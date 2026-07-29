@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,7 +21,7 @@ public class User {
     @Column( nullable = false)
     private String password;
     private String gender;
-    private LocalDateTime dateOfBirth;
+    private LocalDate dateOfBirth;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
@@ -33,12 +34,13 @@ public class User {
             nullable = false)
     private Role role;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private Student student;
 
     public User() {}
 
-    public User(Long  id, String fullName, String email, String password, String gender, LocalDateTime dateOfBirth, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, Role role, Student student) {
+    public User(Long id, String fullName, String email, String password, String gender, LocalDate dateOfBirth, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, Role role, Student student) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
@@ -92,11 +94,11 @@ public class User {
         this.gender = gender;
     }
 
-    public LocalDateTime getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDateTime dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
