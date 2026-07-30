@@ -7,6 +7,7 @@ import com.englishlearning.backend.dto.response.AuthResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
 import com.englishlearning.backend.service.AuthService;
 import com.englishlearning.backend.service.StudentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class AuthController {
     private AuthService authService;
     @PostMapping("/student-register")
     public ResponseEntity<ApiResponse<StudentResponse>> registerStudent(
-            @RequestBody RegisterStudentRequest request
+            @Valid @RequestBody RegisterStudentRequest request
     ){
 
         StudentResponse response =
@@ -36,7 +37,7 @@ public class AuthController {
                 .body(
                         new ApiResponse<>(
                                 201,
-                                "Register student successfully",
+                                "Đăng ký thành công",
                                 response
                         )
                 );
@@ -49,7 +50,7 @@ public class AuthController {
                 .status(HttpStatus.OK).body(
                 new ApiResponse<>(
                         200,
-                        "Login successfully",
+                        "Đăng nhập thành công",
                         authResponse
                 )
         );

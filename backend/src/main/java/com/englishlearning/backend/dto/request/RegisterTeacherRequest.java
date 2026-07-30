@@ -1,5 +1,7 @@
 package com.englishlearning.backend.dto.request;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterTeacherRequest {
+ @Valid
+ @NotNull(message = "Thông tin người dùng không được để trống")
  RegisterUserRequest registerUserRequest;
 
 }

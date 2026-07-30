@@ -1,5 +1,6 @@
 package com.englishlearning.backend.service.impl;
 
+import com.englishlearning.backend.constant.RoleConstant;
 import com.englishlearning.backend.dto.request.RegisterStudentRequest;
 import com.englishlearning.backend.dto.response.StudentResponse;
 import com.englishlearning.backend.entity.Role;
@@ -32,10 +33,11 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public StudentResponse addStudent(RegisterStudentRequest request) {
 
+
         if(userRepository.existsByEmail(request.getRegisterUserRequest().getEmail())) {
-            throw new DuplicateException( "Email already exists");
+            throw new DuplicateException( "Email đã tồn tại");
         }
-        Role role = roleRepository.findByName("STUDENT").orElseThrow(() -> new ResourceNotFoundException("Student role not found"));
+        Role role = roleRepository.findByName(RoleConstant.STUDENT).orElseThrow(() -> new ResourceNotFoundException("Student role not found"));
         User user = new User();
         Student student = new Student();
         user.setFullName(request.getRegisterUserRequest().getFullName());

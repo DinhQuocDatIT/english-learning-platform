@@ -4,6 +4,7 @@ package com.englishlearning.backend.exception;
 import com.englishlearning.backend.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -53,7 +54,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(
             Exception ex
     ){
-
+        ex.printStackTrace();
         return ResponseEntity
                 .status(500)
                 .body(
@@ -93,6 +94,27 @@ public class GlobalExceptionHandler {
                         new ErrorResponse(
                                 404,
                                 "Endpoint not found",
+                                LocalDateTime.now()
+                        )
+                );
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(
+            MethodArgumentNotValidException ex
+    ){
+
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .get(0)
+                .getDefaultMessage();
+
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(
+                        new ErrorResponse(
+                                400,
+                                message,
                                 LocalDateTime.now()
                         )
                 );
