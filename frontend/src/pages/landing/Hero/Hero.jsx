@@ -1,4 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link } from "react-router-dom";
 import Button from "../../../components/common/Button/Button";
 import styles from "./Hero.module.css";
 import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
@@ -6,7 +7,6 @@ import mainImg from "../../../assets/mainHero.avif";
 function Hero() {
   return (
     <section className={styles.hero}>
-        
       <div className={styles.content}>
         <h1 className={styles.title}>
           Làm Chủ Tiếng Anh <span className={styles.highlight}>Tự Nhiên</span>{" "}
@@ -18,9 +18,9 @@ function Hero() {
         </p>
 
         <div className={styles.actions}>
-          <Button onClick={() => console.log("Bắt đầu học ngay")}>
+          <Link to={"/login"} className={styles.loginLink}>
             Bắt đầu học ngay
-          </Button>
+          </Link>
           <button
             className={styles.outlineBtn}
             onClick={() => console.log("Khám phá khóa học")}

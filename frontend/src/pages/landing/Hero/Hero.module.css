@@ -53,7 +53,21 @@
   gap: 16px;
   margin-bottom: 40px;
 }
+.loginLink {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s;
+}
 
+.loginLink:hover {
+  background-color: var(--color-primary-hover);
+}
 .outlineBtn {
   background-color: transparent;
   color: var(--color-text, #1e293b);

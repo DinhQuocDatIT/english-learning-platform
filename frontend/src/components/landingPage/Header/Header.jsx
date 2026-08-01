@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Button from "../../common/Button/Button";
 import styles from "./Header.module.css";
 import Logo from "../../common/Logo/Logo";
@@ -46,12 +47,12 @@ function Header() {
         </ul>
       </nav>
       <div className={styles.actions}>
-        <a href="#" className={styles.loginLink}>
+        <Link to={"/register"} className={styles.registerLink}>
+          Đăng ký
+        </Link>
+        <Link to={"/login"} className={styles.loginLink}>
           Đăng nhập
-        </a>
-        <Button onClick={() => console.log("Clicked!")}>
-          Bắt đầu học ngay
-        </Button>
+        </Link>
       </div>
     </header>
   );

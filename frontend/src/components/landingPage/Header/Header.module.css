@@ -65,7 +65,7 @@
   gap: 24px;
 }
 
-.loginLink {
+.registerLink {
   text-decoration: none;
   color: var(--color-text, #111827);
   font-weight: 500;
@@ -73,11 +73,24 @@
   transition: color 0.2s;
 }
 
-.loginLink:hover {
+.registerLink:hover {
   color: var(--color-primary, #10b981);
 }
+.loginLink {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s;
+}
 
-
+.loginLink:hover {
+  background-color: var(--color-primary-hover);
+}
 
 @media screen and (max-width: 992px) {
   .wrapper {
@@ -90,7 +103,6 @@
 }
 
 @media screen and (max-width: 768px) {
-
   .nav {
     display: none;
   }
