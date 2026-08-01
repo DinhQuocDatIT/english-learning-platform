@@ -1,0 +1,30 @@
+.button {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+
+  width: 45px;
+  height: 45px;
+
+  border-radius: 10px;
+  border: none;
+
+  cursor: pointer;
+
+  font-size: 16px;
+
+  z-index: 999;
+
+  background: var(--color-primary);
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.3s;
+}
+
+.button:hover {
+  transform: translateY(-5px);
+}

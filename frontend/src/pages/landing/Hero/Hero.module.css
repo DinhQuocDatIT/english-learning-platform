@@ -1,0 +1,210 @@
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  gap: 48px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.title {
+  font-family:
+    "Quicksand",
+    "Nunito",
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 20px 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.highlight {
+  color: var(--color-primary);
+}
+
+.description {
+  font-size: 16px;
+  color: var(--color-text-muted, #64748b);
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  max-width: 480px;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.outlineBtn {
+  background-color: transparent;
+  color: var(--color-text, #1e293b);
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.outlineBtn:hover {
+  border-color: var(--color-primary, #10b981);
+  color: var(--color-primary, #10b981);
+}
+
+.socialProof {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatars {
+  display: flex;
+}
+
+.avatarMock {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-border, #e2e8f0);
+  border: 2px solid var(--color-background, #ffffff);
+  margin-left: -10px;
+}
+
+.avatarMock:first-child {
+  margin-left: 0;
+}
+
+.proofText {
+  font-size: 14px;
+  color: var(--color-text-muted, #64748b);
+  margin: 0;
+}
+
+.boldText {
+  font-weight: 600;
+  color: var(--color-text, #1e293b);
+}
+
+/* Phần hình ảnh minh họa bên phải */
+.imageWrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.imageCard {
+  background-color: var(--color-surface, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 24px;
+  padding: 10px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.mainImage {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  display: block;
+}
+
+.floatingCard {
+  position: absolute;
+  bottom: -16px;
+  left: -24px;
+  background-color: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  padding: 12px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+  animation: float 3s ease-in-out infinite;
+}
+
+.iconBox {
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-primary, #10b981);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.cardTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text, #1e293b);
+  margin: 0;
+}
+
+.cardSubtitle {
+  font-size: 12px;
+  color: var(--color-text-muted, #64748b);
+  margin: 0;
+}
+
+/* --- RESPONSIVE --- */
+@media screen and (max-width: 992px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px 16px;
+  }
+
+  .content {
+    align-items: center;
+  }
+
+  .description {
+    max-width: 100%;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .floatingCard {
+    left: 12px;
+  }
+}
+/* Animation */
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}

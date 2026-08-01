@@ -1,13 +1,10 @@
 :root,
 [data-theme="default"] {
-  
-  --color-primary: #10b981;
+  /* Brand */
+  /* --color-primary: #10b981;
   --color-primary-hover: #059669;
-  --color-primary-light: #d1fae5;
-
 
   --color-secondary: #1e293b;
-  --color-secondary-hover: #0f172a;
 
 
   --color-background: #ffffff;
@@ -15,14 +12,27 @@
 
 
   --color-text: #1e293b;
-  --color-text-light: #64748b;
+  --color-text-muted: #64748b;
   --color-text-white: #ffffff;
 
 
   --color-border: #e2e8f0;
+  --color-footer: #091426;
+  */
+  /*  --color-primary: #0ea792; */
+  --color-primary: #0ea792;
+  --color-primary-hover: #52afa3;
 
+  --color-secondary: #1e293b;
+  --color-tertiary: #d4f3ef;
+  --color-accent:#168a7c;
+  --color-background: #ffffff;
+  --color-surface: #f8fafc;
 
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-white: #ffffff;
+
+  --color-border: #e2e8f0;
+  --color-footer: #091426;
 }
