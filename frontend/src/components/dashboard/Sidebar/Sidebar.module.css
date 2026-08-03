@@ -1,0 +1,236 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 240px; /* Reduced from 260px for a more compact feel */
+  background-color: var(--color-background);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition:
+    width 0.2s ease,
+    transform 0.2s ease;
+  z-index: 1001;
+  overflow-x: hidden;
+}
+
+.sidebar.closed {
+  width: 70px; /* Reduced from 80px */
+}
+
+/* Top Section containing Logo */
+.topSection {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.logoContainer a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logoContainer img {
+  height: 34px;
+  width: 34px;
+  object-fit: contain;
+}
+
+.logoContainer span {
+  font-size: 1.25rem; /* Larger logo font */
+  font-weight: 700;
+  color: var(--color-text);
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.sidebar.closed .topSection {
+  padding: 0;
+  justify-content: center;
+}
+
+.sidebar.closed .logoContainer {
+  justify-content: center;
+}
+
+.sidebar.closed .logoContainer span {
+  display: none;
+}
+
+/* Nav links */
+.nav {
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-weight: 500; /* Lighter font weight */
+  font-size: 0.85rem; /* Smaller font size */
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.navLink.active {
+  background-color: var(--color-tertiary);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.icon {
+  font-size: 0.95rem; /* Smaller icons */
+}
+
+.label {
+  transition: opacity 0.15s ease;
+  opacity: 1;
+  font-size: 14px;
+}
+
+/* Closed Sidebar Styling */
+.sidebar.closed .label {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  margin: 0;
+}
+
+.sidebar.closed .navLink {
+  justify-content: center;
+  padding: 10px 0;
+  gap: 0;
+}
+
+/* Bottom Section & Premium CTA */
+.bottomSection {
+  padding: 16px 12px;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+/* Clean, light premium card matching primary theme */
+.premiumCTA {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-primary);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.premiumCTA:hover {
+  background-color: var(--color-tertiary);
+  border-style: solid;
+}
+
+.premiumActive {
+  background-color: var(--color-tertiary);
+  border-style: solid;
+  border-color: var(--color-primary);
+}
+
+.premiumIconWrapper {
+  font-size: 1.1rem;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.premiumContent {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.premiumTitle {
+  font-weight: 700;
+  font-size: 0.8rem; /* Smaller font size */
+  color: var(--color-primary);
+}
+
+.premiumSubtitle {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+/* Collapsed Premium CTA */
+.premiumCTA.premiumCTAClosed {
+  justify-content: center;
+  padding: 12px 0;
+  border-color: transparent;
+  background-color: var(--color-tertiary);
+}
+
+.premiumCTA.premiumCTAClosed:hover {
+  background-color: var(--color-primary);
+}
+
+.premiumCTA.premiumCTAClosed:hover .premiumIconWrapper {
+  color: var(--color-text-white);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 240px;
+  }
+
+  .sidebar.closed {
+    transform: translateX(0);
+    width: 240px;
+  }
+
+  .sidebar.closed .label {
+    opacity: 1;
+    pointer-events: auto;
+    width: auto;
+  }
+
+  .sidebar.closed .premiumCTA {
+    justify-content: flex-start;
+    padding: 12px;
+  }
+}

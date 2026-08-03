@@ -37,6 +37,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 .highlight {
+  font-size: 48px;
   color: var(--color-primary);
 }
 
