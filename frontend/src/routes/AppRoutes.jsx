@@ -9,6 +9,7 @@ import RoleRoute from "./RoleRoute";
 import { ROLES } from "../constants/roles";
 import AuthStorage from "../services/AuthStorage";
 import PublicRoute from "./PublicRoute";
+import AdminProfile from "../pages/admin/AdminProfile/AdminProfile";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -35,8 +36,10 @@ function AppRoutes() {
           ></Route>
           <Route
             path="admin"
-            element={<RoleRoute allowedRoles={[ROLES.ADMIN]}></RoleRoute>}
-          ></Route>
+            element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}
+          >
+            <Route path="profile" element={<AdminProfile />} />
+          </Route>
         </Route>
       </Route>
     </Routes>

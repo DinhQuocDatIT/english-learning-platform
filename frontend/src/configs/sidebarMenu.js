@@ -8,6 +8,7 @@ import {
   faGraduationCap,
   faClipboardList,
   faUserShield,
+  faCircleUser,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -71,29 +72,34 @@ export const sidebarMenus = {
 
   [ROLES.ADMIN]: [
     {
-      path: "/admin/dashboard",
+      path: "/dashboard/admin/dashboard",
       name: "Dashboard",
       icon: faChartSimple,
     },
     {
-      path: "/admin/users",
+      path: "/dashboard/admin/users",
       name: "Quản lý người dùng",
       icon: faUsers,
     },
     {
-      path: "/admin/courses",
+      path: "/dashboard/admin/courses",
       name: "Quản lý khóa học",
       icon: faGraduationCap,
     },
     {
-      path: "/admin/teachers",
+      path: "/dashboard/admin/teachers",
       name: "Giảng viên",
       icon: faUserShield,
     },
     {
-      path: "/admin/settings",
+      path: "/dashboard/admin/settings",
       name: "Cài đặt",
       icon: faGear,
+    },
+    {
+      path: "/dashboard/admin/profile",
+      name: "Thông tin cá nhân",
+      icon: faCircleUser,
     },
   ],
 };
