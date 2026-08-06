@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Button from "../../common/Button/Button";
 import styles from "./Header.module.css";
 import Logo from "../../common/Logo/Logo";
+import AuthStorage from "../../../services/AuthStorage";
 const navbarLinks = [
   {
     href: "#hero",
@@ -27,6 +28,7 @@ const navbarLinks = [
 ];
 function Header() {
   const [isActive, setIsActive] = useState(navbarLinks[0].href);
+  const isAuth = AuthStorage.isAuthenticated();
   return (
     <header className={styles.wrapper}>
       <Logo />
@@ -47,12 +49,21 @@ function Header() {
         </ul>
       </nav>
       <div className={styles.actions}>
-        <Link to={"/register"} className={styles.registerLink}>
-          Đăng ký
-        </Link>
-        <Link to={"/login"} className={styles.loginLink}>
-          Đăng nhập
-        </Link>
+        {!isAuth && (
+          <Link to={"/register"} className={styles.registerLink}>
+            Đăng ký
+          </Link>
+        )}
+
+        {isAuth ? (
+          <Link to={"/dashboard"} className={styles.loginLink}>
+            Bắt đầu học ngay
+          </Link>
+        ) : (
+          <Link to={"/login"} className={styles.loginLink}>
+            Đăng nhập
+          </Link>
+        )}
       </div>
     </header>
   );

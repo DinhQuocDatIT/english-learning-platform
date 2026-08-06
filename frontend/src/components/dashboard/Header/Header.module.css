@@ -127,6 +127,7 @@
   padding: 6px 10px;
   border-radius: 10px;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .userProfile:hover {
@@ -169,7 +170,36 @@
   color: var(--color-text-muted);
   margin-left: 2px;
 }
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 150px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  z-index: 1000;
+}
 
+.dropdownItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.dropdownItem:hover {
+ 
+  color: var(--color-primary);
+}
 @media (max-width: 900px) {
   .searchBar {
     display: none;

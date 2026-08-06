@@ -7,13 +7,20 @@ import Profile from "../pages/student/Profile/Profile";
 import PrivateRoute from "./PrivateRoute";
 import RoleRoute from "./RoleRoute";
 import { ROLES } from "../constants/roles";
+import AuthStorage from "../services/AuthStorage";
+import PublicRoute from "./PublicRoute";
 
 function AppRoutes() {
+  const isAuthenticated = AuthStorage.isAuthenticated();
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+
+      <Route element={<PublicRoute />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Route>
+
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<MainLayout />}>
           <Route
