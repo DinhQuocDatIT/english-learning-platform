@@ -6,12 +6,18 @@ import { ThemeProvider } from "./global/ThemeContext.jsx";
 import "./global/theme.css";
 import AppRoutes from "./routes/AppRoutes.jsx";
 import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
+import { LoadingProvider } from "./contexts/LoadingContext.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ThemeProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ThemeProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <ThemeProvider>
+          <LoadingProvider>
+            <App />
+          </LoadingProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </StrictMode>,
 );

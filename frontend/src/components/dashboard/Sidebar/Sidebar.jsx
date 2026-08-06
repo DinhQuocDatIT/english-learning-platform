@@ -11,36 +11,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Sidebar.module.css";
 import Logo from "../../common/Logo/Logo";
+import { sidebarMenus } from "../../../configs/sidebarMenu";
+import { ROLES } from "../../../constants/roles";
 
 const Sidebar = ({ isOpen }) => {
-  const menuItems = [
-    {
-      path: "/dashboard",
-      name: "Tổng quan",
-      icon: faChartSimple,
-    },
-    {
-      path: "/dashboard/courses",
-      name: "Khóa học của tôi",
-      icon: faBookOpen,
-    },
-    {
-      path: "/dashboard/vocabulary",
-      name: "Từ vựng",
-      icon: faBook,
-    },
-    {
-      path: "/dashboard/practice",
-      name: "Luyện tập",
-      icon: faPenToSquare,
-    },
-    {
-      path: "/dashboard/settings",
-      name: "Cài đặt",
-      icon: faGear,
-    },
-  ];
-
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const role = user.role;
+  const menus = sidebarMenus[role] || [];
   return (
     <aside className={`${styles.sidebar} ${!isOpen ? styles.closed : ""}`}>
       <div className={styles.topSection}>
@@ -50,7 +27,7 @@ const Sidebar = ({ isOpen }) => {
       </div>
 
       <nav className={styles.nav}>
-        {menuItems.map((item) => (
+        {menus.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
@@ -67,24 +44,26 @@ const Sidebar = ({ isOpen }) => {
         ))}
       </nav>
 
-      <div className={styles.bottomSection}>
-        <NavLink
-          to="/dashboard/membership"
-          className={({ isActive }) =>
-            `${styles.premiumCTA} ${isActive ? styles.premiumActive : ""} ${!isOpen ? styles.premiumCTAClosed : ""}`
-          }
-        >
-          <div className={styles.premiumIconWrapper}>
-            <FontAwesomeIcon icon={faCrown} />
-          </div>
-          {isOpen && (
-            <div className={styles.premiumContent}>
-              <span className={styles.premiumTitle}>Gói Thành Viên</span>
-              <span className={styles.premiumSubtitle}>Nâng cấp Premium</span>
+      {role === ROLES.STUDENT && (
+        <div className={styles.bottomSection}>
+          <NavLink
+            to="/dashboard/membership"
+            className={({ isActive }) =>
+              `${styles.premiumCTA} ${isActive ? styles.premiumActive : ""} ${!isOpen ? styles.premiumCTAClosed : ""}`
+            }
+          >
+            <div className={styles.premiumIconWrapper}>
+              <FontAwesomeIcon icon={faCrown} />
             </div>
-          )}
-        </NavLink>
-      </div>
+            {isOpen && (
+              <div className={styles.premiumContent}>
+                <span className={styles.premiumTitle}>Gói Thành Viên</span>
+                <span className={styles.premiumSubtitle}>Nâng cấp Premium</span>
+              </div>
+            )}
+          </NavLink>
+        </div>
+      )}
     </aside>
   );
 };

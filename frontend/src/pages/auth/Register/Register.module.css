@@ -109,6 +109,49 @@
   box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.15);
 }
 
+/* ===== ERROR STYLES ===== */
+.errorInput {
+  border-color: #ff4444 !important;
+  background-color: #fff8f8 !important;
+}
+
+.errorInput:focus {
+  border-color: #ff4444 !important;
+  box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.1) !important;
+}
+
+.errorMessage {
+  color: #ff4444;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+.errorGeneral {
+  grid-column: span 2;
+  background-color: #fff0f0;
+  border: 1px solid #ff4444;
+  color: #d32f2f;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ===== END ERROR STYLES ===== */
+
 /* Xác nhận mật khẩu full width */
 .full {
   grid-column: span 2;
@@ -200,7 +243,8 @@
   }
 
   .full,
-  .btn {
+  .btn,
+  .errorGeneral {
     grid-column: span 1;
   }
 }

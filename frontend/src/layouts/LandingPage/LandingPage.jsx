@@ -1,4 +1,4 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import Footer from "../../components/landingPage/Footer/Footer";
 import Header from "../../components/landingPage/Header/Header";
 import styles from "./LandingPage.module.css";

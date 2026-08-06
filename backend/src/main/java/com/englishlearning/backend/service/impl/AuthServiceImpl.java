@@ -4,6 +4,7 @@ import com.englishlearning.backend.dto.request.LoginRequest;
 import com.englishlearning.backend.dto.response.AuthResponse;
 import com.englishlearning.backend.entity.User;
 import com.englishlearning.backend.exception.UnauthorizedException;
+import com.englishlearning.backend.mapper.UserMapper;
 import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.security.JwtUtil;
 import com.englishlearning.backend.service.AuthService;
@@ -20,6 +21,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @Override
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UnauthorizedException("Email or password incorrect"));
@@ -28,6 +32,6 @@ public class AuthServiceImpl implements AuthService {
       }
       String token = jwtUtil.generateToken(user);
 
-        return new AuthResponse(token);
+        return new AuthResponse(token,userMapper.toResponse(user));
     }
 }
