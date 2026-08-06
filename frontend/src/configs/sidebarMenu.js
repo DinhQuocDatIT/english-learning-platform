@@ -68,6 +68,11 @@ export const sidebarMenus = {
       name: "Cài đặt",
       icon: faGear,
     },
+    {
+      path: "/dashboard/teacher/profile",
+      name: "Thông tin cá nhân",
+      icon: faCircleUser,
+    },
   ],
 
   [ROLES.ADMIN]: [
