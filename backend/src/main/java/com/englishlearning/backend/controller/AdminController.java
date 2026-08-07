@@ -23,12 +23,10 @@ public class AdminController {
 
     @Autowired
     private AdminService adminService;
-
     @PostMapping("/teachers")
     public ResponseEntity<ApiResponse<UserResponse>> addTeacher (
             @Valid @RequestBody RegisterTeacherRequest registerTeacherRequest
     ){
-
         UserResponse response = adminService.addTeacher(registerTeacherRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ApiResponse<>(
