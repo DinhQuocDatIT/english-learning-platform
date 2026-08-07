@@ -87,6 +87,11 @@ export const sidebarMenus = {
       icon: faUsers,
     },
     {
+      path: "/dashboard/admin/vocabulary",
+      name: "Quản lý từ vựng",
+      icon: faUsers,
+    },
+    {
       path: "/dashboard/admin/courses",
       name: "Quản lý khóa học",
       icon: faGraduationCap,
