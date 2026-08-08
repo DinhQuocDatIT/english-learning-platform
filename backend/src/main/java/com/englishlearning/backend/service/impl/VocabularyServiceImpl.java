@@ -2,6 +2,7 @@ package com.englishlearning.backend.service.impl;
 
 
 import com.englishlearning.backend.dto.request.VocabularyRequest;
+import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.VocabularyResponse;
 import com.englishlearning.backend.entity.Vocabulary;
 import com.englishlearning.backend.exception.DuplicateException;
@@ -11,6 +12,9 @@ import com.englishlearning.backend.repository.VocabularyRepository;
 import com.englishlearning.backend.service.VocabularyService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,7 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VocabularyServiceImpl
         implements VocabularyService {
-
 
     private final VocabularyRepository repository;
 
@@ -77,18 +80,39 @@ public class VocabularyServiceImpl
     }
 
 
-
-
-
     @Override
-    public List<VocabularyResponse> getAll(){
+    public PageResponse<VocabularyResponse> getAllByPage(int page, int size) {
 
-        return repository
-                .findByDeletedAtIsNull()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
-
+        if (page < 0) {
+            page = 0;
+        }
+        if (size <= 0) {
+            size = 10;
+        }
+        if (size > 100) {
+            size = 100;
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Vocabulary> vocabularyPage  = repository.findAll(pageable);
+        return PageResponse
+                .<VocabularyResponse>builder()
+                .content(
+                        vocabularyPage
+                                .getContent()
+                                .stream()
+                                .map(mapper::toResponse)
+                                .toList()
+                )
+                .currentPage(vocabularyPage.getNumber())
+                .pageSize(vocabularyPage.getSize())
+                .totalElements(vocabularyPage.getTotalElements())
+                .totalPages(vocabularyPage.getTotalPages())
+                .first(vocabularyPage.isFirst())
+                .last(vocabularyPage.isLast())
+                .build();
     }
+
+
+
 
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./CreateVocabulary.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,15 +9,20 @@ import {
   faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { speakText, getAvailableVoices } from "../../../utils/textToSpeech";
+import vocabulary from "../../../services/vocabulary";
+import { toast } from "react-toastify";
+import { useLoading } from "../../../contexts/LoadingContext";
 
 function CreateVocabulary() {
+  const navigate = useNavigate();
+  const { showLoading, hideLoading } = useLoading();
+
   const [word, setWord] = useState("");
   const [pronunciation, setPronunciation] = useState("");
   const [meanings, setMeanings] = useState([
     { id: 1, partOfSpeech: "", meaning: "", example: "" },
   ]);
 
-  // States quản lý giọng đọc và tốc độ
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [speechRate, setSpeechRate] = useState(0.9);
@@ -68,9 +73,54 @@ function CreateVocabulary() {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ word, pronunciation, meanings, selectedVoice, speechRate });
+
+    // Validate dữ liệu trước khi gửi
+    if (!word.trim()) {
+      toast.error("Vui lòng nhập từ vựng");
+      return;
+    }
+
+    if (meanings.some((m) => !m.meaning.trim())) {
+      toast.error("Vui lòng nhập đầy đủ ý nghĩa cho từ vựng");
+      return;
+    }
+
+    // Chuẩn bị dữ liệu gửi lên API
+    const requestData = {
+      word: word.trim(),
+      pronunciation: pronunciation.trim(),
+      meanings: meanings.map((m) => ({
+        partOfSpeech: m.partOfSpeech,
+        meaning: m.meaning.trim(),
+        example: m.example.trim(),
+      })),
+    };
+    try {
+      showLoading();
+      const response = await vocabulary.addVocabulary(requestData);
+      console.log("Vocabulary created:", response.data);
+
+      toast.success("Tạo từ vựng thành công!");
+
+      navigate("/dashboard/admin/vocabulary"); // Đường dẫn đến trang danh sách từ vựng
+    } catch (error) {
+      console.error("Error creating vocabulary:", error);
+
+      if (error.response) {
+        // Server trả về lỗi
+        const errorMessage =
+          error.response.data?.message || "Có lỗi xảy ra khi tạo từ vựng";
+        toast.error(errorMessage);
+      } else if (error.request) {
+        toast.error("Không thể kết nối đến máy chủ");
+      } else {
+        toast.error("Đã xảy ra lỗi, vui lòng thử lại");
+      }
+    } finally {
+      hideLoading();
+    }
   };
 
   return (
@@ -141,12 +191,14 @@ function CreateVocabulary() {
                   value={word}
                   onChange={(e) => setWord(e.target.value)}
                   className={styles.input}
+                  required
                 />
                 <button
                   type="button"
                   className={styles.speakBtn}
                   onClick={() => handleSpeak(word)}
                   title="Nghe phát âm"
+                  disabled={!word}
                 >
                   <FontAwesomeIcon icon={faVolumeHigh} />
                 </button>
@@ -212,6 +264,7 @@ function CreateVocabulary() {
                         handleMeaningChange(item.id, "meaning", e.target.value)
                       }
                       className={styles.input}
+                      required
                     />
                     {meanings.length > 1 && (
                       <button
@@ -242,6 +295,7 @@ function CreateVocabulary() {
                     className={styles.speakBtn}
                     onClick={() => handleSpeak(item.example)}
                     title="Nghe câu ví dụ"
+                    disabled={!item.example}
                   >
                     <FontAwesomeIcon icon={faVolumeHigh} />
                   </button>

@@ -2,6 +2,7 @@ package com.englishlearning.backend.controller;
 
 import com.englishlearning.backend.dto.request.VocabularyRequest;
 import com.englishlearning.backend.dto.response.ApiResponse;
+import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.VocabularyResponse;
 import com.englishlearning.backend.service.VocabularyService;
 import jakarta.validation.Valid;
@@ -46,13 +47,16 @@ public class VocabularyController {
 
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<VocabularyResponse>>> getAll(){
+    public ResponseEntity<ApiResponse<PageResponse<VocabularyResponse>>> getAll(
+            @RequestParam(defaultValue = "1")int page,@RequestParam(defaultValue = "10") int size
+    ){
 
+        PageResponse<VocabularyResponse> response = vocabularyService.getAllByPage(page-1,size);
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
                         "Lấy danh sách từ vựng thành công",
-                        vocabularyService.getAll()
+                       response
                 )
         );
     }

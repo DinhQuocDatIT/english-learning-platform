@@ -194,12 +194,13 @@
 }
 
 .wordTitle {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-secondary);
 }
 
 .wordDesc {
   font-size: 13px;
+  font-weight: 500;
   color: var(--color-text-muted);
 }
 
@@ -239,8 +240,8 @@
 }
 
 .inactiveStatus {
-  background-color: var(--color-surface);
-  color: var(--color-text-muted);
+  background-color: rgb(255, 245, 245);
+  color: red;
 }
 
 .textRight {
