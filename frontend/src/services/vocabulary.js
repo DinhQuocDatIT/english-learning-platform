@@ -12,5 +12,12 @@ const vocabulary = {
       },
     });
   },
+  importCsv(file) {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    return axiosClient.post("/v1/vocabularies/import", formData);
+  },
 };
 export default vocabulary;

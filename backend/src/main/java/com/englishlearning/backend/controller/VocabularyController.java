@@ -2,15 +2,18 @@ package com.englishlearning.backend.controller;
 
 import com.englishlearning.backend.dto.request.VocabularyRequest;
 import com.englishlearning.backend.dto.response.ApiResponse;
+import com.englishlearning.backend.dto.response.ImportVocabularyResponse;
 import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.VocabularyResponse;
 import com.englishlearning.backend.service.VocabularyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -112,5 +115,23 @@ public class VocabularyController {
                 )
         );
     }
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<
+            ApiResponse<ImportVocabularyResponse>
+            > importCsv(
+            @RequestParam("file") MultipartFile file
+    ) {
 
+        ImportVocabularyResponse response =
+                vocabularyService.importCsv(file);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Import từ vựng thành công",
+                        response
+                )
+        );
+    }
 }

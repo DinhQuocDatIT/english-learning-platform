@@ -20,5 +20,5 @@ public interface VocabularyRepository
     Optional<Vocabulary> findByIdAndDeletedAtIsNull(Long id);
     boolean existsByWordIgnoreCase(String word);
 
-
+    Optional<Vocabulary> findByWordIgnoreCase(String word);
 }

@@ -10,6 +10,7 @@ import {
   faEllipsisV,
   faEdit,
   faTrash,
+  faFileImport,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import vocabulary from "../../../services/vocabulary";
@@ -30,7 +31,6 @@ function VocabularyManagement() {
   const [vocabList, setVocabList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState(null);
-
   const fetchVocabularies = async () => {
     try {
       showLoading();
@@ -100,9 +100,12 @@ function VocabularyManagement() {
           </p>
         </div>
         <div className={styles.headerActions}>
-          <button className={styles.filterBtn}>
-            <FontAwesomeIcon icon={faFilter} /> Lọc
-          </button>
+          <Link
+            to={"/dashboard/admin/import-vocabulary"}
+            className={styles.filterBtn}
+          >
+            <FontAwesomeIcon icon={faFileImport} /> Import CSV
+          </Link>
           <Link
             to={"/dashboard/admin/create-vocabulary"}
             className={styles.addBtn}

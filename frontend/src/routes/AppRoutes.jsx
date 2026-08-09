@@ -13,6 +13,7 @@ import AdminProfile from "../pages/admin/AdminProfile/AdminProfile";
 import TeacherProfile from "../pages/teacher/TeacherProfile/TeacherProfile";
 import VocabularyManagement from "../pages/vocabulary/VocabularyManagement/VocabularyManagement";
 import CreateVocabulary from "../pages/vocabulary/CreateVocabulary/CreateVocabulary";
+import ImportVocabulary from "../pages/vocabulary/ImportVocabulary/ImportVocabulary";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -46,6 +47,7 @@ function AppRoutes() {
             <Route path="profile" element={<AdminProfile />} />
             <Route path="vocabulary" element={<VocabularyManagement />} />
             <Route path="create-vocabulary" element={<CreateVocabulary />} />
+            <Route path="import-vocabulary" element={<ImportVocabulary />} />
           </Route>
         </Route>
       </Route>
