@@ -11,11 +11,14 @@ import {
   faEdit,
   faTrash,
   faFileImport,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import vocabulary from "../../../services/vocabulary";
 import { useLoading } from "../../../contexts/LoadingContext";
 import { formatDateTime } from "../../../utils/formatDate";
+import ConfirmHideVocabulary from "../../../components/vocabulary/ConfirmHideVocabulary/ConfirmHideVocabulary";
+import { toast } from "react-toastify";
 
 function VocabularyManagement() {
   const [filters, setFilters] = useState({
@@ -31,6 +34,10 @@ function VocabularyManagement() {
   const [vocabList, setVocabList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const navigate = useNavigate();
+  const startItem = totalElements === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const endItem = Math.min(currentPage * pageSize, totalElements);
+
   const fetchVocabularies = async () => {
     try {
       showLoading();
@@ -38,7 +45,6 @@ function VocabularyManagement() {
       const response = await vocabulary.getAllByPage(currentPage, pageSize);
 
       const data = response.data.data;
-      console.log(data);
       setVocabList(data.content || []);
       setTotalElements(data.totalElements || 0);
       setTotalPages(data.totalPages || 0);
@@ -86,9 +92,46 @@ function VocabularyManagement() {
     return [1, "...", currentPage, "...", totalPages];
   };
 
-  const startItem = totalElements === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, totalElements);
+  const handleDetail = (id) => {
+    console.log(id);
+    navigate(`/dashboard/admin/update-vocabulary/${id}`);
+  };
 
+  // hide vocabulary
+  const [selectedVocabulary, setSelectedVocabulary] = useState(null);
+  const [showHideModal, setShowHideModal] = useState(false);
+  const [hiding, setHiding] = useState(false);
+  const handleConfirmStatus = async (item) => {
+    if (!item?.id) return;
+
+    try {
+      setHiding(true);
+
+      if (item.deletedAt === null) {
+        await vocabulary.deleteVocabulary(item.id);
+
+        toast.success("Đã ẩn từ vựng thành công.");
+      } else {
+        await vocabulary.restoreVocabulary(item.id);
+
+        toast.success("Đã hiện lại từ vựng thành công.");
+      }
+
+      setShowHideModal(false);
+      setSelectedVocabulary(null);
+
+      await fetchVocabularies();
+    } catch (error) {
+      console.error("Lỗi cập nhật trạng thái:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          "Không thể cập nhật trạng thái từ vựng.",
+      );
+    } finally {
+      setHiding(false);
+    }
+  };
   return (
     <div className={styles.wrapper}>
       {/* Header section */}
@@ -234,11 +277,24 @@ function VocabularyManagement() {
                           </button>
                           {activeMenuId === item.id && (
                             <div className={styles.dropdownMenu}>
-                              <button>
+                              <button onClick={() => handleDetail(item.id)}>
                                 <FontAwesomeIcon icon={faEdit} /> Sửa
                               </button>
-                              <button className={styles.deleteOption}>
-                                <FontAwesomeIcon icon={faTrash} /> Xóa
+                              <button
+                                className={styles.deleteOption}
+                                onClick={() => {
+                                  setSelectedVocabulary(item);
+                                  setShowHideModal(true);
+                                  setActiveMenuId(null);
+                                }}
+                              >
+                                <FontAwesomeIcon
+                                  icon={
+                                    item.deletedAt === null ? faTrash : faEye
+                                  }
+                                />
+
+                                {item.deletedAt === null ? "Ẩn" : "Hiện"}
                               </button>
                             </div>
                           )}
@@ -249,6 +305,21 @@ function VocabularyManagement() {
                 )}
               </tbody>
             </table>
+          )}
+          {showHideModal && selectedVocabulary && (
+            <ConfirmHideVocabulary
+              isOpen={showHideModal}
+              word={selectedVocabulary}
+              loading={hiding}
+              mode={selectedVocabulary.deletedAt ? "restore" : "hide"}
+              onCancel={() => {
+                if (!hiding) {
+                  setShowHideModal(false);
+                  setSelectedVocabulary(null);
+                }
+              }}
+              onConfirm={() => handleConfirmStatus(selectedVocabulary)}
+            />
           )}
         </div>
 

@@ -13,6 +13,7 @@ public interface VocabularyService {
     VocabularyResponse update(Long id, VocabularyRequest request);
     void delete(Long id);
     VocabularyResponse getById(Long id);
+    void restore(Long id);
 
     PageResponse<VocabularyResponse> getAllByPage(int page, int size);
     ImportVocabularyResponse importCsv(MultipartFile file);

@@ -14,6 +14,7 @@ import TeacherProfile from "../pages/teacher/TeacherProfile/TeacherProfile";
 import VocabularyManagement from "../pages/vocabulary/VocabularyManagement/VocabularyManagement";
 import CreateVocabulary from "../pages/vocabulary/CreateVocabulary/CreateVocabulary";
 import ImportVocabulary from "../pages/vocabulary/ImportVocabulary/ImportVocabulary";
+import UpdateVocabulary from "../pages/vocabulary/UpdateVocabulary/UpdateVocabulary";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -48,6 +49,7 @@ function AppRoutes() {
             <Route path="vocabulary" element={<VocabularyManagement />} />
             <Route path="create-vocabulary" element={<CreateVocabulary />} />
             <Route path="import-vocabulary" element={<ImportVocabulary />} />
+            <Route path="update-vocabulary/:id" element={<UpdateVocabulary />} />
           </Route>
         </Route>
       </Route>

@@ -116,6 +116,22 @@ public class VocabularyController {
         );
     }
     @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @PatchMapping("/{id}/restore")
+    public ResponseEntity<ApiResponse<Void>> restore(
+            @PathVariable Long id
+    ) {
+
+        vocabularyService.restore(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Hiện lại từ vựng thành công",
+                        null
+                )
+        );
+    }
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<
             ApiResponse<ImportVocabularyResponse>

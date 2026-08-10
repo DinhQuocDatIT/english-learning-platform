@@ -1,0 +1,627 @@
+.wrapper {
+  background-color: var(--color-surface);
+  min-height: 100vh;
+  padding: 32px 16px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--color-text);
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  background: none;
+  border: none;
+  padding: 0;
+
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  margin-bottom: 8px;
+
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: var(--color-secondary);
+}
+
+.backLink:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+
+  color: var(--color-secondary);
+
+  margin: 0 0 4px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--color-text-muted);
+
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.discardButton {
+  background-color: var(--color-background);
+  color: var(--color-text);
+
+  border: 1px solid var(--color-border);
+
+  padding: 10px 16px;
+
+  border-radius: 8px;
+
+  font-weight: 600;
+  font-size: 14px;
+
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  transition: all 0.2s;
+}
+
+.discardButton:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-text-muted);
+}
+
+.discardButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.updateButton {
+  background-color: var(--color-primary);
+  color: var(--color-text-white);
+
+  border: none;
+
+  padding: 10px 20px;
+
+  border-radius: 8px;
+
+  font-weight: 600;
+  font-size: 14px;
+
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  transition: background-color 0.2s;
+}
+
+.updateButton:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.updateButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   FORM GRID
+========================================================= */
+
+.formGrid {
+  display: grid;
+
+  grid-template-columns: 350px 1fr;
+
+  gap: 24px;
+
+  align-items: start;
+}
+
+.leftColumn,
+.rightColumn {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card {
+  background-color: var(--color-background);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: 12px;
+
+  padding: 20px;
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  margin-bottom: 24px;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+
+  color: var(--color-secondary);
+
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.cardHeaderFlex {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+.cardHeaderFlex .cardTitle {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   FORM GROUP
+========================================================= */
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.formGroupFlex {
+  margin-bottom: 16px;
+
+  flex: 1;
+
+  min-width: 0;
+}
+
+.formRow {
+  display: flex;
+
+  gap: 12px;
+
+  align-items: flex-start;
+}
+
+.formRow > .formGroup {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.formRow > .formGroupFlex {
+  flex: 1;
+}
+
+.label {
+  display: block;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  color: var(--color-text-muted);
+
+  margin-bottom: 6px;
+}
+
+.required {
+  color: #ef4444;
+
+  margin-left: 3px;
+
+  font-weight: 700;
+}
+
+/* =========================================================
+   INPUT / SELECT / TEXTAREA
+========================================================= */
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--color-border);
+
+  border-radius: 6px;
+
+  font-size: 14px;
+
+  color: var(--color-text);
+
+  background-color: var(--color-background);
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background-color 0.2s;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--color-text-muted);
+
+  opacity: 0.7;
+}
+
+.input:hover,
+.select:hover,
+.textarea:hover {
+  border-color: var(--color-text-muted);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+
+  border-color: var(--color-primary);
+
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.15);
+}
+
+.input:disabled,
+.select:disabled,
+.textarea:disabled {
+  opacity: 0.65;
+
+  cursor: not-allowed;
+}
+
+.textarea {
+  resize: vertical;
+
+  min-height: 75px;
+}
+
+/* =========================================================
+   ERROR FIELD
+========================================================= */
+
+.inputError {
+  border-color: #ef4444 !important;
+
+  background-color: #fffafa;
+}
+
+.inputError:hover {
+  border-color: #dc2626 !important;
+}
+
+.inputError:focus {
+  border-color: #ef4444 !important;
+
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+}
+
+/* =========================================================
+   ERROR MESSAGE UNDER INPUT
+========================================================= */
+
+.fieldError {
+  color: #ef4444;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+  line-height: 1.4;
+
+  margin-top: 5px;
+
+  animation: errorAppear 0.15s ease-in;
+}
+
+@keyframes errorAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   CHARACTER COUNTER
+========================================================= */
+
+.charCounter {
+  display: flex;
+
+  justify-content: flex-end;
+
+  margin-top: 4px;
+
+  font-size: 11px;
+
+  color: var(--color-text-muted);
+}
+
+/* =========================================================
+   ADD MEANING
+========================================================= */
+
+.addMeaningButton {
+  background-color: var(--color-tertiary);
+
+  color: var(--color-accent);
+
+  border: 1px dashed var(--color-primary);
+
+  padding: 7px 12px;
+
+  border-radius: 6px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  white-space: nowrap;
+
+  transition:
+    opacity 0.2s,
+    background-color 0.2s;
+}
+
+.addMeaningButton:hover {
+  opacity: 0.85;
+}
+
+.addMeaningButton:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   MEANING ITEM
+========================================================= */
+
+.meaningItemBox {
+  background-color: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: 8px;
+
+  padding: 16px;
+
+  margin-bottom: 16px;
+}
+
+.meaningItemBox:last-child {
+  margin-bottom: 0;
+}
+
+.meaningItemHeader {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 12px;
+}
+
+.meaningIndex {
+  font-size: 13px;
+
+  font-weight: 600;
+
+  color: var(--color-accent);
+}
+
+/* =========================================================
+   REMOVE MEANING
+========================================================= */
+
+.removeMeaningButton {
+  background: none;
+
+  border: none;
+
+  color: #ef4444;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  padding: 4px 8px;
+
+  border-radius: 4px;
+
+  transition:
+    background-color 0.2s,
+    opacity 0.2s;
+}
+
+.removeMeaningButton:hover {
+  background-color: #fee2e2;
+}
+
+.removeMeaningButton:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   API ERROR
+========================================================= */
+
+.errorAlert {
+  background-color: #fee2e2;
+
+  color: #991b1b;
+
+  border: 1px solid #fecaca;
+
+  padding: 12px 14px;
+
+  border-radius: 8px;
+
+  margin-bottom: 20px;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading {
+  text-align: center;
+
+  padding: 50px;
+
+  font-size: 16px;
+
+  color: var(--color-text-muted);
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+  .wrapper {
+    padding: 20px 12px;
+  }
+
+  .header {
+    flex-direction: column;
+
+    gap: 16px;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .discardButton,
+  .updateButton {
+    flex: 1;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .cardHeaderFlex {
+    align-items: flex-start;
+  }
+
+  .formRow {
+    flex-direction: column;
+
+    gap: 0;
+  }
+
+  .formRow > .formGroup {
+    width: 100%;
+  }
+
+  .formRow > .formGroupFlex {
+    width: 100%;
+  }
+}
+
+@media (max-width: 450px) {
+  .headerActions {
+    flex-direction: column;
+  }
+
+  .discardButton,
+  .updateButton {
+    width: 100%;
+  }
+
+  .cardHeaderFlex {
+    flex-direction: column;
+  }
+
+  .addMeaningButton {
+    width: 100%;
+
+    justify-content: center;
+  }
+}

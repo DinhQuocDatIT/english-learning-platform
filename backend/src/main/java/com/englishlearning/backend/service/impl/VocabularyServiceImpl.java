@@ -70,7 +70,23 @@ public class VocabularyServiceImpl
 
 
 
+    @Override
+    public void restore(Long id) {
+        Vocabulary vocabulary = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy từ vựng với id: " + id
+                        )
+                );
 
+        if (vocabulary.getDeletedAt() == null) {
+            throw new IllegalStateException("Từ vựng này đang hoạt động.");
+        }
+
+        vocabulary.setDeletedAt(null);
+
+        repository.save(vocabulary);
+    }
 
     @Override
     public void delete(Long id){Vocabulary vocabulary =
