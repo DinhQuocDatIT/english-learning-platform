@@ -3,6 +3,7 @@ package com.englishlearning.backend.service.impl;
 import com.englishlearning.backend.constant.RoleConstant;
 import com.englishlearning.backend.dto.request.RegisterTeacherRequest;
 import com.englishlearning.backend.dto.request.RegisterUserRequest;
+import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
 import com.englishlearning.backend.dto.response.UserResponse;
 import com.englishlearning.backend.entity.Role;
@@ -16,7 +17,11 @@ import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.service.AdminService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,6 +39,8 @@ public class AdminServiceImpl implements AdminService {
     private StudentMapper studentMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private PathPatternRequestMatcher.Builder builder;
 
     @Override
     @Transactional
@@ -95,6 +102,41 @@ public class AdminServiceImpl implements AdminService {
                 .stream()
                 .map(studentMapper::toResponse)
                 .toList();
+
+    }
+
+    @Override
+    public PageResponse<UserResponse> getAllTeacherByPage(int page, int size,String keyword) {
+        if(page<0){
+            page = 0;
+        }
+        if(size<=0){
+            size = 10;
+        }
+        if(size >100){
+            size = 100;
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User > users = userRepository.searchTeachers(
+                "TEACHER",
+                keyword.trim(),
+                pageable
+        );
+        return PageResponse.<UserResponse>builder()
+                .content(
+                users
+                        .getContent()
+                        .stream()
+                        .map(userMapper::toResponse)
+                        .toList()
+        )
+                .currentPage(users.getNumber())
+                .pageSize(users.getSize())
+                .totalElements(users.getTotalElements())
+                .totalPages(users.getTotalPages())
+                .first(users.isFirst())
+                .last(users.isLast())
+                .build();
 
     }
 }

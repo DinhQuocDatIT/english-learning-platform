@@ -15,6 +15,7 @@ import VocabularyManagement from "../pages/vocabulary/VocabularyManagement/Vocab
 import CreateVocabulary from "../pages/vocabulary/CreateVocabulary/CreateVocabulary";
 import ImportVocabulary from "../pages/vocabulary/ImportVocabulary/ImportVocabulary";
 import UpdateVocabulary from "../pages/vocabulary/UpdateVocabulary/UpdateVocabulary";
+import TeacherManagement from "../pages/admin/TeacherManagement/TeacherManagement";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -46,10 +47,17 @@ function AppRoutes() {
             element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}
           >
             <Route path="profile" element={<AdminProfile />} />
+            {/*   quản lý từ vựng */}
             <Route path="vocabulary" element={<VocabularyManagement />} />
             <Route path="create-vocabulary" element={<CreateVocabulary />} />
             <Route path="import-vocabulary" element={<ImportVocabulary />} />
-            <Route path="update-vocabulary/:id" element={<UpdateVocabulary />} />
+            <Route
+              path="update-vocabulary/:id"
+              element={<UpdateVocabulary />}
+            />
+            {/* Quản lý giáo viên */}
+
+            <Route path="teachers" element={<TeacherManagement />} />
           </Route>
         </Route>
       </Route>

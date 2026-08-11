@@ -82,8 +82,8 @@ export const sidebarMenus = {
       icon: faChartSimple,
     },
     {
-      path: "/dashboard/admin/users",
-      name: "Quản lý người dùng",
+      path: "/dashboard/admin/students",
+      name: "Quản lý học sinh",
       icon: faUsers,
     },
     {

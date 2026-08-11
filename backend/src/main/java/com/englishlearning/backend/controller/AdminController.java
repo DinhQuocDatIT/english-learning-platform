@@ -2,6 +2,7 @@ package com.englishlearning.backend.controller;
 
 import com.englishlearning.backend.dto.request.RegisterTeacherRequest;
 import com.englishlearning.backend.dto.response.ApiResponse;
+import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
 import com.englishlearning.backend.dto.response.UserResponse;
 import com.englishlearning.backend.security.CustomUserDetails;
@@ -50,9 +51,27 @@ public class AdminController {
 
     }
 
+//    @GetMapping("/teachers")
+//    public ResponseEntity<ApiResponse<List<UserResponse>>> getTeachersList (){
+//        List<UserResponse> teacherResponses = adminService.getAllTeachers();
+//        return ResponseEntity.status(HttpStatus.OK).body(
+//                new ApiResponse<>(
+//                        200,
+//                        "Lấy danh sách giáo viên thành công",
+//                        teacherResponses
+//                )
+//        );
+//    }
+
     @GetMapping("/teachers")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getTeachersList (){
-        List<UserResponse> teacherResponses = adminService.getAllTeachers();
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getTeachersList (
+
+            @RequestParam(defaultValue = "1")int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String keyword
+
+    ){
+        PageResponse<UserResponse> teacherResponses = adminService.getAllTeacherByPage(page -1, size,keyword);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ApiResponse<>(
                         200,
