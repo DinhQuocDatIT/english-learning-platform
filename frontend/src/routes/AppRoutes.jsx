@@ -18,6 +18,8 @@ import UpdateVocabulary from "../pages/vocabulary/UpdateVocabulary/UpdateVocabul
 import TeacherManagement from "../pages/admin/TeacherManagement/TeacherManagement";
 import CreateTeacher from "../pages/admin/CreateTeacher/CreateTeacher";
 import TeacherDetail from "../pages/admin/TeacherDetail/TeacherDetail";
+import StudentManagement from "../pages/shared/student/StudentManagement/StudentManagement";
+import CreateStudent from "../pages/shared/student/CreateStudent/CreateStudent";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -62,6 +64,10 @@ function AppRoutes() {
             <Route path="teachers" element={<TeacherManagement />} />
             <Route path="create-teacher" element={<CreateTeacher />} />
             <Route path="teacher-detail/:id" element={<TeacherDetail />} />
+
+            {/* quản lý học sinh */}
+            <Route path="students" element={<StudentManagement />} />
+            <Route path="create-student" element={<CreateStudent />} />
           </Route>
         </Route>
       </Route>

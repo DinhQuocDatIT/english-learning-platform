@@ -39,31 +39,6 @@ public class AdminController {
         );
     }
 
-    @GetMapping("/students")
-    public ResponseEntity<ApiResponse<List<StudentResponse>>> getStudentsList (){
-        List<StudentResponse> studentResponses = adminService.getAllStudents();
-        return ResponseEntity.status(HttpStatus.OK).body(
-                new ApiResponse<>(
-                        200,
-                        "Lấy danh sách học sinh thành công",
-                        studentResponses
-                )
-        );
-
-    }
-
-//    @GetMapping("/teachers")
-//    public ResponseEntity<ApiResponse<List<UserResponse>>> getTeachersList (){
-//        List<UserResponse> teacherResponses = adminService.getAllTeachers();
-//        return ResponseEntity.status(HttpStatus.OK).body(
-//                new ApiResponse<>(
-//                        200,
-//                        "Lấy danh sách giáo viên thành công",
-//                        teacherResponses
-//                )
-//        );
-//    }
-
     @GetMapping("/teachers")
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getTeachersList (
 

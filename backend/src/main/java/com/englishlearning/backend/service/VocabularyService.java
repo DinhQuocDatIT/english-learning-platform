@@ -3,6 +3,7 @@ package com.englishlearning.backend.service;
 import com.englishlearning.backend.dto.request.VocabularyRequest;
 import com.englishlearning.backend.dto.response.ImportVocabularyResponse;
 import com.englishlearning.backend.dto.response.PageResponse;
+import com.englishlearning.backend.dto.response.StudentResponse;
 import com.englishlearning.backend.dto.response.VocabularyResponse;
 import com.englishlearning.backend.entity.Vocabulary;
 import org.springframework.data.domain.Page;
@@ -27,4 +28,5 @@ public interface VocabularyService {
             String status
     );
     ImportVocabularyResponse importCsv(MultipartFile file);
+
 }

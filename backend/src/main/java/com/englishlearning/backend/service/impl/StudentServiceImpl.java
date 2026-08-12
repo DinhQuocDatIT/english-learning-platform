@@ -2,18 +2,24 @@ package com.englishlearning.backend.service.impl;
 
 import com.englishlearning.backend.constant.RoleConstant;
 import com.englishlearning.backend.dto.request.RegisterStudentRequest;
+import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
+import com.englishlearning.backend.dto.response.UserResponse;
 import com.englishlearning.backend.entity.Role;
 import com.englishlearning.backend.entity.Student;
 import com.englishlearning.backend.entity.User;
 import com.englishlearning.backend.exception.DuplicateException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.mapper.StudentMapper;
+import com.englishlearning.backend.mapper.UserMapper;
 import com.englishlearning.backend.repository.RoleRepository;
 import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.service.StudentService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +34,9 @@ public class StudentServiceImpl implements StudentService {
     private StudentMapper studentMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserMapper userMapper;
+
 
     @Override
     @Transactional
@@ -50,5 +59,51 @@ public class StudentServiceImpl implements StudentService {
         user.setStudent(student);
         User userSave =  userRepository.save(user);
         return studentMapper.toResponse(userSave);
+    }
+    @Override
+    public PageResponse<UserResponse> getAllStudentByPage(
+            int page,
+            int size,
+            String keyword
+    ) {
+        if (page < 0) {
+            page = 0;
+        }
+
+        if (size <= 0) {
+            size = 10;
+        }
+
+        if (size > 100) {
+            size = 100;
+        }
+
+        if (keyword == null) {
+            keyword = "";
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<User> studentPage = userRepository.searchStudents(
+                "STUDENT",
+                keyword.trim(),
+                pageable
+        );
+
+        return PageResponse
+                .<UserResponse>builder()
+                .content(
+                        studentPage.getContent()
+                                .stream()
+                                .map(userMapper::toResponse)
+                                .toList()
+                )
+                .currentPage(studentPage.getNumber())
+                .pageSize(studentPage.getSize())
+                .totalElements(studentPage.getTotalElements())
+                .totalPages(studentPage.getTotalPages())
+                .first(studentPage.isFirst())
+                .last(studentPage.isLast())
+                .build();
     }
 }
