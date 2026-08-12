@@ -1,0 +1,164 @@
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background-color: rgba(0, 0, 0, 0.45);
+}
+
+.modal {
+  width: 100%;
+  max-width: 430px;
+
+  padding: 28px;
+
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+
+  animation: modalFadeIn 0.2s ease;
+}
+
+.modalIcon {
+  width: 52px;
+  height: 52px;
+
+  margin: 0 auto 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background-color: rgba(255, 68, 68, 0.1);
+  color: #ff4444;
+
+  font-size: 20px;
+}
+
+.modalTitle {
+  margin: 0 0 12px;
+
+  text-align: center;
+
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.modalMessage {
+  margin: 0;
+
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.modalMessage strong {
+  font-weight: 700;
+}
+
+.modalWarning {
+  margin: 14px 0 0;
+
+  padding: 10px 12px;
+
+  border-radius: 8px;
+
+  background-color: rgba(255, 68, 68, 0.08);
+  color: #ff4444;
+
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+
+  margin-top: 24px;
+}
+
+.modalCancel,
+.modalConfirm {
+  flex: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 11px 14px;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s,
+    opacity 0.2s;
+}
+
+.modalCancel {
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.modalCancel:hover:not(:disabled) {
+  background-color: var(--color-border);
+}
+
+.modalConfirm {
+  border: none;
+  background-color: #ff4444;
+  color: #ffffff;
+}
+
+.modalConfirm:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.modalCancel:disabled,
+.modalConfirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 500px) {
+  .modal {
+    padding: 22px;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+}
+

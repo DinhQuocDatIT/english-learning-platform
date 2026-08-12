@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,4 +20,5 @@ public class UserResponse {
     private String gender;
     private LocalDate dateOfBirth;
     private String role;
+    private LocalDateTime deletedAt;
 }

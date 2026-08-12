@@ -8,10 +8,14 @@ import {
   faTrash,
   faEye,
   faSearch,
+  faLock,
+  faLockOpen,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import teacherService from "../../../services/teacherService";
 import { useLoading } from "../../../contexts/LoadingContext";
+import { toast } from "react-toastify";
+import DeactivateTeacherModal from "../../../components/DeactivateTeacherModal/DeactivateTeacherModal";
 
 function TeacherManagement() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +30,11 @@ function TeacherManagement() {
   const startItem = totalElements === 0 ? 0 : (currentPage - 1) * pageSize + 1;
 
   const endItem = Math.min(currentPage * pageSize, totalElements);
+  const navigate = useNavigate();
+
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [deactivating, setDeactivating] = useState(false);
 
   const fetchTeachers = async () => {
     try {
@@ -80,15 +89,69 @@ function TeacherManagement() {
 
     return [1, "...", currentPage, "...", totalPages];
   };
-
   const handleDetail = (id) => {
-    console.log("Xem chi tiết giáo viên:", id);
+    navigate(`/dashboard/admin/teacher-detail/${id}`);
   };
 
-  const handleDelete = (id) => {
-    console.log("Xóa giáo viên:", id);
+  const handleDeactivate = (teacher) => {
+    setSelectedTeacher(teacher);
+    setShowDeactivateModal(true);
   };
 
+  const handleCloseDeactivateModal = () => {
+    if (deactivating) return;
+
+    setShowDeactivateModal(false);
+    setSelectedTeacher(null);
+  };
+
+  const handleConfirmDeactivate = async () => {
+    if (!selectedTeacher) return;
+
+    try {
+      setDeactivating(true);
+
+      await teacherService.deactivateTeacher(selectedTeacher.id);
+      toast.success("Khóa tài khoản giáo viên thành công!");
+
+      setShowDeactivateModal(false);
+      setSelectedTeacher(null);
+
+      await fetchTeachers();
+    } catch (error) {
+      console.error("Lỗi khóa tài khoản:", error);
+
+      alert(
+        error.response?.data?.message || "Khóa tài khoản giáo viên thất bại.",
+      );
+    } finally {
+      setDeactivating(false);
+    }
+  };
+  const handleActivate = async (teacher) => {
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn mở khóa tài khoản của giáo viên ${teacher.fullName} không?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      showLoading();
+
+      await teacherService.activateTeacher(teacher.id);
+
+      toast.success("Mở khóa tài khoản thành công!");
+      await fetchTeachers();
+    } catch (error) {
+      console.error("Lỗi mở khóa tài khoản:", error);
+
+      alert(error.response?.data?.message || "Mở khóa tài khoản thất bại.");
+    } finally {
+      hideLoading();
+    }
+  };
   return (
     <div className={styles.wrapper}>
       {/* Header */}
@@ -115,7 +178,7 @@ function TeacherManagement() {
           <div className={styles.searchInputWrapper}>
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên, email..."
+              placeholder="Tìm kiếm theo id, tên, email"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -143,6 +206,7 @@ function TeacherManagement() {
                   <th>Email</th>
                   <th>Giới tính</th>
                   <th>Ngày sinh</th>
+                  <th>Trạng thái</th>
                   <th className={styles.textRight}>Thao tác</th>
                 </tr>
               </thead>
@@ -157,7 +221,7 @@ function TeacherManagement() {
                 ) : (
                   teacherList.map((item) => (
                     <tr key={item.id}>
-                      <td className={styles.idCol}>#{item.id}</td>
+                      <td className={styles.idCol}>{item.id}</td>
 
                       <td>
                         <div className={styles.wordCell}>
@@ -172,7 +236,15 @@ function TeacherManagement() {
                       <td>{item.gender}</td>
 
                       <td className={styles.dateCol}>{item.dateOfBirth}</td>
-
+                      <td>
+                        {item.deletedAt ? (
+                          <span className={styles.statusLocked}>Đã khóa</span>
+                        ) : (
+                          <span className={styles.statusActive}>
+                            Đang hoạt động
+                          </span>
+                        )}
+                      </td>
                       <td className={styles.textRight}>
                         <div className={styles.actionButtons}>
                           <button
@@ -183,13 +255,23 @@ function TeacherManagement() {
                             Xem chi tiết
                           </button>
 
-                          <button
-                            className={styles.btnDelete}
-                            onClick={() => handleDelete(item.id)}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                            Xóa
-                          </button>
+                          {item.deletedAt == null ? (
+                            <button
+                              className={styles.btnDelete}
+                              onClick={() => handleDeactivate(item)}
+                            >
+                              <FontAwesomeIcon icon={faLock} />
+                              Khóa tài khoản
+                            </button>
+                          ) : (
+                            <button
+                              className={styles.btnActivate}
+                              onClick={() => handleActivate(item)}
+                            >
+                              <FontAwesomeIcon icon={faLockOpen} />
+                              Mở khóa
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -251,6 +333,14 @@ function TeacherManagement() {
           </div>
         </div>
       </div>
+
+      <DeactivateTeacherModal
+        teacher={selectedTeacher}
+        isOpen={showDeactivateModal}
+        loading={deactivating}
+        onClose={handleCloseDeactivateModal}
+        onConfirm={handleConfirmDeactivate}
+      />
     </div>
   );
 }

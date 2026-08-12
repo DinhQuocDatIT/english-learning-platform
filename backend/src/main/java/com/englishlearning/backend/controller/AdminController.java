@@ -1,6 +1,7 @@
 package com.englishlearning.backend.controller;
 
 import com.englishlearning.backend.dto.request.RegisterTeacherRequest;
+import com.englishlearning.backend.dto.request.UpdateUserProfileRequest;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
@@ -80,6 +81,37 @@ public class AdminController {
                 )
         );
     }
+    @GetMapping("/teachers/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> getTeacherById(
+            @PathVariable Long id
+    ) {
+        UserResponse response = adminService.getTeacherById(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy thông tin giáo viên thành công",
+                        response
+                )
+        );
+    }
+    @PutMapping("/teachers/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> updateTeacher(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserProfileRequest request
+    ) {
+
+        UserResponse response =
+                adminService.updateTeacher(id, request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Cập nhật thông tin giáo viên thành công",
+                        response
+                )
+        );
+    }
     @PutMapping("/user/{id}/deactivate")
     public ResponseEntity<ApiResponse<Boolean>> deactivateUser (
             @PathVariable Long id,
@@ -90,6 +122,20 @@ public class AdminController {
                 new ApiResponse<>(
                         200,
                         "Vô hiệu hóa tài khoản thành công",
+                        result
+                )
+        );
+    }
+    @PutMapping("/user/{id}/activate")
+    public ResponseEntity<ApiResponse<Boolean>> activateUser(
+            @PathVariable Long id
+    ) {
+        boolean result = adminService.activateUser(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Mở khóa tài khoản thành công",
                         result
                 )
         );

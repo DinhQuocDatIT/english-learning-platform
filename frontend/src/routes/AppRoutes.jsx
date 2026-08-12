@@ -16,6 +16,8 @@ import CreateVocabulary from "../pages/vocabulary/CreateVocabulary/CreateVocabul
 import ImportVocabulary from "../pages/vocabulary/ImportVocabulary/ImportVocabulary";
 import UpdateVocabulary from "../pages/vocabulary/UpdateVocabulary/UpdateVocabulary";
 import TeacherManagement from "../pages/admin/TeacherManagement/TeacherManagement";
+import CreateTeacher from "../pages/admin/CreateTeacher/CreateTeacher";
+import TeacherDetail from "../pages/admin/TeacherDetail/TeacherDetail";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -58,6 +60,8 @@ function AppRoutes() {
             {/* Quản lý giáo viên */}
 
             <Route path="teachers" element={<TeacherManagement />} />
+            <Route path="create-teacher" element={<CreateTeacher />} />
+            <Route path="teacher-detail/:id" element={<TeacherDetail />} />
           </Route>
         </Route>
       </Route>

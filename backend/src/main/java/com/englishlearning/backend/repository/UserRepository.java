@@ -21,10 +21,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     SELECT u
     FROM User u
     WHERE u.role.name = :roleName
-      AND u.deletedAt IS NULL
       AND (
           LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
           OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          OR CAST(u.id AS string) LIKE CONCAT('%', :keyword, '%')
       )
 """)
         Page<User> searchTeachers(

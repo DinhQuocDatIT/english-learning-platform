@@ -3,6 +3,7 @@ package com.englishlearning.backend.service.impl;
 import com.englishlearning.backend.constant.RoleConstant;
 import com.englishlearning.backend.dto.request.RegisterTeacherRequest;
 import com.englishlearning.backend.dto.request.RegisterUserRequest;
+import com.englishlearning.backend.dto.request.UpdateUserProfileRequest;
 import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
 import com.englishlearning.backend.dto.response.UserResponse;
@@ -138,5 +139,58 @@ public class AdminServiceImpl implements AdminService {
                 .last(users.isLast())
                 .build();
 
+    }
+    public UserResponse getTeacherById(Long id) {
+        User teacher = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giáo viên"));
+
+
+        return userMapper.toResponse(teacher);
+    }
+    @Override
+    @Transactional
+    public UserResponse updateTeacher(
+            Long id,
+            UpdateUserProfileRequest request
+    ) {
+
+        User teacher = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Không tìm thấy giáo viên"));
+        if (!RoleConstant.TEACHER.equals(teacher.getRole().getName())) {
+            throw new RuntimeException("Người dùng này không phải giáo viên");
+        }
+
+
+        if (!teacher.getEmail().equals(request.getEmail())
+                && userRepository.existsByEmail(request.getEmail())) {
+
+            throw new DuplicateException("Email đã tồn tại");
+        }
+
+        teacher.setFullName(request.getFullName().trim());
+        teacher.setEmail(request.getEmail().trim());
+        teacher.setGender(request.getGender());
+        teacher.setDateOfBirth(request.getDateOfBirth());
+
+        User savedTeacher = userRepository.save(teacher);
+
+        return userMapper.toResponse(savedTeacher);
+    }
+    @Transactional
+    @Override
+    public boolean activateUser(Long targetUserId) {
+        User user = userRepository.findById(targetUserId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Không tìm thấy người dùng"));
+
+        if (user.getDeletedAt() == null) {
+            throw new RuntimeException("Tài khoản đang hoạt động");
+        }
+
+        user.setDeletedAt(null);
+        userRepository.save(user);
+
+        return true;
     }
 }

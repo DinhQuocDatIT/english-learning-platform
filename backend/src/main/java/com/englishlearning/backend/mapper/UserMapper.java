@@ -16,7 +16,7 @@ public class UserMapper {
         response.setGender(user.getGender());
         response.setDateOfBirth(user.getDateOfBirth());
         response.setRole(user.getRole().getName());
-
+        response.setDeletedAt(user.getDeletedAt());
         return response;
     }
 }

@@ -2,6 +2,7 @@ package com.englishlearning.backend.service;
 
 import com.englishlearning.backend.dto.request.RegisterTeacherRequest;
 import com.englishlearning.backend.dto.request.RegisterUserRequest;
+import com.englishlearning.backend.dto.request.UpdateUserProfileRequest;
 import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
 import com.englishlearning.backend.dto.response.UserResponse;
@@ -15,4 +16,10 @@ public interface AdminService  {
     public List<UserResponse> getAllTeachers();
     public List<StudentResponse> getAllStudents();
     public PageResponse<UserResponse> getAllTeacherByPage(int page, int size,String keyword);
+    public UserResponse getTeacherById(Long id);
+    public UserResponse updateTeacher(
+            Long id,
+            UpdateUserProfileRequest request
+    );
+    public boolean activateUser(Long targetUserId);
 }
