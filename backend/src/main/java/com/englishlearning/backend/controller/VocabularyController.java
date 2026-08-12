@@ -51,15 +51,25 @@ public class VocabularyController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<VocabularyResponse>>> getAll(
-            @RequestParam(defaultValue = "1")int page,@RequestParam(defaultValue = "10") int size
-    ){
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "ALL") String status
+    ) {
 
-        PageResponse<VocabularyResponse> response = vocabularyService.getAllByPage(page-1,size);
+        PageResponse<VocabularyResponse> response =
+                vocabularyService.getAllByPage(
+                        page - 1,
+                        size,
+                        keyword,
+                        status
+                );
+
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
                         "Lấy danh sách từ vựng thành công",
-                       response
+                        response
                 )
         );
     }

@@ -109,19 +109,42 @@ public class VocabularyServiceImpl
 
 
     @Override
-    public PageResponse<VocabularyResponse> getAllByPage(int page, int size) {
+    public PageResponse<VocabularyResponse> getAllByPage(
+            int page,
+            int size,
+            String keyword,
+            String status
+    ) {
 
         if (page < 0) {
             page = 0;
         }
+
         if (size <= 0) {
             size = 10;
         }
+
         if (size > 100) {
             size = 100;
         }
+
+        if (keyword == null) {
+            keyword = "";
+        }
+
+        if (status == null || status.isBlank()) {
+            status = "ALL";
+        }
+
         Pageable pageable = PageRequest.of(page, size);
-        Page<Vocabulary> vocabularyPage  = repository.findAll(pageable);
+
+        Page<Vocabulary> vocabularyPage =
+                repository.searchVocabulary(
+                        keyword.trim(),
+                        status,
+                        pageable
+                );
+
         return PageResponse
                 .<VocabularyResponse>builder()
                 .content(

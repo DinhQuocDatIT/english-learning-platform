@@ -836,16 +836,6 @@ function CreateVocabulary() {
                             meaningTouched.meaning && !!meaningErrors.meaning
                           }
                         />
-
-                        <button
-                          type="button"
-                          className={styles.speakBtn}
-                          onClick={() => handleSpeak(item.meaning)}
-                          title="Nghe ý nghĩa"
-                          disabled={!item.meaning}
-                        >
-                          <FontAwesomeIcon icon={faVolumeHigh} />
-                        </button>
                       </div>
 
                       {meaningTouched.meaning && meaningErrors.meaning && (

@@ -96,8 +96,7 @@
   text-transform: uppercase;
 }
 
-.selectInput,
-.dateInput {
+.selectInput{
   padding: 9px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -106,25 +105,16 @@
   background-color: var(--color-background);
   outline: none;
   width: 100%;
+  height: 40px;
 }
 
-.selectInput:focus,
-.dateInput:focus {
+.selectInput:focus{
   border-color: var(--color-primary);
 }
 
-.dateInputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
 
-.calendarIcon {
-  position: absolute;
-  right: 12px;
-  color: var(--color-text-muted);
-  pointer-events: none;
-}
+
+
 
 .clearFiltersBtn {
   background: transparent;
@@ -140,7 +130,23 @@
 .clearFiltersBtn:hover {
   text-decoration: underline;
 }
-
+.searchGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.searchInputWrapper input {
+  height: 40px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--color-text);
+  background-color: var(--color-background);
+  outline: none;
+  width: 100%;
+}
 /* Table Card */
 .tableCard {
   background: var(--color-background);

@@ -9,6 +9,7 @@ import {
   faClipboardList,
   faUserShield,
   faCircleUser,
+  faFileWord,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -87,9 +88,14 @@ export const sidebarMenus = {
       icon: faUsers,
     },
     {
+      path: "/dashboard/admin/teachers",
+      name: "Giảng viên",
+      icon: faUserShield,
+    },
+    {
       path: "/dashboard/admin/vocabulary",
       name: "Quản lý từ vựng",
-      icon: faUsers,
+      icon: faFileWord,
     },
     {
       path: "/dashboard/admin/courses",
@@ -97,19 +103,14 @@ export const sidebarMenus = {
       icon: faGraduationCap,
     },
     {
-      path: "/dashboard/admin/teachers",
-      name: "Giảng viên",
-      icon: faUserShield,
+      path: "/dashboard/admin/profile",
+      name: "Thông tin cá nhân",
+      icon: faCircleUser,
     },
     {
       path: "/dashboard/admin/settings",
       name: "Cài đặt",
       icon: faGear,
-    },
-    {
-      path: "/dashboard/admin/profile",
-      name: "Thông tin cá nhân",
-      icon: faCircleUser,
     },
   ],
 };

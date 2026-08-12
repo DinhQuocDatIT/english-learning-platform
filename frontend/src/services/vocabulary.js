@@ -17,11 +17,13 @@ const vocabulary = {
   restoreVocabulary(id) {
     return axiosClient.patch(`/v1/vocabularies/${id}/restore`);
   },
-  getAllByPage(page = 1, size = 10) {
+  getAllByPage(page = 1, size = 10, keyword = "", status = "ALL") {
     return axiosClient.get("/v1/vocabularies", {
       params: {
         page,
         size,
+        keyword,
+        status,
       },
     });
   },

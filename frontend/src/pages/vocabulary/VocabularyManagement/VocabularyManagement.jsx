@@ -22,9 +22,8 @@ import { toast } from "react-toastify";
 
 function VocabularyManagement() {
   const [filters, setFilters] = useState({
-    status: "Tất cả trạng thái",
-    createdDate: "",
-    topicCategory: "Tất cả chủ đề",
+    status: "",
+    keyword: "",
   });
   const { showLoading, hideLoading } = useLoading();
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,7 +41,12 @@ function VocabularyManagement() {
     try {
       showLoading();
       setLoading(true);
-      const response = await vocabulary.getAllByPage(currentPage, pageSize);
+      const response = await vocabulary.getAllByPage(
+        currentPage,
+        pageSize,
+        filters.keyword,
+        filters.status,
+      );
 
       const data = response.data.data;
       setVocabList(data.content || []);
@@ -57,8 +61,12 @@ function VocabularyManagement() {
   };
 
   useEffect(() => {
-    fetchVocabularies();
-  }, [currentPage]);
+    const timer = setTimeout(() => {
+      fetchVocabularies();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [currentPage, filters.keyword, filters.status]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -68,10 +76,10 @@ function VocabularyManagement() {
 
   const clearFilters = () => {
     setFilters({
-      status: "Tất cả trạng thái",
-      createdDate: "",
-      topicCategory: "Tất cả chủ đề",
+      status: "",
+      keyword: "",
     });
+
     setCurrentPage(1);
   };
 
@@ -160,54 +168,41 @@ function VocabularyManagement() {
 
       {/* Filter Bar Card */}
       <div className={styles.filterCard}>
+        {/* Trạng thái */}
         <div className={styles.filterGroup}>
           <label className={styles.filterLabel}>Trạng thái</label>
+
           <select
             name="status"
             value={filters.status}
             onChange={handleFilterChange}
             className={styles.selectInput}
           >
-            <option>Tất cả trạng thái</option>
-            <option>Đang hoạt động</option>
-            <option>Ngừng hoạt động</option>
+            <option value="">Tất cả trạng thái</option>
+            <option value="ACTIVE">Đang hoạt động</option>
+            <option value="INACTIVE">Ngừng hoạt động</option>
           </select>
         </div>
+        {/* Tìm kiếm */}
+        <div className={styles.searchGroup}>
+          <label className={styles.filterLabel}>Tìm kiếm</label>
 
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Ngày tạo</label>
-          <div className={styles.dateInputWrapper}>
+          <div className={styles.searchInputWrapper}>
             <input
               type="text"
-              placeholder="dd/mm/yyyy"
-              name="createdDate"
-              value={filters.createdDate}
+              name="keyword"
+              value={filters.keyword}
               onChange={handleFilterChange}
-              className={styles.dateInput}
-            />
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              className={styles.calendarIcon}
+              placeholder="Tìm theo ID, từ vựng..."
+              className={styles.searchInput}
             />
           </div>
         </div>
-
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Danh mục chủ đề</label>
-          <select
-            name="topicCategory"
-            value={filters.topicCategory}
-            onChange={handleFilterChange}
-            className={styles.selectInput}
-          >
-            <option>Tất cả chủ đề</option>
-            <option>Kinh doanh</option>
-            <option>Học thuật</option>
-            <option>Công nghệ</option>
-          </select>
-        </div>
-
-        <button className={styles.clearFiltersBtn} onClick={clearFilters}>
+        <button
+          type="button"
+          className={styles.clearFiltersBtn}
+          onClick={clearFilters}
+        >
           Xóa bộ lọc
         </button>
       </div>
@@ -264,7 +259,7 @@ function VocabularyManagement() {
                         <span
                           className={`${styles.statusBadge} ${item.deletedAt === null ? styles.activeStatus : styles.inactiveStatus}`}
                         >
-                          {item.deletedAt === null ? "Hoạt động" : "Ẩn"}
+                          {item.deletedAt === null ? "Hoạt động" : "Ngưng hoạt động"}
                         </span>
                       </td>
                       <td className={styles.textRight}>
