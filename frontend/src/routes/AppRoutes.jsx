@@ -20,6 +20,7 @@ import CreateTeacher from "../pages/admin/CreateTeacher/CreateTeacher";
 import TeacherDetail from "../pages/admin/TeacherDetail/TeacherDetail";
 import StudentManagement from "../pages/shared/student/StudentManagement/StudentManagement";
 import CreateStudent from "../pages/shared/student/CreateStudent/CreateStudent";
+import StudentDetail from "../pages/shared/student/StudentDetail/StudentDetail";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -68,6 +69,7 @@ function AppRoutes() {
             {/* quản lý học sinh */}
             <Route path="students" element={<StudentManagement />} />
             <Route path="create-student" element={<CreateStudent />} />
+            <Route path="student-detail/:id" element={<StudentDetail />} />
           </Route>
         </Route>
       </Route>

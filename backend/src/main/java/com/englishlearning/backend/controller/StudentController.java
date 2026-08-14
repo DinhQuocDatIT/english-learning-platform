@@ -2,6 +2,7 @@ package com.englishlearning.backend.controller;
 
 
 import com.englishlearning.backend.dto.request.RegisterStudentRequest;
+import com.englishlearning.backend.dto.request.UpdateStudentRequest;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
@@ -66,5 +67,41 @@ public class StudentController {
                                 response
                         )
                 );
+    }
+    @GetMapping("/{userId}")
+    public ResponseEntity<ApiResponse<StudentResponse>> getStudentByUserId(
+            @PathVariable Long userId
+    ) {
+
+        StudentResponse response =
+                studentService.getStudentByUserId(userId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy thông tin học sinh thành công",
+                        response
+                )
+        );
+    }
+    @PutMapping("/{userId}")
+    public ResponseEntity<ApiResponse<StudentResponse>> updateStudent(
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateStudentRequest request
+    ) {
+
+        StudentResponse response =
+                studentService.updateStudentByUserId(
+                        userId,
+                        request
+                );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Cập nhật học sinh thành công",
+                        response
+                )
+        );
     }
 }

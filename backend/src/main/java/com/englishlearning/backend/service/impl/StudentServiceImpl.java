@@ -2,6 +2,7 @@ package com.englishlearning.backend.service.impl;
 
 import com.englishlearning.backend.constant.RoleConstant;
 import com.englishlearning.backend.dto.request.RegisterStudentRequest;
+import com.englishlearning.backend.dto.request.UpdateStudentRequest;
 import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
 import com.englishlearning.backend.dto.response.UserResponse;
@@ -105,5 +106,77 @@ public class StudentServiceImpl implements StudentService {
                 .first(studentPage.isFirst())
                 .last(studentPage.isLast())
                 .build();
+    }
+    @Override
+    public StudentResponse getStudentByUserId(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy người dùng với id: " + userId
+                        )
+                );
+
+        if (user.getStudent() == null) {
+            throw new ResourceNotFoundException(
+                    "Người dùng này không phải học sinh"
+            );
+        }
+
+        return studentMapper.toResponse(user);
+    }
+    @Override
+    @Transactional
+    public StudentResponse updateStudentByUserId(
+            Long userId,
+            UpdateStudentRequest request
+    ) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy người dùng với id: " + userId
+                        )
+                );
+
+        Student student = user.getStudent();
+
+        if (student == null) {
+            throw new ResourceNotFoundException(
+                    "Người dùng này không phải học sinh"
+            );
+        }
+
+
+        if (!user.getEmail().equals(request.getEmail())
+                && userRepository.existsByEmail(request.getEmail())) {
+
+            throw new DuplicateException("Email đã tồn tại");
+        }
+
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setGender(request.getGender());
+        user.setDateOfBirth(request.getDateOfBirth());
+
+        if (request.getExperience() != null) {
+            student.setExperience(request.getExperience());
+        }
+
+        if (request.getTotalLearningSeconds() != null) {
+            student.setTotalLearningSeconds(
+                    request.getTotalLearningSeconds()
+            );
+        }
+
+        if (request.getTotalCompletedTopic() != null) {
+            student.setTotalCompletedTopic(
+                    request.getTotalCompletedTopic()
+            );
+        }
+
+        User savedUser = userRepository.save(user);
+
+        return studentMapper.toResponse(savedUser);
     }
 }

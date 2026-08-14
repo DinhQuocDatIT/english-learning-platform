@@ -1,6 +1,7 @@
 package com.englishlearning.backend.service;
 
 import com.englishlearning.backend.dto.request.RegisterStudentRequest;
+import com.englishlearning.backend.dto.request.UpdateStudentRequest;
 import com.englishlearning.backend.dto.response.PageResponse;
 import com.englishlearning.backend.dto.response.StudentResponse;
 import com.englishlearning.backend.dto.response.UserResponse;
@@ -14,4 +15,9 @@ public interface StudentService {
             int size,
             String keyword
     );
+    StudentResponse updateStudentByUserId(
+            Long userId,
+            UpdateStudentRequest request
+    );
+    StudentResponse getStudentByUserId(Long userId);
 }
