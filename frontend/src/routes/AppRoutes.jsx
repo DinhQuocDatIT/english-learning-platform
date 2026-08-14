@@ -46,6 +46,18 @@ function AppRoutes() {
             element={<RoleRoute allowedRoles={[ROLES.TEACHER]} />}
           >
             <Route path="profile" element={<TeacherProfile />} />
+            {/*   quản lý từ vựng */}
+            <Route path="vocabulary" element={<VocabularyManagement />} />
+            <Route path="create-vocabulary" element={<CreateVocabulary />} />
+            <Route path="import-vocabulary" element={<ImportVocabulary />} />
+            <Route
+              path="update-vocabulary/:id"
+              element={<UpdateVocabulary />}
+            />
+            {/* quản lý học sinh */}
+            <Route path="students" element={<StudentManagement />} />
+            <Route path="create-student" element={<CreateStudent />} />
+            <Route path="student-detail/:id" element={<StudentDetail />} />
           </Route>
           <Route
             path="admin"

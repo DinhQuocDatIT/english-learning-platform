@@ -20,11 +20,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admins")
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     @Autowired
     private AdminService adminService;
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teachers")
     public ResponseEntity<ApiResponse<UserResponse>> addTeacher (
             @Valid @RequestBody RegisterTeacherRequest registerTeacherRequest
@@ -39,6 +40,8 @@ public class AdminController {
         );
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/teachers")
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getTeachersList (
 
@@ -56,6 +59,7 @@ public class AdminController {
                 )
         );
     }
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/teachers/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> getTeacherById(
             @PathVariable Long id
@@ -70,6 +74,7 @@ public class AdminController {
                 )
         );
     }
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/teachers/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> updateTeacher(
             @PathVariable Long id,
@@ -87,6 +92,7 @@ public class AdminController {
                 )
         );
     }
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
     @PutMapping("/user/{id}/deactivate")
     public ResponseEntity<ApiResponse<Boolean>> deactivateUser (
             @PathVariable Long id,
@@ -101,6 +107,7 @@ public class AdminController {
                 )
         );
     }
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
     @PutMapping("/user/{id}/activate")
     public ResponseEntity<ApiResponse<Boolean>> activateUser(
             @PathVariable Long id

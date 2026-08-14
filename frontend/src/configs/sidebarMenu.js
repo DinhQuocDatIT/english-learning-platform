@@ -55,15 +55,17 @@ export const sidebarMenus = {
       icon: faBookOpen,
     },
     {
-      path: "/teacher/students",
-      name: "Học viên",
+      path: "/dashboard/teacher/students",
+      name: "Quản lý học sinh",
       icon: faUsers,
     },
+
     {
-      path: "/teacher/assignments",
-      name: "Bài tập",
-      icon: faClipboardList,
+      path: "/dashboard/teacher/vocabulary",
+      name: "Quản lý từ vựng",
+      icon: faFileWord,
     },
+
     {
       path: "/teacher/settings",
       name: "Cài đặt",
