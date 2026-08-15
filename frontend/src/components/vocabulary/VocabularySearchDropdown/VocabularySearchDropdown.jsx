@@ -7,7 +7,7 @@ import { faMagnifyingGlass, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 import vocabularyService from "../../../services/vocabularyService";
-import studentVocabularyService from "../../../services/studentVocabulary";
+import studentVocabularyService from "../../../services/studentVocabularyService";
 
 import VocabularyResult from "../VocabularyResult/VocabularyResult";
 
@@ -20,8 +20,6 @@ function VocabularySearchDropdown() {
   const [savingId, setSavingId] = useState(null);
 
   const searchRef = useRef(null);
-
-
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -75,12 +73,10 @@ function VocabularySearchDropdown() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  
   const handleSaveVocabulary = async (vocabulary) => {
     if (!vocabulary?.id) {
       toast.error("Không xác định được từ vựng.");
@@ -160,8 +156,6 @@ function VocabularySearchDropdown() {
         </div>
       </div>
 
-
-
       {isOpen && (
         <div className={styles.dropdownResultOverlay}>
           {/* LOADING */}
@@ -173,7 +167,6 @@ function VocabularySearchDropdown() {
               <span>Đang tra cứu...</span>
             </div>
           )}
-
 
           {!loading && searchTerm.trim() && vocabularyList.length === 0 && (
             <div className={styles.emptyResult}>
@@ -188,8 +181,6 @@ function VocabularySearchDropdown() {
               <span>Hãy thử nhập từ khác</span>
             </div>
           )}
-
-     
 
           {!loading &&
             vocabularyList.length > 0 &&

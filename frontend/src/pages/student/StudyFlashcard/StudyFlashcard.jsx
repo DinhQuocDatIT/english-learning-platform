@@ -1,50 +1,25 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import styles from "./StudyFlashcard.module.css";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faXmark,
   faVolumeHigh,
-  faCheck,
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { speakText } from "../../../utils/textToSpeech";
 
 function StudyFlashcard() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [flashcards] = useState([
-    {
-      id: 1,
-      partOfSpeech: "adjective",
-      word: "ubiquitous",
-      pronunciation: "/juːˈbɪk.wə.təs/",
-      meaning: "có mặt ở khắp nơi",
-      exampleEn: "The company's logo is ubiquitous.",
-      exampleVi: "Logo của công ty có mặt ở khắp mọi nơi.",
-    },
-    {
-      id: 2,
-      partOfSpeech: "adjective",
-      word: "ephemeral",
-      pronunciation: "/ɪˈfem.ər.əl/",
-      meaning: "chóng tàn, phù du",
-      exampleEn: "Fame in the world of pop music is ephemeral.",
-      exampleVi: "Danh tiếng trong thế giới nhạc pop rất phù du.",
-    },
-    {
-      id: 3,
-      partOfSpeech: "verb",
-      word: "mitigate",
-      pronunciation: "/ˈmɪt.ɪ.ɡeɪt/",
-      meaning: "làm nhẹ, làm dịu",
-      exampleEn: "We need to mitigate the risks involved.",
-      exampleVi: "Chúng ta cần giảm thiểu các rủi ro liên quan.",
-    },
-  ]);
+  const wordsFromState = location.state?.words ?? [];
+  const sourceFromState = location.state?.source ?? "all";
+
+  const [flashcards] = useState(wordsFromState);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -54,6 +29,30 @@ function StudyFlashcard() {
 
   const progressPercent =
     totalCards > 0 ? ((currentIndex + 1) / totalCards) * 100 : 0;
+
+  const getMeaning = (word) => {
+    if (!word?.meanings || word.meanings.length === 0) {
+      return "Chưa có nghĩa";
+    }
+
+    return word.meanings[0]?.meaning ?? "Chưa có nghĩa";
+  };
+
+  const getPartOfSpeech = (word) => {
+    if (!word?.meanings || word.meanings.length === 0) {
+      return "";
+    }
+
+    return word.meanings[0]?.partOfSpeech ?? "";
+  };
+
+  const getExample = (word) => {
+    if (!word?.meanings || word.meanings.length === 0) {
+      return "";
+    }
+
+    return word.meanings[0]?.example ?? "";
+  };
 
   const handleFlip = () => {
     setIsFlipped((prev) => !prev);
@@ -81,26 +80,22 @@ function StudyFlashcard() {
     setCurrentIndex((prev) => prev + 1);
   };
 
-  const handleAnswer = (status) => {
-    console.log("Vocabulary:", currentCard.word);
-    console.log("Status:", status);
-
-    if (currentIndex < totalCards - 1) {
-      setIsFlipped(false);
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      console.log("Đã hoàn thành phiên học");
-    }
-  };
-
-  /**
-   * Highlight vocabulary inside example sentence.
-   */
   const renderExample = () => {
-    const sentence = currentCard.exampleEn;
-    const word = currentCard.word;
+    const sentence = getExample(currentCard);
 
-    const regex = new RegExp(`(${word})`, "gi");
+    if (!sentence) {
+      return "Chưa có ví dụ.";
+    }
+
+    const word = currentCard?.word;
+
+    if (!word) {
+      return sentence;
+    }
+
+    const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const regex = new RegExp(`(${escapedWord})`, "gi");
     const parts = sentence.split(regex);
 
     return parts.map((part, index) => {
@@ -112,11 +107,25 @@ function StudyFlashcard() {
     });
   };
 
+  const sessionTitle = useMemo(() => {
+    if (sourceFromState === "learned") {
+      return "TỪ VỰNG ĐÃ HỌC";
+    }
+
+    if (sourceFromState === "unlearned") {
+      return "TỪ VỰNG CHƯA NHỚ";
+    }
+
+    return "PHIÊN HỌC TỪ VỰNG";
+  }, [sourceFromState]);
+
   if (!currentCard) {
     return (
       <div className={styles.container}>
         <div className={styles.emptyState}>
           <h2>Không có từ vựng để học</h2>
+
+          <p>Vui lòng quay lại và chọn ít nhất một từ để bắt đầu phiên học.</p>
 
           <button type="button" onClick={() => navigate(-1)}>
             Quay lại
@@ -128,10 +137,6 @@ function StudyFlashcard() {
 
   return (
     <div className={styles.container}>
-      {/* =========================
-          TOP BAR
-      ========================= */}
-
       <div className={styles.topBar}>
         <button
           type="button"
@@ -154,7 +159,7 @@ function StudyFlashcard() {
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
 
-            <span className={styles.title}>ADVANCED VOCABULARY SET</span>
+            <span className={styles.title}>{sessionTitle}</span>
 
             <button
               type="button"
@@ -182,27 +187,21 @@ function StudyFlashcard() {
         </div>
       </div>
 
-      {/* =========================
-          MAIN CONTENT
-      ========================= */}
-
       <div className={styles.mainContent}>
         <div className={styles.cardContainer}>
           <div
             className={`${styles.card} ${isFlipped ? styles.flipped : ""}`}
             onClick={handleFlip}
           >
-            {/* =========================
-                FRONT
-            ========================= */}
-
             <div className={styles.cardFront}>
-              <span className={styles.badge}>{currentCard.partOfSpeech}</span>
+              <span className={styles.badge}>
+                {getPartOfSpeech(currentCard)}
+              </span>
 
               <h2 className={styles.word}>{currentCard.word}</h2>
 
               <p className={styles.pronunciation}>
-                {currentCard.pronunciation}
+                {currentCard.pronunciation || "Chưa có phiên âm"}
               </p>
 
               <button
@@ -217,65 +216,32 @@ function StudyFlashcard() {
               <p className={styles.flipHint}>Nhấn vào thẻ để xem nghĩa</p>
             </div>
 
-            {/* =========================
-                BACK
-            ========================= */}
-
             <div className={styles.cardBack}>
               <div className={styles.backHeader}>
-                <span className={styles.badge}>{currentCard.partOfSpeech}</span>
+                <span className={styles.badge}>
+                  {getPartOfSpeech(currentCard)}
+                </span>
 
                 <h2 className={styles.backWord}>{currentCard.word}</h2>
 
                 <p className={styles.backPronunciation}>
-                  {currentCard.pronunciation}
+                  {currentCard.pronunciation || "Chưa có phiên âm"}
                 </p>
               </div>
 
-              <div className={styles.meaning}>{currentCard.meaning}</div>
+              <div className={styles.meaning}>{getMeaning(currentCard)}</div>
 
               <div className={styles.exampleCard}>
-               
                 <div className={styles.exampleLine} />
 
                 <div className={styles.exampleContent}>
                   <p className={styles.exampleEn}>{renderExample()}</p>
-
-                  <p className={styles.exampleVi}>{currentCard.exampleVi}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* =========================
-          ANSWER BAR
-      ========================= */}
-
-      {isFlipped && (
-        <div className={styles.bottomBar}>
-          <button
-            type="button"
-            className={`${styles.actionBtn} ${styles.unlearnedBtn}`}
-            onClick={() => handleAnswer("unlearned")}
-          >
-            <FontAwesomeIcon icon={faXmark} className={styles.redIcon} />
-
-            <span className={styles.labelMain}>Chưa nhớ</span>
-          </button>
-
-          <button
-            type="button"
-            className={`${styles.actionBtn} ${styles.learnedBtn}`}
-            onClick={() => handleAnswer("learned")}
-          >
-            <FontAwesomeIcon icon={faCheck} className={styles.greenIcon} />
-
-            <span className={styles.labelMain}>Đã nhớ</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }

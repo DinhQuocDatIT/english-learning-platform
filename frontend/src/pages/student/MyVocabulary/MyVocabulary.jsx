@@ -7,7 +7,7 @@ import { faPlay, faRotate } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import studentVocabularyService from "../../../services/studentVocabulary";
+import studentVocabularyService from "../../../services/studentVocabularyService";
 import { useLoading } from "../../../contexts/LoadingContext";
 
 import VocabularyCard from "../../../components/vocabulary/MyVocabularyCard/MyVocabularyCard";
@@ -107,7 +107,6 @@ function MyVocabulary() {
 
   return (
     <div className={styles.container}>
-
       <div className={styles.headerSection}>
         <div>
           <h1 className={styles.pageTitle}>Kho từ vựng của {studentName}</h1>
@@ -130,8 +129,6 @@ function MyVocabulary() {
           Tạo phiên học
         </button>
       </div>
-
-      
 
       <div className={styles.filterBar}>
         <div className={styles.tabs}>
@@ -165,7 +162,6 @@ function MyVocabulary() {
             Đã học
           </button>
         </div>
-
 
         <button
           type="button"
