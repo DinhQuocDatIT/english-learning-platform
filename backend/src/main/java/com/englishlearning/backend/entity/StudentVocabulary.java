@@ -1,5 +1,6 @@
 package com.englishlearning.backend.entity;
 
+import com.englishlearning.backend.enums.LearningStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -38,4 +39,12 @@ public class StudentVocabulary {
     @CreationTimestamp
     @Column(name = "saved_at", nullable = false, updatable = false)
     private LocalDateTime savedAt;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "learning_status", nullable = false)
+    private LearningStatus learningStatus = LearningStatus.NOT_LEARNED;
+
+    private Integer reviewCount = 0;
+    private LocalDateTime lastReviewedAt;
 }

@@ -21,6 +21,9 @@ import TeacherDetail from "../pages/admin/TeacherDetail/TeacherDetail";
 import StudentManagement from "../pages/shared/student/StudentManagement/StudentManagement";
 import CreateStudent from "../pages/shared/student/CreateStudent/CreateStudent";
 import StudentDetail from "../pages/shared/student/StudentDetail/StudentDetail";
+import MyVocabulary from "../pages/student/MyVocabulary/MyVocabulary";
+import CreateStudySession from "../pages/student/CreateStudySession/CreateStudySession";
+import StudyFlashcard from "../pages/student/StudyFlashcard/StudyFlashcard";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -40,6 +43,14 @@ function AppRoutes() {
             element={<RoleRoute allowedRoles={[ROLES.STUDENT]} />}
           >
             <Route path="profile" element={<Profile />} />
+
+            {/* Tự vừng của học sinh */}
+            <Route path="myvocabulary" element={<MyVocabulary />} />
+            <Route
+              path="create-study-session"
+              element={<CreateStudySession />}
+            />
+            <Route path="study-flash-card" element={<StudyFlashcard />} />
           </Route>
           <Route
             path="teacher"

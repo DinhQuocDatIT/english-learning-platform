@@ -1,0 +1,805 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  height: 100vh;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--color-background);
+
+  overflow: hidden;
+
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px 10px;
+  background: var(--color-surface);
+  flex-shrink: 0;
+  gap: 16px;
+}
+
+.closeBtn {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+  color: var(--color-text-muted);
+
+  font-size: 20px;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  background: var(--color-tertiary);
+  color: var(--color-primary);
+}
+
+/* =========================
+   PROGRESS
+========================= */
+
+.progressSection {
+  flex: 1;
+  max-width: 480px;
+  min-width: 0;
+}
+
+.navRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  margin-bottom: 6px;
+}
+
+.arrowBtn {
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+
+  font-size: 11px;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+  flex-shrink: 0;
+}
+
+.arrowBtn:hover:not(:disabled) {
+  background: var(--color-tertiary);
+
+  border-color: var(--color-primary);
+
+  color: var(--color-primary);
+}
+
+.arrowBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 700;
+
+  color: var(--color-secondary);
+
+  letter-spacing: 1px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progressBar {
+  width: 100%;
+  height: 3px;
+  margin-top: 20px;
+  background: rgb(197, 197, 197);
+
+  border-radius: 10px;
+
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+
+  background: var(--color-primary);
+
+  border-radius: 10px;
+
+  transition: width 0.4s ease;
+}
+
+.counter {
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--color-text-muted);
+
+  white-space: nowrap;
+
+  flex-shrink: 0;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.mainContent {
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 24px;
+  perspective: 1200px;
+  overflow: hidden;
+  background: var(--color-background);
+}
+
+.cardContainer {
+  width: 100%;
+  max-width: 500px;
+  height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card {
+  width: 100%;
+  height: 100%;
+
+  position: relative;
+
+  cursor: pointer;
+
+  transform-style: preserve-3d;
+
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+
+  border-radius: 16px;
+}
+
+.card.flipped {
+  transform: rotateY(180deg);
+}
+
+.cardFront,
+.cardBack {
+  position: absolute;
+
+  width: 100%;
+  height: 100%;
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 16px;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+
+  box-shadow: 0 8px 30px rgba(14, 167, 146, 0.07);
+}
+
+/* =========================
+   FRONT
+========================= */
+
+.cardFront {
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+
+  padding: 4px 12px;
+
+  border-radius: 4px;
+
+  background: var(--color-tertiary);
+
+  color: var(--color-accent);
+
+  font-size: 11px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+
+  margin-bottom: 12px;
+}
+
+.word {
+  font-size: 38px;
+
+  font-weight: 600;
+
+  color: var(--color-secondary);
+
+  margin: 4px 0 8px;
+
+  text-align: center;
+}
+
+.pronunciation {
+  font-size: 16px;
+
+  color: var(--color-text-muted);
+
+  margin: 0;
+}
+
+.speakBtn {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: var(--color-tertiary);
+
+  color: var(--color-primary);
+
+  font-size: 18px;
+
+  cursor: pointer;
+
+  margin-top: 20px;
+
+  transition: all 0.2s;
+}
+
+.speakBtn:hover {
+  background: var(--color-primary);
+
+  color: var(--color-text-white);
+
+  transform: scale(1.05);
+}
+
+.flipHint {
+  margin-top: 24px;
+
+  font-size: 11px;
+
+  color: var(--color-text-muted);
+
+  opacity: 0.7;
+}
+
+/* =========================
+   BACK
+========================= */
+
+.cardBack {
+  transform: rotateY(180deg);
+
+  padding: 32px;
+
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+.backHeader {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  margin-bottom: 14px;
+}
+
+.backHeader .badge {
+  margin-bottom: 8px;
+}
+
+.backWord {
+  font-size: 30px;
+
+  font-weight: 600;
+
+  color: var(--color-secondary);
+
+  margin: 0 0 4px;
+
+  text-align: center;
+}
+
+.backPronunciation {
+  margin: 0;
+
+  font-size: 14px;
+
+  color: var(--color-text-muted);
+}
+
+/* =========================
+   MEANING
+========================= */
+
+.meaning {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 22px;
+  border-radius: 7px;
+  color: var(--color-accent);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* =========================
+   EXAMPLE CARD
+========================= */
+
+.exampleCard {
+  position: relative;
+
+  width: 100%;
+  max-width: 500px;
+
+  display: flex;
+  align-items: stretch;
+
+  background: var(--color-surface);
+
+  border: 1px solid #dcefeb;
+
+  border-radius: 8px;
+
+  padding: 12px 16px 12px 20px;
+
+  box-shadow: 0 2px 8px rgba(14, 167, 146, 0.04);
+}
+
+/* =========================
+   NUMBER
+========================= */
+
+.quoteNumber {
+  position: absolute;
+
+  left: -11px;
+  top: -9px;
+
+  width: 24px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--color-surface);
+
+  color: #a8c7c2;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  z-index: 2;
+}
+
+/* =========================
+   VERTICAL LINE
+========================= */
+
+.exampleLine {
+  width: 2px;
+
+  flex-shrink: 0;
+
+  margin-right: 12px;
+
+  background: var(--color-tertiary);
+
+  border-radius: 2px;
+}
+
+/* =========================
+   EXAMPLE CONTENT
+========================= */
+
+.exampleContent {
+  width: 100%;
+}
+
+.exampleEn {
+  margin: 0 0 6px;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+
+  font-style: italic;
+
+  color: var(--color-text-muted);
+}
+
+.exampleEn strong {
+  color: var(--color-primary);
+
+  font-weight: 700;
+}
+
+.exampleVi {
+  margin: 0;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+
+  color: var(--color-text);
+}
+
+/* =========================
+   BOTTOM BAR
+========================= */
+
+.bottomBar {
+  display: flex;
+  gap: 12px;
+  padding: 8px 24px 20px;
+  flex-shrink: 0;
+  max-width: 560px;
+  margin: 0 auto;
+  width: 100%;
+  justify-content: center;
+}
+
+.actionBtn {
+  max-width: 150px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  border-radius: 5px;
+}
+.actionBtn span {
+  color: white;
+}
+.actionBtn:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.08);
+}
+
+.actionBtn:active {
+  transform: translateY(0);
+}
+
+/* =========================
+   UNLEARNED
+========================= */
+
+.unlearnedBtn {
+  background-color: #f87171;
+}
+
+
+
+/* =========================
+   LEARNED
+========================= */
+
+.learnedBtn {
+  background-color: var(--color-primary);
+}
+
+
+.redIcon {
+  font-size: 18px;
+
+  color: #dc2626;
+}
+
+.greenIcon {
+  font-size: 18px;
+
+  color: var(--color-accent);
+}
+
+.labelMain {
+  font-size: 15px;
+
+  font-weight: 600;
+
+  color: var(--color-secondary);
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+
+.emptyState {
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 16px;
+}
+
+.emptyState h2 {
+  color: var(--color-secondary);
+}
+
+.emptyState button {
+  padding: 10px 20px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: var(--color-primary);
+
+  color: var(--color-text-white);
+
+  cursor: pointer;
+
+  font-weight: 600;
+
+  transition: background 0.2s;
+}
+
+.emptyState button:hover {
+  background: var(--color-primary-hover);
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 768px) {
+  .topBar {
+    padding: 10px 16px 8px;
+
+    gap: 10px;
+  }
+
+  .closeBtn {
+    width: 32px;
+    height: 32px;
+
+    font-size: 18px;
+  }
+
+  .title {
+    font-size: 10px;
+  }
+
+  .counter {
+    font-size: 12px;
+  }
+
+  .mainContent {
+    padding: 10px 16px;
+  }
+
+  .cardContainer {
+    height: 380px;
+  }
+
+  .cardFront,
+  .cardBack {
+    padding: 28px 24px;
+  }
+
+  .word {
+    font-size: 32px;
+  }
+
+  .backWord {
+    font-size: 26px;
+  }
+
+  .meaning {
+    font-size: 15px;
+  }
+
+  .bottomBar {
+    padding: 6px 16px 16px;
+
+    gap: 10px;
+  }
+
+  .actionBtn {
+    padding: 10px 16px;
+  }
+
+  .labelMain {
+    font-size: 14px;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 480px) {
+  .topBar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .cardContainer {
+    height: 340px;
+  }
+
+  .cardFront,
+  .cardBack {
+    padding: 20px 16px;
+  }
+
+  .word {
+    font-size: 28px;
+  }
+
+  .backWord {
+    font-size: 24px;
+  }
+
+  .pronunciation,
+  .backPronunciation {
+    font-size: 14px;
+  }
+
+  .meaning {
+    font-size: 14px;
+
+    padding: 8px 12px;
+
+    margin-bottom: 16px;
+  }
+
+  .exampleCard {
+    padding: 10px 12px 10px 16px;
+  }
+
+  .exampleLine {
+    margin-right: 9px;
+  }
+
+  .exampleEn {
+    font-size: 12px;
+  }
+
+  .exampleVi {
+    font-size: 11px;
+  }
+
+  .speakBtn {
+    width: 40px;
+    height: 40px;
+
+    font-size: 16px;
+
+    margin-top: 14px;
+  }
+
+  .badge {
+    font-size: 10px;
+
+    padding: 3px 10px;
+
+    margin-bottom: 8px;
+  }
+
+  .arrowBtn {
+    width: 24px;
+    height: 24px;
+
+    font-size: 10px;
+  }
+
+  .navRow {
+    gap: 8px;
+  }
+
+  .bottomBar {
+    padding: 6px 12px 14px;
+
+    gap: 8px;
+  }
+
+  .actionBtn {
+    padding: 8px 12px;
+  }
+
+  .labelMain {
+    font-size: 13px;
+  }
+
+  .redIcon,
+  .greenIcon {
+    font-size: 16px;
+  }
+
+  .flipHint {
+    margin-top: 18px;
+  }
+}
+
+/* =========================
+   REDUCED MOTION
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .actionBtn,
+  .speakBtn,
+  .closeBtn,
+  .arrowBtn,
+  .progressFill {
+    transition: none;
+  }
+}

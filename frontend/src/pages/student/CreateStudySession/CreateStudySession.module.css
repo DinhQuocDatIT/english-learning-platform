@@ -1,0 +1,496 @@
+/* --- RESET & LAYOUT CHUNG --- */
+.container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  font-family: inherit;
+  background-color: var(--color-surface, #f8fafc);
+  min-height: 100vh;
+  color: var(--color-text, #1e293b);
+}
+
+.container *,
+.container *::before,
+.container *::after {
+  box-sizing: border-box;
+}
+
+/* --- HEADER TRÊN CÙNG --- */
+.topHeader {
+  margin-bottom: 28px;
+}
+
+.backBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #64748b);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  margin-bottom: 12px;
+  transition: color 0.2s ease;
+}
+
+.backBtn:hover {
+  color: var(--color-primary, #0ea792);
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--color-text-muted, #64748b);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --- MAIN GRID LAYOUT (2 CỘT) --- */
+.mainLayout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .mainLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rightColumn {
+  position: sticky;
+  top: 24px;
+}
+
+/* --- CARD CHUNG CHO TỪNG PHẦN --- */
+.sectionCard {
+  background-color: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.sectionHeading {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  margin: 0 0 16px 0;
+}
+
+.sectionHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sectionHeaderRow .sectionHeading {
+  margin: 0;
+}
+
+.maxLimitLabel {
+  font-size: 12px;
+  font-weight: 600;
+  background-color: var(--color-surface, #f8fafc);
+  color: var(--color-text-muted, #64748b);
+  border: 1px solid var(--color-border, #e2e8f0);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* --- LƯỚI CHỌN NGUỒN TỪ --- */
+.sourceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .sourceGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sourceCard {
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  padding: 18px;
+  cursor: pointer;
+  background-color: var(--color-background, #ffffff);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.sourceCard:hover {
+  border-color: var(--color-primary, #0ea792);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.05);
+}
+
+.selectedSourceCard {
+  border-color: var(--color-primary, #0ea792);
+  background-color: rgba(14, 167, 146, 0.02);
+}
+
+.sourceCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sourceIconBox {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.iconGreen {
+  background-color: #d4f3ef;
+  color: var(--color-accent, #168a7c);
+}
+.iconBlue {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+.iconOrange {
+  background-color: #ffedd5;
+  color: #c2410c;
+}
+.iconPurple {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+}
+
+.sourceCountBadge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted, #64748b);
+  background: var(--color-surface, #f8fafc);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.sourceInfo h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  margin: 0 0 4px 0;
+}
+
+.sourceInfo p {
+  font-size: 13px;
+  color: var(--color-text-muted, #64748b);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* --- SỐ LƯỢNG TỪ (BUTTONS) --- */
+.numberOptions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.numBtn {
+  flex: 1;
+  min-width: 60px;
+  padding: 10px 0;
+  background-color: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-secondary, #1e293b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.numBtn:hover {
+  border-color: var(--color-primary, #0ea792);
+}
+
+.activeNumBtn {
+  background-color: var(--color-primary, #0ea792);
+  color: #ffffff;
+  border-color: var(--color-primary, #0ea792);
+}
+
+.customNumBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background-color: var(--color-surface, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.customNumBtn:hover {
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-primary, #0ea792);
+}
+
+/* --- PHẦN TỰ CHỌN TỪ VỰNG --- */
+.actionLinks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.textLink {
+  background: none;
+  border: none;
+  color: var(--color-primary, #0ea792);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.textLink:hover {
+  text-decoration: underline;
+}
+
+.dotSeparator {
+  color: var(--color-text-muted, #64748b);
+}
+
+.searchBoxWrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.searchIconInline {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted, #64748b);
+  font-size: 14px;
+}
+
+.searchInputInline {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  background-color: var(--color-surface, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--color-text, #1e293b);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.searchInputInline:focus {
+  border-color: var(--color-primary, #0ea792);
+  background-color: var(--color-background, #ffffff);
+}
+
+.wordsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Tùy chỉnh thanh cuộn cho lưới từ vựng */
+.wordsGrid::-webkit-scrollbar {
+  width: 6px;
+}
+.wordsGrid::-webkit-scrollbar-thumb {
+  background-color: var(--color-border, #cbd5e1);
+  border-radius: 4px;
+}
+
+.wordCheckboxCard {
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: var(--color-background, #ffffff);
+  transition: all 0.2s ease;
+}
+
+.wordCheckboxCard:hover {
+  border-color: var(--color-primary, #0ea792);
+}
+
+.wordCardSelected {
+  border-color: var(--color-primary, #0ea792);
+  background-color: rgba(14, 167, 146, 0.03);
+}
+
+.wordCardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.cardWordTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+}
+
+.cardWordPronounce {
+  font-size: 12px;
+  color: var(--color-text-muted, #64748b);
+}
+
+.cardWordMeaning {
+  font-size: 13px;
+  color: var(--color-text, #1e293b);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.styledCheckbox {
+  accent-color: var(--color-primary, #0ea792);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+/* --- CỘT PHẢI: SUMMARY SIDEBAR --- */
+.summaryCard {
+  background-color: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.summaryIconBox {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: #d4f3ef;
+  color: var(--color-accent, #168a7c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.summaryTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  margin: 0;
+}
+
+.summaryDetailList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.summaryLabel {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text-muted, #64748b);
+}
+
+.summaryValue {
+  font-weight: 600;
+  color: var(--color-secondary, #1e293b);
+  text-align: right;
+  font-size: 14px;
+}
+
+.summaryValueTime {
+  font-weight: 600;
+  color: var(--color-primary, #0ea792);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.startSessionBtn {
+  width: 100%;
+  background-color: var(--color-primary, #0ea792);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 10px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+ 
+}
+
+.startSessionBtn:hover {
+  background-color: var(--color-primary-hover, #0c8f7e);
+}
+
+.startSessionBtn:active {
+  transform: scale(0.98);
+}

@@ -1,0 +1,213 @@
+.wordCard {
+  background-color: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 14px;
+  padding: 24px;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.wordCard:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.wordTitle {
+  font-size: 24px;
+  font-weight: 800;
+
+  color: var(--color-secondary, #1e293b);
+
+  margin: 0 0 2px 0;
+}
+
+.pronunciation {
+  font-size: 14px;
+  color: var(--color-text-muted, #64748b);
+  font-weight: 500;
+}
+
+.statusBadge {
+  border-radius: 20px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  padding: 4px 10px;
+
+  letter-spacing: 0.3px;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
+}
+
+.statusBadge:hover {
+  opacity: 0.8;
+}
+
+.statusBadge:active {
+  transform: scale(0.97);
+}
+
+.unlearned {
+  background-color: #f1f5f9;
+
+  color: var(--color-text-muted, #64748b);
+
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.learned {
+  background-color: var(--color-tertiary, #d4f3ef);
+
+  color: var(--color-accent, #168a7c);
+
+  border: 1px solid transparent;
+}
+
+.meaningsContainer {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  flex-grow: 1;
+
+  margin-bottom: 20px;
+}
+
+.meaningItem {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.posRow {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.posTag {
+  background-color: var(--color-surface, #f8fafc);
+
+  color: var(--color-text, #1e293b);
+
+  border: 1px solid var(--color-border, #e2e8f0);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  padding: 2px 6px;
+
+  border-radius: 4px;
+
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+.meaningText {
+  font-size: 14px;
+  font-weight: 600;
+
+  color: var(--color-text, #1e293b);
+}
+
+.exampleText {
+  font-size: 13px;
+
+  color: var(--color-text-muted, #64748b);
+
+  font-style: italic;
+
+  margin: 0;
+
+  padding-left: 2px;
+
+  line-height: 1.5;
+}
+
+.noMeaning {
+  font-size: 14px;
+
+  color: var(--color-text-muted, #64748b);
+
+  margin: 0;
+}
+
+.cardFooter {
+  border-top: 1px solid var(--color-border, #e2e8f0);
+
+  padding-top: 14px;
+
+  display: flex;
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 12px;
+}
+.cardFooter span {
+  font-size: 14px;
+  font-weight: 400;
+  color: #64748b;
+}
+.listenBtn {
+  background: transparent;
+
+  border: none;
+
+  color: var(--color-text-muted, #64748b);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 0;
+
+  transition: color 0.2s;
+}
+
+.listenBtn:hover {
+  color: var(--color-primary, #0ea792);
+}
+
+.reviewCount {
+  font-size: 12px;
+
+  color: var(--color-text-muted, #64748b);
+
+  white-space: nowrap;
+}

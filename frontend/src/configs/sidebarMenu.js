@@ -27,12 +27,12 @@ export const sidebarMenus = {
       icon: faBookOpen,
     },
     {
-      path: "/dashboard/vocabulary",
+      path: "/dashboard/student/myvocabulary",
       name: "Từ vựng",
       icon: faBook,
     },
     {
-      path: "/dashboard/practice",
+      path: "/dashboard/student/study-flash-card",
       name: "Luyện tập",
       icon: faPenToSquare,
     },

@@ -2,25 +2,27 @@ import React, { useEffect, useState } from "react";
 import styles from "./VocabularyResult.module.css";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faVolumeHigh, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faVolumeHigh,
+  faPlus,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { speakText } from "../../../utils/textToSpeech";
 
-function VocabularyResult({ vocabulary, onSave }) {
+function VocabularyResult({ vocabulary, onSave, saving = false }) {
   const [voices, setVoices] = useState([]);
 
-  // =========================
-  // LẤY DANH SÁCH GIỌNG
-  // =========================
+
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
 
     const loadVoices = () => {
       const availableVoices = window.speechSynthesis.getVoices();
+
       setVoices(availableVoices);
     };
 
-    // Một số trình duyệt load voice hơi chậm
     loadVoices();
 
     window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
@@ -30,9 +32,7 @@ function VocabularyResult({ vocabulary, onSave }) {
     };
   }, []);
 
-  // =========================
-  // TÌM GIỌNG UK
-  // =========================
+
   const getUkVoice = () => {
     return (
       voices.find(
@@ -43,9 +43,6 @@ function VocabularyResult({ vocabulary, onSave }) {
     );
   };
 
-  // =========================
-  // TÌM GIỌNG US
-  // =========================
   const getUsVoice = () => {
     return (
       voices.find(
@@ -56,9 +53,7 @@ function VocabularyResult({ vocabulary, onSave }) {
     );
   };
 
-  // =========================
-  // PHÁT ÂM UK
-  // =========================
+
   const handleSpeakUk = () => {
     if (!vocabulary?.word) return;
 
@@ -71,9 +66,7 @@ function VocabularyResult({ vocabulary, onSave }) {
     });
   };
 
-  // =========================
-  // PHÁT ÂM US
-  // =========================
+
   const handleSpeakUs = () => {
     if (!vocabulary?.word) return;
 
@@ -86,23 +79,28 @@ function VocabularyResult({ vocabulary, onSave }) {
     });
   };
 
+
+  const handleSave = () => {
+    if (saving) return;
+
+    onSave(vocabulary);
+  };
+
   return (
     <div className={styles.vocabularyResult}>
-      {/* =========================
-          WORD HEADER
-      ========================= */}
+      {/* WORD HEADER */}
+
       <div className={styles.wordHeaderFlex}>
         <div className={styles.wordInfo}>
-          {/* WORD */}
           <div className={styles.wordTitleRow}>
             <h1 className={styles.wordTitle}>{vocabulary.word}</h1>
           </div>
 
-          {/* =========================
-              UK / US PRONUNCIATION
-          ========================= */}
+          {/* PRONUNCIATION */}
+
           <div className={styles.pronunciationRow}>
             {/* UK */}
+
             <div className={styles.pronunciationItem}>
               <span className={styles.accentLabel}>UK</span>
 
@@ -124,6 +122,7 @@ function VocabularyResult({ vocabulary, onSave }) {
             </div>
 
             {/* US */}
+
             <div className={styles.pronunciationItem}>
               <span className={styles.accentLabel}>US</span>
 
@@ -146,23 +145,22 @@ function VocabularyResult({ vocabulary, onSave }) {
           </div>
         </div>
 
-        {/* =========================
-            SAVE
-        ========================= */}
+        {/* SAVE */}
+
         <button
           type="button"
           className={styles.saveWordBtn}
-          onClick={() => onSave(vocabulary)}
+          onClick={handleSave}
+          disabled={saving}
         >
-          <FontAwesomeIcon icon={faPlus} />
+          <FontAwesomeIcon icon={saving ? faSpinner : faPlus} spin={saving} />
 
-          <span>Lưu từ</span>
+          <span>{saving ? "Đang lưu..." : "Lưu từ"}</span>
         </button>
       </div>
 
-      {/* =========================
-          MEANINGS
-      ========================= */}
+      {/* MEANINGS */}
+
       <div className={styles.meaningsList}>
         {vocabulary.meanings?.map((item, index) => (
           <div key={index} className={styles.meaningCardItem}>
@@ -172,7 +170,6 @@ function VocabularyResult({ vocabulary, onSave }) {
               <span className={styles.meaningText}>{item.meaning}</span>
             </div>
 
-            {/* EXAMPLE */}
             {item.example && (
               <div className={styles.exampleRow}>
                 <span className={styles.exampleLine} />

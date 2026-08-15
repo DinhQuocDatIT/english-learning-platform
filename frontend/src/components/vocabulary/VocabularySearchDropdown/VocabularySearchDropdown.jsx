@@ -5,7 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faXmark } from "@fortawesome/free-solid-svg-icons";
 
 import { toast } from "react-toastify";
+
 import vocabularyService from "../../../services/vocabularyService";
+import studentVocabularyService from "../../../services/studentVocabulary";
 
 import VocabularyResult from "../VocabularyResult/VocabularyResult";
 
@@ -15,12 +17,12 @@ function VocabularySearchDropdown() {
 
   const [vocabularyList, setVocabularyList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [savingId, setSavingId] = useState(null);
 
   const searchRef = useRef(null);
 
-  // =========================
-  // ĐÓNG DROPDOWN KHI CLICK RA NGOÀI
-  // =========================
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -35,9 +37,6 @@ function VocabularySearchDropdown() {
     };
   }, []);
 
-  // =========================
-  // SEARCH API
-  // =========================
   useEffect(() => {
     const keyword = searchTerm.trim();
 
@@ -76,23 +75,39 @@ function VocabularySearchDropdown() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // =========================
-  // INPUT
-  // =========================
+
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // =========================
-  // LƯU TỪ
-  // =========================
-  const handleSaveVocabulary = (vocabulary) => {
-    toast.success(`Đã lưu từ "${vocabulary.word}" vào từ vựng của bạn!`);
+  
+  const handleSaveVocabulary = async (vocabulary) => {
+    if (!vocabulary?.id) {
+      toast.error("Không xác định được từ vựng.");
+      return;
+    }
+
+    try {
+      setSavingId(vocabulary.id);
+
+      const response = await studentVocabularyService.saveVocabulary({
+        vocabularyId: vocabulary.id,
+      });
+
+      console.log("Save vocabulary response:", response);
+
+      toast.success(`Đã lưu từ "${vocabulary.word}" vào kho từ vựng!`);
+    } catch (error) {
+      console.error("Lỗi lưu từ vựng:", error);
+
+      const message = error.response?.data?.message || "Không thể lưu từ vựng.";
+
+      toast.error(message);
+    } finally {
+      setSavingId(null);
+    }
   };
 
-  // =========================
-  // XÓA SEARCH
-  // =========================
   const handleClear = () => {
     setSearchTerm("");
     setVocabularyList([]);
@@ -102,6 +117,7 @@ function VocabularySearchDropdown() {
   return (
     <div className={styles.container} ref={searchRef}>
       {/* SEARCH SECTION */}
+
       <div className={styles.searchSection}>
         <div className={styles.sectionHeader}>
           <FontAwesomeIcon
@@ -144,10 +160,12 @@ function VocabularySearchDropdown() {
         </div>
       </div>
 
-      {/* RESULT DROPDOWN */}
+
+
       {isOpen && (
         <div className={styles.dropdownResultOverlay}>
           {/* LOADING */}
+
           {loading && (
             <div className={styles.loading}>
               <FontAwesomeIcon icon={faMagnifyingGlass} spin />
@@ -156,7 +174,7 @@ function VocabularySearchDropdown() {
             </div>
           )}
 
-          {/* EMPTY */}
+
           {!loading && searchTerm.trim() && vocabularyList.length === 0 && (
             <div className={styles.emptyResult}>
               <div className={styles.emptyIcon}>
@@ -171,7 +189,8 @@ function VocabularySearchDropdown() {
             </div>
           )}
 
-          {/* RESULTS */}
+     
+
           {!loading &&
             vocabularyList.length > 0 &&
             vocabularyList.map((vocabulary) => (
@@ -179,6 +198,7 @@ function VocabularySearchDropdown() {
                 key={vocabulary.id}
                 vocabulary={vocabulary}
                 onSave={handleSaveVocabulary}
+                saving={savingId === vocabulary.id}
               />
             ))}
         </div>
