@@ -74,7 +74,22 @@ public class VocabularyController {
         );
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<VocabularyResponse>>> search(
+            @RequestParam String keyword
+    ) {
 
+        List<VocabularyResponse> response =
+                vocabularyService.searchForLearner(keyword);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Tra cứu từ vựng thành công",
+                        response
+                )
+        );
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<VocabularyResponse>> getById(
@@ -160,4 +175,5 @@ public class VocabularyController {
                 )
         );
     }
+
 }

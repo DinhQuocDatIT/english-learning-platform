@@ -1,0 +1,331 @@
+.vocabularyResult {
+  width: 100%;
+}
+
+/* =========================
+   WORD HEADER
+========================= */
+
+.wordHeaderFlex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.wordInfo {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  min-width: 0;
+}
+
+/* =========================
+   WORD
+========================= */
+
+.wordTitleRow {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.wordTitle {
+  margin: 0;
+
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+
+  color: var(--color-secondary, #1e293b);
+
+  word-break: break-word;
+}
+
+/* =========================
+   UK / US PRONUNCIATION
+========================= */
+
+.pronunciationRow {
+  display: flex;
+  align-items: center;
+
+  flex-wrap: wrap;
+
+  gap: 18px;
+
+  margin-top: 2px;
+}
+
+.pronunciationItem {
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+}
+
+.accentLabel {
+  font-size: 12px;
+  font-weight: 700;
+
+  color: var(--color-text, #1e293b);
+}
+
+/* =========================
+   UK / US SPEAKER
+========================= */
+
+.accentSpeakerBtn {
+  width: 24px;
+  height: 24px;
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+
+  border: none;
+  border-radius: 5px;
+
+  color: var(--color-primary, #0ea792);
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.accentSpeakerBtn:hover {
+  background: var(--color-tertiary, #d4f3ef);
+
+  color: var(--color-accent, #168a7c);
+
+  transform: scale(1.08);
+}
+
+.accentSpeakerBtn:active {
+  transform: scale(0.95);
+}
+
+/* =========================
+   PRONUNCIATION TEXT
+========================= */
+
+.pronunciationText {
+  font-size: 14px;
+
+  color: var(--color-text-muted, #64748b);
+
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+/* =========================
+   SAVE BUTTON
+========================= */
+
+.saveWordBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 6px 10px;
+
+  background-color: var(--color-primary, #0ea792);
+
+  color: white;
+
+  border: none;
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  flex-shrink: 0;
+
+  transition: all 0.2s ease;
+}
+
+.saveWordBtn span {
+  font-size: 12px;
+
+  color: white;
+}
+
+.saveWordBtn:hover {
+  background-color: var(--color-primary-hover, #52afa3);
+
+  transform: translateY(-1px);
+}
+
+.saveWordBtn:active {
+  transform: translateY(0);
+}
+
+/* =========================
+   MEANINGS
+========================= */
+
+.meaningsList {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.meaningCardItem {
+  background: var(--color-background, #ffffff);
+
+  border: 1px solid var(--color-border, #e2e8f0);
+
+  border-radius: 9px;
+
+  padding: 12px 15px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.meaningCardItem:hover {
+  border-color: var(--color-primary, #0ea792);
+
+  box-shadow: 0 2px 6px rgba(14, 167, 146, 0.08);
+}
+
+/* =========================
+   PART OF SPEECH + MEANING
+========================= */
+
+.meaningTopRow {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 5px;
+}
+
+.posBadge {
+  display: inline-flex;
+  align-items: center;
+
+  background-color: var(--color-tertiary, #d4f3ef);
+
+  color: var(--color-accent, #168a7c);
+
+  border: 1px solid transparent;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  padding: 3px 7px;
+
+  border-radius: 4px;
+
+  letter-spacing: 0.4px;
+
+  text-transform: uppercase;
+
+  flex-shrink: 0;
+}
+
+.meaningText {
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: var(--color-text, #1e293b);
+}
+
+/* =========================
+   EXAMPLE
+========================= */
+
+.exampleRow {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 9px;
+
+  margin-top: 6px;
+
+  padding-left: 1px;
+}
+
+.exampleLine {
+  width: 3px;
+  min-width: 3px;
+
+  height: 16px;
+
+  background-color: var(--color-primary, #0ea792);
+
+  border-radius: 2px;
+
+  margin-top: 2px;
+}
+
+.exampleText {
+  margin: 0;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+
+  color: var(--color-text-muted, #64748b);
+
+  font-style: italic;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 600px) {
+  .wordHeaderFlex {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .saveWordBtn {
+    align-self: flex-start;
+  }
+
+  .wordTitle {
+    font-size: 24px;
+  }
+
+  .meaningTopRow {
+    align-items: flex-start;
+  }
+
+  .meaningText {
+    font-size: 13px;
+  }
+
+  .pronunciationRow {
+    gap: 12px;
+  }
+
+  .pronunciationItem {
+    gap: 3px;
+  }
+}

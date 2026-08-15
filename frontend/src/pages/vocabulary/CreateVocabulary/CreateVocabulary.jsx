@@ -25,7 +25,7 @@ import {
 
 import { speakText, getAvailableVoices } from "../../../utils/textToSpeech";
 
-import vocabulary from "../../../services/vocabulary";
+import vocabulary from "../../../services/vocabularyService";
 
 import { toast } from "react-toastify";
 import { useLoading } from "../../../contexts/LoadingContext";

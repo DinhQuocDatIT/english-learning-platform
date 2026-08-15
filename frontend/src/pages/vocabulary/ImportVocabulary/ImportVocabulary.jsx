@@ -18,7 +18,7 @@ import {
   faTimesCircle,
   faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
-import vocabulary from "../../../services/vocabulary";
+import vocabulary from "../../../services/vocabularyService";
 
 function ImportVocabulary() {
   const navigate = useNavigate();

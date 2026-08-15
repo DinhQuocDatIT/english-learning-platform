@@ -42,7 +42,22 @@ public class VocabularyServiceImpl
 
     private final VocabularyMapper mapper;
 
+    @Override
+    @Transactional
+    public List<VocabularyResponse> searchForLearner(String keyword) {
 
+        if (keyword == null || keyword.trim().isBlank()) {
+            return List.of();
+        }
+
+        List<Vocabulary> vocabularies =
+                repository.searchForLearner(keyword.trim());
+
+        return vocabularies
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
 
     @Override
     public VocabularyResponse create(

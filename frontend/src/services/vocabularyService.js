@@ -27,6 +27,13 @@ const vocabulary = {
       },
     });
   },
+  searchVocabulary: (keyword) => {
+    return axiosClient.get("/v1/vocabularies/search", {
+      params: {
+        keyword,
+      },
+    });
+  },
   importCsv(file) {
     const formData = new FormData();
 

@@ -42,4 +42,14 @@ public interface VocabularyRepository
             Pageable pageable
     );
     Optional<Vocabulary> findByWordIgnoreCase(String word);
+    @Query("""
+    SELECT v
+    FROM Vocabulary v
+    WHERE v.deletedAt IS NULL
+      AND LOWER(v.word) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    ORDER BY v.word ASC
+""")
+    List<Vocabulary> searchForLearner(
+            @Param("keyword") String keyword
+    );
 }

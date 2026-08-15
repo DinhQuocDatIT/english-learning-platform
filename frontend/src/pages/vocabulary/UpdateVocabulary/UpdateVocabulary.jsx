@@ -23,7 +23,7 @@ import {
   emptyVocabularyErrors,
 } from "../../../utils/vocabularyValidation";
 
-import vocabulary from "../../../services/vocabulary";
+import vocabulary from "../../../services/vocabularyService";
 import { useLoading } from "../../../contexts/LoadingContext";
 
 function UpdateVocabulary() {

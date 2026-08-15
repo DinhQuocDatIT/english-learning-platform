@@ -28,5 +28,5 @@ public interface VocabularyService {
             String status
     );
     ImportVocabularyResponse importCsv(MultipartFile file);
-
+    List<VocabularyResponse> searchForLearner(String keyword);
 }

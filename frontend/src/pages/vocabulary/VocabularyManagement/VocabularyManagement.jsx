@@ -14,7 +14,7 @@ import {
   faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
-import vocabulary from "../../../services/vocabulary";
+import vocabulary from "../../../services/vocabularyService";
 import { useLoading } from "../../../contexts/LoadingContext";
 import { formatDateTime } from "../../../utils/formatDate";
 import ConfirmHideVocabulary from "../../../components/vocabulary/ConfirmHideVocabulary/ConfirmHideVocabulary";
