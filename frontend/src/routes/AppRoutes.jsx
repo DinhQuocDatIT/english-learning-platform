@@ -24,6 +24,8 @@ import StudentDetail from "../pages/shared/student/StudentDetail/StudentDetail";
 import MyVocabulary from "../pages/student/MyVocabulary/MyVocabulary";
 import CreateStudySession from "../pages/student/CreateStudySession/CreateStudySession";
 import StudyFlashcard from "../pages/student/StudyFlashcard/StudyFlashcard";
+import MembershipPackageManage from "../pages/admin/membershipPackage/MembershipPackageManage/MembershipPackageManage";
+import MembershipPackageAdd from "../pages/admin/membershipPackage/MembershipPackageAdd/MembershipPackageAdd";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -93,6 +95,16 @@ function AppRoutes() {
             <Route path="students" element={<StudentManagement />} />
             <Route path="create-student" element={<CreateStudent />} />
             <Route path="student-detail/:id" element={<StudentDetail />} />
+
+            {/* quản lý gói thành viên */}
+            <Route
+              path="membership-package"
+              element={<MembershipPackageManage />}
+            />
+            <Route
+              path="add-membership-package"
+              element={<MembershipPackageAdd />}
+            />
           </Route>
         </Route>
       </Route>

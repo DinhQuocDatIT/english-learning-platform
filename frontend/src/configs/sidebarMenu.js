@@ -95,15 +95,16 @@ export const sidebarMenus = {
       icon: faUserShield,
     },
     {
+      path: "/dashboard/admin/membership-package",
+      name: "Quản lý gói thành viên",
+      icon: faGraduationCap,
+    },
+    {
       path: "/dashboard/admin/vocabulary",
       name: "Quản lý từ vựng",
       icon: faFileWord,
     },
-    {
-      path: "/dashboard/admin/courses",
-      name: "Quản lý khóa học",
-      icon: faGraduationCap,
-    },
+
     {
       path: "/dashboard/admin/profile",
       name: "Thông tin cá nhân",

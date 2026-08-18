@@ -45,4 +45,9 @@ public class Student {
             orphanRemoval=true
     )
     private List<StudentVocabulary> savedVocabularies = new ArrayList<>();
+    @OneToMany(
+            mappedBy = "student",
+            fetch = FetchType.LAZY
+    )
+    private List<StudentMembership> memberships = new ArrayList<>();
 }
