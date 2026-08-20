@@ -1,16 +1,4 @@
-:root {
-  --color-primary: #0ea792;
-  --color-primary-hover: #52afa3;
-  --color-secondary: #1e293b;
-  --color-tertiary: #d4f3ef;
-  --color-accent: #168a7c;
-  --color-background: #ffffff;
-  --color-surface: #ffffff;
-  --color-text: #1e293b;
-  --color-text-muted: #64748b;
-  --color-text-white: #ffffff;
-  --color-border: #e2e8f0;
-}
+
 
 .container {
   box-sizing: border-box;

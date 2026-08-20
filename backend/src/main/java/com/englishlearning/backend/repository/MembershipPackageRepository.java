@@ -30,11 +30,19 @@ public interface MembershipPackageRepository
             String name,
             Long id
     );
+//    @Modifying
+//    @Query("""
+//            UPDATE MembershipPackage m
+//            SET m.isFeatured = false
+//            WHERE m.id <> :id
+//            """)
+//    void clearFeaturedExcept(@Param("id") Long id);
     @Modifying
     @Query("""
-            UPDATE MembershipPackage m
-            SET m.isFeatured = false
-            WHERE m.id <> :id
-            """)
-    void clearFeaturedExcept(@Param("id") Long id);
+    UPDATE MembershipPackage m
+    SET m.isFeatured = false
+    WHERE m.isFeatured = true
+      AND (:exceptId IS NULL OR m.id <> :exceptId)
+""")
+    void clearFeaturedExcept(@Param("exceptId") Long exceptId);
 }

@@ -25,6 +25,10 @@ public class MembershipPackageResponse {
 
     private Boolean isFeatured;
 
+    private Long totalSubscribers;
+
+    private BigDecimal totalRevenue;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

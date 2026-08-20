@@ -26,6 +26,8 @@ import CreateStudySession from "../pages/student/CreateStudySession/CreateStudyS
 import StudyFlashcard from "../pages/student/StudyFlashcard/StudyFlashcard";
 import MembershipPackageManage from "../pages/admin/membershipPackage/MembershipPackageManage/MembershipPackageManage";
 import MembershipPackageAdd from "../pages/admin/membershipPackage/MembershipPackageAdd/MembershipPackageAdd";
+import MembershipPackageDetail from "../pages/admin/membershipPackage/MembershipPackageDetail/MembershipPackageDetail";
+import MembershipPackageEdit from "../pages/admin/membershipPackage/MembershipPackageEdit/MembershipPackageEdit";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -104,6 +106,14 @@ function AppRoutes() {
             <Route
               path="add-membership-package"
               element={<MembershipPackageAdd />}
+            />
+            <Route
+              path="membership-package/:id"
+              element={<MembershipPackageDetail />}
+            />
+            <Route
+              path="membership-package/:id/edit"
+              element={<MembershipPackageEdit />}
             />
           </Route>
         </Route>

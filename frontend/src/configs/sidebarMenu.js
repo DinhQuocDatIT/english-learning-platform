@@ -10,6 +10,8 @@ import {
   faUserShield,
   faCircleUser,
   faFileWord,
+  faHandHoldingDollar,
+  faMoneyBill,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -97,7 +99,7 @@ export const sidebarMenus = {
     {
       path: "/dashboard/admin/membership-package",
       name: "Quản lý gói thành viên",
-      icon: faGraduationCap,
+      icon: faMoneyBill,
     },
     {
       path: "/dashboard/admin/vocabulary",

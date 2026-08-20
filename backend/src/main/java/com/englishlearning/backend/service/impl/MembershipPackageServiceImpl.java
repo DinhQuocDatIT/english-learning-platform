@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -55,7 +56,27 @@ public class MembershipPackageServiceImpl
 
         MembershipPackage membershipPackage = findById(id);
 
-        return toResponse(membershipPackage);
+        long totalSubscribers =
+                studentMembershipRepository
+                        .countByMembershipPackageId(id);
+
+        BigDecimal totalRevenue =
+                studentMembershipRepository
+                        .sumPaidPriceByMembershipPackageId(id);
+
+        return MembershipPackageResponse.builder()
+                .id(membershipPackage.getId())
+                .name(membershipPackage.getName())
+                .duration(membershipPackage.getDuration())
+                .price(membershipPackage.getPrice())
+                .description(membershipPackage.getDescription())
+                .status(membershipPackage.getStatus())
+                .isFeatured(membershipPackage.getIsFeatured())
+                .totalSubscribers(totalSubscribers)
+                .totalRevenue(totalRevenue)
+                .createdAt(membershipPackage.getCreatedAt())
+                .updatedAt(membershipPackage.getUpdatedAt())
+                .build();
     }
 
     @Override
@@ -95,8 +116,10 @@ public class MembershipPackageServiceImpl
                 Boolean.TRUE.equals(request.getIsFeatured());
 
         if (isFeatured) {
-            clearFeaturedPackages();
+            clearFeaturedPackages(null);
         }
+
+
 
         membershipPackage.setIsFeatured(isFeatured);
 
@@ -148,7 +171,7 @@ public class MembershipPackageServiceImpl
                 Boolean.TRUE.equals(request.getIsFeatured());
 
         if (isFeatured) {
-            clearFeaturedPackages();
+            clearFeaturedPackages(id);
         }
 
         membershipPackage.setIsFeatured(isFeatured);
@@ -243,10 +266,8 @@ public class MembershipPackageServiceImpl
         return toResponse(saved);
     }
 
-    private void clearFeaturedPackages() {
-
-        membershipPackageRepository
-                .clearFeaturedExcept(-1L);
+    private void clearFeaturedPackages(Long exceptId) {
+        membershipPackageRepository.clearFeaturedExcept(exceptId);
     }
 
     private MembershipPackage findById(Long id) {

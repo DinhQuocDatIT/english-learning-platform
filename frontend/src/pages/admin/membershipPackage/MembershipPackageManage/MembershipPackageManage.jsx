@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import membershipPackageService from "../../../../services/membershipPackageService";
 import { useLoading } from "../../../../contexts/LoadingContext";
 import { formatDuration } from "../../../../utils/MembershipPackageManage";
+import ConfirmPackageStatusModal from "../../../../components/ConfirmPackageStatusModal/ConfirmPackageStatusModal";
 
 function MembershipPackageManage() {
   const navigate = useNavigate();
@@ -21,7 +22,14 @@ function MembershipPackageManage() {
   const [error, setError] = useState("");
 
   const { showLoading, hideLoading } = useLoading();
+  const [statusModal, setStatusModal] = useState({
+    open: false,
+    packageId: null,
+    packageName: "",
+    isInactive: false,
+  });
 
+  const [statusLoading, setStatusLoading] = useState(false);
   const fetchPackages = async () => {
     try {
       showLoading();
@@ -45,7 +53,51 @@ function MembershipPackageManage() {
   useEffect(() => {
     fetchPackages();
   }, []);
+  const openStatusModal = (pkg) => {
+    setStatusModal({
+      open: true,
+      packageId: pkg.id,
+      packageName: pkg.name,
+      isInactive: pkg.status === "INACTIVE",
+    });
+  };
 
+  const closeStatusModal = () => {
+    if (statusLoading) return;
+
+    setStatusModal({
+      open: false,
+      packageId: null,
+      packageName: "",
+      isInactive: false,
+    });
+  };
+
+  const handleConfirmStatus = async () => {
+    try {
+      setStatusLoading(true);
+      setError("");
+
+      if (statusModal.isInactive) {
+        await membershipPackageService.activate(statusModal.packageId);
+      } else {
+        await membershipPackageService.deactivate(statusModal.packageId);
+      }
+
+      closeStatusModal();
+
+      await fetchPackages();
+    } catch (err) {
+      console.error("Lỗi khi thay đổi trạng thái gói:", err);
+
+      setError(
+        err.response?.data?.message ||
+          "Không thể thay đổi trạng thái gói thành viên.",
+      );
+    } finally {
+      setStatusLoading(false);
+    }
+  };
   return (
     <div className={styles.container}>
       <div className={styles.headerSection}>
@@ -186,7 +238,7 @@ function MembershipPackageManage() {
                     type="button"
                     className={styles.detailBtn}
                     onClick={() =>
-                      navigate(`/admin/membership-packages/${pkg.id}`)
+                      navigate(`/dashboard/admin/membership-package/${pkg.id}`)
                     }
                   >
                     Xem chi tiết
@@ -197,7 +249,9 @@ function MembershipPackageManage() {
                       type="button"
                       className={styles.editBtn}
                       onClick={() =>
-                        navigate(`/admin/membership-packages/${pkg.id}/edit`)
+                        navigate(
+                          `/dashboard/admin/membership-package/${pkg.id}/edit`,
+                        )
                       }
                     >
                       Sửa
@@ -208,6 +262,7 @@ function MembershipPackageManage() {
                       className={`${styles.lockToggleBtn} ${
                         isInactive ? styles.unlockAction : styles.lockAction
                       }`}
+                      onClick={() => openStatusModal(pkg)}
                     >
                       {isInactive ? "Bật lại" : "Tạm dừng"}
                     </button>
@@ -218,6 +273,15 @@ function MembershipPackageManage() {
           })}
         </div>
       )}
+      
+      <ConfirmPackageStatusModal
+        isOpen={statusModal.open}
+        packageName={statusModal.packageName}
+        isInactive={statusModal.isInactive}
+        loading={statusLoading}
+        onClose={closeStatusModal}
+        onConfirm={handleConfirmStatus}
+      />
     </div>
   );
 }

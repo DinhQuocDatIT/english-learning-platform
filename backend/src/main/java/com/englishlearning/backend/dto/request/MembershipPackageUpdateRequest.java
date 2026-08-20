@@ -30,5 +30,5 @@ public class MembershipPackageUpdateRequest {
 
     private String description;
 
-    private Boolean isFeatured = false;
+    private Boolean isFeatured ;
 }
