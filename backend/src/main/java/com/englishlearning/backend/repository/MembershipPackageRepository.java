@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,4 +46,6 @@ public interface MembershipPackageRepository
       AND (:exceptId IS NULL OR m.id <> :exceptId)
 """)
     void clearFeaturedExcept(@Param("exceptId") Long exceptId);
+   public long count();
+
 }

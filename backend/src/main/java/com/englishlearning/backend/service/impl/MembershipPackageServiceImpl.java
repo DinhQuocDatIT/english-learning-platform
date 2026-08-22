@@ -3,6 +3,7 @@ package com.englishlearning.backend.service.impl;
 import com.englishlearning.backend.dto.request.MembershipPackageCreateRequest;
 import com.englishlearning.backend.dto.request.MembershipPackageUpdateRequest;
 import com.englishlearning.backend.dto.response.MembershipPackageResponse;
+import com.englishlearning.backend.dto.response.MembershipPackageStatsResponse;
 import com.englishlearning.backend.entity.MembershipPackage;
 import com.englishlearning.backend.enums.MembershipPackageStatus;
 import com.englishlearning.backend.exception.BusinessException;
@@ -36,7 +37,35 @@ public class MembershipPackageServiceImpl
                 .map(this::toResponse)
                 .toList();
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<MembershipPackageResponse> getAllWithStatistics() {
 
+        return membershipPackageRepository
+                .findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(this::toAdminResponse)
+                .toList();
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public MembershipPackageStatsResponse getStats() {
+
+        Long totalUsers =
+                studentMembershipRepository.countTotalUsers();
+
+        Long totalPackages =
+                membershipPackageRepository.count();
+
+        BigDecimal totalRevenue =
+                studentMembershipRepository.sumTotalRevenue();
+
+        return MembershipPackageStatsResponse.builder()
+                .totalUsers(totalUsers)
+                .totalPackages(totalPackages)
+                .totalRevenue(totalRevenue)
+                .build();
+    }
     @Override
     @Transactional(readOnly = true)
     public List<MembershipPackageResponse> getActivePackages() {
@@ -294,6 +323,34 @@ public class MembershipPackageServiceImpl
                 .description(membershipPackage.getDescription())
                 .status(membershipPackage.getStatus())
                 .isFeatured(membershipPackage.getIsFeatured())
+                .createdAt(membershipPackage.getCreatedAt())
+                .updatedAt(membershipPackage.getUpdatedAt())
+                .build();
+    }
+    private MembershipPackageResponse toAdminResponse(
+            MembershipPackage membershipPackage
+    ) {
+
+        Long packageId = membershipPackage.getId();
+
+        long totalSubscribers =
+                studentMembershipRepository
+                        .countByMembershipPackageId(packageId);
+
+        BigDecimal totalRevenue =
+                studentMembershipRepository
+                        .sumPaidPriceByMembershipPackageId(packageId);
+
+        return MembershipPackageResponse.builder()
+                .id(packageId)
+                .name(membershipPackage.getName())
+                .duration(membershipPackage.getDuration())
+                .price(membershipPackage.getPrice())
+                .description(membershipPackage.getDescription())
+                .status(membershipPackage.getStatus())
+                .isFeatured(membershipPackage.getIsFeatured())
+                .totalSubscribers(totalSubscribers)
+                .totalRevenue(totalRevenue)
                 .createdAt(membershipPackage.getCreatedAt())
                 .updatedAt(membershipPackage.getUpdatedAt())
                 .build();

@@ -28,7 +28,11 @@ function MembershipPackageManage() {
     packageName: "",
     isInactive: false,
   });
-
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalPackages: 0,
+    totalRevenue: 0,
+  });
   const [statusLoading, setStatusLoading] = useState(false);
   const fetchPackages = async () => {
     try {
@@ -38,6 +42,7 @@ function MembershipPackageManage() {
       const response = await membershipPackageService.getAll();
 
       setPackages(response.data?.data ?? []);
+      console.log(response.data?.data);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách gói:", err);
 
@@ -49,9 +54,24 @@ function MembershipPackageManage() {
       hideLoading();
     }
   };
+  const fetchStats = async () => {
+    try {
+      const response = await membershipPackageService.getStats();
 
+      setStats(
+        response.data?.data ?? {
+          totalUsers: 0,
+          totalPackages: 0,
+          totalRevenue: 0,
+        },
+      );
+    } catch (err) {
+      console.error("Lỗi khi lấy thống kê:", err);
+    }
+  };
   useEffect(() => {
     fetchPackages();
+    fetchStats();
   }, []);
   const openStatusModal = (pkg) => {
     setStatusModal({
@@ -129,7 +149,10 @@ function MembershipPackageManage() {
             <span className={styles.statLabel}>TỔNG NGƯỜI DÙNG</span>
           </div>
 
-          <div className={styles.statNumber}>-</div>
+          <div className={styles.statNumber}>
+            {" "}
+            {Number(stats.totalUsers).toLocaleString("vi-VN")}
+          </div>
         </div>
 
         <div className={styles.statCard}>
@@ -142,7 +165,7 @@ function MembershipPackageManage() {
           </div>
 
           <div className={styles.statNumber}>
-            {packages.filter((pkg) => pkg.status === "ACTIVE").length}
+            {Number(stats.totalPackages).toLocaleString("vi-VN")}
           </div>
         </div>
 
@@ -155,7 +178,10 @@ function MembershipPackageManage() {
             <span className={styles.statLabel}>DOANH THU (MRR)</span>
           </div>
 
-          <div className={styles.statNumber}>-</div>
+          <div className={styles.statNumber}>
+            {" "}
+            {Number(stats.totalRevenue).toLocaleString("vi-VN")} VNĐ
+          </div>
         </div>
       </div>
 
@@ -231,6 +257,10 @@ function MembershipPackageManage() {
                   <p className={styles.planDuration}>
                     Thời hạn: {formatDuration(pkg.duration)}
                   </p>
+                  <p className={styles.subscriberCount}>
+                    {Number(pkg.totalSubscribers || 0).toLocaleString("vi-VN")}{" "}
+                    người đăng ký
+                  </p>
                 </div>
 
                 <div className={styles.planCardActions}>
@@ -273,7 +303,7 @@ function MembershipPackageManage() {
           })}
         </div>
       )}
-      
+
       <ConfirmPackageStatusModal
         isOpen={statusModal.open}
         packageName={statusModal.packageName}

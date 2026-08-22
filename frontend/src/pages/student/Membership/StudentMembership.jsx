@@ -21,7 +21,9 @@ function StudentMembership() {
   const [error, setError] = useState("");
 
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const [registering, setRegistering] = useState(false);
+
+  // Chỉ lưu ID của gói đang đăng ký
+  const [registeringId, setRegisteringId] = useState(null);
 
   const [membershipNotice, setMembershipNotice] = useState({
     open: false,
@@ -45,9 +47,7 @@ function StudentMembership() {
         setLoadingMembership(true);
         setError("");
 
-        const response = await studentMembershipService.getCurrentMembership(
-          user.id,
-        );
+        const response = await studentMembershipService.getCurrentMembership();
 
         setCurrentMembership(response.data?.data ?? null);
       } catch (err) {
@@ -97,7 +97,7 @@ function StudentMembership() {
   // =========================
 
   const handleSelectPackage = (pkg) => {
-    // Nếu đang có gói còn hạn
+    // Đang có gói còn hạn
     if (currentMembership) {
       setMembershipNotice({
         open: true,
@@ -107,7 +107,8 @@ function StudentMembership() {
       return;
     }
 
-    if (registering) {
+    // Đang có request đăng ký
+    if (registeringId !== null) {
       return;
     }
 
@@ -119,26 +120,30 @@ function StudentMembership() {
   // =========================
 
   const handleConfirmRegister = async () => {
-    if (!selectedPackage || !user?.id) {
+    if (!selectedPackage) {
       return;
     }
 
+    const packageId = selectedPackage.id;
+
     try {
-      setRegistering(true);
+      // Chỉ card có packageId này hiện loading
+      setRegisteringId(packageId);
 
       const response = await studentMembershipService.register({
-        membershipPackageId: selectedPackage.id,
+        membershipPackageId: packageId,
       });
 
+      // Đóng modal
       setSelectedPackage(null);
 
       toast.success(
         response.data?.message || "Đăng ký gói thành viên thành công.",
       );
 
-      // Lấy lại membership hiện tại
+      // Load lại membership hiện tại
       const currentResponse =
-        await studentMembershipService.getCurrentMembership(user.id);
+        await studentMembershipService.getCurrentMembership();
 
       setCurrentMembership(currentResponse.data?.data ?? null);
     } catch (err) {
@@ -156,16 +161,17 @@ function StudentMembership() {
         toast.error(message);
       }
     } finally {
-      setRegistering(false);
+      // Kết thúc loading
+      setRegisteringId(null);
     }
   };
 
   // =========================
-  // CLOSE MODAL
+  // CLOSE CONFIRM MODAL
   // =========================
 
   const handleCloseConfirm = () => {
-    if (registering) {
+    if (registeringId !== null) {
       return;
     }
 
@@ -173,7 +179,7 @@ function StudentMembership() {
   };
 
   // =========================
-  // RENDER
+  // RENDER LOADING
   // =========================
 
   if (loadingMembership) {
@@ -185,6 +191,10 @@ function StudentMembership() {
       </div>
     );
   }
+
+  // =========================
+  // RENDER
+  // =========================
 
   return (
     <div className={styles.container}>
@@ -228,6 +238,7 @@ function StudentMembership() {
             </div>
 
             <div className={styles.currentInfo}>
+              {/* GIÁ */}
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>GIÁ ĐÃ THANH TOÁN</span>
 
@@ -239,18 +250,21 @@ function StudentMembership() {
                 </strong>
               </div>
 
+              {/* NGÀY BẮT ĐẦU */}
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>NGÀY BẮT ĐẦU</span>
 
                 <strong>{currentMembership.startDate}</strong>
               </div>
 
+              {/* NGÀY HẾT HẠN */}
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>NGÀY HẾT HẠN</span>
 
                 <strong>{currentMembership.endDate}</strong>
               </div>
 
+              {/* CÒN LẠI */}
               <div className={styles.remainingBox}>
                 <span className={styles.infoLabel}>THỜI GIAN CÒN LẠI</span>
 
@@ -311,8 +325,10 @@ function StudentMembership() {
                   formData={pkg}
                   features={features}
                   onSelect={handleSelectPackage}
-                  registering={registering}
-                  disabled={registering || currentMembership !== null}
+                  registering={registeringId === pkg.id}
+                  disabled={
+                    registeringId !== null || currentMembership !== null
+                  }
                 />
               );
             })}
@@ -327,13 +343,13 @@ function StudentMembership() {
       <MembershipConfirmModal
         packageData={selectedPackage}
         open={selectedPackage !== null}
-        loading={registering}
+        loading={registeringId !== null}
         onClose={handleCloseConfirm}
         onConfirm={handleConfirmRegister}
       />
 
       {/* =========================
-          NOTICE
+          MEMBERSHIP NOTICE
       ========================= */}
 
       <MembershipNotice

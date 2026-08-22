@@ -1,6 +1,9 @@
 import axiosClient from "../api/axiosClient";
 
 const membershipPackageService = {
+  getStats() {
+    return axiosClient.get("/v1/membership-packages/stats");
+  },
   getActivePackages() {
     return axiosClient.get("/v1/membership-packages/active");
   },

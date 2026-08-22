@@ -4,6 +4,7 @@ import com.englishlearning.backend.dto.request.MembershipPackageCreateRequest;
 import com.englishlearning.backend.dto.request.MembershipPackageUpdateRequest;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.dto.response.MembershipPackageResponse;
+import com.englishlearning.backend.dto.response.MembershipPackageStatsResponse;
 import com.englishlearning.backend.service.MembershipPackageService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class MembershipPackageController {
     public ResponseEntity<ApiResponse<List<MembershipPackageResponse>>> getAll() {
 
         List<MembershipPackageResponse> responses =
-                membershipPackageService.getAll();
+                membershipPackageService.getAllWithStatistics();
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -50,7 +51,21 @@ public class MembershipPackageController {
                 )
         );
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<MembershipPackageStatsResponse>> getStats() {
 
+        MembershipPackageStatsResponse response =
+                membershipPackageService.getStats();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy thống kê gói thành viên thành công",
+                        response
+                )
+        );
+    }
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<MembershipPackageResponse>> getById(

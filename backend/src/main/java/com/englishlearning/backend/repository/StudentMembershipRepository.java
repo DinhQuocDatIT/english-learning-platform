@@ -30,4 +30,14 @@ public interface StudentMembershipRepository
             Long studentId,
             StudentMembershipStatus status
     );
+    @Query("""
+    SELECT COALESCE(SUM(sm.paidPrice), 0)
+    FROM StudentMembership sm
+""")
+    public BigDecimal sumTotalRevenue();
+    @Query("""
+    SELECT COUNT(DISTINCT sm.student.id)
+    FROM StudentMembership sm
+""")
+    public Long countTotalUsers();
 }
