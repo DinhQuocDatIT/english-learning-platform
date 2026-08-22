@@ -21,6 +21,20 @@ public class MembershipPackageController {
     @Autowired
     private MembershipPackageService membershipPackageService;
 
+    @GetMapping("/active")
+    public ResponseEntity<ApiResponse<List<MembershipPackageResponse>>> getActivePackages() {
+
+        List<MembershipPackageResponse> responses =
+                membershipPackageService.getActivePackages();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy danh sách gói thành viên đang hoạt động thành công",
+                        responses
+                )
+        );
+    }
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<ApiResponse<List<MembershipPackageResponse>>> getAll() {

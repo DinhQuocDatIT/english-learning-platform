@@ -28,6 +28,7 @@ import MembershipPackageManage from "../pages/admin/membershipPackage/Membership
 import MembershipPackageAdd from "../pages/admin/membershipPackage/MembershipPackageAdd/MembershipPackageAdd";
 import MembershipPackageDetail from "../pages/admin/membershipPackage/MembershipPackageDetail/MembershipPackageDetail";
 import MembershipPackageEdit from "../pages/admin/membershipPackage/MembershipPackageEdit/MembershipPackageEdit";
+import StudentMembership from "../pages/student/Membership/StudentMembership";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -55,6 +56,9 @@ function AppRoutes() {
               element={<CreateStudySession />}
             />
             <Route path="study-flash-card" element={<StudyFlashcard />} />
+
+            {/* gói thành viên */}
+            <Route path="student-membership" element={<StudentMembership />} />
           </Route>
           <Route
             path="teacher"

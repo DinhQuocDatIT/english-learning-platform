@@ -1,0 +1,261 @@
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-secondary);
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+
+
+.sectionTitle {
+  margin-bottom: 1rem;
+  color: var(--color-secondary);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* =========================
+   CURRENT MEMBERSHIP
+========================= */
+
+.currentSection {
+  margin-bottom: 3rem;
+}
+
+.currentCard {
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-background);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.currentTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.currentLabel {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.currentPackageName {
+  margin: 0;
+  color: var(--color-secondary);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.activeBadge {
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.currentInfo {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding-top: 1.25rem;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.infoLabel {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.infoItem strong {
+  color: var(--color-secondary);
+  font-size: 0.9rem;
+}
+
+.remainingBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.8rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.remainingBox strong {
+  color: var(--color-primary);
+  font-size: 1.5rem;
+}
+
+.remainingBox > span:last-child {
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
+.warning {
+  margin-top: 0.75rem;
+  padding: 0.8rem 1rem;
+  border-radius: 0.7rem;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 0.8rem;
+}
+
+
+
+.emptyMembership {
+  margin-bottom: 3rem;
+  padding: 2rem;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  border-radius: 1rem;
+}
+
+.emptyIcon {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-primary);
+}
+
+.emptyMembership h2 {
+  margin: 0;
+  color: var(--color-secondary);
+  font-size: 1.1rem;
+}
+
+.emptyMembership p {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+
+
+.packageSection {
+  width: 100%;
+}
+
+.packageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.packageGrid > * {
+  width: 100%;
+  min-width: 0;
+}
+
+
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.error {
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.7rem;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.emptyPackages {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  border: 1px dashed var(--color-border);
+  border-radius: 1rem;
+}
+
+
+
+@media (max-width: 900px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .currentInfo {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .packageGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+
+@media (max-width: 600px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.4rem;
+  }
+
+  .currentTop {
+    flex-direction: column;
+  }
+
+  .currentInfo {
+    grid-template-columns: 1fr;
+  }
+
+  .packageGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .currentCard {
+    padding: 1rem;
+  }
+}

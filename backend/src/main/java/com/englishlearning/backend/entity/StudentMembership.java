@@ -1,5 +1,6 @@
 package com.englishlearning.backend.entity;
 
+import com.englishlearning.backend.enums.StudentMembershipStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,8 +30,9 @@ public class StudentMembership {
     @JoinColumn(name = "membership_package_id", nullable = false)
     private MembershipPackage membershipPackage;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String status;
+    private StudentMembershipStatus status;
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal paidPrice;
     @Column(nullable = false)

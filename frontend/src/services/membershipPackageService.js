@@ -1,7 +1,9 @@
-
 import axiosClient from "../api/axiosClient";
 
 const membershipPackageService = {
+  getActivePackages() {
+    return axiosClient.get("/v1/membership-packages/active");
+  },
   getAll() {
     return axiosClient.get("/v1/membership-packages");
   },
@@ -23,17 +25,12 @@ const membershipPackageService = {
   },
 
   deactivate(id) {
-    return axiosClient.put(
-      `/v1/membership-packages/${id}/deactivate`
-    );
+    return axiosClient.put(`/v1/membership-packages/${id}/deactivate`);
   },
 
   activate(id) {
-    return axiosClient.put(
-      `/v1/membership-packages/${id}/activate`
-    );
+    return axiosClient.put(`/v1/membership-packages/${id}/activate`);
   },
 };
 
 export default membershipPackageService;
-

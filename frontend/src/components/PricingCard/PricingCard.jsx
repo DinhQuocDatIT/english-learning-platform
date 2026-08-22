@@ -4,7 +4,13 @@ import { formatDuration } from "../../utils/MembershipPackageManage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun } from "@fortawesome/free-regular-svg-icons";
 
-function PricingCard({ formData, features = [] }) {
+function PricingCard({
+  formData,
+  features = [],
+  onSelect,
+  registering = false,
+  disabled = false,
+}) {
   if (!formData) return null;
 
   const isActive = formData.status === "ACTIVE";
@@ -24,21 +30,22 @@ function PricingCard({ formData, features = [] }) {
         {/* Package name */}
         <div className={styles.header}>
           <h3 className={styles.name}>{formData.name || "Tên gói..."}</h3>
+
           <p className={styles.description}>Mô tả gói thành viên.</p>
         </div>
 
-        {/* =========================
-            PRICE
-        ========================= */}
+        {/* PRICE */}
         <div className={styles.priceSection}>
           <div className={styles.price}>
             {price}
+
             <span className={styles.currency}> VNĐ</span>
           </div>
 
           <div className={styles.duration}>Thời hạn: {duration}</div>
         </div>
 
+        {/* FEATURES */}
         <div className={styles.features}>
           {packageFeatures.length > 0 ? (
             packageFeatures.map((feature, index) => (
@@ -48,7 +55,9 @@ function PricingCard({ formData, features = [] }) {
                 </span>
 
                 <span
-                  className={`${styles.featureText}  ${isFeatured ? styles.cardPopular : ""} `}
+                  className={`${styles.featureText} ${
+                    isFeatured ? styles.cardPopular : ""
+                  }`}
                 >
                   {feature}
                 </span>
@@ -60,17 +69,20 @@ function PricingCard({ formData, features = [] }) {
         </div>
       </div>
 
-      {/* =========================
-          BUTTON
-      ========================= */}
+      {/* BUTTON */}
       <button
         type="button"
         className={`${styles.button} ${
           isFeatured ? styles.buttonPrimary : styles.buttonOutline
         }`}
-        disabled={!isActive}
+        disabled={!isActive || disabled}
+        onClick={() => onSelect?.(formData)}
       >
-        {isActive ? "Chọn gói này" : "Gói chưa công khai"}
+        {!isActive
+          ? "Gói chưa công khai"
+          : registering
+            ? "Đang đăng ký..."
+            : "Chọn gói này"}
       </button>
     </div>
   );

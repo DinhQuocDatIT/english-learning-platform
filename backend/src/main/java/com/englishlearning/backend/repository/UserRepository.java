@@ -1,5 +1,6 @@
 package com.englishlearning.backend.repository;
 
+import com.englishlearning.backend.entity.Student;
 import com.englishlearning.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

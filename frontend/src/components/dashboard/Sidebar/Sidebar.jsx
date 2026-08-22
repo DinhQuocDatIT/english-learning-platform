@@ -47,7 +47,7 @@ const Sidebar = ({ isOpen }) => {
       {role === ROLES.STUDENT && (
         <div className={styles.bottomSection}>
           <NavLink
-            to="/dashboard/membership"
+            to="/dashboard/student/student-membership"
             className={({ isActive }) =>
               `${styles.premiumCTA} ${isActive ? styles.premiumActive : ""} ${!isOpen ? styles.premiumCTAClosed : ""}`
             }
