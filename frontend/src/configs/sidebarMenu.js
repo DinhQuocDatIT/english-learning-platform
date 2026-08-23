@@ -12,6 +12,7 @@ import {
   faFileWord,
   faHandHoldingDollar,
   faMoneyBill,
+  faLayerGroup,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -106,7 +107,11 @@ export const sidebarMenus = {
       name: "Quản lý từ vựng",
       icon: faFileWord,
     },
-
+    {
+      path: "/dashboard/admin/level",
+      name: "Quản lý cấp độ",
+      icon: faLayerGroup,
+    },
     {
       path: "/dashboard/admin/profile",
       name: "Thông tin cá nhân",

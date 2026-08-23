@@ -10,26 +10,15 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class MembershipPackageResponse {
-
     private Long id;
-
     private String name;
-
     private Integer duration;
-
     private BigDecimal price;
-
     private String description;
-
     private MembershipPackageStatus status;
-
     private Boolean isFeatured;
-
     private Long totalSubscribers;
-
     private BigDecimal totalRevenue;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 }

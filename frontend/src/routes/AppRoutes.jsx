@@ -29,6 +29,7 @@ import MembershipPackageAdd from "../pages/admin/membershipPackage/MembershipPac
 import MembershipPackageDetail from "../pages/admin/membershipPackage/MembershipPackageDetail/MembershipPackageDetail";
 import MembershipPackageEdit from "../pages/admin/membershipPackage/MembershipPackageEdit/MembershipPackageEdit";
 import StudentMembership from "../pages/student/Membership/StudentMembership";
+import LevelManage from "../pages/admin/Level/LevelManage/LevelManage";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -60,6 +61,7 @@ function AppRoutes() {
             {/* gói thành viên */}
             <Route path="student-membership" element={<StudentMembership />} />
           </Route>
+
           <Route
             path="teacher"
             element={<RoleRoute allowedRoles={[ROLES.TEACHER]} />}
@@ -78,6 +80,7 @@ function AppRoutes() {
             <Route path="create-student" element={<CreateStudent />} />
             <Route path="student-detail/:id" element={<StudentDetail />} />
           </Route>
+
           <Route
             path="admin"
             element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}
@@ -119,6 +122,9 @@ function AppRoutes() {
               path="membership-package/:id/edit"
               element={<MembershipPackageEdit />}
             />
+            {/* quản lý cấp độ */}
+
+            <Route path="level" element={<LevelManage />} />
           </Route>
         </Route>
       </Route>

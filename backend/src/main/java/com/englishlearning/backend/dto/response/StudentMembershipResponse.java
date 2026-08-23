@@ -10,20 +10,12 @@ import java.time.LocalDate;
 @Getter
 @Builder
 public class StudentMembershipResponse {
-
     private Long id;
-
     private Long packageId;
-
     private String packageName;
-
     private BigDecimal paidPrice;
-
     private StudentMembershipStatus status;
-
     private LocalDate startDate;
-
     private LocalDate endDate;
-
     private long remainingDays;
 }

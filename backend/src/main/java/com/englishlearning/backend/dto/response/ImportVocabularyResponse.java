@@ -12,15 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImportVocabularyResponse {
-
     private int totalRows;
-
     private int successCount;
-
     private int duplicateCount;
-
     private int errorCount;
-
     private List<String> errors;
     private List<String> duplicates;
 }

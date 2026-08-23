@@ -1,0 +1,442 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 1000;
+
+  background-color: rgba(15, 23, 42, 0.45);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+}
+
+.modal {
+  width: 100%;
+  max-width: 500px;
+
+  background-color: var(--color-surface);
+
+  border-radius: 16px;
+
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+
+  overflow: hidden;
+
+  animation: modalAppear 0.2s ease;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  padding: 22px 24px;
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.titleWrapper {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.iconBox {
+  width: 40px;
+  height: 40px;
+
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+
+  color: var(--color-secondary);
+
+  margin: 0 0 3px;
+}
+
+.subtitle {
+  font-size: 13px;
+
+  color: var(--color-text-muted);
+
+  margin: 0;
+}
+
+/* =========================
+   CLOSE
+========================= */
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+
+  border: none;
+  border-radius: 8px;
+
+  background-color: transparent;
+
+  color: var(--color-text-muted);
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+
+  transition: all 0.2s;
+}
+
+.closeBtn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  color: var(--color-secondary);
+}
+
+.closeBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.form {
+  padding: 24px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--color-secondary);
+
+  margin-bottom: 8px;
+}
+
+.formGroup label span {
+  color: #dc2626;
+
+  margin-left: 3px;
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+
+  border: 1px solid var(--color-border);
+
+  border-radius: 9px;
+
+  background-color: var(--color-surface);
+
+  color: var(--color-text);
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.formGroup input {
+  height: 42px;
+
+  padding: 0 12px;
+}
+
+.formGroup textarea {
+  padding: 11px 12px;
+
+  resize: vertical;
+
+  min-height: 110px;
+
+  line-height: 1.5;
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: #94a3b8;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  border-color: var(--color-primary);
+
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.1);
+}
+
+.formGroup input:disabled,
+.formGroup textarea:disabled {
+  background-color: #f8fafc;
+
+  cursor: not-allowed;
+}
+
+/* =========================
+   INPUT FOOTER
+========================= */
+
+.inputFooter {
+  display: flex;
+
+  justify-content: space-between;
+
+  margin-top: 5px;
+
+  font-size: 11px;
+
+  color: var(--color-text-muted);
+}
+
+.inputFooter span {
+  font-size: 11px;
+
+  color: var(--color-text-muted);
+
+  font-weight: 400;
+}
+
+/* =========================
+   COLOR
+========================= */
+
+.colorField {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  min-height: 42px;
+}
+
+.colorPicker {
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+
+  border: 3px solid var(--color-surface);
+
+  outline: 1px solid var(--color-border);
+
+  cursor: pointer;
+
+  flex-shrink: 0;
+
+  margin: 0 !important;
+
+  padding: 0;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.colorPicker:hover {
+  transform: scale(1.08);
+
+  box-shadow: 0 0 0 4px rgba(14, 167, 146, 0.1);
+}
+
+.hiddenColorInput {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+.colorValue {
+  font-size: 13px;
+
+  font-weight: 600;
+
+  color: var(--color-text-muted);
+
+  font-family: monospace;
+
+  letter-spacing: 0.3px;
+}
+
+.levelPreview {
+  margin-left: auto;
+
+  min-width: 48px;
+  height: 34px;
+
+  padding: 0 12px;
+
+  border-radius: 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+
+
+.errorMessage {
+  padding: 10px 12px;
+
+  border-radius: 8px;
+
+  background-color: #fef2f2;
+
+  border: 1px solid #fecaca;
+
+  color: #dc2626;
+
+  font-size: 13px;
+
+  margin-bottom: 18px;
+}
+
+
+.modalFooter {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  padding-top: 4px;
+}
+
+.cancelBtn,
+.submitBtn {
+  height: 40px;
+
+  padding: 0 16px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  transition: all 0.2s;
+}
+
+.cancelBtn {
+  border: 1px solid var(--color-border);
+
+  background-color: var(--color-surface);
+
+  color: var(--color-text-muted);
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background-color: #f8fafc;
+
+  color: var(--color-secondary);
+}
+
+.submitBtn {
+  border: 1px solid var(--color-primary);
+
+  background-color: var(--color-primary);
+
+  color: white;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.cancelBtn:disabled,
+.submitBtn:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+
+@media (max-width: 500px) {
+  .overlay {
+    padding: 12px;
+  }
+
+  .modalHeader,
+  .form {
+    padding: 18px;
+  }
+
+  .modalFooter {
+    flex-direction: column-reverse;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    width: 100%;
+  }
+
+  .levelPreview {
+    display: none;
+  }
+}
