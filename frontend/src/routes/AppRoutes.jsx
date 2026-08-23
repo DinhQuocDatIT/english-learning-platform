@@ -30,6 +30,7 @@ import MembershipPackageDetail from "../pages/admin/membershipPackage/Membership
 import MembershipPackageEdit from "../pages/admin/membershipPackage/MembershipPackageEdit/MembershipPackageEdit";
 import StudentMembership from "../pages/student/Membership/StudentMembership";
 import LevelManage from "../pages/admin/Level/LevelManage/LevelManage";
+import DashBoard from "../pages/admin/DashBoard/DashBoard";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -86,6 +87,8 @@ function AppRoutes() {
             element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}
           >
             <Route path="profile" element={<AdminProfile />} />
+            <Route path="index" element={<DashBoard />} />
+
             {/*   quản lý từ vựng */}
             <Route path="vocabulary" element={<VocabularyManagement />} />
             <Route path="create-vocabulary" element={<CreateVocabulary />} />

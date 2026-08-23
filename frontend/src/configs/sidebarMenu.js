@@ -83,7 +83,7 @@ export const sidebarMenus = {
 
   [ROLES.ADMIN]: [
     {
-      path: "/dashboard/admin/dashboard",
+      path: "/dashboard/admin/index",
       name: "Dashboard",
       icon: faChartSimple,
     },
