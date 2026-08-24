@@ -53,11 +53,6 @@ export const sidebarMenus = {
       icon: faChartSimple,
     },
     {
-      path: "/teacher/courses",
-      name: "Quản lý khóa học",
-      icon: faBookOpen,
-    },
-    {
       path: "/dashboard/teacher/students",
       name: "Quản lý học sinh",
       icon: faUsers,
@@ -111,6 +106,11 @@ export const sidebarMenus = {
       path: "/dashboard/admin/level",
       name: "Quản lý cấp độ",
       icon: faLayerGroup,
+    },
+    {
+      path: "/dashboard/admin/topics",
+      name: "Quản lý chủ đề",
+      icon: faBookOpen,
     },
     {
       path: "/dashboard/admin/profile",

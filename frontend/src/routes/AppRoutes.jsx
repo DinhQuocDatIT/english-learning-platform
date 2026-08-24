@@ -32,6 +32,12 @@ import StudentMembership from "../pages/student/Membership/StudentMembership";
 import LevelManage from "../pages/admin/Level/LevelManage/LevelManage";
 import DashBoard from "../pages/admin/DashBoard/DashBoard";
 
+
+import CreateTopic from "../pages/admin/Topic/CreateTopic/CreateTopic";
+import EditTopic from "../pages/admin/Topic/EditTopic/EditTopic";
+import TopicDetail from "../pages/admin/Topic/TopicDetail/TopicDetail";
+import TopicManage from "../pages/admin/Topic/TopicManage/TopicManage";
+
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
   return (
@@ -68,6 +74,7 @@ function AppRoutes() {
             element={<RoleRoute allowedRoles={[ROLES.TEACHER]} />}
           >
             <Route path="profile" element={<TeacherProfile />} />
+            
             {/*   quản lý từ vựng */}
             <Route path="vocabulary" element={<VocabularyManagement />} />
             <Route path="create-vocabulary" element={<CreateVocabulary />} />
@@ -128,6 +135,11 @@ function AppRoutes() {
             {/* quản lý cấp độ */}
 
             <Route path="level" element={<LevelManage />} />
+            {/*   quản lý chủ đề */}
+            <Route path="topics" element={<TopicManage />} />
+            <Route path="create-topic" element={<CreateTopic />} />
+            <Route path="edit-topic/:id" element={<EditTopic />} />
+            <Route path="topic/:id" element={<TopicDetail />} />
           </Route>
         </Route>
       </Route>

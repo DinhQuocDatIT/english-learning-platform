@@ -1,0 +1,561 @@
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  border: none;
+  background: transparent;
+
+  color: var(--color-text-muted);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  padding: 7px 0;
+}
+
+.backButton:hover {
+  color: var(--color-primary);
+}
+
+.backButton span {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* =========================
+   FORM CARD
+========================= */
+
+.formCard {
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+
+  padding: 28px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+/* =========================
+   MESSAGES
+========================= */
+
+.errorMessage {
+  margin-bottom: 20px;
+  padding: 11px 14px;
+
+  border-radius: 8px;
+
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+
+  color: #dc2626;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.successMessage {
+  margin-bottom: 20px;
+  padding: 11px 14px;
+
+  border-radius: 8px;
+
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+
+  color: #059669;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* =========================
+   CARD HEADER
+========================= */
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cardHeader h2 {
+  margin: 0 0 5px;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  color: var(--color-secondary);
+}
+
+.cardHeader p {
+  margin: 0;
+
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.topicBadge {
+  flex-shrink: 0;
+
+  padding: 6px 11px;
+
+  border-radius: 6px;
+
+  background: var(--color-tertiary);
+  border: 1px solid var(--color-border);
+
+  color: var(--color-primary);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* =========================
+   FORM GRID
+========================= */
+
+.formGrid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.15fr)
+    minmax(320px, 0.85fr);
+
+  gap: 28px;
+
+  align-items: stretch;
+
+  padding-bottom: 24px;
+}
+
+.formLeft,
+.formRight {
+  min-width: 0;
+}
+
+.formLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.formRight {
+  display: flex;
+}
+
+.formRight .formGroup {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 0;
+}
+
+/* =========================
+   FORM GROUP
+========================= */
+
+.formGroup {
+  margin-bottom: 22px;
+}
+
+.formGroup > label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--color-secondary);
+}
+
+.formGroup > label span {
+  color: #dc2626;
+}
+
+.formGroup input[type="text"],
+.formGroup textarea {
+  width: 100%;
+
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+
+  background: var(--color-surface);
+
+  color: var(--color-text);
+
+  font-family: inherit;
+  font-size: 13px;
+
+  outline: none;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.formGroup input[type="text"] {
+  height: 42px;
+  padding: 0 13px;
+}
+
+.formGroup textarea {
+  min-height: 150px;
+  height: 150px;
+
+  padding: 12px 13px;
+
+  resize: vertical;
+}
+
+.formGroup input[type="text"]:focus,
+.formGroup textarea:focus {
+  border-color: var(--color-primary);
+
+  box-shadow: 0 0 0 3px var(--color-tertiary);
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: #a1a1aa;
+}
+
+.formGroup input:disabled,
+.formGroup textarea:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* =========================
+   IMAGE UPLOAD
+========================= */
+
+.imageUpload {
+  width: 100%;
+
+  flex: 1;
+
+  display: flex;
+}
+
+.fileInput {
+  display: none !important;
+}
+
+.uploadArea {
+  width: 100%;
+  min-height: 225px;
+
+  border: 2px dashed var(--color-border);
+  border-radius: 12px;
+
+  background: #fafafa;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.uploadArea:hover {
+  border-color: var(--color-primary);
+  background: var(--color-tertiary);
+}
+
+.uploadIcon {
+  width: 46px;
+  height: 46px;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--color-tertiary);
+  color: var(--color-primary);
+
+  font-size: 21px;
+}
+
+.uploadText {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.uploadText strong {
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--color-secondary);
+}
+
+.uploadText span {
+  font-size: 11px;
+
+  color: var(--color-text-muted);
+}
+
+.imagePreview {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+  min-height: 225px;
+
+  object-fit: cover;
+
+  border-radius: 9px;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.formActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding-top: 22px;
+  margin-top: 2px;
+
+  border-top: 1px solid var(--color-border);
+}
+
+.cancelButton,
+.saveButton {
+  height: 40px;
+
+  padding: 0 16px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  transition: all 0.2s ease;
+}
+
+.cancelButton {
+  border: 1px solid var(--color-border);
+
+  background: var(--color-surface);
+
+  color: var(--color-text-muted);
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.saveButton {
+  border: none;
+
+  background: var(--color-primary);
+
+  color: white;
+
+  margin-left: auto;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.cancelButton:disabled,
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================
+   INFO
+========================= */
+
+.infoCard {
+  display: flex;
+
+  gap: 14px;
+
+  padding: 18px;
+
+  border-radius: 12px;
+
+  background: var(--color-tertiary);
+
+  border: 1px solid rgba(14, 167, 146, 0.15);
+}
+
+.infoIcon {
+  width: 34px;
+  height: 34px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: var(--color-primary);
+
+  color: white;
+
+  font-size: 14px;
+}
+
+.infoCard h3 {
+  margin: 0 0 6px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  color: var(--color-secondary);
+}
+
+.infoCard p {
+  margin: 0 0 6px;
+
+  font-size: 12px;
+  line-height: 1.6;
+
+  color: var(--color-text-muted);
+}
+
+.infoCard p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 900px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .formRight {
+    display: block;
+  }
+
+  .formRight .formGroup {
+    margin-bottom: 22px;
+  }
+
+  .uploadArea {
+    min-height: 200px;
+  }
+
+  .imagePreview {
+    min-height: 200px;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 640px) {
+  .container {
+    padding: 22px 16px 40px;
+  }
+
+  .formCard {
+    padding: 18px;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+  }
+
+  .formActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .saveButton {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .cancelButton {
+    width: 100%;
+  }
+
+  .infoCard {
+    align-items: flex-start;
+  }
+}
