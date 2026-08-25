@@ -7,6 +7,45 @@
   font-family: "Inter", sans-serif;
   color: var(--color-text);
 }
+/* ====== HEADER TOP ====== */
+.headerTop {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+}
+
+/* Nút quay lại */
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #64748b);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.backButton span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted, #64748b);
+}
+
+.backButton:hover {
+  background: var(--color-background, #f1f5f9);
+  color: var(--color-text, #0f172a);
+}
+
+.backButton:hover span {
+  color: var(--color-text, #0f172a);
+}
+
 
 /* ====== TOPIC HERO ====== */
 .topicHero {

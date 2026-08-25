@@ -10,6 +10,7 @@ import {
   faBook,
   faImage,
   faTag,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -36,6 +37,7 @@ const STATUS_COLOR_MAP = {
   REJECTED: "#f87171",
   PUBLISHED: "#34d399",
 };
+
 function TeacherListeningLessonList() {
   const navigate = useNavigate();
   const { topicId } = useParams();
@@ -89,6 +91,10 @@ function TeacherListeningLessonList() {
     setFilters({ keyword: e.target.value });
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   const handleCreate = () => {
     navigate(`/dashboard/teacher/topics/${topicId}/listening-lessons/create`);
   };
@@ -119,6 +125,14 @@ function TeacherListeningLessonList() {
 
   return (
     <div className={styles.wrapper}>
+      {/* Header với nút quay lại */}
+      <div className={styles.headerTop}>
+        <button className={styles.backButton} onClick={handleGoBack}>
+          <FontAwesomeIcon icon={faArrowLeft} />
+          <span>Quay lại</span>
+        </button>
+      </div>
+
       <div className={styles.topicHero}>
         <div className={styles.topicHeroImage}>
           {getImageUrl(topic?.topicImage) ? (
@@ -327,7 +341,6 @@ function TeacherListeningLessonList() {
                 <div className={styles.cardMeta}>
                   {lesson.createdByName && (
                     <span className={styles.metaItem}>
-                      {/* <span className={styles.metaLabel}>Người tạo</span> */}
                       <span className={styles.metaValue}>
                         {lesson.createdByName}
                       </span>
@@ -336,7 +349,6 @@ function TeacherListeningLessonList() {
 
                   {lesson.updatedAt && (
                     <span className={styles.metaItem}>
-                      {/* <span className={styles.metaLabel}>Cập nhật</span> */}
                       <span className={styles.metaValue}>
                         {new Date(lesson.updatedAt).toLocaleDateString("vi-VN")}
                       </span>
