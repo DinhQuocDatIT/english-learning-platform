@@ -35,4 +35,6 @@
 
   --color-border: #e2e8f0;
   --color-footer: #091426;
+  /* --color-premium : #fad16b; */
+  --color-premium: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
 }

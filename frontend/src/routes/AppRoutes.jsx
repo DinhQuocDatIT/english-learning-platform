@@ -32,11 +32,14 @@ import StudentMembership from "../pages/student/Membership/StudentMembership";
 import LevelManage from "../pages/admin/Level/LevelManage/LevelManage";
 import DashBoard from "../pages/admin/DashBoard/DashBoard";
 
-
 import CreateTopic from "../pages/admin/Topic/CreateTopic/CreateTopic";
 import EditTopic from "../pages/admin/Topic/EditTopic/EditTopic";
 import TopicDetail from "../pages/admin/Topic/TopicDetail/TopicDetail";
 import TopicManage from "../pages/admin/Topic/TopicManage/TopicManage";
+import TeacherTopicList from "../pages/teacher/Topic/TeacherTopicList/TeacherTopicList";
+import TeacherListeningLessonList from "../pages/teacher/Topic/TeacherListeningLessonList/TeacherListeningLessonList";
+import TeacherListeningLessonCreate from "../pages/teacher/Topic/TeacherListeningLessonCreate/TeacherListeningLessonCreate";
+import TeacherListeningLessonDetail from "../pages/teacher/Topic/TeacherListeningLessonDetail/TeacherListeningLessonDetail";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -74,7 +77,7 @@ function AppRoutes() {
             element={<RoleRoute allowedRoles={[ROLES.TEACHER]} />}
           >
             <Route path="profile" element={<TeacherProfile />} />
-            
+
             {/*   quản lý từ vựng */}
             <Route path="vocabulary" element={<VocabularyManagement />} />
             <Route path="create-vocabulary" element={<CreateVocabulary />} />
@@ -87,6 +90,21 @@ function AppRoutes() {
             <Route path="students" element={<StudentManagement />} />
             <Route path="create-student" element={<CreateStudent />} />
             <Route path="student-detail/:id" element={<StudentDetail />} />
+
+            {/* topic */}
+            <Route path="topics" element={<TeacherTopicList />} />
+            <Route
+              path="topics/:topicId"
+              element={<TeacherListeningLessonList />}
+            />
+            <Route
+              path="topics/:topicId/listening-lessons/create"
+              element={<TeacherListeningLessonCreate />}
+            />
+            <Route
+              path="topics/:topicId/listening-lessons/:lessonId"
+              element={<TeacherListeningLessonDetail />}
+            />
           </Route>
 
           <Route

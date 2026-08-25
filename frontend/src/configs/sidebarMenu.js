@@ -63,7 +63,11 @@ export const sidebarMenus = {
       name: "Quản lý từ vựng",
       icon: faFileWord,
     },
-
+    {
+      path: "/dashboard/teacher/topics",
+      name: "Quản lý chủ đề",
+      icon: faBookOpen,
+    },
     {
       path: "/teacher/settings",
       name: "Cài đặt",

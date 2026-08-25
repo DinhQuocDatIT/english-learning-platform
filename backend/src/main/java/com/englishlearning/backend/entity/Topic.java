@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -46,4 +47,7 @@ public class Topic {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
+
+    @OneToMany(mappedBy = "topic")
+    private List<ListeningLesson> listeningLessons;
 }

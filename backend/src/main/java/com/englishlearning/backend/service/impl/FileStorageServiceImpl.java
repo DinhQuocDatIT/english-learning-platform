@@ -17,6 +17,7 @@ import java.util.UUID;
 public class FileStorageServiceImpl implements FileStorageService {
 
     private final Path topicUploadPath;
+    private final Path lessonUploadPath;
 
     public FileStorageServiceImpl(
             @Value("${file.upload-dir:uploads}") String uploadDir
@@ -27,16 +28,76 @@ public class FileStorageServiceImpl implements FileStorageService {
                         .toAbsolutePath()
                         .normalize();
 
+        this.lessonUploadPath =
+                Paths.get(uploadDir, "listening-lessons")
+                        .toAbsolutePath()
+                        .normalize();
+
         try {
             Files.createDirectories(topicUploadPath);
+            Files.createDirectories(lessonUploadPath);
         } catch (IOException e) {
             throw new RuntimeException(
-                    "Không thể tạo thư mục lưu ảnh topic",
+                    "Không thể tạo thư mục upload",
                     e
             );
         }
     }
+    @Override
+    public String storeLessonImage(MultipartFile file) {
 
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        String contentType = file.getContentType();
+
+        if (contentType == null ||
+                !contentType.startsWith("image/")) {
+
+            throw new BusinessException(
+                    "File upload phải là hình ảnh"
+            );
+        }
+
+        String originalFilename =
+                StringUtils.cleanPath(
+                        file.getOriginalFilename()
+                );
+
+        String extension = "";
+
+        int lastDot =
+                originalFilename.lastIndexOf(".");
+
+        if (lastDot >= 0) {
+            extension =
+                    originalFilename.substring(lastDot);
+        }
+
+        String fileName =
+                UUID.randomUUID() + extension;
+
+        Path targetPath =
+                lessonUploadPath.resolve(fileName);
+
+        try {
+
+            Files.copy(
+                    file.getInputStream(),
+                    targetPath
+            );
+
+            return "/uploads/listening-lessons/" + fileName;
+
+        } catch (IOException e) {
+
+            throw new RuntimeException(
+                    "Không thể lưu ảnh bài nghe",
+                    e
+            );
+        }
+    }
     @Override
     public String storeTopicImage(MultipartFile file) {
 
