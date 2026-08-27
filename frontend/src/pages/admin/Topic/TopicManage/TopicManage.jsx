@@ -15,6 +15,7 @@ import {
   faEyeSlash,
   faFileLines,
   faEdit,
+  faHeadphones,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { toast } from "react-toastify";
@@ -169,12 +170,19 @@ function TopicManage() {
   };
 
   // =========================
-  // VIEW
+  // CLICK CARD -> VÀO DANH SÁCH BÀI NGHE
+  // =========================
+
+  const handleCardClick = (topicId) => {
+    navigate(`/dashboard/admin/topics/${topicId}/listening-lessons`);
+  };
+
+  // =========================
+  // VIEW DETAIL
   // =========================
 
   const handleView = (topic) => {
     setActiveMenuId(null);
-
     navigate(`/dashboard/admin/topic/${topic.id}`);
   };
 
@@ -184,7 +192,6 @@ function TopicManage() {
 
   const handleEdit = (topic) => {
     setActiveMenuId(null);
-
     navigate(`/dashboard/admin/edit-topic/${topic.id}`);
   };
 
@@ -196,7 +203,6 @@ function TopicManage() {
     setActiveMenuId(null);
 
     const shouldPublish = topic.status !== "PUBLISHED";
-
     const actionText = shouldPublish ? "hiển thị" : "ẩn";
 
     const confirmed = window.confirm(
@@ -338,7 +344,12 @@ function TopicManage() {
             const imageUrl = getImageUrl(topic.topicImage);
 
             return (
-              <div key={topic.id} className={styles.card}>
+              <div
+                key={topic.id}
+                className={styles.card}
+                onClick={() => handleCardClick(topic.id)}
+                style={{ cursor: "pointer" }}
+              >
                 {/* IMAGE */}
 
                 <div className={styles.imageWrapper}>
@@ -369,6 +380,13 @@ function TopicManage() {
                       icon={faImage}
                       className={styles.fallbackIcon}
                     />
+                  </div>
+
+                  {/* LESSON BADGE - Số bài nghe */}
+
+                  <div className={styles.lessonBadge}>
+                    <FontAwesomeIcon icon={faHeadphones} />
+                    {topic.lessonCount || 0} bài nghe
                   </div>
 
                   {/* STATUS */}
@@ -402,19 +420,34 @@ function TopicManage() {
 
                     {activeMenuId === topic.id && (
                       <div className={styles.dropdownMenu}>
-                        <button type="button" onClick={() => handleView(topic)}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleView(topic);
+                          }}
+                        >
                           <FontAwesomeIcon icon={faFileLines} />
                           Xem chi tiết
                         </button>
 
-                        <button type="button" onClick={() => handleEdit(topic)}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(topic);
+                          }}
+                        >
                           <FontAwesomeIcon icon={faEdit} />
                           Chỉnh sửa
                         </button>
 
                         <button
                           type="button"
-                          onClick={() => handleChangeStatus(topic)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleChangeStatus(topic);
+                          }}
                         >
                           <FontAwesomeIcon
                             icon={

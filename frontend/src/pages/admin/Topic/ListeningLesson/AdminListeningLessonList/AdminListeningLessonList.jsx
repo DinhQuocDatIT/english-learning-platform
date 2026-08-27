@@ -11,14 +11,19 @@ import {
   faImage,
   faTag,
   faArrowLeft,
+  faCheck,
+  faTimes,
+  faRocket,
+  faFilter,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
-import teacherTopicService from "../../../../services/teacherTopicService";
-import listeningLessonService from "../../../../services/listeningLessonService";
-import getImageUrl from "../../../../utils/imageUrl";
+import adminTopicService from "../../../../../services/adminTopicService";
+import listeningLessonService from "../../../../../services/listeningLessonService";
+import getImageUrl from "../../../../../utils/imageUrl";
+import { useLoading } from "../../../../../contexts/LoadingContext";
 
-import styles from "./TeacherListeningLessonList.module.css";
+import styles from "./AdminListeningLessonList.module.css";
 
 // Map trạng thái từ tiếng Anh sang tiếng Việt
 const STATUS_MAP = {
@@ -38,9 +43,10 @@ const STATUS_COLOR_MAP = {
   PUBLISHED: "#34d399",
 };
 
-function TeacherListeningLessonList() {
+function AdminListeningLessonList() {
   const navigate = useNavigate();
   const { topicId } = useParams();
+  const { showLoading, hideLoading } = useLoading();
 
   const [topic, setTopic] = useState(null);
   const [lessons, setLessons] = useState([]);
@@ -49,6 +55,7 @@ function TeacherListeningLessonList() {
 
   const [filters, setFilters] = useState({
     keyword: "",
+    status: "",
   });
 
   useEffect(() => {
@@ -58,9 +65,10 @@ function TeacherListeningLessonList() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      showLoading();
 
       const [topicResponse, lessonResponse] = await Promise.all([
-        teacherTopicService.getById(topicId),
+        adminTopicService.getById(topicId),
         listeningLessonService.getByTopic(topicId),
       ]);
 
@@ -78,38 +86,111 @@ function TeacherListeningLessonList() {
       setLessons([]);
     } finally {
       setLoading(false);
+      hideLoading();
     }
   };
 
   // Filter
   const filteredLessons = lessons.filter((lesson) => {
     const keyword = filters.keyword.trim().toLowerCase();
-    return !keyword || lesson.title?.toLowerCase().includes(keyword);
+    const matchKeyword =
+      !keyword || lesson.title?.toLowerCase().includes(keyword);
+
+    const matchStatus = !filters.status || lesson.status === filters.status;
+
+    return matchKeyword && matchStatus;
   });
 
   const handleFilterChange = (e) => {
-    setFilters({ keyword: e.target.value });
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters({ keyword: "", status: "" });
   };
 
   const handleGoBack = () => {
-    navigate(`/dashboard/teacher/topics`);
+    navigate(`/dashboard/admin/topics`);
   };
 
-  const handleCreate = () => {
-    navigate(`/dashboard/teacher/topics/${topicId}/listening-lessons/create`);
+  // =========================
+  // ADMIN ACTIONS
+  // =========================
+
+  // Approve - PENDING → APPROVED
+  const handleApprove = async (lessonId) => {
+    const confirmed = window.confirm("Bạn chắc chắn muốn duyệt bài nghe này?");
+    if (!confirmed) return;
+
+    try {
+      showLoading();
+      await listeningLessonService.approve(lessonId);
+      toast.success("✅ Duyệt bài nghe thành công!");
+      await fetchData();
+    } catch (error) {
+      console.error("Lỗi duyệt bài nghe:", error);
+      toast.error(error.response?.data?.message || "Không thể duyệt bài nghe.");
+    } finally {
+      hideLoading();
+      setActiveMenuId(null);
+    }
   };
+
+  // Reject - PENDING → REJECTED
+  const handleReject = async (lessonId) => {
+    const confirmed = window.confirm(
+      "Bạn chắc chắn muốn từ chối bài nghe này?",
+    );
+    if (!confirmed) return;
+
+    try {
+      showLoading();
+      await listeningLessonService.reject(lessonId);
+      toast.success("❌ Từ chối bài nghe thành công!");
+      await fetchData();
+    } catch (error) {
+      console.error("Lỗi từ chối bài nghe:", error);
+      toast.error(
+        error.response?.data?.message || "Không thể từ chối bài nghe.",
+      );
+    } finally {
+      hideLoading();
+      setActiveMenuId(null);
+    }
+  };
+
+  // Publish - APPROVED → PUBLISHED
+  const handlePublish = async (lessonId) => {
+    const confirmed = window.confirm(
+      "Bạn chắc chắn muốn phát hành bài nghe này?",
+    );
+    if (!confirmed) return;
+
+    try {
+      showLoading();
+      await listeningLessonService.publish(lessonId);
+      toast.success("🚀 Phát hành bài nghe thành công!");
+      await fetchData();
+    } catch (error) {
+      console.error("Lỗi phát hành bài nghe:", error);
+      toast.error(
+        error.response?.data?.message || "Không thể phát hành bài nghe.",
+      );
+    } finally {
+      hideLoading();
+      setActiveMenuId(null);
+    }
+  };
+
+  // =========================
+  // NAVIGATION
+  // =========================
 
   const handleViewLesson = (lessonId) => {
     setActiveMenuId(null);
     navigate(
-      `/dashboard/teacher/topics/${topicId}/listening-lessons/${lessonId}`,
-    );
-  };
-
-  const handleEditLesson = (lessonId) => {
-    setActiveMenuId(null);
-    navigate(
-      `/dashboard/teacher/topics/${topicId}/listening-lessons/${lessonId}/edit`,
+      `/dashboard/admin/topics/${topicId}/listening-lessons/${lessonId}`,
     );
   };
 
@@ -131,8 +212,10 @@ function TeacherListeningLessonList() {
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại</span>
         </button>
+        <h1 className={styles.pageTitle}>Quản lý bài nghe</h1>
       </div>
 
+      {/* Topic Hero */}
       <div className={styles.topicHero}>
         <div className={styles.topicHeroImage}>
           {getImageUrl(topic?.topicImage) ? (
@@ -170,26 +253,16 @@ function TeacherListeningLessonList() {
                 </span>
               )}
             </div>
-
             <h1 className={styles.topicHeroTitle}>{topic?.title || ""}</h1>
             <p className={styles.topicHeroDesc}>{topic?.description || ""}</p>
           </div>
-
-          <button
-            type="button"
-            className={styles.topicHeroBtn}
-            onClick={handleCreate}
-          >
-            <FontAwesomeIcon icon={faPlus} />
-            Thêm Bài nghe Mới
-          </button>
         </div>
       </div>
 
-      {/* Search */}
+      {/* Filter */}
       <div className={styles.filterCard}>
         <div className={styles.searchGroup}>
-          <label className={styles.filterLabel}>Tìm kiếm bài nghe</label>
+          <label className={styles.filterLabel}>Tìm kiếm</label>
           <div className={styles.searchInputWrapper}>
             <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
             <input
@@ -202,6 +275,32 @@ function TeacherListeningLessonList() {
             />
           </div>
         </div>
+
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Trạng thái</label>
+          <select
+            name="status"
+            value={filters.status}
+            onChange={handleFilterChange}
+            className={styles.selectInput}
+          >
+            <option value="">Tất cả</option>
+            <option value="DRAFT">Nháp</option>
+            <option value="PENDING">Chờ duyệt</option>
+            <option value="APPROVED">Đã duyệt</option>
+            <option value="REJECTED">Từ chối</option>
+            <option value="PUBLISHED">Đã phát hành</option>
+          </select>
+        </div>
+
+        <button
+          type="button"
+          className={styles.clearFiltersBtn}
+          onClick={handleClearFilters}
+        >
+          <FontAwesomeIcon icon={faFilter} />
+          Xóa bộ lọc
+        </button>
       </div>
 
       {/* Grid */}
@@ -211,20 +310,9 @@ function TeacherListeningLessonList() {
           <h3>Không tìm thấy bài nghe nào</h3>
           <p>
             {lessons.length === 0
-              ? "Hãy tạo bài nghe đầu tiên."
-              : "Không có kết quả phù hợp."}
+              ? "Chưa có bài nghe nào trong topic này."
+              : "Không có kết quả phù hợp với bộ lọc."}
           </p>
-
-          {lessons.length === 0 && (
-            <button
-              type="button"
-              className={styles.emptyAddBtn}
-              onClick={handleCreate}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-              Tạo bài nghe
-            </button>
-          )}
         </div>
       ) : (
         <div className={styles.grid}>
@@ -262,7 +350,6 @@ function TeacherListeningLessonList() {
                   />
                 </div>
 
-                {/* Overlay */}
                 <div className={styles.imageOverlay} />
 
                 {/* Level */}
@@ -285,7 +372,7 @@ function TeacherListeningLessonList() {
                   </span>
                 )}
 
-                {/* Status - Tiếng Việt */}
+                {/* Status */}
                 {lesson.status && (
                   <span
                     className={styles.statusBadge}
@@ -320,12 +407,38 @@ function TeacherListeningLessonList() {
                       >
                         Xem chi tiết
                       </button>
-                      {lesson.status === "DRAFT" && (
+
+                      {/* PENDING → Approve / Reject */}
+                      {lesson.status === "PENDING" && (
+                        <>
+                          <button
+                            type="button"
+                            className={styles.approveBtn}
+                            onClick={() => handleApprove(lesson.id)}
+                          >
+                            <FontAwesomeIcon icon={faCheck} />
+                            Duyệt bài
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.rejectBtn}
+                            onClick={() => handleReject(lesson.id)}
+                          >
+                            <FontAwesomeIcon icon={faTimes} />
+                            Từ chối
+                          </button>
+                        </>
+                      )}
+
+                      {/* APPROVED → Publish */}
+                      {lesson.status === "APPROVED" && (
                         <button
                           type="button"
-                          onClick={() => handleEditLesson(lesson.id)}
+                          className={styles.publishBtn}
+                          onClick={() => handlePublish(lesson.id)}
                         >
-                          Chỉnh sửa
+                          <FontAwesomeIcon icon={faRocket} />
+                          Phát hành
                         </button>
                       )}
                     </div>
@@ -337,10 +450,10 @@ function TeacherListeningLessonList() {
               <div className={styles.cardBody}>
                 <h3 className={styles.cardTitle}>{lesson.title}</h3>
 
-                {/* Meta */}
                 <div className={styles.cardMeta}>
                   {lesson.createdByName && (
                     <span className={styles.metaItem}>
+                      <span className={styles.metaLabel}>Người tạo</span>
                       <span className={styles.metaValue}>
                         {lesson.createdByName}
                       </span>
@@ -349,6 +462,7 @@ function TeacherListeningLessonList() {
 
                   {lesson.updatedAt && (
                     <span className={styles.metaItem}>
+                      <span className={styles.metaLabel}>Cập nhật</span>
                       <span className={styles.metaValue}>
                         {new Date(lesson.updatedAt).toLocaleDateString("vi-VN")}
                       </span>
@@ -364,4 +478,4 @@ function TeacherListeningLessonList() {
   );
 }
 
-export default TeacherListeningLessonList;
+export default AdminListeningLessonList;
