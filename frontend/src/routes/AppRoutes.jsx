@@ -42,6 +42,7 @@ import TeacherListeningLessonCreate from "../pages/teacher/Topic/TeacherListenin
 import TeacherListeningLessonDetail from "../pages/teacher/Topic/TeacherListeningLessonDetail/TeacherListeningLessonDetail";
 import TeacherListeningLessonEdit from "../pages/teacher/Topic/TeacherListeningLessonEdit/TeacherListeningLessonEdit";
 import AdminListeningLessonList from "../pages/admin/Topic/ListeningLesson/AdminListeningLessonList/AdminListeningLessonList";
+import ListeningSentenceManage from "../pages/teacher/Topic/ListeningSentenceManage/ListeningSentenceManage";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -110,6 +111,10 @@ function AppRoutes() {
             <Route
               path="topics/:topicId/listening-lessons/:lessonId/edit"
               element={<TeacherListeningLessonEdit />}
+            />
+            <Route
+              path="topics/:topicId/listening-lessons/:lessonId/sentences"
+              element={<ListeningSentenceManage />}
             />
           </Route>
 

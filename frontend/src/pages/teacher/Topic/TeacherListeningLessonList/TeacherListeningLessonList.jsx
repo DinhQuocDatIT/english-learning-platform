@@ -11,6 +11,7 @@ import {
   faImage,
   faTag,
   faArrowLeft,
+  faLanguage,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -55,7 +56,6 @@ function TeacherListeningLessonList() {
     fetchData();
   }, [topicId]);
 
-  // TeacherListeningLessonList.jsx - fetchData
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -81,6 +81,7 @@ function TeacherListeningLessonList() {
       setLoading(false);
     }
   };
+
   // Filter
   const filteredLessons = lessons.filter((lesson) => {
     const keyword = filters.keyword.trim().toLowerCase();
@@ -99,6 +100,14 @@ function TeacherListeningLessonList() {
     navigate(`/dashboard/teacher/topics/${topicId}/listening-lessons/create`);
   };
 
+  // 👇 KHI CLICK VÀO CARD -> VÀO TRANG QUẢN LÝ CÂU HỎI
+  const handleCardClick = (lessonId) => {
+    navigate(
+      `/dashboard/teacher/topics/${topicId}/listening-lessons/${lessonId}/sentences`,
+    );
+  };
+
+  // 👇 MENU: Xem chi tiết (vẫn giữ)
   const handleViewLesson = (lessonId) => {
     setActiveMenuId(null);
     navigate(
@@ -232,6 +241,8 @@ function TeacherListeningLessonList() {
             <div
               key={lesson.id}
               className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
+              onClick={() => handleCardClick(lesson.id)} // 👈 CLICK VÀO CARD
+              style={{ cursor: "pointer" }}
             >
               {/* Image */}
               <div className={styles.imageWrapper}>
@@ -303,11 +314,12 @@ function TeacherListeningLessonList() {
                   <button
                     type="button"
                     className={styles.actionBtn}
-                    onClick={() =>
+                    onClick={(e) => {
+                      e.stopPropagation(); // 👈 KHÔNG BẮN SỰ KIỆN LÊN CARD
                       setActiveMenuId(
                         activeMenuId === lesson.id ? null : lesson.id,
-                      )
-                    }
+                      );
+                    }}
                   >
                     <FontAwesomeIcon icon={faEllipsisV} />
                   </button>
@@ -316,14 +328,30 @@ function TeacherListeningLessonList() {
                     <div className={styles.dropdownMenu}>
                       <button
                         type="button"
-                        onClick={() => handleViewLesson(lesson.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewLesson(lesson.id);
+                        }}
                       >
                         Xem chi tiết
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCardClick(lesson.id);
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faLanguage} />
+                        Quản lý câu hỏi
                       </button>
                       {lesson.status === "DRAFT" && (
                         <button
                           type="button"
-                          onClick={() => handleEditLesson(lesson.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditLesson(lesson.id);
+                          }}
                         >
                           Chỉnh sửa
                         </button>
