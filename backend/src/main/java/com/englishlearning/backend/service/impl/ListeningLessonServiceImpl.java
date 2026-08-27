@@ -176,7 +176,17 @@ public class ListeningLessonServiceImpl
                 .map(this::toResponse)
                 .toList();
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public List<ListeningLessonResponse> getMyLessonsByTopic(Long teacherId, Long topicId) {
+        getUser(teacherId);
+        getTopic(topicId);
+        return listeningLessonRepository
+                .findAllByCreatedByIdAndTopicIdOrderByCreatedAtDesc(teacherId, topicId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
     // =====================================================
     // TEACHER - SUBMIT
     // =====================================================

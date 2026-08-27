@@ -55,13 +55,14 @@ function TeacherListeningLessonList() {
     fetchData();
   }, [topicId]);
 
+  // TeacherListeningLessonList.jsx - fetchData
   const fetchData = async () => {
     try {
       setLoading(true);
 
       const [topicResponse, lessonResponse] = await Promise.all([
         teacherTopicService.getById(topicId),
-        listeningLessonService.getByTopic(topicId),
+        listeningLessonService.getMyLessonsByTopic(topicId),
       ]);
 
       const topicData = topicResponse?.data?.data;
@@ -80,7 +81,6 @@ function TeacherListeningLessonList() {
       setLoading(false);
     }
   };
-
   // Filter
   const filteredLessons = lessons.filter((lesson) => {
     const keyword = filters.keyword.trim().toLowerCase();

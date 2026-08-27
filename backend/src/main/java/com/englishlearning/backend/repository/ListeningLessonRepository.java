@@ -23,4 +23,8 @@ public interface ListeningLessonRepository extends JpaRepository<ListeningLesson
     );
     List<ListeningLesson>
     findAllByOrderByCreatedAtDesc();
+    List<ListeningLesson> findAllByCreatedByIdAndTopicIdOrderByCreatedAtDesc(
+            Long teacherId,
+            Long topicId
+    );
 }

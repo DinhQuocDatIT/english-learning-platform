@@ -18,6 +18,7 @@ public interface ListeningLessonService {
     List<ListeningLessonResponse> getMyLessons(
             Long teacherId
     );
+    List<ListeningLessonResponse> getMyLessonsByTopic(Long teacherId, Long topicId);
     ListeningLessonResponse submitForReview(
             Long teacherId,
             Long lessonId

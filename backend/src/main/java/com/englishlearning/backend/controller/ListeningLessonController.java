@@ -101,7 +101,26 @@ public class ListeningLessonController {
                 )
         );
     }
+    @PreAuthorize("hasRole('TEACHER')")
+    @GetMapping("/topic/{topicId}/my")
+    public ResponseEntity<ApiResponse<List<ListeningLessonResponse>>> getMyLessonsByTopic(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long topicId
+    ) {
+        List<ListeningLessonResponse> response =
+                listeningLessonService.getMyLessonsByTopic(
+                        userDetails.getUser().getId(),
+                        topicId
+                );
 
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy danh sách bài nghe thành công",
+                        response
+                )
+        );
+    }
     // =========================
     // TEACHER - SUBMIT
     // =========================

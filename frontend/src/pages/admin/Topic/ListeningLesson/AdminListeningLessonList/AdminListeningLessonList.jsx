@@ -212,7 +212,6 @@ function AdminListeningLessonList() {
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại</span>
         </button>
-        <h1 className={styles.pageTitle}>Quản lý bài nghe</h1>
       </div>
 
       {/* Topic Hero */}

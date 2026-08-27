@@ -24,6 +24,9 @@ const listeningLessonService = {
   submit(id) {
     return axiosClient.post(`/v1/listening-lessons/${id}/submit`);
   },
+  getMyLessonsByTopic(topicId) {
+    return axiosClient.get(`/v1/listening-lessons/topic/${topicId}/my`);
+  },
 };
 
 export default listeningLessonService;
