@@ -1,0 +1,145 @@
+/* Thêm vào cuối file AdminListeningLessonReview.module.css */
+
+/* ====== REJECT FORM IN PAGE ====== */
+.rejectFormContainer {
+  margin-bottom: 28px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rejectForm {
+  background: var(--color-background, #ffffff);
+  border-radius: 16px;
+  border: 1px solid #ef4444;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.08);
+}
+
+.rejectForm h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ef4444;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rejectForm .formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.rejectForm .formGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-secondary, #0f172a);
+}
+
+.rejectForm .required {
+  color: #ef4444;
+}
+
+.rejectForm .textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--color-text, #0f172a);
+  background: var(--color-surface, #fafbfc);
+  transition: all 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.rejectForm .textarea:focus {
+  outline: none;
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+  background: var(--color-background, #ffffff);
+}
+
+.rejectForm .hint {
+  font-size: 12px;
+  color: var(--color-text-muted, #94a3b8);
+  margin: 4px 0 0 0;
+}
+
+.rejectFormActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.rejectFormActions .cancelBtn {
+  padding: 10px 24px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-muted, #64748b);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rejectFormActions .cancelBtn:hover:not(:disabled) {
+  background: var(--color-border, #f1f5f9);
+  border-color: var(--color-text-muted, #cbd5e1);
+}
+
+.rejectFormActions .submitReject {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 10px;
+  background: #ef4444;
+  color: var(--color-text-white, #ffffff);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rejectFormActions .submitReject:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.rejectFormActions .submitReject:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ====== CONTAINER ====== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  background: transparent;
+  min-height: 100vh;
+}

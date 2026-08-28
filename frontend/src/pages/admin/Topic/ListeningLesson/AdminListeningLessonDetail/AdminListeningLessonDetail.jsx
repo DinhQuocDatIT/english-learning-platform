@@ -14,24 +14,30 @@ import {
   faInfoCircle,
   faLayerGroup,
   faCheckCircle,
+  faCheck,
+  faTimes,
+  faRocket,
   faHistory,
+  faSpinner,
   faChevronDown,
   faChevronUp,
   faTimesCircle,
-  faRocket,
+  faCheckCircle as faCheckCircleIcon,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
-import listeningLessonService from "../../../../services/listeningLessonService";
-import listeningLessonReviewService from "../../../../services/listeningLessonReviewService";
-import getImageUrl from "../../../../utils/imageUrl";
-import { useLoading } from "../../../../contexts/LoadingContext";
+import listeningLessonService from "../../../../../services/listeningLessonService";
+import listeningLessonReviewService from "../../../../../services/listeningLessonReviewService";
+import getImageUrl from "../../../../../utils/imageUrl";
+import { useLoading } from "../../../../../contexts/LoadingContext";
+import RejectForm from "../../../../../components/RejectForm/RejectForm";
+
+import styles from "./AdminListeningLessonDetail.module.css";
 import {
   STATUS_MAP,
   STATUS_BG_COLOR_MAP,
-  STATUS_COLOR_MAP,
-} from "../../../../constants/status";
-import styles from "./TeacherListeningLessonDetail.module.css";
+} from "../../../../../constants/status";
+// Map trạng thái
 
 // ===== PROGRESS STEPPER COMPONENT =====
 function ProgressStepper({ currentStep }) {
@@ -144,7 +150,7 @@ function ReviewItem({ review }) {
     switch (action) {
       case "APPROVE":
         return {
-          icon: faCheckCircle,
+          icon: faCheckCircleIcon,
           className: styles.reviewApprove,
           label: "Đã duyệt",
           iconColor: "#22c55e",
@@ -260,7 +266,7 @@ function ReviewItem({ review }) {
 }
 
 // ===== MAIN COMPONENT =====
-function TeacherListeningLessonDetail() {
+function AdminListeningLessonDetail() {
   const navigate = useNavigate();
   const { topicId, lessonId } = useParams();
   const { showLoading, hideLoading } = useLoading();
@@ -269,12 +275,15 @@ function TeacherListeningLessonDetail() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const [showRejectModal, setShowRejectModal] = useState(false);
 
   useEffect(() => {
-    fetchLessonDetail();
+    fetchData();
   }, [lessonId]);
 
-  const fetchLessonDetail = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
       showLoading();
@@ -307,8 +316,8 @@ function TeacherListeningLessonDetail() {
     }
   };
 
-  const handleBack = () => {
-    navigate(`/dashboard/teacher/topics/${topicId}`);
+  const handleGoBack = () => {
+    navigate(`/dashboard/admin/topics/${topicId}/listening-lessons`);
   };
 
   const formatDate = (dateString) => {
@@ -320,6 +329,89 @@ function TeacherListeningLessonDetail() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // ===== ADMIN ACTIONS =====
+
+  const handleApprove = async () => {
+    if (!window.confirm("Bạn chắc chắn muốn duyệt bài nghe này?")) return;
+
+    try {
+      setActionLoading(true);
+      showLoading();
+
+      await listeningLessonService.approve(lessonId);
+
+      await listeningLessonReviewService.create({
+        listeningLessonId: Number(lessonId),
+        action: "APPROVE",
+        reason: null,
+      });
+
+      toast.success("✅ Duyệt bài nghe thành công!");
+      await fetchData();
+    } catch (error) {
+      console.error("Lỗi duyệt bài nghe:", error);
+      toast.error(error.response?.data?.message || "Không thể duyệt bài nghe.");
+    } finally {
+      setActionLoading(false);
+      hideLoading();
+    }
+  };
+
+  const handleRejectSubmit = async (reason) => {
+    try {
+      setActionLoading(true);
+      showLoading();
+
+      await listeningLessonService.reject(lessonId);
+
+      await listeningLessonReviewService.create({
+        listeningLessonId: Number(lessonId),
+        action: "REJECT",
+        reason: reason,
+      });
+
+      toast.success("❌ Từ chối bài nghe thành công!");
+      setShowRejectModal(false);
+      await fetchData();
+    } catch (error) {
+      console.error("Lỗi từ chối bài nghe:", error);
+      toast.error(
+        error.response?.data?.message || "Không thể từ chối bài nghe.",
+      );
+    } finally {
+      setActionLoading(false);
+      hideLoading();
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!window.confirm("Bạn chắc chắn muốn phát hành bài nghe này?")) return;
+
+    try {
+      setActionLoading(true);
+      showLoading();
+
+      await listeningLessonService.publish(lessonId);
+
+      await listeningLessonReviewService.create({
+        listeningLessonId: Number(lessonId),
+        action: "PUBLISH",
+        reason: null,
+      });
+
+      toast.success("🚀 Phát hành bài nghe thành công!");
+      await fetchData();
+    } catch (error) {
+      console.error("Lỗi phát hành bài nghe:", error);
+      toast.error(
+        error.response?.data?.message || "Không thể phát hành bài nghe.",
+      );
+    } finally {
+      setActionLoading(false);
+      hideLoading();
+    }
   };
 
   if (loading) {
@@ -340,7 +432,7 @@ function TeacherListeningLessonDetail() {
           <FontAwesomeIcon icon={faHeadphones} className={styles.errorIcon} />
           <h3>Không thể tải bài nghe</h3>
           <p>{error || "Bài nghe không tồn tại."}</p>
-          <button className={styles.backButtonError} onClick={handleBack}>
+          <button className={styles.backButtonError} onClick={handleGoBack}>
             <FontAwesomeIcon icon={faArrowLeft} />
             Quay lại danh sách
           </button>
@@ -349,20 +441,64 @@ function TeacherListeningLessonDetail() {
     );
   }
 
-  const statusInfo = STATUS_COLOR_MAP[lesson.status] || {
+  const statusInfo = STATUS_BG_COLOR_MAP[lesson.status] || {
     bg: "#f1f5f9",
     text: "#475569",
     border: "#94a3b8",
   };
 
+  const canApprove = lesson.status === "PENDING";
+  const canReject = lesson.status === "PENDING";
+  const canPublish = lesson.status === "APPROVED";
+
   return (
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={handleBack}>
+        <button className={styles.backButton} onClick={handleGoBack}>
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại danh sách</span>
         </button>
+        <div className={styles.headerActions}>
+          {canApprove && (
+            <button
+              className={`${styles.actionBtn} ${styles.approveBtn}`}
+              onClick={handleApprove}
+              disabled={actionLoading}
+            >
+              {actionLoading ? (
+                <FontAwesomeIcon icon={faSpinner} spin />
+              ) : (
+                <FontAwesomeIcon icon={faCheck} />
+              )}
+              Duyệt bài
+            </button>
+          )}
+          {canReject && (
+            <button
+              className={`${styles.actionBtn} ${styles.rejectBtn}`}
+              onClick={() => setShowRejectModal(true)}
+              disabled={actionLoading}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+              Từ chối
+            </button>
+          )}
+          {canPublish && (
+            <button
+              className={`${styles.actionBtn} ${styles.publishBtn}`}
+              onClick={handlePublish}
+              disabled={actionLoading}
+            >
+              {actionLoading ? (
+                <FontAwesomeIcon icon={faSpinner} spin />
+              ) : (
+                <FontAwesomeIcon icon={faRocket} />
+              )}
+              Phát hành
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Progress Stepper */}
@@ -411,7 +547,7 @@ function TeacherListeningLessonDetail() {
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>
                   <FontAwesomeIcon icon={faUser} />
-                  Người tạo
+                  Giáo viên tạo
                 </span>
                 <span className={styles.infoValue}>
                   {lesson.createdByName || "N/A"}
@@ -489,7 +625,6 @@ function TeacherListeningLessonDetail() {
               </div>
             </div>
 
-            {/* Status Info */}
             <div className={styles.statusCard}>
               <h3 className={styles.cardTitle}>Trạng thái bài học</h3>
               <div className={styles.statusInfo}>
@@ -503,15 +638,15 @@ function TeacherListeningLessonDetail() {
                   </div>
                   <div className={styles.statusDescription}>
                     {lesson.status === "DRAFT" &&
-                      "Bài nghe đang ở trạng thái nháp, bạn có thể chỉnh sửa trước khi gửi duyệt."}
+                      "Bài nghe đang ở trạng thái nháp, chờ giáo viên gửi duyệt."}
                     {lesson.status === "PENDING" &&
-                      "Bài nghe đang chờ Admin xét duyệt. Vui lòng chờ phản hồi."}
+                      "Bài nghe đang chờ Admin xét duyệt."}
                     {lesson.status === "APPROVED" &&
-                      "Bài nghe đã được Admin duyệt. Tiến hành phát hành để học sinh truy cập."}
+                      "Bài nghe đã được duyệt. Nhấn 'Phát hành' để công khai."}
                     {lesson.status === "REJECTED" &&
-                      "Bài nghe đã bị từ chối. Vui lòng kiểm tra và chỉnh sửa lại."}
+                      "Bài nghe đã bị từ chối. Giáo viên cần chỉnh sửa và gửi lại."}
                     {lesson.status === "PUBLISHED" &&
-                      "Bài nghe đã được phát hành. Học sinh có thể truy cập và học tập."}
+                      "Bài nghe đã được phát hành. Học sinh có thể truy cập."}
                   </div>
                 </div>
               </div>
@@ -539,8 +674,16 @@ function TeacherListeningLessonDetail() {
           </div>
         </div>
       </div>
+
+      {/* Reject Modal - Component riêng */}
+      <RejectForm
+        isOpen={showRejectModal}
+        onClose={() => setShowRejectModal(false)}
+        onSubmit={handleRejectSubmit}
+        isLoading={actionLoading}
+      />
     </div>
   );
 }
 
-export default TeacherListeningLessonDetail;
+export default AdminListeningLessonDetail;

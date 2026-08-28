@@ -1,6 +1,7 @@
 import axiosClient from "../api/axiosClient";
 
 const listeningLessonService = {
+  // ===== TEACHER =====
   create(data) {
     return axiosClient.post("/v1/listening-lessons", data);
   },
@@ -13,6 +14,15 @@ const listeningLessonService = {
     return axiosClient.get("/v1/listening-lessons/my");
   },
 
+  getMyLessonsByTopic(topicId) {
+    return axiosClient.get(`/v1/listening-lessons/topic/${topicId}/my`);
+  },
+
+  submit(id) {
+    return axiosClient.post(`/v1/listening-lessons/${id}/submit`);
+  },
+
+  // ===== PUBLIC =====
   getById(id) {
     return axiosClient.get(`/v1/listening-lessons/${id}`);
   },
@@ -21,11 +31,25 @@ const listeningLessonService = {
     return axiosClient.get(`/v1/listening-lessons/topic/${topicId}`);
   },
 
-  submit(id) {
-    return axiosClient.post(`/v1/listening-lessons/${id}/submit`);
+  getPublishedByTopic(topicId) {
+    return axiosClient.get(`/v1/listening-lessons/topic/${topicId}/published`);
   },
-  getMyLessonsByTopic(topicId) {
-    return axiosClient.get(`/v1/listening-lessons/topic/${topicId}/my`);
+
+  // ===== ADMIN =====
+  getAllForAdmin() {
+    return axiosClient.get("/v1/listening-lessons/admin");
+  },
+
+  approve(id) {
+    return axiosClient.post(`/v1/listening-lessons/admin/${id}/approve`);
+  },
+
+  reject(id) {
+    return axiosClient.post(`/v1/listening-lessons/admin/${id}/reject`);
+  },
+
+  publish(id) {
+    return axiosClient.post(`/v1/listening-lessons/admin/${id}/publish`);
   },
 };
 

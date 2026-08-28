@@ -32,6 +32,7 @@ public class ListeningLessonServiceImpl
     private final LevelRepository levelRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+
     // =====================================================
     // TEACHER - CREATE
     // =====================================================
@@ -85,7 +86,7 @@ public class ListeningLessonServiceImpl
     }
 
     // =====================================================
-    // TEACHER - UPDATE
+    // TEACHER - UPDATE (SỬA: Cho phép DRAFT và REJECTED)
     // =====================================================
 
     @Override
@@ -108,12 +109,12 @@ public class ListeningLessonServiceImpl
             );
         }
 
-        // Chỉ DRAFT mới được sửa
-        if (lesson.getStatus()
-                != ListeningLessonStatus.DRAFT) {
+        // ✅ SỬA: Cho phép sửa khi DRAFT hoặc REJECTED
+        if (lesson.getStatus() != ListeningLessonStatus.DRAFT &&
+                lesson.getStatus() != ListeningLessonStatus.REJECTED) {
 
             throw new RuntimeException(
-                    "Chỉ có thể chỉnh sửa bài nghe đang ở trạng thái Nháp"
+                    "Chỉ có thể chỉnh sửa bài nghe đang ở trạng thái Nháp hoặc Từ chối"
             );
         }
 
@@ -176,6 +177,11 @@ public class ListeningLessonServiceImpl
                 .map(this::toResponse)
                 .toList();
     }
+
+    // =====================================================
+    // TEACHER - MY LESSONS BY TOPIC
+    // =====================================================
+
     @Override
     @Transactional(readOnly = true)
     public List<ListeningLessonResponse> getMyLessonsByTopic(Long teacherId, Long topicId) {
@@ -187,8 +193,9 @@ public class ListeningLessonServiceImpl
                 .map(this::toResponse)
                 .toList();
     }
+
     // =====================================================
-    // TEACHER - SUBMIT
+    // TEACHER - SUBMIT (SỬA: Cho phép DRAFT và REJECTED)
     // =====================================================
 
     @Override
@@ -209,11 +216,12 @@ public class ListeningLessonServiceImpl
             );
         }
 
-        if (lesson.getStatus()
-                != ListeningLessonStatus.DRAFT) {
+        // ✅ SỬA: Cho phép submit khi DRAFT hoặc REJECTED
+        if (lesson.getStatus() != ListeningLessonStatus.DRAFT &&
+                lesson.getStatus() != ListeningLessonStatus.REJECTED) {
 
             throw new RuntimeException(
-                    "Chỉ có thể gửi bài nghe đang ở trạng thái Nháp"
+                    "Chỉ có thể gửi bài nghe đang ở trạng thái Nháp hoặc Từ chối"
             );
         }
 
@@ -267,6 +275,39 @@ public class ListeningLessonServiceImpl
 
         lesson.setStatus(
                 ListeningLessonStatus.APPROVED
+        );
+
+        ListeningLesson saved =
+                listeningLessonRepository.save(lesson);
+
+        return toResponse(saved);
+    }
+
+    // =====================================================
+    // ADMIN - REJECT
+    // =====================================================
+
+    @Override
+    public ListeningLessonResponse reject(
+            Long adminId,
+            Long lessonId
+    ) {
+
+        getUser(adminId);
+
+        ListeningLesson lesson =
+                getLesson(lessonId);
+
+        if (lesson.getStatus()
+                != ListeningLessonStatus.PENDING) {
+
+            throw new RuntimeException(
+                    "Chỉ có thể từ chối bài nghe đang chờ duyệt"
+            );
+        }
+
+        lesson.setStatus(
+                ListeningLessonStatus.REJECTED
         );
 
         ListeningLesson saved =

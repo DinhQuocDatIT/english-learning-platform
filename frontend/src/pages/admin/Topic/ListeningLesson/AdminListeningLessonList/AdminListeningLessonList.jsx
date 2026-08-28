@@ -11,10 +11,14 @@ import {
   faImage,
   faTag,
   faArrowLeft,
-  faCheck,
-  faTimes,
-  faRocket,
   faFilter,
+  faClock,
+  faList,
+  faHourglassHalf,
+  faCheckCircle,
+  faXmarkCircle,
+  faGlobe,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -43,6 +47,49 @@ const STATUS_COLOR_MAP = {
   PUBLISHED: "#34d399",
 };
 
+const STATUS_OPTIONS = [
+  { value: "", label: "Tất cả" },
+  { value: "PENDING", label: "Chờ duyệt" },
+  { value: "APPROVED", label: "Đã duyệt" },
+  { value: "REJECTED", label: "Từ chối" },
+  { value: "PUBLISHED", label: "Đã phát hành" },
+  { value: "DRAFT", label: "Nháp" },
+];
+
+// Cấu hình cho stats
+const STATS_CONFIG = [
+  {
+    key: "all",
+    label: "Tổng số",
+    icon: faList,
+    className: "statAll",
+  },
+  {
+    key: "pending",
+    label: "Chờ duyệt",
+    icon: faHourglassHalf,
+    className: "statPending",
+  },
+  {
+    key: "approved",
+    label: "Đã duyệt",
+    icon: faCheckCircle,
+    className: "statApproved",
+  },
+  {
+    key: "rejected",
+    label: "Từ chối",
+    icon: faXmarkCircle,
+    className: "statRejected",
+  },
+  {
+    key: "published",
+    label: "Đã phát hành",
+    icon: faGlobe,
+    className: "statPublished",
+  },
+];
+
 function AdminListeningLessonList() {
   const navigate = useNavigate();
   const { topicId } = useParams();
@@ -53,6 +100,7 @@ function AdminListeningLessonList() {
   const [loading, setLoading] = useState(true);
   const [activeMenuId, setActiveMenuId] = useState(null);
 
+  // Filter
   const [filters, setFilters] = useState({
     keyword: "",
     status: "",
@@ -67,9 +115,14 @@ function AdminListeningLessonList() {
       setLoading(true);
       showLoading();
 
+      // Nếu có topicId -> lấy theo topic, không -> lấy tất cả (Admin)
       const [topicResponse, lessonResponse] = await Promise.all([
-        adminTopicService.getById(topicId),
-        listeningLessonService.getByTopic(topicId),
+        topicId
+          ? adminTopicService.getById(topicId)
+          : Promise.resolve({ data: { data: null } }),
+        topicId
+          ? listeningLessonService.getByTopic(topicId)
+          : listeningLessonService.getAllForAdmin(),
       ]);
 
       const topicData = topicResponse?.data?.data;
@@ -79,10 +132,9 @@ function AdminListeningLessonList() {
       setLessons(Array.isArray(lessonData) ? lessonData : []);
     } catch (error) {
       console.error("Lỗi lấy danh sách bài nghe:", error);
-      const message =
-        error.response?.data?.message || "Không thể tải danh sách bài nghe.";
-      toast.error(message);
-      setTopic(null);
+      toast.error(
+        error.response?.data?.message || "Không thể tải danh sách bài nghe.",
+      );
       setLessons([]);
     } finally {
       setLoading(false);
@@ -114,85 +166,24 @@ function AdminListeningLessonList() {
     navigate(`/dashboard/admin/topics`);
   };
 
-  // =========================
-  // ADMIN ACTIONS
-  // =========================
-
-  // Approve - PENDING → APPROVED
-  const handleApprove = async (lessonId) => {
-    const confirmed = window.confirm("Bạn chắc chắn muốn duyệt bài nghe này?");
-    if (!confirmed) return;
-
-    try {
-      showLoading();
-      await listeningLessonService.approve(lessonId);
-      toast.success("✅ Duyệt bài nghe thành công!");
-      await fetchData();
-    } catch (error) {
-      console.error("Lỗi duyệt bài nghe:", error);
-      toast.error(error.response?.data?.message || "Không thể duyệt bài nghe.");
-    } finally {
-      hideLoading();
-      setActiveMenuId(null);
-    }
-  };
-
-  // Reject - PENDING → REJECTED
-  const handleReject = async (lessonId) => {
-    const confirmed = window.confirm(
-      "Bạn chắc chắn muốn từ chối bài nghe này?",
-    );
-    if (!confirmed) return;
-
-    try {
-      showLoading();
-      await listeningLessonService.reject(lessonId);
-      toast.success("❌ Từ chối bài nghe thành công!");
-      await fetchData();
-    } catch (error) {
-      console.error("Lỗi từ chối bài nghe:", error);
-      toast.error(
-        error.response?.data?.message || "Không thể từ chối bài nghe.",
-      );
-    } finally {
-      hideLoading();
-      setActiveMenuId(null);
-    }
-  };
-
-  // Publish - APPROVED → PUBLISHED
-  const handlePublish = async (lessonId) => {
-    const confirmed = window.confirm(
-      "Bạn chắc chắn muốn phát hành bài nghe này?",
-    );
-    if (!confirmed) return;
-
-    try {
-      showLoading();
-      await listeningLessonService.publish(lessonId);
-      toast.success("🚀 Phát hành bài nghe thành công!");
-      await fetchData();
-    } catch (error) {
-      console.error("Lỗi phát hành bài nghe:", error);
-      toast.error(
-        error.response?.data?.message || "Không thể phát hành bài nghe.",
-      );
-    } finally {
-      hideLoading();
-      setActiveMenuId(null);
-    }
-  };
-
-  // =========================
-  // NAVIGATION
-  // =========================
-
+  // ===== NAVIGATION =====
   const handleViewLesson = (lessonId) => {
     setActiveMenuId(null);
     navigate(
       `/dashboard/admin/topics/${topicId}/listening-lessons/${lessonId}`,
     );
   };
+
+  // Stats
+  const statusCount = {
+    all: lessons.length,
+    pending: lessons.filter((l) => l.status === "PENDING").length,
+    approved: lessons.filter((l) => l.status === "APPROVED").length,
+    rejected: lessons.filter((l) => l.status === "REJECTED").length,
+    published: lessons.filter((l) => l.status === "PUBLISHED").length,
+  };
+
+  const getStatValue = (key) => statusCount[key] || 0;
 
   if (loading) {
     return (
@@ -206,7 +197,7 @@ function AdminListeningLessonList() {
 
   return (
     <div className={styles.wrapper}>
-      {/* Header với nút quay lại */}
+      {/* Header */}
       <div className={styles.headerTop}>
         <button className={styles.backButton} onClick={handleGoBack}>
           <FontAwesomeIcon icon={faArrowLeft} />
@@ -214,48 +205,25 @@ function AdminListeningLessonList() {
         </button>
       </div>
 
-      {/* Topic Hero */}
-      <div className={styles.topicHero}>
-        <div className={styles.topicHeroImage}>
-          {getImageUrl(topic?.topicImage) ? (
-            <img
-              src={getImageUrl(topic?.topicImage)}
-              alt={topic?.title}
-              className={styles.topicHeroImg}
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-                const fallback = e.currentTarget.nextElementSibling;
-                if (fallback) fallback.style.display = "flex";
-              }}
-            />
-          ) : null}
-          <div
-            className={styles.topicHeroFallback}
-            style={{
-              display: getImageUrl(topic?.topicImage) ? "none" : "flex",
-            }}
-          >
-            <FontAwesomeIcon icon={faImage} className={styles.topicHeroIcon} />
-          </div>
-          <div className={styles.topicHeroOverlay} />
-        </div>
-
-        <div className={styles.topicHeroContent}>
-          <div className={styles.topicHeroMain}>
-            <div className={styles.topicHeroStats}>
-              <span className={styles.topicHeroStat}>
-                <FontAwesomeIcon icon={faBook} /> {lessons.length} Bài học
-              </span>
-              {topic?.levelName && (
-                <span className={styles.topicHeroStat}>
-                  <FontAwesomeIcon icon={faTag} /> {topic.levelName}
-                </span>
-              )}
+      {/* Stats */}
+      <div className={styles.statsGrid}>
+        {STATS_CONFIG.map((stat) => {
+          const value = getStatValue(stat.key);
+          return (
+            <div
+              key={stat.key}
+              className={`${styles.statCard} ${styles[stat.className]}`}
+            >
+              <div className={styles.statIconWrapper}>
+                <FontAwesomeIcon icon={stat.icon} className={styles.statIcon} />
+              </div>
+              <div className={styles.statInfo}>
+                <span className={styles.statLabel}>{stat.label}</span>
+                <span className={styles.statValue}>{value}</span>
+              </div>
             </div>
-            <h1 className={styles.topicHeroTitle}>{topic?.title || ""}</h1>
-            <p className={styles.topicHeroDesc}>{topic?.description || ""}</p>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
       {/* Filter */}
@@ -283,12 +251,11 @@ function AdminListeningLessonList() {
             onChange={handleFilterChange}
             className={styles.selectInput}
           >
-            <option value="">Tất cả</option>
-            <option value="DRAFT">Nháp</option>
-            <option value="PENDING">Chờ duyệt</option>
-            <option value="APPROVED">Đã duyệt</option>
-            <option value="REJECTED">Từ chối</option>
-            <option value="PUBLISHED">Đã phát hành</option>
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -305,11 +272,11 @@ function AdminListeningLessonList() {
       {/* Grid */}
       {filteredLessons.length === 0 ? (
         <div className={styles.emptyState}>
-          <FontAwesomeIcon icon={faHeadphones} className={styles.emptyIcon} />
+          <FontAwesomeIcon icon={faClock} className={styles.emptyIcon} />
           <h3>Không tìm thấy bài nghe nào</h3>
           <p>
             {lessons.length === 0
-              ? "Chưa có bài nghe nào trong topic này."
+              ? "Chưa có bài nghe nào trong hệ thống."
               : "Không có kết quả phù hợp với bộ lọc."}
           </p>
         </div>
@@ -384,7 +351,7 @@ function AdminListeningLessonList() {
                   </span>
                 )}
 
-                {/* Menu */}
+                {/* Menu - CHỈ CÓ XEM CHI TIẾT */}
                 <div className={styles.actionContainer}>
                   <button
                     type="button"
@@ -404,42 +371,9 @@ function AdminListeningLessonList() {
                         type="button"
                         onClick={() => handleViewLesson(lesson.id)}
                       >
+                        <FontAwesomeIcon icon={faEye} />
                         Xem chi tiết
                       </button>
-
-                      {/* PENDING → Approve / Reject */}
-                      {lesson.status === "PENDING" && (
-                        <>
-                          <button
-                            type="button"
-                            className={styles.approveBtn}
-                            onClick={() => handleApprove(lesson.id)}
-                          >
-                            <FontAwesomeIcon icon={faCheck} />
-                            Duyệt bài
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.rejectBtn}
-                            onClick={() => handleReject(lesson.id)}
-                          >
-                            <FontAwesomeIcon icon={faTimes} />
-                            Từ chối
-                          </button>
-                        </>
-                      )}
-
-                      {/* APPROVED → Publish */}
-                      {lesson.status === "APPROVED" && (
-                        <button
-                          type="button"
-                          className={styles.publishBtn}
-                          onClick={() => handlePublish(lesson.id)}
-                        >
-                          <FontAwesomeIcon icon={faRocket} />
-                          Phát hành
-                        </button>
-                      )}
                     </div>
                   )}
                 </div>
@@ -450,23 +384,21 @@ function AdminListeningLessonList() {
                 <h3 className={styles.cardTitle}>{lesson.title}</h3>
 
                 <div className={styles.cardMeta}>
-                  {lesson.createdByName && (
-                    <span className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Người tạo</span>
-                      <span className={styles.metaValue}>
-                        {lesson.createdByName}
-                      </span>
+                  
+                  <span className={styles.metaItem}>
+                    <span className={styles.metaLabel}>Người tạo</span>
+                    <span className={styles.metaValue}>
+                      {lesson.createdByName || "N/A"}
                     </span>
-                  )}
-
-                  {lesson.updatedAt && (
-                    <span className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Cập nhật</span>
-                      <span className={styles.metaValue}>
-                        {new Date(lesson.updatedAt).toLocaleDateString("vi-VN")}
-                      </span>
+                  </span>
+                  <span className={styles.metaItem}>
+                    <span className={styles.metaLabel}>Cập nhật</span>
+                    <span className={styles.metaValue}>
+                      {lesson.updatedAt
+                        ? new Date(lesson.updatedAt).toLocaleDateString("vi-VN")
+                        : "N/A"}
                     </span>
-                  )}
+                  </span>
                 </div>
               </div>
             </div>

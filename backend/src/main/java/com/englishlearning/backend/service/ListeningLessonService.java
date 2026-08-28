@@ -23,6 +23,10 @@ public interface ListeningLessonService {
             Long teacherId,
             Long lessonId
     );
+    ListeningLessonResponse reject(
+            Long adminId,
+            Long lessonId
+    );
     List<ListeningLessonResponse> getAll();
     ListeningLessonResponse approve(
             Long adminId,

@@ -101,6 +101,7 @@ public class ListeningLessonController {
                 )
         );
     }
+
     @PreAuthorize("hasRole('TEACHER')")
     @GetMapping("/topic/{topicId}/my")
     public ResponseEntity<ApiResponse<List<ListeningLessonResponse>>> getMyLessonsByTopic(
@@ -121,6 +122,7 @@ public class ListeningLessonController {
                 )
         );
     }
+
     // =========================
     // TEACHER - SUBMIT
     // =========================
@@ -188,6 +190,32 @@ public class ListeningLessonController {
                 new ApiResponse<>(
                         200,
                         "Duyệt bài nghe thành công",
+                        response
+                )
+        );
+    }
+
+    // =========================
+    // ADMIN - REJECT ⭐ THÊM MỚI
+    // =========================
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/{lessonId}/reject")
+    public ResponseEntity<ApiResponse<ListeningLessonResponse>> reject(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long lessonId
+    ) {
+
+        ListeningLessonResponse response =
+                listeningLessonService.reject(
+                        userDetails.getUser().getId(),
+                        lessonId
+                );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Từ chối bài nghe thành công",
                         response
                 )
         );

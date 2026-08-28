@@ -108,7 +108,7 @@ function TopicDetail() {
         <button
           type="button"
           className={styles.editButton}
-          onClick={() => navigate(`/dashboard/teacher/topics/${topic.id}/edit`)}
+          onClick={() => navigate(`/dashboard/admin/edit-topic/${topic.id}`)}
         >
           <FontAwesomeIcon icon={faEdit} />
           Chỉnh sửa

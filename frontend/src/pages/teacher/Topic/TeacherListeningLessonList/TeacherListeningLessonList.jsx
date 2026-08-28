@@ -20,24 +20,13 @@ import listeningLessonService from "../../../../services/listeningLessonService"
 import getImageUrl from "../../../../utils/imageUrl";
 
 import styles from "./TeacherListeningLessonList.module.css";
-
-// Map trạng thái từ tiếng Anh sang tiếng Việt
-const STATUS_MAP = {
-  DRAFT: "Nháp",
-  PENDING: "Chờ duyệt",
-  APPROVED: "Đã duyệt",
-  REJECTED: "Từ chối",
-  PUBLISHED: "Đã phát hành",
-};
+import {
+  STATUS_MAP,
+  STATUS_BG_COLOR_MAP,
+  STATUS_COLOR_MAP,
+} from "../../../../constants/status";
 
 // Map màu sắc cho từng trạng thái
-const STATUS_COLOR_MAP = {
-  DRAFT: "#fbbf24",
-  PENDING: "#60a5fa",
-  APPROVED: "#a78bfa",
-  REJECTED: "#f87171",
-  PUBLISHED: "#34d399",
-};
 
 function TeacherListeningLessonList() {
   const navigate = useNavigate();
@@ -120,6 +109,11 @@ function TeacherListeningLessonList() {
     navigate(
       `/dashboard/teacher/topics/${topicId}/listening-lessons/${lessonId}/edit`,
     );
+  };
+
+  // Kiểm tra có thể chỉnh sửa không (DRAFT hoặc REJECTED)
+  const canEdit = (status) => {
+    return status === "DRAFT" || status === "REJECTED";
   };
 
   if (loading) {
@@ -237,155 +231,174 @@ function TeacherListeningLessonList() {
         </div>
       ) : (
         <div className={styles.grid}>
-          {filteredLessons.map((lesson) => (
-            <div
-              key={lesson.id}
-              className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
-              onClick={() => handleCardClick(lesson.id)} // 👈 CLICK VÀO CARD
-              style={{ cursor: "pointer" }}
-            >
-              {/* Image */}
-              <div className={styles.imageWrapper}>
-                {getImageUrl(lesson.lessonImage) ? (
-                  <img
-                    src={getImageUrl(lesson.lessonImage)}
-                    alt={lesson.title}
-                    className={styles.lessonImage}
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      const fallback = e.currentTarget.nextElementSibling;
-                      if (fallback) {
-                        fallback.style.display = "flex";
-                      }
-                    }}
-                  />
-                ) : null}
+          {filteredLessons.map((lesson) => {
+            const isEditable = canEdit(lesson.status);
 
-                <div
-                  className={styles.fallbackGradient}
-                  style={{
-                    display: getImageUrl(lesson.lessonImage) ? "none" : "flex",
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faHeadphones}
-                    className={styles.fallbackIcon}
-                  />
-                </div>
+            return (
+              <div
+                key={lesson.id}
+                className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
+                onClick={() => {
+                  // Click vào card -> vào quản lý câu hỏi (chỉ khi editable)
+                  if (isEditable) {
+                    handleCardClick(lesson.id);
+                  }
+                }}
+                style={{ cursor: isEditable ? "pointer" : "default" }}
+              >
+                {/* Image */}
+                <div className={styles.imageWrapper}>
+                  {getImageUrl(lesson.lessonImage) ? (
+                    <img
+                      src={getImageUrl(lesson.lessonImage)}
+                      alt={lesson.title}
+                      className={styles.lessonImage}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const fallback = e.currentTarget.nextElementSibling;
+                        if (fallback) {
+                          fallback.style.display = "flex";
+                        }
+                      }}
+                    />
+                  ) : null}
 
-                {/* Overlay */}
-                <div className={styles.imageOverlay} />
-
-                {/* Level */}
-                {lesson.levelName && (
-                  <span
-                    className={styles.levelBadge}
+                  <div
+                    className={styles.fallbackGradient}
                     style={{
-                      color: lesson.levelColor || "#ffffff",
+                      display: getImageUrl(lesson.lessonImage)
+                        ? "none"
+                        : "flex",
                     }}
                   >
-                    {lesson.levelName}
-                  </span>
-                )}
+                    <FontAwesomeIcon
+                      icon={faHeadphones}
+                      className={styles.fallbackIcon}
+                    />
+                  </div>
 
-                {/* Premium */}
-                {lesson.isPremium && (
-                  <span className={styles.premiumBadge}>
-                    <FontAwesomeIcon icon={faCrown} />
-                    Pro
-                  </span>
-                )}
+                  {/* Overlay */}
+                  <div className={styles.imageOverlay} />
 
-                {/* Status - Tiếng Việt */}
-                {lesson.status && (
-                  <span
-                    className={styles.statusBadge}
-                    style={{
-                      backgroundColor:
-                        STATUS_COLOR_MAP[lesson.status] || "#64748b",
-                    }}
-                  >
-                    {STATUS_MAP[lesson.status] || lesson.status}
-                  </span>
-                )}
+                  {/* Level */}
+                  {lesson.levelName && (
+                    <span
+                      className={styles.levelBadge}
+                      style={{
+                        color: lesson.levelColor || "#ffffff",
+                      }}
+                    >
+                      {lesson.levelName}
+                    </span>
+                  )}
 
-                {/* Menu */}
-                <div className={styles.actionContainer}>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
-                    onClick={(e) => {
-                      e.stopPropagation(); // 👈 KHÔNG BẮN SỰ KIỆN LÊN CARD
-                      setActiveMenuId(
-                        activeMenuId === lesson.id ? null : lesson.id,
-                      );
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faEllipsisV} />
-                  </button>
+                  {/* Premium */}
+                  {lesson.isPremium && (
+                    <span className={styles.premiumBadge}>
+                      <FontAwesomeIcon icon={faCrown} />
+                      Pro
+                    </span>
+                  )}
 
-                  {activeMenuId === lesson.id && (
-                    <div className={styles.dropdownMenu}>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewLesson(lesson.id);
-                        }}
-                      >
-                        Xem chi tiết
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCardClick(lesson.id);
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faLanguage} />
-                        Quản lý câu hỏi
-                      </button>
-                      {lesson.status === "DRAFT" && (
+                  {/* Status - Tiếng Việt */}
+                  {lesson.status && (
+                    <span
+                      className={styles.statusBadge}
+                      style={{
+                        backgroundColor:
+                          STATUS_BG_COLOR_MAP[lesson.status] || "#64748b",
+                      }}
+                    >
+                      {STATUS_MAP[lesson.status] || lesson.status}
+                    </span>
+                  )}
+
+                  {/* Menu */}
+                  <div className={styles.actionContainer}>
+                    <button
+                      type="button"
+                      className={styles.actionBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveMenuId(
+                          activeMenuId === lesson.id ? null : lesson.id,
+                        );
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faEllipsisV} />
+                    </button>
+
+                    {activeMenuId === lesson.id && (
+                      <div className={styles.dropdownMenu}>
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleEditLesson(lesson.id);
+                            handleViewLesson(lesson.id);
                           }}
                         >
-                          Chỉnh sửa
+                          Xem chi tiết
                         </button>
-                      )}
-                    </div>
-                  )}
+
+                        {/* 👇 Chỉ hiển thị Quản lý câu hỏi khi DRAFT hoặc REJECTED */}
+                        {isEditable && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCardClick(lesson.id);
+                            }}
+                          >
+                            <FontAwesomeIcon icon={faLanguage} />
+                            Quản lý câu hỏi
+                          </button>
+                        )}
+
+                        {/* 👇 Chỉ hiển thị Chỉnh sửa khi DRAFT hoặc REJECTED */}
+                        {isEditable && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditLesson(lesson.id);
+                            }}
+                          >
+                            Chỉnh sửa
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className={styles.cardBody}>
+                  <h3 className={styles.cardTitle}>{lesson.title}</h3>
+
+                  {/* Meta */}
+                  <div className={styles.cardMeta}>
+                    {lesson.createdByName && (
+                      <span className={styles.metaItem}>
+                        <span className={styles.metaValue}>
+                          {lesson.createdByName}
+                        </span>
+                      </span>
+                    )}
+
+                    {lesson.updatedAt && (
+                      <span className={styles.metaItem}>
+                        <span className={styles.metaValue}>
+                          {new Date(lesson.updatedAt).toLocaleDateString(
+                            "vi-VN",
+                          )}
+                        </span>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              {/* Body */}
-              <div className={styles.cardBody}>
-                <h3 className={styles.cardTitle}>{lesson.title}</h3>
-
-                {/* Meta */}
-                <div className={styles.cardMeta}>
-                  {lesson.createdByName && (
-                    <span className={styles.metaItem}>
-                      <span className={styles.metaValue}>
-                        {lesson.createdByName}
-                      </span>
-                    </span>
-                  )}
-
-                  {lesson.updatedAt && (
-                    <span className={styles.metaItem}>
-                      <span className={styles.metaValue}>
-                        {new Date(lesson.updatedAt).toLocaleDateString("vi-VN")}
-                      </span>
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-/* TeacherListeningLessonDetail.module.css */
+/* AdminListeningLessonDetail.module.css */
 
 /* ====== CONTAINER ====== */
 .container {
@@ -47,10 +47,12 @@
 /* ====== HEADER ====== */
 .header {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 20px;
   margin-bottom: 28px;
   padding-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .backButton {
@@ -82,6 +84,59 @@
 .backButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-text-white, #ffffff);
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.approveBtn {
+  background: var(--color-primary, #0ea792);
+}
+.approveBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover, #0d9488);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.3);
+}
+
+.rejectBtn {
+  background: #ef4444;
+}
+.rejectBtn:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.publishBtn {
+  background: #8b5cf6;
+}
+.publishBtn:hover:not(:disabled) {
+  background: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 /* ====== STEPPER ====== */
@@ -443,7 +498,7 @@
   line-height: 1.5;
 }
 
-/* ====== REVIEW CARD (THÊM MỚI) ====== */
+/* ====== REVIEW CARD ====== */
 .reviewCard {
   background: var(--color-background, #ffffff);
   border-radius: 16px;
@@ -481,7 +536,7 @@
   margin-top: 12px;
 }
 
-/* ====== REVIEW ITEM (THÊM MỚI) ====== */
+/* ====== REVIEW ITEM ====== */
 .reviewItem {
   background: #ffffff;
   border-radius: 14px;
@@ -580,7 +635,10 @@
   align-items: center;
   gap: 6px;
 }
-
+.reasonLabel span {
+  font-size: 13px;
+  font-weight: 600;
+}
 .reasonListDisplay {
   display: flex;
   flex-wrap: wrap;
@@ -646,6 +704,15 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .actionBtn {
+    flex: 1;
+    justify-content: center;
   }
 
   .stepperContainer {

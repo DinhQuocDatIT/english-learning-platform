@@ -19,6 +19,7 @@ import {
   faPause,
   faForward,
   faStop,
+  faLock,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -28,25 +29,10 @@ import listeningSentenceService from "../../../../services/listeningSentenceServ
 import getImageUrl from "../../../../utils/imageUrl";
 import { useLoading } from "../../../../contexts/LoadingContext";
 import { speakText } from "../../../../utils/textToSpeech";
-
+import { STATUS_MAP, STATUS_BG_COLOR_MAP } from "../../../../constants/status";
 import styles from "./ListeningSentenceManage.module.css";
 
-// Map trạng thái
-const STATUS_MAP = {
-  DRAFT: "Nháp",
-  PENDING: "Chờ duyệt",
-  APPROVED: "Đã duyệt",
-  REJECTED: "Từ chối",
-  PUBLISHED: "Đã phát hành",
-};
-
-const STATUS_COLOR_MAP = {
-  DRAFT: "#f59e0b",
-  PENDING: "#3b82f6",
-  APPROVED: "#8b5cf6",
-  REJECTED: "#ef4444",
-  PUBLISHED: "#22c55e",
-};
+const EDITABLE_STATUSES = ["DRAFT", "REJECTED"];
 
 function ListeningSentenceManage() {
   const navigate = useNavigate();
@@ -61,7 +47,7 @@ function ListeningSentenceManage() {
   const [selectedSentence, setSelectedSentence] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedAccent, setSelectedAccent] = useState("us");
-  const [speechRate, setSpeechRate] = useState(0.9); // Mặc định 0.9
+  const [speechRate, setSpeechRate] = useState(0.9);
 
   // State cho text-to-speech
   const [voices, setVoices] = useState([]);
@@ -77,6 +63,9 @@ function ListeningSentenceManage() {
   });
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Kiểm tra có được chỉnh sửa không
+  const canEdit = EDITABLE_STATUSES.includes(lesson?.status);
 
   // Khởi tạo voices
   useEffect(() => {
@@ -154,7 +143,6 @@ function ListeningSentenceManage() {
   };
 
   const handleSpeak = (text, sentenceId) => {
-    // Nếu đang nói câu này, dừng lại
     if (speakingId === sentenceId) {
       window.speechSynthesis.cancel();
       setSpeakingId(null);
@@ -162,7 +150,6 @@ function ListeningSentenceManage() {
       return;
     }
 
-    // Dừng nếu đang nói câu khác
     if (speakingId) {
       window.speechSynthesis.cancel();
       setSpeakingId(null);
@@ -211,6 +198,13 @@ function ListeningSentenceManage() {
 
   // ===== OPEN MODAL =====
   const openCreateModal = () => {
+    // Chỉ cho phép khi có thể chỉnh sửa
+    if (!canEdit) {
+      toast.warning(
+        `Không thể thêm câu hỏi khi bài nghe ở trạng thái "${STATUS_MAP[lesson?.status]}"`,
+      );
+      return;
+    }
     setEditingSentence(null);
     setFormData({
       englishText: "",
@@ -222,6 +216,13 @@ function ListeningSentenceManage() {
   };
 
   const openEditModal = (sentence) => {
+    // Chỉ cho phép khi có thể chỉnh sửa
+    if (!canEdit) {
+      toast.warning(
+        `Không thể chỉnh sửa câu hỏi khi bài nghe ở trạng thái "${STATUS_MAP[lesson?.status]}"`,
+      );
+      return;
+    }
     setEditingSentence(sentence);
     setFormData({
       englishText: sentence.englishText,
@@ -310,6 +311,14 @@ function ListeningSentenceManage() {
 
   // ===== DELETE =====
   const handleDelete = async (sentence) => {
+    // Chỉ cho phép khi có thể chỉnh sửa
+    if (!canEdit) {
+      toast.warning(
+        `Không thể xóa câu hỏi khi bài nghe ở trạng thái "${STATUS_MAP[lesson?.status]}"`,
+      );
+      return;
+    }
+
     if (!window.confirm(`Bạn chắc chắn muốn xóa câu hỏi này?`)) return;
 
     try {
@@ -333,6 +342,14 @@ function ListeningSentenceManage() {
 
   // ===== DRAG & DROP REORDER =====
   const onDragEnd = async (result) => {
+    // Chỉ cho phép khi có thể chỉnh sửa
+    if (!canEdit) {
+      toast.warning(
+        `Không thể sắp xếp câu hỏi khi bài nghe ở trạng thái "${STATUS_MAP[lesson?.status]}"`,
+      );
+      return;
+    }
+
     if (!result.destination) return;
 
     const items = Array.from(sentences);
@@ -367,9 +384,8 @@ function ListeningSentenceManage() {
     );
   }
 
-  const statusColor = STATUS_COLOR_MAP[lesson?.status] || "#64748b";
+  const statusColor = STATUS_BG_COLOR_MAP[lesson?.status] || "#64748b";
 
-  // Tốc độ nói
   const rateOptions = [
     { value: 0.5, label: "0.5x" },
     { value: 0.7, label: "0.7x" },
@@ -386,6 +402,21 @@ function ListeningSentenceManage() {
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại</span>
         </button>
+        {/* Hiển thị trạng thái và thông báo khóa nếu không thể chỉnh sửa */}
+        <div className={styles.headerStatus}>
+          <span
+            className={styles.headerStatusBadge}
+            style={{ backgroundColor: statusColor }}
+          >
+            {STATUS_MAP[lesson?.status] || lesson?.status}
+          </span>
+          {!canEdit && (
+            <span className={styles.headerLocked}>
+              <FontAwesomeIcon icon={faLock} />
+              Chỉ xem
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Two columns layout */}
@@ -477,7 +508,6 @@ function ListeningSentenceManage() {
                 </div>
 
                 <div className={styles.playerControls}>
-                  {/* Chọn giọng */}
                   <div className={styles.accentSelector}>
                     <button
                       type="button"
@@ -499,7 +529,6 @@ function ListeningSentenceManage() {
                     </button>
                   </div>
 
-                  {/* Tốc độ */}
                   <div className={styles.rateSelector}>
                     <select
                       className={styles.rateSelect}
@@ -516,7 +545,6 @@ function ListeningSentenceManage() {
                     </select>
                   </div>
 
-                  {/* Nút phát */}
                   <button
                     type="button"
                     className={`${styles.playBtn} ${
@@ -560,11 +588,32 @@ function ListeningSentenceManage() {
 
           {/* Quick Actions */}
           <div className={styles.quickActions}>
-            <button className={styles.actionBtn} onClick={openCreateModal}>
+            <button
+              className={`${styles.actionBtn} ${!canEdit ? styles.actionBtnDisabled : ""}`}
+              onClick={openCreateModal}
+              disabled={!canEdit}
+              title={
+                !canEdit
+                  ? `Không thể thêm khi bài nghe ở trạng thái ${STATUS_MAP[lesson?.status]}`
+                  : ""
+              }
+            >
               <FontAwesomeIcon icon={faPlus} />
-              Thêm câu hỏi
+              {canEdit ? "Thêm câu hỏi" : "Không thể thêm"}
             </button>
           </div>
+
+          {/* Thông báo nếu không thể chỉnh sửa */}
+          {!canEdit && (
+            <div className={styles.lockedNotice}>
+              <FontAwesomeIcon icon={faLock} />
+              <span>
+                Bài nghe đang ở trạng thái{" "}
+                <strong>"{STATUS_MAP[lesson?.status]}"</strong>, không thể chỉnh
+                sửa câu hỏi.
+              </span>
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN - Sentences List */}
@@ -581,10 +630,21 @@ function ListeningSentenceManage() {
             <div className={styles.emptySentences}>
               <FontAwesomeIcon icon={faLanguage} className={styles.emptyIcon} />
               <p>Chưa có câu hỏi nào</p>
-              <button className={styles.emptyAddBtn} onClick={openCreateModal}>
-                <FontAwesomeIcon icon={faPlus} />
-                Thêm câu hỏi đầu tiên
-              </button>
+              {canEdit ? (
+                <button
+                  className={styles.emptyAddBtn}
+                  onClick={openCreateModal}
+                >
+                  <FontAwesomeIcon icon={faPlus} />
+                  Thêm câu hỏi đầu tiên
+                </button>
+              ) : (
+                <p className={styles.emptyLocked}>
+                  <FontAwesomeIcon icon={faLock} />
+                  Không thể thêm câu hỏi khi bài nghe ở trạng thái "
+                  {STATUS_MAP[lesson?.status]}"
+                </p>
+              )}
             </div>
           ) : (
             <DragDropContext onDragEnd={onDragEnd}>
@@ -600,6 +660,7 @@ function ListeningSentenceManage() {
                         key={sentence.id}
                         draggableId={String(sentence.id)}
                         index={index}
+                        isDragDisabled={!canEdit}
                       >
                         {(provided) => (
                           <div
@@ -609,12 +670,16 @@ function ListeningSentenceManage() {
                               selectedSentence?.id === sentence.id
                                 ? styles.sentenceActive
                                 : ""
-                            }`}
+                            } ${!canEdit ? styles.sentenceReadonly : ""}`}
                             onClick={() => handleSelectSentence(sentence)}
                           >
                             <div
                               className={styles.dragHandle}
                               {...provided.dragHandleProps}
+                              style={{
+                                cursor: canEdit ? "grab" : "default",
+                                opacity: canEdit ? 1 : 0.3,
+                              }}
                             >
                               <FontAwesomeIcon icon={faGripVertical} />
                             </div>
@@ -632,24 +697,33 @@ function ListeningSentenceManage() {
                               )}
                             </div>
                             <div className={styles.sentenceActions}>
-                              <button
-                                className={styles.editBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openEditModal(sentence);
-                                }}
-                              >
-                                <FontAwesomeIcon icon={faEdit} />
-                              </button>
-                              <button
-                                className={styles.deleteBtn}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(sentence);
-                                }}
-                              >
-                                <FontAwesomeIcon icon={faTrash} />
-                              </button>
+                              {canEdit && (
+                                <>
+                                  <button
+                                    className={styles.editBtn}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openEditModal(sentence);
+                                    }}
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                  </button>
+                                  <button
+                                    className={styles.deleteBtn}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDelete(sentence);
+                                    }}
+                                  >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                  </button>
+                                </>
+                              )}
+                              {!canEdit && (
+                                <span className={styles.readonlyIcon}>
+                                  <FontAwesomeIcon icon={faLock} />
+                                </span>
+                              )}
                             </div>
                           </div>
                         )}
@@ -664,8 +738,8 @@ function ListeningSentenceManage() {
         </div>
       </div>
 
-      {/* MODAL */}
-      {showModal && (
+      {/* MODAL - Chỉ hiện khi canEdit */}
+      {showModal && canEdit && (
         <div className={styles.modalOverlay} onClick={closeModal}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>

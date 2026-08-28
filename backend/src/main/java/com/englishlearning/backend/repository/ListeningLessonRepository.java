@@ -27,4 +27,5 @@ public interface ListeningLessonRepository extends JpaRepository<ListeningLesson
             Long teacherId,
             Long topicId
     );
+
 }
