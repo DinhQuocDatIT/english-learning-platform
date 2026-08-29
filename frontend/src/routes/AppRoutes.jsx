@@ -49,6 +49,7 @@ import ListeningPreview from "../pages/teacher/Topic/ListeningPreview/ListeningP
 import AdminListeningSentenceView from "../pages/admin/Topic/ListeningLesson/AdminListeningSentenceView/AdminListeningSentenceView";
 import AdminListeningPreview from "../pages/admin/Topic/ListeningLesson/AdminListeningPreview/AdminListeningPreview";
 import StudentTopicList from "../pages/student/Topic/StudentTopicList/StudentTopicList";
+import StudentLessonList from "../pages/student/Topic/StudentLessonList/StudentLessonList";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -81,6 +82,10 @@ function AppRoutes() {
             <Route path="student-membership" element={<StudentMembership />} />
 
             <Route path="topics" element={<StudentTopicList />} />
+            <Route
+              path="topics/:topicId/lessons"
+              element={<StudentLessonList />}
+            />
           </Route>
 
           <Route

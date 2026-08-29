@@ -4,8 +4,10 @@ import com.englishlearning.backend.dto.request.TopicCreateRequest;
 import com.englishlearning.backend.dto.response.TopicResponse;
 import com.englishlearning.backend.entity.Topic;
 import com.englishlearning.backend.entity.User;
+import com.englishlearning.backend.enums.ListeningLessonStatus;
 import com.englishlearning.backend.enums.TopicStatus;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
+import com.englishlearning.backend.repository.ListeningLessonRepository;
 import com.englishlearning.backend.repository.TopicRepository;
 import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.service.FileStorageService;
@@ -26,7 +28,7 @@ public class TopicServiceImpl implements TopicService {
     private final TopicRepository topicRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
-
+    private final ListeningLessonRepository listeningLessonRepository;
     @Override
     public TopicResponse create(
             Long adminId,
@@ -197,6 +199,18 @@ public class TopicServiceImpl implements TopicService {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TopicResponse> getTopicsForStudent() {
+
+        List<Topic> topics = topicRepository.findAllByStatus(TopicStatus.PUBLISHED);
+
+        return topics.stream()
+                .map(this::toStudentResponse) // Dùng method riêng
+                .collect(Collectors.toList());
+    }
+
     private TopicResponse toResponse(
             Topic topic
     ) {
@@ -215,6 +229,27 @@ public class TopicServiceImpl implements TopicService {
                 .createdByName(
                         topic.getCreatedBy().getFullName()
                 )
+                .createdAt(topic.getCreatedAt())
+                .updatedAt(topic.getUpdatedAt())
+                .build();
+    }
+    private TopicResponse toStudentResponse(Topic topic) {
+
+        // Đếm bài học đã publish
+        long lessonCount = listeningLessonRepository.countByTopicIdAndStatus(
+                topic.getId(),
+                ListeningLessonStatus.PUBLISHED
+        );
+
+        return TopicResponse.builder()
+                .id(topic.getId())
+                .title(topic.getTitle())
+                .description(topic.getDescription())
+                .topicImage(topic.getTopicImage())
+                .status(topic.getStatus())
+                .lessonCount((int) lessonCount)
+                .createdById(topic.getCreatedBy().getId())
+                .createdByName(topic.getCreatedBy().getFullName())
                 .createdAt(topic.getCreatedAt())
                 .updatedAt(topic.getUpdatedAt())
                 .build();

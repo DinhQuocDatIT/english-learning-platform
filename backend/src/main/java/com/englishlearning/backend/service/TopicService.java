@@ -34,4 +34,5 @@ public interface TopicService {
 
     TopicResponse getById(Long topicId);
     List<TopicResponse> getTopicsForStudent(String sortBy);
+    List<TopicResponse> getTopicsForStudent();
 }

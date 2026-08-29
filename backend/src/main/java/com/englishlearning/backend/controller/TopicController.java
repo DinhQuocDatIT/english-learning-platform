@@ -167,8 +167,7 @@ public class TopicController {
             @RequestParam(defaultValue = "newest") String sortBy
     ) {
 
-        List<TopicResponse> response =
-                topicService.getTopicsForStudent(sortBy);
+        List<TopicResponse> response = topicService.getTopicsForStudent();
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
