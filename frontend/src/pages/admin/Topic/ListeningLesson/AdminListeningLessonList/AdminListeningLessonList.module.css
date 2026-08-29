@@ -340,11 +340,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    135deg,
-    var(--color-primary, #0ea792) 0%,
-    var(--color-accent, #168a7c) 100%
-  );
+  background: var(--color-primary);
 }
 
 .fallbackIcon {

@@ -174,6 +174,13 @@ function AdminListeningLessonList() {
     );
   };
 
+  const handleViewSentenceList = (lessonId) => {
+    setActiveMenuId(null);
+    navigate(
+      `/dashboard/admin/topics/${topicId}/listening-lessons/${lessonId}/view`,
+    );
+  };
+
   // Stats
   const statusCount = {
     all: lessons.length,
@@ -351,7 +358,7 @@ function AdminListeningLessonList() {
                   </span>
                 )}
 
-                {/* Menu - CHỈ CÓ XEM CHI TIẾT */}
+                {/* Menu */}
                 <div className={styles.actionContainer}>
                   <button
                     type="button"
@@ -374,6 +381,13 @@ function AdminListeningLessonList() {
                         <FontAwesomeIcon icon={faEye} />
                         Xem chi tiết
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => handleViewSentenceList(lesson.id)}
+                      >
+                        <FontAwesomeIcon icon={faList} />
+                        Xem câu hỏi
+                      </button>
                     </div>
                   )}
                 </div>
@@ -384,7 +398,6 @@ function AdminListeningLessonList() {
                 <h3 className={styles.cardTitle}>{lesson.title}</h3>
 
                 <div className={styles.cardMeta}>
-                  
                   <span className={styles.metaItem}>
                     <span className={styles.metaLabel}>Người tạo</span>
                     <span className={styles.metaValue}>
