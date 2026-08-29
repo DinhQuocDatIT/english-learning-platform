@@ -35,9 +35,9 @@ export const sidebarMenus = {
       icon: faBook,
     },
     {
-      path: "/dashboard/student/study-flash-card",
-      name: "Luyện tập",
-      icon: faPenToSquare,
+      path: "/dashboard/student/topics",
+      name: "Luyện nghe",
+      icon: faBookOpen,
     },
     {
       path: "/dashboard/settings",

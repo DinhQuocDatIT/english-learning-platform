@@ -28,6 +28,19 @@ const topicService = {
   hide(id) {
     return axiosClient.post(`/v1/topics/admin/${id}/hide`);
   },
+  getTopicsForStudent: (params = {}) => {
+    return axiosClient.get("/v1/topics/student", { params });
+  },
+
+  // Lấy chi tiết topic
+  getById: (id) => {
+    return axiosClient.get(`/v1/topics/${id}`);
+  },
+
+  // Lấy danh sách topic đã publish (cho teacher/student)
+  getPublishedTopics: () => {
+    return axiosClient.get("/v1/topics");
+  },
 };
 
 export default topicService;

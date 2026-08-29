@@ -15,4 +15,5 @@ public interface TopicRepository
     );
 
     List<Topic> findAllByOrderByCreatedAtDesc();
+    List<Topic> findAllByStatus(TopicStatus status);
 }

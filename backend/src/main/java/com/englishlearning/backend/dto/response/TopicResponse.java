@@ -21,7 +21,7 @@ public class TopicResponse {
     private TopicStatus status;
 
     private Long createdById;
-
+    private Integer lessonCount;
     private String createdByName;
 
     private LocalDateTime createdAt;

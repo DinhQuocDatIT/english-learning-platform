@@ -162,4 +162,20 @@ public class TopicController {
                 )
         );
     }
+    @GetMapping("/student")
+    public ResponseEntity<ApiResponse<List<TopicResponse>>> getTopicsForStudent(
+            @RequestParam(defaultValue = "newest") String sortBy
+    ) {
+
+        List<TopicResponse> response =
+                topicService.getTopicsForStudent(sortBy);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy danh sách topic thành công",
+                        response
+                )
+        );
+    }
 }

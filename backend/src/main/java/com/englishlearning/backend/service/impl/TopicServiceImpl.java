@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -178,17 +179,36 @@ public class TopicServiceImpl implements TopicService {
                         )
                 );
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<TopicResponse> getTopicsForStudent(String sortBy) {
 
+        // Lấy tất cả topic đã publish
+        List<Topic> topics = topicRepository.findAllByStatus(TopicStatus.PUBLISHED);
+
+        // Sort
+        if ("newest".equals(sortBy)) {
+            topics.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        } else if ("oldest".equals(sortBy)) {
+            topics.sort((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
+        }
+
+        return topics.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
     private TopicResponse toResponse(
             Topic topic
     ) {
-
+        int lessonCount = topic.getListeningLessons() != null ?
+                topic.getListeningLessons().size() : 0;
         return TopicResponse.builder()
                 .id(topic.getId())
                 .title(topic.getTitle())
                 .description(topic.getDescription())
                 .topicImage(topic.getTopicImage())
                 .status(topic.getStatus())
+                .lessonCount(lessonCount)
                 .createdById(
                         topic.getCreatedBy().getId()
                 )
