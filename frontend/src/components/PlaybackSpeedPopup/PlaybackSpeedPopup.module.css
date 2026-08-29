@@ -1,0 +1,205 @@
+.speedWrapper {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.speedWrapper,
+.speedWrapper *,
+.speedWrapper *::before,
+.speedWrapper *::after {
+  box-sizing: border-box;
+}
+
+.speedWrapper button {
+  font-family: inherit;
+  margin: 0;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* =========================
+   Main button
+   ========================= */
+
+.controlIconBtn {
+  background: transparent;
+  border: none;
+
+  width: auto;
+  min-width: 36px;
+  height: 36px;
+
+  padding: 4px 10px;
+  margin: 0;
+
+  border-radius: 6px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  cursor: pointer;
+
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  font-weight: inherit;
+  line-height: 1;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.controlIconBtn:hover {
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+}
+
+.controlIconBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* =========================
+   Speed text
+   ========================= */
+
+.speedText {
+  display: inline-block;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+
+  margin: 0;
+  padding: 0;
+
+  white-space: nowrap;
+}
+
+/* =========================
+   Popup
+   ========================= */
+
+.speedPopup {
+  position: absolute;
+
+  top: 100%;
+  right: 0;
+
+  margin-top: 0.5rem;
+
+  width: 180px;
+  min-width: 180px;
+
+  padding: 0.75rem;
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  z-index: 9999;
+
+  display: block;
+}
+
+/* =========================
+   Popup title
+   ========================= */
+
+.popupTitle {
+  display: block;
+
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+
+  color: var(--color-text-muted);
+
+  letter-spacing: 0.05em;
+
+  white-space: nowrap;
+}
+
+/* =========================
+   SPEED GRID
+   Luôn luôn 2 cột
+   ========================= */
+
+.speedWrapper .speedPopup .speedGrid {
+  display: grid !important;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+
+  grid-template-rows: auto !important;
+
+  gap: 0.35rem !important;
+
+  width: 100% !important;
+  min-width: 0;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* =========================
+   Speed buttons
+   ========================= */
+
+.speedWrapper .speedPopup .speedGrid .speedItemBtn {
+  display: flex !important;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+
+  min-height: 32px;
+
+  margin: 0 !important;
+  padding: 0.4rem;
+
+  background: var(--color-background);
+
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+
+  color: var(--color-text);
+
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.speedWrapper .speedPopup .speedGrid .speedItemBtn:hover,
+.speedWrapper .speedPopup .speedGrid .speedItemActive {
+  background: var(--color-primary) !important;
+  color: var(--color-text-white) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.speedWrapper .speedPopup .speedGrid .speedItemBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}

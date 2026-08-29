@@ -1,0 +1,464 @@
+.container {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--color-background);
+  min-height: calc(100vh - 70px);
+  box-sizing: border-box;
+  font-family: inherit;
+  color: var(--color-text);
+}
+
+.leftMainSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  fontsize: 0.875rem;
+  transition: color 0.2s;
+}
+
+.backButton:hover {
+  color: var(--color-primary);
+}
+
+.playerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-surface);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.playerControlsLeft,
+.playerControlsRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.controlIconBtn {
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  padding: 4px 20px;
+}
+
+.controlIconBtn:hover:not(:disabled) {
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+}
+
+.controlIconBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.speedWrapper {
+  position: relative;
+}
+
+.speedText {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+.speedPopup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem;
+  z-index: 50;
+  width: 180px;
+}
+
+.popupTitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.speedGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.35rem;
+}
+
+.speedItemBtn {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  padding: 0.4rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: all 0.2s;
+}
+
+.speedItemBtn:hover,
+.speedItemActive {
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  border-color: var(--color-primary);
+}
+
+.inputBoxCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1rem;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.inputLabelHeader {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.textareaField {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 1rem;
+  color: var(--color-text);
+  background: transparent;
+  font-family: inherit;
+}
+
+.micButtonAbsolute {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.micButtonAbsolute:hover {
+  color: var(--color-primary);
+}
+
+.wordBoxesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.wordBoxItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 36px;
+}
+
+.wordEyeBtn {
+  background: var(--color-background);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  width: 100%;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.wordEyeBtn:hover {
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+}
+
+.wordBoxValue {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.hintWarningText {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin: -0.25rem 0 0 0;
+}
+
+.showAllBtn {
+  background: var(--color-tertiary);
+  border: 1px solid rgba(14, 167, 146, 0.2);
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  letter-spacing: 0.025em;
+}
+
+.showAllBtn:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-text-white);
+}
+
+.resultBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.resultText {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.resultCheckIcon {
+  font-size: 1.1rem;
+}
+
+.translationCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+}
+
+.translationTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.05em;
+}
+
+.translationContent {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.nextButton {
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  border: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
+}
+
+.nextButton:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.nextButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nextButtonOutline {
+  background: var(--color-secondary);
+  color: var(--color-text-white);
+  border: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s;
+}
+
+.nextButtonOutline:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.rightSidebar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: calc(100vh - 5rem);
+  position: sticky;
+  top: 1.5rem;
+  box-sizing: border-box;
+}
+
+.sidebarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebarTitle {
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--color-secondary);
+  letter-spacing: 0.025em;
+}
+
+.progressPercentBadge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-background);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.progressBarTrack {
+  width: 100%;
+  height: 6px;
+  background: var(--color-background);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.progressBarFill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.transcriptList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.transcriptCardItem {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  transition: all 0.2s;
+}
+
+.transcriptCardItem:hover {
+  border-color: var(--color-primary-hover);
+}
+
+.transcriptActive {
+  border: 1px solid var(--color-primary) !important;
+  background-color: var(--color-tertiary);
+}
+
+.transcriptCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.itemIndexBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-background);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.itemActionIcons {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.iconAction {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.2rem;
+  transition: color 0.2s;
+}
+
+.iconAction:hover {
+  color: var(--color-primary);
+}
+
+.checkIconGreen {
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  margin-left: 0.25rem;
+}
+
+.transcriptTextSnippet {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  word-break: break-word;
+  letter-spacing: normal;
+}

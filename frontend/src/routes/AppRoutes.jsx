@@ -45,6 +45,7 @@ import AdminListeningLessonList from "../pages/admin/Topic/ListeningLesson/Admin
 import ListeningSentenceManage from "../pages/teacher/Topic/ListeningSentenceManage/ListeningSentenceManage";
 import AdminListeningLessonDetail from "../pages/admin/Topic/ListeningLesson/AdminListeningLessonDetail/AdminListeningLessonDetail";
 import AdminListeningLessonReview from "../pages/admin/Topic/ListeningLesson/AdminListeningLessonReview/AdminListeningLessonReview";
+import ListeningPreview from "../pages/teacher/Topic/ListeningPreview/ListeningPreview";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -117,6 +118,10 @@ function AppRoutes() {
             <Route
               path="topics/:topicId/listening-lessons/:lessonId/sentences"
               element={<ListeningSentenceManage />}
+            />
+            <Route
+              path="topics/:topicId/listening-lessons/:lessonId/preview"
+              element={<ListeningPreview />}
             />
           </Route>
 

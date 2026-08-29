@@ -20,6 +20,7 @@ import {
   faForward,
   faStop,
   faLock,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -30,6 +31,8 @@ import getImageUrl from "../../../../utils/imageUrl";
 import { useLoading } from "../../../../contexts/LoadingContext";
 import { speakText } from "../../../../utils/textToSpeech";
 import { STATUS_MAP, STATUS_BG_COLOR_MAP } from "../../../../constants/status";
+import PlaybackSpeedPopup from "../../../../components/PlaybackSpeedPopup/PlaybackSpeedPopup";
+import PlaybackVoicePopup from "../../../../components/PlaybackVoicePopup/PlaybackVoicePopup";
 import styles from "./ListeningSentenceManage.module.css";
 
 const EDITABLE_STATUSES = ["DRAFT", "REJECTED"];
@@ -46,12 +49,16 @@ function ListeningSentenceManage() {
   // State cho câu đang chọn để nghe
   const [selectedSentence, setSelectedSentence] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedAccent, setSelectedAccent] = useState("us");
-  const [speechRate, setSpeechRate] = useState(0.9);
 
   // State cho text-to-speech
   const [voices, setVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
+
+  // State cho tốc độ và popup
+  const [playbackSpeed, setPlaybackSpeed] = useState("1x");
+  const [showSpeedPopup, setShowSpeedPopup] = useState(false);
+  const [showVoicePopup, setShowVoicePopup] = useState(false);
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -67,26 +74,43 @@ function ListeningSentenceManage() {
   // Kiểm tra có được chỉnh sửa không
   const canEdit = EDITABLE_STATUSES.includes(lesson?.status);
 
+  // Helper để lấy tốc độ dạng số
+  const getNumericSpeed = (speedStr) =>
+    parseFloat(speedStr.replace("x", "")) || 1.0;
+
   // Khởi tạo voices
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
 
     const loadVoices = () => {
       const availableVoices = window.speechSynthesis.getVoices();
-      setVoices(availableVoices);
+      const englishVoices = availableVoices.filter((v) =>
+        v.lang.startsWith("en"),
+      );
+      const listToUse =
+        englishVoices.length > 0 ? englishVoices : availableVoices;
+
+      setVoices(listToUse);
+      setSelectedVoice((prev) => {
+        if (prev && listToUse.some((v) => v.name === prev.name)) return prev;
+        return (
+          listToUse.find((v) => v.lang === "en-US") || listToUse[0] || null
+        );
+      });
     };
 
     loadVoices();
-
     window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
 
     return () => {
       window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
+      window.speechSynthesis.cancel();
     };
   }, []);
 
   useEffect(() => {
     fetchData();
+    return () => window.speechSynthesis.cancel();
   }, [lessonId]);
 
   const fetchData = async () => {
@@ -118,30 +142,11 @@ function ListeningSentenceManage() {
   };
 
   const handleGoBack = () => {
+    window.speechSynthesis.cancel();
     navigate(`/dashboard/teacher/topics/${topicId}`);
   };
 
   // ===== TEXT-TO-SPEECH =====
-  const getUkVoice = () => {
-    return (
-      voices.find(
-        (voice) =>
-          voice.lang.toLowerCase() === "en-gb" &&
-          voice.name.toLowerCase().includes("google"),
-      ) || voices.find((voice) => voice.lang.toLowerCase().startsWith("en-gb"))
-    );
-  };
-
-  const getUsVoice = () => {
-    return (
-      voices.find(
-        (voice) =>
-          voice.lang.toLowerCase() === "en-us" &&
-          voice.name.toLowerCase().includes("google"),
-      ) || voices.find((voice) => voice.lang.toLowerCase().startsWith("en-us"))
-    );
-  };
-
   const handleSpeak = (text, sentenceId) => {
     if (speakingId === sentenceId) {
       window.speechSynthesis.cancel();
@@ -156,21 +161,12 @@ function ListeningSentenceManage() {
       setIsPlaying(false);
     }
 
-    const voice = selectedAccent === "uk" ? getUkVoice() : getUsVoice();
-
-    if (!voice) {
-      toast.warning(
-        `Không tìm thấy giọng đọc ${selectedAccent === "uk" ? "UK" : "US"}. Vui lòng thử lại.`,
-      );
-      return;
-    }
-
     setIsPlaying(true);
 
     speakText(text, {
-      voice,
-      lang: selectedAccent === "uk" ? "en-GB" : "en-US",
-      rate: speechRate,
+      lang: selectedVoice ? selectedVoice.lang : "en-US",
+      voice: selectedVoice,
+      rate: getNumericSpeed(playbackSpeed),
       onStart: () => {
         setSpeakingId(sentenceId);
       },
@@ -386,14 +382,6 @@ function ListeningSentenceManage() {
 
   const statusColor = STATUS_BG_COLOR_MAP[lesson?.status] || "#64748b";
 
-  const rateOptions = [
-    { value: 0.5, label: "0.5x" },
-    { value: 0.7, label: "0.7x" },
-    { value: 0.9, label: "0.9x" },
-    { value: 1.0, label: "1.0x" },
-    { value: 1.2, label: "1.2x" },
-  ];
-
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -402,14 +390,8 @@ function ListeningSentenceManage() {
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại</span>
         </button>
-        {/* Hiển thị trạng thái và thông báo khóa nếu không thể chỉnh sửa */}
+
         <div className={styles.headerStatus}>
-          <span
-            className={styles.headerStatusBadge}
-            style={{ backgroundColor: statusColor }}
-          >
-            {STATUS_MAP[lesson?.status] || lesson?.status}
-          </span>
           {!canEdit && (
             <span className={styles.headerLocked}>
               <FontAwesomeIcon icon={faLock} />
@@ -417,6 +399,17 @@ function ListeningSentenceManage() {
             </span>
           )}
         </div>
+        <button
+          className={styles.previewBtn}
+          onClick={() =>
+            navigate(
+              `/dashboard/teacher/topics/${topicId}/listening-lessons/${lessonId}/preview`,
+            )
+          }
+        >
+          <FontAwesomeIcon icon={faEye} />
+          Xem trước
+        </button>
       </div>
 
       {/* Two columns layout */}
@@ -485,11 +478,10 @@ function ListeningSentenceManage() {
             <div className={styles.playerHeader}>
               <span className={styles.playerTitle}>
                 <FontAwesomeIcon icon={faPlay} />
-                Nghe
               </span>
               {selectedSentence && (
                 <span className={styles.playerOrder}>
-                  {selectedSentence.sentenceOrder}
+                  #{selectedSentence.sentenceOrder}
                 </span>
               )}
             </div>
@@ -508,43 +500,7 @@ function ListeningSentenceManage() {
                 </div>
 
                 <div className={styles.playerControls}>
-                  <div className={styles.accentSelector}>
-                    <button
-                      type="button"
-                      className={`${styles.accentBtn} ${
-                        selectedAccent === "uk" ? styles.activeUk : ""
-                      }`}
-                      onClick={() => setSelectedAccent("uk")}
-                    >
-                      🇬🇧 UK
-                    </button>
-                    <button
-                      type="button"
-                      className={`${styles.accentBtn} ${
-                        selectedAccent === "us" ? styles.activeUs : ""
-                      }`}
-                      onClick={() => setSelectedAccent("us")}
-                    >
-                      🇺🇸 US
-                    </button>
-                  </div>
-
-                  <div className={styles.rateSelector}>
-                    <select
-                      className={styles.rateSelect}
-                      value={speechRate}
-                      onChange={(e) =>
-                        setSpeechRate(parseFloat(e.target.value))
-                      }
-                    >
-                      {rateOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
+                  {/* Play Button */}
                   <button
                     type="button"
                     className={`${styles.playBtn} ${
@@ -577,6 +533,24 @@ function ListeningSentenceManage() {
                       </>
                     )}
                   </button>
+                  <div>
+                    {" "}
+                    {/* Voice Selector */}
+                    <PlaybackVoicePopup
+                      voices={voices}
+                      selectedVoice={selectedVoice}
+                      setSelectedVoice={setSelectedVoice}
+                      showVoicePopup={showVoicePopup}
+                      setShowVoicePopup={setShowVoicePopup}
+                    />
+                    {/* Speed Selector */}
+                    <PlaybackSpeedPopup
+                      playbackSpeed={playbackSpeed}
+                      setPlaybackSpeed={setPlaybackSpeed}
+                      showSpeedPopup={showSpeedPopup}
+                      setShowSpeedPopup={setShowSpeedPopup}
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
