@@ -13,6 +13,7 @@ import com.englishlearning.backend.repository.LevelRepository;
 import com.englishlearning.backend.repository.ListeningLessonRepository;
 import com.englishlearning.backend.repository.TopicRepository;
 import com.englishlearning.backend.repository.UserRepository;
+import com.englishlearning.backend.repository.ListeningAnswerRepository; // ← THÊM IMPORT
 import com.englishlearning.backend.service.FileStorageService;
 import com.englishlearning.backend.service.ListeningLessonService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class ListeningLessonServiceImpl
     private final LevelRepository levelRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final ListeningAnswerRepository listeningAnswerRepository; // ← THÊM
 
     // =====================================================
     // TEACHER - CREATE
@@ -86,7 +88,7 @@ public class ListeningLessonServiceImpl
     }
 
     // =====================================================
-    // TEACHER - UPDATE (SỬA: Cho phép DRAFT và REJECTED)
+    // TEACHER - UPDATE
     // =====================================================
 
     @Override
@@ -109,7 +111,6 @@ public class ListeningLessonServiceImpl
             );
         }
 
-        // ✅ SỬA: Cho phép sửa khi DRAFT hoặc REJECTED
         if (lesson.getStatus() != ListeningLessonStatus.DRAFT &&
                 lesson.getStatus() != ListeningLessonStatus.REJECTED) {
 
@@ -195,7 +196,7 @@ public class ListeningLessonServiceImpl
     }
 
     // =====================================================
-    // TEACHER - SUBMIT (SỬA: Cho phép DRAFT và REJECTED)
+    // TEACHER - SUBMIT
     // =====================================================
 
     @Override
@@ -216,7 +217,6 @@ public class ListeningLessonServiceImpl
             );
         }
 
-        // ✅ SỬA: Cho phép submit khi DRAFT hoặc REJECTED
         if (lesson.getStatus() != ListeningLessonStatus.DRAFT &&
                 lesson.getStatus() != ListeningLessonStatus.REJECTED) {
 
@@ -459,9 +459,15 @@ public class ListeningLessonServiceImpl
                 );
     }
 
+
+
     private ListeningLessonResponse toResponse(
             ListeningLesson lesson
     ) {
+
+
+        int studentCount = listeningAnswerRepository
+                .countDistinctStudentsByLessonId(lesson.getId());
 
         return ListeningLessonResponse.builder()
                 .id(lesson.getId())
@@ -479,6 +485,7 @@ public class ListeningLessonServiceImpl
                 .lessonImage(lesson.getLessonImage())
                 .createdAt(lesson.getCreatedAt())
                 .updatedAt(lesson.getUpdatedAt())
+                .studentCount(studentCount)
                 .build();
     }
 }

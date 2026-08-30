@@ -221,7 +221,11 @@ function TeacherListeningLessonList() {
         </span>
         <span className={styles.statsText}>
           <FontAwesomeIcon icon={faUsers} />
-          {filteredLessons.reduce((sum) => sum + getLearnerCount(), 0)} học viên
+          {filteredLessons.reduce(
+            (sum, lesson) => sum + (lesson.studentCount || 0),
+            0,
+          )}{" "}
+          học viên
         </span>
       </div>
 
@@ -408,7 +412,7 @@ function TeacherListeningLessonList() {
                     <div className={styles.cardMeta}>
                       <span className={styles.metaItem}>
                         <FontAwesomeIcon icon={faUsers} />
-                        {learnerCount} học viên
+                        {lesson.studentCount || 0} học viên
                       </span>
                       <span className={styles.metaItem}>
                         <FontAwesomeIcon icon={faClock} />

@@ -25,5 +25,5 @@ public class ListeningLessonResponse {
     private String lessonImage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
+    private Integer studentCount;
 }

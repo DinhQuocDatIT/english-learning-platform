@@ -276,7 +276,7 @@ function StudentLessonList() {
                     <div className={styles.cardMeta}>
                       <span className={styles.metaItem}>
                         <FontAwesomeIcon icon={faUsers} />
-                        {learnerCount} học viên
+                        {lesson.studentCount || 0} học viên
                       </span>
                       {/* <span className={styles.metaItem}>
                         <FontAwesomeIcon icon={faClock} />

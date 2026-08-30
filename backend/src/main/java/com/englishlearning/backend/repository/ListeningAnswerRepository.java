@@ -25,4 +25,7 @@ public interface ListeningAnswerRepository extends JpaRepository<ListeningAnswer
             @Param("studentId") Long studentId,
             @Param("lessonId") Long lessonId
     );
+    @Query("SELECT COUNT(DISTINCT a.student.id) FROM ListeningAnswer a " +
+            "WHERE a.listeningSentence.listeningLesson.id = :lessonId")
+    int countDistinctStudentsByLessonId(@Param("lessonId") Long lessonId);
 }

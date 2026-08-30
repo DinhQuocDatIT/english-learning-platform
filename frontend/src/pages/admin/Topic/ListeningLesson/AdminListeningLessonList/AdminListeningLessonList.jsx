@@ -194,20 +194,6 @@ function AdminListeningLessonList() {
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại</span>
         </button>
-        {topic && (
-          <div className={styles.headerInfo}>
-            <h1 className={styles.pageTitle}>
-              <FontAwesomeIcon
-                icon={faHeadphones}
-                className={styles.titleIcon}
-              />
-              {topic.title}
-            </h1>
-            <p className={styles.subtitle}>
-              Quản lý bài nghe trong chủ đề <strong>"{topic.title}"</strong>
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Stats - Simple & Clean */}
@@ -328,7 +314,11 @@ function AdminListeningLessonList() {
         </span>
         <span className={styles.statsText}>
           <FontAwesomeIcon icon={faUsers} />
-          {filteredLessons.reduce((sum) => sum + getLearnerCount(), 0)} học viên
+          {filteredLessons.reduce(
+            (sum, lesson) => sum + (lesson.studentCount || 0),
+            0,
+          )}{" "}
+          học viên
         </span>
       </div>
 
@@ -402,7 +392,7 @@ function AdminListeningLessonList() {
                   {lesson.isPremium && (
                     <span className={styles.premiumBadge}>
                       <FontAwesomeIcon icon={faCrown} />
-                      Pro
+                      Premium
                     </span>
                   )}
 
@@ -481,7 +471,7 @@ function AdminListeningLessonList() {
                     <div className={styles.cardMeta}>
                       <span className={styles.metaItem}>
                         <FontAwesomeIcon icon={faUsers} />
-                        {learnerCount} học viên
+                        {lesson.studentCount || 0} học viên
                       </span>
                       <span className={styles.metaItem}>
                         <FontAwesomeIcon icon={faClock} />
