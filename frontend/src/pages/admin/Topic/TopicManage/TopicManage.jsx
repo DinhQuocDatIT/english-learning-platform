@@ -16,6 +16,7 @@ import {
   faFileLines,
   faEdit,
   faHeadphones,
+  faBookOpen, // THÊM ICON NÀY
 } from "@fortawesome/free-solid-svg-icons";
 
 import { toast } from "react-toastify";
@@ -42,10 +43,6 @@ function TopicManage() {
   const pageSize = 6;
 
   const [loading, setLoading] = useState(false);
-
-  // =========================
-  // GET ALL TOPICS
-  // =========================
 
   const fetchTopics = async () => {
     try {
@@ -74,9 +71,6 @@ function TopicManage() {
     fetchTopics();
   }, []);
 
-  // =========================
-  // FILTER
-  // =========================
 
   const filteredTopics = topics.filter((topic) => {
     const keyword = filters.keyword.trim().toLowerCase();
@@ -91,9 +85,7 @@ function TopicManage() {
     return matchKeyword && matchStatus;
   });
 
-  // =========================
-  // PAGINATION
-  // =========================
+
 
   const totalElements = filteredTopics.length;
   const totalPages = Math.ceil(totalElements / pageSize) || 1;
@@ -111,9 +103,6 @@ function TopicManage() {
     }
   }, [currentPage, totalPages]);
 
-  // =========================
-  // FILTER HANDLERS
-  // =========================
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -135,9 +124,6 @@ function TopicManage() {
     setCurrentPage(1);
   };
 
-  // =========================
-  // STATUS
-  // =========================
 
   const getStatusLabel = (status) => {
     switch (status) {
@@ -169,35 +155,20 @@ function TopicManage() {
     return status === "PUBLISHED" ? faEye : faEyeSlash;
   };
 
-  // =========================
-  // CLICK CARD -> VÀO DANH SÁCH BÀI NGHE
-  // =========================
 
   const handleCardClick = (topicId) => {
     navigate(`/dashboard/admin/topics/${topicId}/listening-lessons`);
   };
-
-  // =========================
-  // VIEW DETAIL
-  // =========================
 
   const handleView = (topic) => {
     setActiveMenuId(null);
     navigate(`/dashboard/admin/topic/${topic.id}`);
   };
 
-  // =========================
-  // EDIT
-  // =========================
-
   const handleEdit = (topic) => {
     setActiveMenuId(null);
     navigate(`/dashboard/admin/edit-topic/${topic.id}`);
   };
-
-  // =========================
-  // CHANGE STATUS
-  // =========================
 
   const handleChangeStatus = async (topic) => {
     setActiveMenuId(null);
@@ -236,9 +207,7 @@ function TopicManage() {
     }
   };
 
-  // =========================
-  // PAGINATION NUMBERS
-  // =========================
+
 
   const getPageNumbers = () => {
     if (totalPages <= 5) {
@@ -476,18 +445,22 @@ function TopicManage() {
                   <div className={styles.metadata}>
                     <div className={styles.metaItem}>
                       <FontAwesomeIcon icon={faUser} />
-
                       <span>{topic.createdByName || "Giảng viên"}</span>
                     </div>
 
                     <div className={styles.metaItem}>
                       <FontAwesomeIcon icon={faCalendarAlt} />
-
                       <span>
                         {topic.createdAt
                           ? formatDateTime(topic.createdAt).split(" ")[0]
                           : "Gần đây"}
                       </span>
+                    </div>
+
+                    {/* THÊM SỐ LƯỢNG BÀI HỌC VÀO METADATA */}
+                    <div className={styles.metaItem}>
+                      <FontAwesomeIcon icon={faBookOpen} />
+                      <span>{topic.lessonCount || 0} bài học</span>
                     </div>
                   </div>
                 </div>

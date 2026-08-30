@@ -12,6 +12,10 @@ import {
   faTag,
   faArrowLeft,
   faLanguage,
+  faUsers,
+  faClock,
+  faGraduationCap,
+  faPlay,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -20,13 +24,7 @@ import listeningLessonService from "../../../../services/listeningLessonService"
 import getImageUrl from "../../../../utils/imageUrl";
 
 import styles from "./TeacherListeningLessonList.module.css";
-import {
-  STATUS_MAP,
-  STATUS_BG_COLOR_MAP,
-  STATUS_COLOR_MAP,
-} from "../../../../constants/status";
-
-// Map màu sắc cho từng trạng thái
+import { STATUS_MAP, STATUS_BG_COLOR_MAP } from "../../../../constants/status";
 
 function TeacherListeningLessonList() {
   const navigate = useNavigate();
@@ -116,6 +114,14 @@ function TeacherListeningLessonList() {
     return status === "DRAFT" || status === "REJECTED";
   };
 
+  // Hàm random số lượng người học (tạm thời)
+  const getLearnerCount = () => {
+    const counts = [
+      127, 89, 234, 56, 312, 45, 178, 93, 256, 67, 543, 23, 189, 76, 432,
+    ];
+    return counts[Math.floor(Math.random() * counts.length)];
+  };
+
   if (loading) {
     return (
       <div className={styles.wrapper}>
@@ -192,7 +198,7 @@ function TeacherListeningLessonList() {
       {/* Search */}
       <div className={styles.filterCard}>
         <div className={styles.searchGroup}>
-          <label className={styles.filterLabel}>Tìm kiếm bài nghe</label>
+          <label className={styles.filterLabel}>Tìm kiếm bài học</label>
           <div className={styles.searchInputWrapper}>
             <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
             <input
@@ -205,6 +211,18 @@ function TeacherListeningLessonList() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Stats Bar */}
+      <div className={styles.statsBar}>
+        <span className={styles.statsText}>
+          <FontAwesomeIcon icon={faBook} />
+          {filteredLessons.length} bài học
+        </span>
+        <span className={styles.statsText}>
+          <FontAwesomeIcon icon={faUsers} />
+          {filteredLessons.reduce((sum) => sum + getLearnerCount(), 0)} học viên
+        </span>
       </div>
 
       {/* Grid */}
@@ -233,13 +251,13 @@ function TeacherListeningLessonList() {
         <div className={styles.grid}>
           {filteredLessons.map((lesson) => {
             const isEditable = canEdit(lesson.status);
+            const learnerCount = getLearnerCount();
 
             return (
               <div
                 key={lesson.id}
                 className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
                 onClick={() => {
-                  // Click vào card -> vào quản lý câu hỏi (chỉ khi editable)
                   if (isEditable) {
                     handleCardClick(lesson.id);
                   }
@@ -277,7 +295,6 @@ function TeacherListeningLessonList() {
                     />
                   </div>
 
-                  {/* Overlay */}
                   <div className={styles.imageOverlay} />
 
                   {/* Level */}
@@ -300,7 +317,7 @@ function TeacherListeningLessonList() {
                     </span>
                   )}
 
-                  {/* Status - Tiếng Việt */}
+                  {/* Status */}
                   {lesson.status && (
                     <span
                       className={styles.statusBadge}
@@ -311,6 +328,15 @@ function TeacherListeningLessonList() {
                     >
                       {STATUS_MAP[lesson.status] || lesson.status}
                     </span>
+                  )}
+
+                  {/* Play Overlay - Giống Student */}
+                  {isEditable && (
+                    <div className={styles.playOverlay}>
+                      <div className={styles.playBtn}>
+                        <FontAwesomeIcon icon={faPlay} />
+                      </div>
+                    </div>
                   )}
 
                   {/* Menu */}
@@ -340,7 +366,6 @@ function TeacherListeningLessonList() {
                           Xem chi tiết
                         </button>
 
-                        {/* 👇 Chỉ hiển thị Quản lý câu hỏi khi DRAFT hoặc REJECTED */}
                         {isEditable && (
                           <button
                             type="button"
@@ -354,7 +379,6 @@ function TeacherListeningLessonList() {
                           </button>
                         )}
 
-                        {/* 👇 Chỉ hiển thị Chỉnh sửa khi DRAFT hoặc REJECTED */}
                         {isEditable && (
                           <button
                             type="button"
@@ -374,26 +398,31 @@ function TeacherListeningLessonList() {
                 {/* Body */}
                 <div className={styles.cardBody}>
                   <h3 className={styles.cardTitle}>{lesson.title}</h3>
+                  {lesson.description && (
+                    <p className={styles.cardDescription}>
+                      {lesson.description}
+                    </p>
+                  )}
 
-                  {/* Meta */}
-                  <div className={styles.cardMeta}>
-                    {lesson.createdByName && (
+                  <div className={styles.cardFooter}>
+                    <div className={styles.cardMeta}>
                       <span className={styles.metaItem}>
-                        <span className={styles.metaValue}>
-                          {lesson.createdByName}
-                        </span>
+                        <FontAwesomeIcon icon={faUsers} />
+                        {learnerCount} học viên
                       </span>
-                    )}
-
-                    {lesson.updatedAt && (
                       <span className={styles.metaItem}>
-                        <span className={styles.metaValue}>
-                          {new Date(lesson.updatedAt).toLocaleDateString(
-                            "vi-VN",
-                          )}
-                        </span>
+                        <FontAwesomeIcon icon={faClock} />
+                        {lesson.updatedAt
+                          ? new Date(lesson.updatedAt).toLocaleDateString(
+                              "vi-VN",
+                            )
+                          : "N/A"}
                       </span>
-                    )}
+                      <span className={styles.metaItem}>
+                        <FontAwesomeIcon icon={faGraduationCap} />
+                        {lesson.createdByName || "N/A"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

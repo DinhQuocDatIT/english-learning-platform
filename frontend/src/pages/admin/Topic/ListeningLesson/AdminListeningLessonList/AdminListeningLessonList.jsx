@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHeadphones,
-  faPlus,
   faSearch,
   faEllipsisV,
   faCrown,
@@ -19,6 +18,11 @@ import {
   faXmarkCircle,
   faGlobe,
   faEye,
+  faUsers,
+  faPlayCircle,
+  faGraduationCap,
+  faFileAlt,
+  faPlay,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -56,40 +60,6 @@ const STATUS_OPTIONS = [
   { value: "DRAFT", label: "Nháp" },
 ];
 
-// Cấu hình cho stats
-const STATS_CONFIG = [
-  {
-    key: "all",
-    label: "Tổng số",
-    icon: faList,
-    className: "statAll",
-  },
-  {
-    key: "pending",
-    label: "Chờ duyệt",
-    icon: faHourglassHalf,
-    className: "statPending",
-  },
-  {
-    key: "approved",
-    label: "Đã duyệt",
-    icon: faCheckCircle,
-    className: "statApproved",
-  },
-  {
-    key: "rejected",
-    label: "Từ chối",
-    icon: faXmarkCircle,
-    className: "statRejected",
-  },
-  {
-    key: "published",
-    label: "Đã phát hành",
-    icon: faGlobe,
-    className: "statPublished",
-  },
-];
-
 function AdminListeningLessonList() {
   const navigate = useNavigate();
   const { topicId } = useParams();
@@ -115,7 +85,6 @@ function AdminListeningLessonList() {
       setLoading(true);
       showLoading();
 
-      // Nếu có topicId -> lấy theo topic, không -> lấy tất cả (Admin)
       const [topicResponse, lessonResponse] = await Promise.all([
         topicId
           ? adminTopicService.getById(topicId)
@@ -166,31 +135,46 @@ function AdminListeningLessonList() {
     navigate(`/dashboard/admin/topics`);
   };
 
-  // ===== NAVIGATION =====
-  const handleViewLesson = (lessonId) => {
+  // ===== CLICK CARD -> XEM CÂU HỎI =====
+  const handleCardClick = (lessonId) => {
+    navigate(
+      `/dashboard/admin/topics/${topicId}/listening-lessons/${lessonId}/view`,
+    );
+  };
+
+  // ===== MENU -> XEM CHI TIẾT =====
+  const handleViewDetail = (lessonId) => {
     setActiveMenuId(null);
     navigate(
       `/dashboard/admin/topics/${topicId}/listening-lessons/${lessonId}`,
     );
   };
 
-  const handleViewSentenceList = (lessonId) => {
+  // ===== MENU -> XEM CÂU HỎI =====
+  const handleViewSentences = (lessonId) => {
     setActiveMenuId(null);
     navigate(
       `/dashboard/admin/topics/${topicId}/listening-lessons/${lessonId}/view`,
     );
   };
 
+  // Hàm random số lượng người học (tạm thời)
+  const getLearnerCount = () => {
+    const counts = [
+      127, 89, 234, 56, 312, 45, 178, 93, 256, 67, 543, 23, 189, 76, 432,
+    ];
+    return counts[Math.floor(Math.random() * counts.length)];
+  };
+
   // Stats
   const statusCount = {
     all: lessons.length,
+    draft: lessons.filter((l) => l.status === "DRAFT").length,
     pending: lessons.filter((l) => l.status === "PENDING").length,
     approved: lessons.filter((l) => l.status === "APPROVED").length,
     rejected: lessons.filter((l) => l.status === "REJECTED").length,
     published: lessons.filter((l) => l.status === "PUBLISHED").length,
   };
-
-  const getStatValue = (key) => statusCount[key] || 0;
 
   if (loading) {
     return (
@@ -210,27 +194,83 @@ function AdminListeningLessonList() {
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại</span>
         </button>
+        {topic && (
+          <div className={styles.headerInfo}>
+            <h1 className={styles.pageTitle}>
+              <FontAwesomeIcon
+                icon={faHeadphones}
+                className={styles.titleIcon}
+              />
+              {topic.title}
+            </h1>
+            <p className={styles.subtitle}>
+              Quản lý bài nghe trong chủ đề <strong>"{topic.title}"</strong>
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Stats */}
+      {/* Stats - Simple & Clean */}
       <div className={styles.statsGrid}>
-        {STATS_CONFIG.map((stat) => {
-          const value = getStatValue(stat.key);
-          return (
-            <div
-              key={stat.key}
-              className={`${styles.statCard} ${styles[stat.className]}`}
-            >
-              <div className={styles.statIconWrapper}>
-                <FontAwesomeIcon icon={stat.icon} className={styles.statIcon} />
-              </div>
-              <div className={styles.statInfo}>
-                <span className={styles.statLabel}>{stat.label}</span>
-                <span className={styles.statValue}>{value}</span>
-              </div>
-            </div>
-          );
-        })}
+        <div className={`${styles.statCard} ${styles.statAll}`}>
+          <div className={styles.statIconWrapper}>
+            <FontAwesomeIcon icon={faList} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statValue}>{statusCount.all}</span>
+            <span className={styles.statLabel}>Tổng số</span>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.statDraft}`}>
+          <div className={styles.statIconWrapper}>
+            <FontAwesomeIcon icon={faFileAlt} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statValue}>{statusCount.draft}</span>
+            <span className={styles.statLabel}>Nháp</span>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.statPending}`}>
+          <div className={styles.statIconWrapper}>
+            <FontAwesomeIcon icon={faHourglassHalf} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statValue}>{statusCount.pending}</span>
+            <span className={styles.statLabel}>Chờ duyệt</span>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.statApproved}`}>
+          <div className={styles.statIconWrapper}>
+            <FontAwesomeIcon icon={faCheckCircle} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statValue}>{statusCount.approved}</span>
+            <span className={styles.statLabel}>Đã duyệt</span>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.statRejected}`}>
+          <div className={styles.statIconWrapper}>
+            <FontAwesomeIcon icon={faXmarkCircle} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statValue}>{statusCount.rejected}</span>
+            <span className={styles.statLabel}>Từ chối</span>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.statPublished}`}>
+          <div className={styles.statIconWrapper}>
+            <FontAwesomeIcon icon={faGlobe} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statValue}>{statusCount.published}</span>
+            <span className={styles.statLabel}>Đã phát hành</span>
+          </div>
+        </div>
       </div>
 
       {/* Filter */}
@@ -276,6 +316,22 @@ function AdminListeningLessonList() {
         </button>
       </div>
 
+      {/* Stats Bar */}
+      <div className={styles.statsBar}>
+        <span className={styles.statsText}>
+          <FontAwesomeIcon icon={faBook} />
+          {filteredLessons.length} bài học
+        </span>
+        <span className={styles.statsText}>
+          <FontAwesomeIcon icon={faPlayCircle} />
+          {filteredLessons.filter((l) => l.isPremium).length} bài Premium
+        </span>
+        <span className={styles.statsText}>
+          <FontAwesomeIcon icon={faUsers} />
+          {filteredLessons.reduce((sum) => sum + getLearnerCount(), 0)} học viên
+        </span>
+      </div>
+
       {/* Grid */}
       {filteredLessons.length === 0 ? (
         <div className={styles.emptyState}>
@@ -289,133 +345,162 @@ function AdminListeningLessonList() {
         </div>
       ) : (
         <div className={styles.grid}>
-          {filteredLessons.map((lesson) => (
-            <div
-              key={lesson.id}
-              className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
-            >
-              {/* Image */}
-              <div className={styles.imageWrapper}>
-                {getImageUrl(lesson.lessonImage) ? (
-                  <img
-                    src={getImageUrl(lesson.lessonImage)}
-                    alt={lesson.title}
-                    className={styles.lessonImage}
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                      const fallback = e.currentTarget.nextElementSibling;
-                      if (fallback) {
-                        fallback.style.display = "flex";
-                      }
-                    }}
-                  />
-                ) : null}
+          {filteredLessons.map((lesson) => {
+            const learnerCount = getLearnerCount();
+            return (
+              <div
+                key={lesson.id}
+                className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
+                onClick={() => handleCardClick(lesson.id)}
+              >
+                {/* Image */}
+                <div className={styles.imageWrapper}>
+                  {getImageUrl(lesson.lessonImage) ? (
+                    <img
+                      src={getImageUrl(lesson.lessonImage)}
+                      alt={lesson.title}
+                      className={styles.lessonImage}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const fallback = e.currentTarget.nextElementSibling;
+                        if (fallback) {
+                          fallback.style.display = "flex";
+                        }
+                      }}
+                    />
+                  ) : null}
 
-                <div
-                  className={styles.fallbackGradient}
-                  style={{
-                    display: getImageUrl(lesson.lessonImage) ? "none" : "flex",
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faHeadphones}
-                    className={styles.fallbackIcon}
-                  />
-                </div>
-
-                <div className={styles.imageOverlay} />
-
-                {/* Level */}
-                {lesson.levelName && (
-                  <span
-                    className={styles.levelBadge}
+                  <div
+                    className={styles.fallbackGradient}
                     style={{
-                      color: lesson.levelColor || "#ffffff",
+                      display: getImageUrl(lesson.lessonImage)
+                        ? "none"
+                        : "flex",
                     }}
                   >
-                    {lesson.levelName}
-                  </span>
-                )}
+                    <FontAwesomeIcon
+                      icon={faHeadphones}
+                      className={styles.fallbackIcon}
+                    />
+                  </div>
 
-                {/* Premium */}
-                {lesson.isPremium && (
-                  <span className={styles.premiumBadge}>
-                    <FontAwesomeIcon icon={faCrown} />
-                    Pro
-                  </span>
-                )}
+                  <div className={styles.imageOverlay} />
 
-                {/* Status */}
-                {lesson.status && (
-                  <span
-                    className={styles.statusBadge}
-                    style={{
-                      backgroundColor:
-                        STATUS_COLOR_MAP[lesson.status] || "#64748b",
-                    }}
-                  >
-                    {STATUS_MAP[lesson.status] || lesson.status}
-                  </span>
-                )}
-
-                {/* Menu */}
-                <div className={styles.actionContainer}>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
-                    onClick={() =>
-                      setActiveMenuId(
-                        activeMenuId === lesson.id ? null : lesson.id,
-                      )
-                    }
-                  >
-                    <FontAwesomeIcon icon={faEllipsisV} />
-                  </button>
-
-                  {activeMenuId === lesson.id && (
-                    <div className={styles.dropdownMenu}>
-                      <button
-                        type="button"
-                        onClick={() => handleViewLesson(lesson.id)}
-                      >
-                        <FontAwesomeIcon icon={faEye} />
-                        Xem chi tiết
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleViewSentenceList(lesson.id)}
-                      >
-                        <FontAwesomeIcon icon={faList} />
-                        Xem câu hỏi
-                      </button>
-                    </div>
+                  {/* Level */}
+                  {lesson.levelName && (
+                    <span
+                      className={styles.levelBadge}
+                      style={{
+                        color: lesson.levelColor || "#ffffff",
+                      }}
+                    >
+                      {lesson.levelName}
+                    </span>
                   )}
+
+                  {/* Premium */}
+                  {lesson.isPremium && (
+                    <span className={styles.premiumBadge}>
+                      <FontAwesomeIcon icon={faCrown} />
+                      Pro
+                    </span>
+                  )}
+
+                  {/* Status */}
+                  {lesson.status && (
+                    <span
+                      className={styles.statusBadge}
+                      style={{
+                        backgroundColor:
+                          STATUS_COLOR_MAP[lesson.status] || "#64748b",
+                      }}
+                    >
+                      {STATUS_MAP[lesson.status] || lesson.status}
+                    </span>
+                  )}
+
+                  {/* Play Overlay - Giống Student */}
+                  <div className={styles.playOverlay}>
+                    <div className={styles.playBtn}>
+                      <FontAwesomeIcon icon={faPlay} />
+                    </div>
+                  </div>
+
+                  {/* Menu */}
+                  <div className={styles.actionContainer}>
+                    <button
+                      type="button"
+                      className={styles.actionBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveMenuId(
+                          activeMenuId === lesson.id ? null : lesson.id,
+                        );
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faEllipsisV} />
+                    </button>
+
+                    {activeMenuId === lesson.id && (
+                      <div className={styles.dropdownMenu}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewDetail(lesson.id);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faEye} />
+                          Xem chi tiết
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewSentences(lesson.id);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faList} />
+                          Xem câu hỏi
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className={styles.cardBody}>
+                  <h3 className={styles.cardTitle}>{lesson.title}</h3>
+                  {lesson.description && (
+                    <p className={styles.cardDescription}>
+                      {lesson.description}
+                    </p>
+                  )}
+
+                  <div className={styles.cardFooter}>
+                    <div className={styles.cardMeta}>
+                      <span className={styles.metaItem}>
+                        <FontAwesomeIcon icon={faUsers} />
+                        {learnerCount} học viên
+                      </span>
+                      <span className={styles.metaItem}>
+                        <FontAwesomeIcon icon={faClock} />
+                        {lesson.updatedAt
+                          ? new Date(lesson.updatedAt).toLocaleDateString(
+                              "vi-VN",
+                            )
+                          : "N/A"}
+                      </span>
+                      <span className={styles.metaItem}>
+                        <FontAwesomeIcon icon={faGraduationCap} />
+                        {lesson.createdByName || "N/A"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* Body */}
-              <div className={styles.cardBody}>
-                <h3 className={styles.cardTitle}>{lesson.title}</h3>
-
-                <div className={styles.cardMeta}>
-                  <span className={styles.metaItem}>
-                    <span className={styles.metaLabel}>Người tạo</span>
-                    <span className={styles.metaValue}>
-                      {lesson.createdByName || "N/A"}
-                    </span>
-                  </span>
-                  <span className={styles.metaItem}>
-                    <span className={styles.metaLabel}>Cập nhật</span>
-                    <span className={styles.metaValue}>
-                      {lesson.updatedAt
-                        ? new Date(lesson.updatedAt).toLocaleDateString("vi-VN")
-                        : "N/A"}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -50,4 +50,17 @@ public class Student {
             fetch = FetchType.LAZY
     )
     private List<StudentMembership> memberships = new ArrayList<>();
+    @OneToMany(
+            mappedBy = "student",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ListeningAnswer> listeningAnswers = new ArrayList<>();
+    public void addExperience(int points) {
+        if (this.experience == null) {
+            this.experience = 0;
+        }
+        this.experience += points;
+    }
 }
