@@ -31,6 +31,7 @@ import PlaybackVoicePopup from "../../../../components/PlaybackVoicePopup/Playba
 import getImageUrl from "../../../../utils/imageUrl";
 
 import styles from "./StudentListeningPractice.module.css";
+import ListeningSentenceFeedback from "../../../../components/ListeningSentenceFeedback/ListeningSentenceFeedback";
 
 function StudentListeningPractice() {
   const navigate = useNavigate();
@@ -818,6 +819,13 @@ function StudentListeningPractice() {
               <FontAwesomeIcon icon={faRotateRight} /> Làm lại bài học
             </button>
           </div>
+        )}
+
+        {currentSentence && (
+          <ListeningSentenceFeedback
+            sentenceId={currentSentence.id}
+            lessonId={lessonId}
+          />
         )}
       </div>
 
