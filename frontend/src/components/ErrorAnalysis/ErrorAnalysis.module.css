@@ -1,0 +1,570 @@
+
+
+.errorContainer {
+  width: 100%;
+  margin-top: 16px;
+  background: var(--color-background, #ffffff);
+  border: 1px solid #e8edf3;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+.errorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 16px 18px;
+
+  background: #ffffff;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.headerInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.headerIcon {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  background: #fff1f2;
+  color: #ef4444;
+
+  font-size: 15px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.errorTitle {
+  margin: 0;
+
+  color: #172033;
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.errorCount {
+  min-width: 22px;
+  height: 22px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 7px;
+
+  border-radius: 999px;
+
+  background: #fff1f2;
+  color: #dc2626;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.errorSubtitle {
+  margin: 3px 0 0;
+
+  color: #8a94a6;
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* =========================================
+   EXPAND BUTTON
+   ========================================= */
+
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  flex-shrink: 0;
+
+  padding: 7px 10px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: #f6f8fa;
+  color: #667085;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.expandBtn:hover {
+  background: #eef2f5;
+  color: #172033;
+}
+
+.expandBtn svg {
+  font-size: 10px;
+}
+
+/* =========================================
+   ERROR LIST
+   ========================================= */
+
+.errorList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 12px;
+}
+
+/* =========================================
+   ERROR ITEM
+   ========================================= */
+
+.errorItem {
+  position: relative;
+
+  padding: 14px;
+
+  background: #ffffff;
+
+  border: 1px solid #e9edf2;
+  border-radius: 12px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.errorItem:hover {
+  border-color: #d9e1e8;
+
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.05);
+
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   ERROR TOP
+   ========================================= */
+
+.errorTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+}
+
+.errorMeta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+/* =========================================
+   ERROR TYPE
+   ========================================= */
+
+.errorTypeBadge {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 22px;
+
+  padding: 3px 9px;
+
+  border-radius: 6px;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+}
+
+/* Default */
+
+.errorTypeBadge.default {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* Grammar */
+
+.errorTypeBadge.grammar {
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+/* Vocabulary */
+
+.errorTypeBadge.vocabulary {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+/* Article */
+
+.errorTypeBadge.article {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+/* Preposition */
+
+.errorTypeBadge.preposition {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+/* Tense */
+
+.errorTypeBadge.tense {
+  background: #fdf2f8;
+  color: #db2777;
+}
+
+/* Word order */
+
+.errorTypeBadge.word_order {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+
+/* Spelling */
+
+.errorTypeBadge.spelling {
+  background: #fdf2f8;
+  color: #db2777;
+}
+
+/* Word choice */
+
+.errorTypeBadge.word_choice {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+/* Naturalness */
+
+.errorTypeBadge.naturalness {
+  background: #ecfeff;
+  color: #0891b2;
+}
+
+/* Missing word */
+
+.errorTypeBadge.missing_word {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* Extra word */
+
+.errorTypeBadge.extra_word {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+
+/* =========================================
+   SEVERITY
+   ========================================= */
+
+.severityBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 3px 8px;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.severityDot {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+.severityHigh {
+  background: #fff1f2;
+  color: #dc2626;
+}
+
+.severityMedium {
+  background: #fff7ed;
+  color: #d97706;
+}
+
+.severityLow {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+/* =========================================
+   ERROR NUMBER
+   ========================================= */
+
+.errorNumber {
+  flex-shrink: 0;
+
+  color: #b0b8c5;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.5px;
+}
+
+/* =========================================
+   CONTENT
+   ========================================= */
+
+.errorContent {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* =========================================
+   TEXT BOX
+   ========================================= */
+
+.textBox {
+  padding: 9px 11px;
+
+  border-radius: 8px;
+}
+
+.wrongBox {
+  background: #fff8f8;
+  border: 1px solid #ffe4e6;
+}
+
+.correctBox {
+  background: #f5fbf8;
+  border: 1px solid #dcefe5;
+}
+
+.textLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-bottom: 4px;
+
+  color: #8993a4;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.wrongIcon,
+.correctIcon {
+  width: 17px;
+  height: 17px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  font-size: 8px;
+}
+
+.wrongIcon {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.correctIcon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.wrongText,
+.correctText {
+  margin: 0;
+
+  font-size: 13px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.wrongText {
+  color: #b91c1c;
+}
+
+.correctText {
+  color: #15803d;
+}
+
+/* =========================================
+   EXPLANATION
+   ========================================= */
+
+.explanation {
+  padding: 8px 2px 0;
+}
+
+.explanationLabel {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #667085;
+
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.explanation p {
+  margin: 0;
+
+  color: #667085;
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* =========================================
+   SHOW MORE
+   ========================================= */
+
+.showMoreBtn {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 9px 12px;
+
+  border: 1px dashed #dce2e8;
+  border-radius: 9px;
+
+  background: #fafbfc;
+  color: #667085;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.showMoreBtn:hover {
+  background: #f4f7f8;
+  border-color: #cbd5df;
+  color: #344054;
+}
+
+.showMoreBtn svg {
+  font-size: 9px;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 480px) {
+  .errorContainer {
+    border-radius: 12px;
+  }
+
+  .errorHeader {
+    align-items: flex-start;
+    padding: 13px;
+  }
+
+  .headerIcon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .errorTitle {
+    font-size: 14px;
+  }
+
+  .errorSubtitle {
+    font-size: 11px;
+  }
+
+  .expandBtn {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .errorList {
+    padding: 9px;
+  }
+
+  .errorItem {
+    padding: 12px;
+  }
+
+  .errorTop {
+    align-items: flex-start;
+  }
+
+  .errorNumber {
+    display: none;
+  }
+
+  .wrongText,
+  .correctText {
+    font-size: 12px;
+  }
+
+  .explanation p {
+    font-size: 11px;
+  }
+}
+

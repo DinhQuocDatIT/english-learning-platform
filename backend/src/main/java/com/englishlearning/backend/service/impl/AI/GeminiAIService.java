@@ -99,7 +99,7 @@ public class GeminiAIService implements AIService {
                 ))
                 .generationConfig(GenerationConfig.builder()
                         .temperature(0.3)
-                        .maxOutputTokens(4096)
+                        .maxOutputTokens(2048)
                         .responseMimeType("application/json")
                         .build())
                 .build();

@@ -51,7 +51,9 @@ import AdminListeningPreview from "../pages/admin/Topic/ListeningLesson/AdminLis
 import StudentTopicList from "../pages/student/Topic/StudentTopicList/StudentTopicList";
 import StudentLessonList from "../pages/student/Topic/StudentLessonList/StudentLessonList";
 import StudentListeningPractice from "../pages/student/Topic/StudentListeningPractice/StudentListeningPractice";
-
+import StudentAIPractice from "../pages/student/AI/StudentAIPractice/StudentAIPractice";
+import StudentAIPracticeCreate from "../pages/student/AI/StudentAIPracticeCreate/StudentAIPracticeCreate";
+import StudentAIPracticeChat from "../pages/student/AI/StudentAIPracticeChat/StudentAIPracticeChat";
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
   return (
@@ -91,6 +93,24 @@ function AppRoutes() {
               path="topics/:topicId/lessons/:lessonId/preview"
               element={<StudentListeningPractice />}
             />
+            <Route path="ai-practice" element={<StudentAIPractice />} />
+            <Route
+              path="ai-practice/create"
+              element={<StudentAIPracticeCreate />}
+            />
+            <Route
+              path="ai-practice/chat/:chatId"
+              element={<StudentAIPracticeChat />}
+            />
+            {/* <Route
+              path="ai-practice/create"
+              element={<StudentAIPracticeCreate />}
+            />
+            <Route path="ai-practice/:chatId" element={<StudentAIPractice />} />
+            <Route
+              path="ai-practice/:chatId/result"
+              element={<StudentAIPractice />}
+            /> */}
           </Route>
 
           <Route

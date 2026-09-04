@@ -109,7 +109,75 @@ public class PracticeServiceImpl implements PracticeService {
 
         return buildPracticeChatResponse(chat, turn);
     }
+    @Override
+    public PracticeChatResponse getPracticeChat(Long practiceId, Long userId) {
+        // Get student from userId
+        Student student = studentRepository
+                .findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Không tìm thấy thông tin học viên")
+                );
 
+        Long studentId = student.getId();
+
+        AIPracticeChat chat = practiceChatRepository.findById(practiceId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRACTICE_NOT_FOUND));
+
+        if (!chat.getStudent().getId().equals(studentId)) {
+            throw new BusinessException("Practice does not belong to student");
+        }
+
+        // ✅ Lấy tất cả turns đã có (cả đã trả lời và chưa trả lời)
+        List<AIPracticeTurn> allTurns = turnRepository
+                .findByPracticeChatIdOrderByQuestionOrderAsc(practiceId);
+
+        // ✅ Lấy current turn (chưa có answer)
+        AIPracticeTurn currentTurn = allTurns.stream()
+                .filter(turn -> turn.getAnswer() == null)
+                .findFirst()
+                .orElse(null);
+
+        // ✅ Build response với danh sách turns
+        PracticeChatResponse response = buildPracticeChatResponse(chat, currentTurn);
+
+        // ✅ Thêm danh sách các turn đã trả lời vào response
+        List<TurnHistoryResponse> turnHistory = allTurns.stream()
+                .filter(turn -> turn.getAnswer() != null)
+                .map(turn -> {
+                    AIAnswer answer = turn.getAnswer();
+                    AIEvaluation evaluation = answer.getEvaluation();
+
+                    List<ErrorDetail> errorDetails = new ArrayList<>();
+                    if (evaluation != null && evaluation.getErrors() != null) {
+                        for (AIError error : evaluation.getErrors()) {
+                            errorDetails.add(ErrorDetail.builder()
+                                    .errorType(error.getErrorType().name())
+                                    .userText(error.getUserText())
+                                    .correctText(error.getCorrectText())
+                                    .explanation(error.getExplanation())
+                                    .severity(error.getSeverity().name())
+                                    .build());
+                        }
+                    }
+
+                    return TurnHistoryResponse.builder()
+                            .id(turn.getId())
+                            .questionOrder(turn.getQuestionOrder())
+                            .vietnameseSentence(turn.getVietnameseSentence())
+                            .studentAnswer(answer.getStudentAnswer())
+                            .score(answer.getScore())
+                            .isCorrect(answer.getIsCorrect())
+                            .feedback(evaluation != null ? evaluation.getFeedback() : null)
+                            .naturalnessScore(evaluation != null ? evaluation.getNaturalnessScore() : null)
+                            .errors(errorDetails)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        response.setTurnHistory(turnHistory);
+
+        return response;
+    }
     // ===== SUBMIT ANSWER =====
     @Override
     public EvaluationResponse submitAnswer(Long userId, SubmitAnswerRequest request) {
@@ -364,31 +432,31 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     // ===== GET PRACTICE CHAT =====
-    @Override
-    public PracticeChatResponse getPracticeChat(Long practiceId, Long userId) {
-        // Get student from userId
-        Student student = studentRepository
-                .findByUserId(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Không tìm thấy thông tin học viên")
-                );
-
-        Long studentId = student.getId();
-
-        AIPracticeChat chat = practiceChatRepository.findById(practiceId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.PRACTICE_NOT_FOUND));
-
-        if (!chat.getStudent().getId().equals(studentId)) {
-            throw new BusinessException("Practice does not belong to student");
-        }
-
-        // Get current turn (chưa có answer)
-        AIPracticeTurn currentTurn = turnRepository
-                .findCurrentTurnByChatId(practiceId)
-                .orElse(null);
-
-        return buildPracticeChatResponse(chat, currentTurn);
-    }
+//    @Override
+//    public PracticeChatResponse getPracticeChat(Long practiceId, Long userId) {
+//        // Get student from userId
+//        Student student = studentRepository
+//                .findByUserId(userId)
+//                .orElseThrow(() ->
+//                        new ResourceNotFoundException("Không tìm thấy thông tin học viên")
+//                );
+//
+//        Long studentId = student.getId();
+//
+//        AIPracticeChat chat = practiceChatRepository.findById(practiceId)
+//                .orElseThrow(() -> new BusinessException(ErrorCode.PRACTICE_NOT_FOUND));
+//
+//        if (!chat.getStudent().getId().equals(studentId)) {
+//            throw new BusinessException("Practice does not belong to student");
+//        }
+//
+//        // Get current turn (chưa có answer)
+//        AIPracticeTurn currentTurn = turnRepository
+//                .findCurrentTurnByChatId(practiceId)
+//                .orElse(null);
+//
+//        return buildPracticeChatResponse(chat, currentTurn);
+//    }
 
     // ===== PRIVATE METHODS =====
 

@@ -30,4 +30,5 @@ public class PracticeChatResponse {
     private List<String> vocabularyWords;
     // Câu hỏi đầu tiên (khi tạo mới)
     private TurnResponse currentTurn;
+    private List<TurnHistoryResponse> turnHistory;
 }

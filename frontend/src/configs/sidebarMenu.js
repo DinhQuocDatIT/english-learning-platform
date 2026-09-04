@@ -40,6 +40,11 @@ export const sidebarMenus = {
       icon: faBookOpen,
     },
     {
+      path: "/dashboard/student/ai-practice",
+      name: "Luyện nghe",
+      icon: faBookOpen,
+    },
+    {
       path: "/dashboard/settings",
       name: "Cài đặt",
       icon: faGear,

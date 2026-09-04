@@ -1,0 +1,442 @@
+/* StudentAIPracticeCreate.module.css */
+
+.wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+}
+
+/* ====== HEADER ====== */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text, #0f172a);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-tertiary, #f0fdfa);
+}
+
+.headerTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-secondary, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.headerIcon {
+  color: var(--color-primary, #0ea792);
+}
+
+/* ====== FORM ====== */
+.form {
+  background: var(--color-background, #ffffff);
+  border-radius: 16px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  padding: 32px;
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formGroupFull {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  grid-column: 1 / -1;
+}
+
+.formLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-secondary, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.formLabel svg {
+  color: var(--color-primary, #0ea792);
+}
+
+.formHint {
+  font-size: 13px;
+  color: var(--color-text-muted, #94a3b8);
+  margin: -4px 0 0 0;
+}
+
+/* ====== LEVEL OPTIONS ====== */
+.levelOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.levelOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text, #0f172a);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.levelOption:hover {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-tertiary, #f0fdfa);
+}
+
+.levelOption.active {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-tertiary, #f0fdfa);
+}
+
+.levelDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* ====== TYPE OPTIONS ====== */
+.typeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.typeOption {
+  padding: 8px 20px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text, #0f172a);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.typeOption:hover {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-tertiary, #f0fdfa);
+}
+
+.typeOption.active {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-primary, #0ea792);
+  color: #ffffff;
+}
+
+/* ====== TOPIC OPTIONS ====== */
+.topicOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topicOption {
+  padding: 8px 16px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text, #0f172a);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.topicOption:hover {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-tertiary, #f0fdfa);
+}
+
+.topicOption.active {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-primary, #0ea792);
+  color: #ffffff;
+}
+
+/* ====== LIMIT OPTIONS ====== */
+.limitOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.limitOption {
+  padding: 8px 20px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text, #0f172a);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.limitOption:hover {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-tertiary, #f0fdfa);
+}
+
+.limitOption.active {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-primary, #0ea792);
+  color: #ffffff;
+}
+
+/* ====== VOCABULARY ====== */
+.vocabSearch {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 16px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--color-text, #0f172a);
+  background: var(--color-background, #ffffff);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary, #0ea792);
+  box-shadow: 0 0 0 4px rgba(14, 167, 146, 0.1);
+}
+
+.searchCount {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary, #0ea792);
+  white-space: nowrap;
+}
+
+.vocabLoading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.vocabEmpty {
+  padding: 20px;
+  text-align: center;
+  color: var(--color-text-muted, #94a3b8);
+  background: var(--color-tertiary, #f8fafc);
+  border-radius: 8px;
+}
+
+.vocabGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+
+.vocabItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.vocabItem:hover {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-tertiary, #f0fdfa);
+}
+
+.vocabItem.selected {
+  border-color: var(--color-primary, #0ea792);
+  background: var(--color-tertiary, #f0fdfa);
+}
+
+.vocabWord {
+  font-weight: 600;
+  color: var(--color-secondary, #0f172a);
+}
+
+.vocabMeaning {
+  font-size: 13px;
+  color: var(--color-text-muted, #94a3b8);
+  flex: 1;
+}
+
+.vocabCheck {
+  color: var(--color-primary, #0ea792);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* ====== FORM ACTIONS ====== */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border, #f1f5f9);
+}
+
+.cancelBtn {
+  padding: 10px 24px;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text, #0f172a);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelBtn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-primary, #0ea792);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover, #0d9488);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(14, 167, 146, 0.3);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 16px;
+  }
+
+  .form {
+    padding: 20px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+  }
+
+  .headerTitle {
+    font-size: 20px;
+  }
+
+  .vocabGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 12px;
+  }
+
+  .form {
+    padding: 16px;
+  }
+
+  .levelOptions,
+  .typeOptions,
+  .topicOptions,
+  .limitOptions {
+    flex-direction: column;
+  }
+
+  .levelOption,
+  .typeOption,
+  .topicOption,
+  .limitOption {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .vocabSearch {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vocabGrid {
+    grid-template-columns: 1fr;
+  }
+}

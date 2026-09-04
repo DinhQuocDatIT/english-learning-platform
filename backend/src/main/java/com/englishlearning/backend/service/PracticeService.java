@@ -16,4 +16,5 @@ public interface PracticeService {
     List<PracticeChatResponse> getPracticeHistory(Long userId);
     PracticeResultResponse getPracticeResult(Long practiceId, Long userId);
     PracticeChatResponse getPracticeChat(Long practiceId, Long userId);
+
 }
