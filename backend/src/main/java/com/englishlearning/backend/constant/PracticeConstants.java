@@ -16,13 +16,19 @@ public class PracticeConstants {
 
     public static final Set<String> VALID_TOPICS = new HashSet<>(
             Arrays.asList(
-                    "DAILY_CONVERSATION",
-                    "SHOPPING",
-                    "RESTAURANT",
-                    "TRAVEL",
-                    "WORK",
-                    "SCHOOL",
                     "FAMILY",
+                    "WORK",
+                    "TRAVEL",
+                    "SHOPPING",
+                    "FOOD",
+                    "HEALTH",
+                    "EDUCATION",
+                    "TECHNOLOGY",
+                    "HOBBIES",
+                    "DAILY_ROUTINE",
+                    "DAILY_CONVERSATION",
+                    "RESTAURANT",
+                    "SCHOOL",
                     "FRIENDS"
             )
     );

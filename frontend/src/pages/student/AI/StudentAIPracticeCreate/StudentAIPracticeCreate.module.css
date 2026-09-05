@@ -4,7 +4,11 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: 24px 32px;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   min-height: 100vh;
 }
 
@@ -224,18 +228,27 @@
   color: #ffffff;
 }
 
-/* ====== VOCABULARY ====== */
-.vocabSearch {
+/* ============================================
+   ✅ VOCABULARY - NHẬP TAY TỪNG Ô
+   ============================================ */
+
+.vocabInputContainer {
   display: flex;
-  align-items: center;
-  gap: 16px;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
-.searchInput {
-  flex: 1;
-  min-width: 200px;
-  padding: 10px 16px;
+.vocabInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.vocabInput {
+  width: 180px;
+  padding: 10px 14px;
   border: 2px solid var(--color-border, #e2e8f0);
   border-radius: 8px;
   font-size: 14px;
@@ -245,82 +258,78 @@
   transition: all 0.2s;
 }
 
-.searchInput:focus {
+.vocabInput:focus {
   border-color: var(--color-primary, #0ea792);
   box-shadow: 0 0 0 4px rgba(14, 167, 146, 0.1);
 }
 
-.searchCount {
+.vocabInput::placeholder {
+  color: var(--color-text-muted, #94a3b8);
   font-size: 13px;
-  font-weight: 500;
-  color: var(--color-primary, #0ea792);
-  white-space: nowrap;
 }
 
-.vocabLoading {
+.vocabRemoveBtn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 20px;
-  color: var(--color-text-muted, #94a3b8);
-}
-
-.vocabEmpty {
-  padding: 20px;
-  text-align: center;
-  color: var(--color-text-muted, #94a3b8);
-  background: var(--color-tertiary, #f8fafc);
-  border-radius: 8px;
-}
-
-.vocabGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 8px;
-  max-height: 300px;
-  overflow-y: auto;
-  padding: 4px 2px;
-}
-
-.vocabItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border: 2px solid var(--color-border, #e2e8f0);
-  border-radius: 8px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #ef4444;
   cursor: pointer;
   transition: all 0.2s;
-  position: relative;
+  flex-shrink: 0;
 }
 
-.vocabItem:hover {
-  border-color: var(--color-primary, #0ea792);
+.vocabRemoveBtn:hover {
+  background: #fecaca;
+  transform: scale(1.05);
+}
+
+.vocabAddBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 2px dashed var(--color-primary, #0ea792);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-primary, #0ea792);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vocabAddBtn:hover {
   background: var(--color-tertiary, #f0fdfa);
+  border-color: var(--color-primary-hover, #0d9488);
 }
 
-.vocabItem.selected {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-tertiary, #f0fdfa);
+.vocabAddBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.vocabWord {
-  font-weight: 600;
-  color: var(--color-secondary, #0f172a);
-}
-
-.vocabMeaning {
+.vocabCounter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   color: var(--color-text-muted, #94a3b8);
-  flex: 1;
 }
 
-.vocabCheck {
+.vocabCounter .vocabPreview {
   color: var(--color-primary, #0ea792);
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 500;
 }
-
+.vocabCounter span {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-muted, #94a3b8);
+}
 /* ====== FORM ACTIONS ====== */
 .formActions {
   display: flex;
@@ -392,8 +401,8 @@
     font-size: 20px;
   }
 
-  .vocabGrid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  .vocabInput {
+    width: 140px;
   }
 
   .formActions {
@@ -431,12 +440,22 @@
     justify-content: center;
   }
 
-  .vocabSearch {
+  .vocabInputContainer {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .vocabGrid {
-    grid-template-columns: 1fr;
+  .vocabInputWrapper {
+    width: 100%;
+  }
+
+  .vocabInput {
+    width: 100%;
+    flex: 1;
+  }
+
+  .vocabAddBtn {
+    width: 100%;
+    justify-content: center;
   }
 }

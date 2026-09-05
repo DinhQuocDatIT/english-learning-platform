@@ -29,10 +29,11 @@ public class StudentAIError {
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ErrorType errorType;
-
+//    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)
+//    private ErrorType errorType;
+        @Column(nullable = false, length = 50)
+        private String errorType;
     @Column(nullable = false, length = 255)
     private String errorKey; // e.g., "ARTICLE_A_AN", "PREPOSITION_AT_IN_ON"
 

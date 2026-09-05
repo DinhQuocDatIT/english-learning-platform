@@ -11,5 +11,6 @@ public enum ErrorType {
     WORD_CHOICE,
     NATURALNESS,
     MISSING_WORD,
-    EXTRA_WORD
+    EXTRA_WORD,
+    UNKNOWN
 }

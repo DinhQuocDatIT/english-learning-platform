@@ -23,4 +23,5 @@ public class TurnHistoryResponse {
     private String feedback;
     private Integer naturalnessScore;
     private List<ErrorDetail> errors;
+    private List<String> betterAnswers;
 }

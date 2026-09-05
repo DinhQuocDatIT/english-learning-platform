@@ -34,6 +34,9 @@ public class AIPracticeTurn {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String expectedAnswer;
 
+    @Column(columnDefinition = "TEXT")
+    private String betterAnswers;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

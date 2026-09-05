@@ -13,6 +13,8 @@ import {
   faHandHoldingDollar,
   faMoneyBill,
   faLayerGroup,
+  faAirFreshener,
+  faRobot,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -41,8 +43,8 @@ export const sidebarMenus = {
     },
     {
       path: "/dashboard/student/ai-practice",
-      name: "Luyện nghe",
-      icon: faBookOpen,
+      name: "Luyện tập với AI",
+      icon: faRobot,
     },
     {
       path: "/dashboard/settings",

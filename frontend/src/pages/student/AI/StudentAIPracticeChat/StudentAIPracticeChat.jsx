@@ -26,6 +26,7 @@ import {
   faSpellCheck,
   faLanguage,
   faCircleCheck,
+  faCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
@@ -142,7 +143,9 @@ function StudentAIPracticeChat() {
         feedback: data.feedback,
         naturalnessScore: data.naturalnessScore,
         errors: data.errors || [],
-        betterAnswers: data.betterAnswers || [],
+        // ✅ Lấy betterAnswers từ response (backend đã trả về)
+        betterAnswers:
+          data.betterAnswers?.map((item) => item.text || item) || [],
         answeredAt: new Date().toISOString(),
       };
 
@@ -208,6 +211,9 @@ function StudentAIPracticeChat() {
   };
 
   const handleViewResult = () => {
+    if (!result && chatId) {
+      fetchResult(chatId);
+    }
     setShowResult(true);
   };
 
@@ -284,7 +290,7 @@ function StudentAIPracticeChat() {
             }
           >
             <FontAwesomeIcon
-              icon={turn.isCorrect ? faCheckCircle : faTriangleExclamation}
+              icon={turn.isCorrect ? faCheckCircle : faCircleXmark}
             />
             <span>{turn.isCorrect ? "Chính xác" : "Cần cải thiện"}</span>
           </span>
@@ -353,16 +359,17 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* Suggestions */}
+        {/* ✅ Suggestions - Better Answers */}
         {turn.betterAnswers && turn.betterAnswers.length > 0 && (
           <div className={styles.betterWaysContainer}>
             <div className={styles.betterWaysLabel}>
               <FontAwesomeIcon icon={faLightbulb} />
-              <span>Câu đề xuất tốt hơn:</span>
+              <span>Các cách diễn đạt tốt hơn:</span>
             </div>
             {turn.betterAnswers.map((sug, idx) => (
               <div key={idx} className={styles.suggestionBox}>
-                {sug.text || sug}
+
+                {sug}
               </div>
             ))}
           </div>
@@ -394,7 +401,7 @@ function StudentAIPracticeChat() {
               style={{
                 width: `${Math.min(progress, 100)}%`,
                 background: isCompleted
-                  ? "linear-gradient(90deg, #22c55e, #16a34a)"
+                  ? "linear-gradient(90deg, #0ea792, #059669)"
                   : "linear-gradient(90deg, #0ea792, #059669)",
               }}
             />
@@ -425,12 +432,15 @@ function StudentAIPracticeChat() {
             </div>
             <h2>🎉 Chúc mừng bạn đã hoàn thành!</h2>
             <p>
-              Bạn đã trả lời đúng {practice.correctCount || correctTurns}/
-              {totalTurns} câu.
+              Bạn đã trả lời đúng{" "}
+              <strong>
+                {practice.correctCount || correctTurns}/{totalTurns}
+              </strong>{" "}
+              câu.
             </p>
             <button className={styles.viewResultBtn} onClick={handleViewResult}>
               <FontAwesomeIcon icon={faChartBar} />
-              Xem kết quả chi tiết
+              <span>Xem kết quả chi tiết</span>
             </button>
           </div>
         ) : (
@@ -544,7 +554,7 @@ function StudentAIPracticeChat() {
             </div>
             <div className={styles.statBox}>
               <span className={styles.statIconWarning}>
-                <FontAwesomeIcon icon={faTriangleExclamation} />
+                <FontAwesomeIcon icon={faCircleXmark} />
               </span>
               <span className={styles.statNumber}>
                 {completedTurns - correctTurns}
@@ -605,7 +615,7 @@ function StudentAIPracticeChat() {
                     </span>
                   ) : (
                     <span className={styles.iconWarning}>
-                      <FontAwesomeIcon icon={faTriangleExclamation} />
+                      <FontAwesomeIcon icon={faCircleXmark} />
                     </span>
                   )}
                 </span>
@@ -664,7 +674,7 @@ function StudentAIPracticeChat() {
       </aside>
 
       {/* Result Modal */}
-      {showResult && result && (
+      {showResult && (result || isCompleted) && (
         <div
           className={styles.resultModal}
           onClick={() => setShowResult(false)}
@@ -676,50 +686,83 @@ function StudentAIPracticeChat() {
             <button
               className={styles.resultModalClose}
               onClick={() => setShowResult(false)}
+              aria-label="Đóng"
             >
               ✕
             </button>
-            <h2>📊 Kết quả luyện tập</h2>
+            <h2>Kết quả luyện tập</h2>
 
             <div className={styles.resultStats}>
-              <div className={styles.resultStat}>
+              <div className={`${styles.resultStat} ${styles.statTotal}`}>
                 <span className={styles.resultStatValue}>
-                  {result.totalQuestions || result.questionCount || totalTurns}
+                  {result?.totalQuestions ||
+                    result?.questionCount ||
+                    practice?.questionLimit ||
+                    totalTurns}
                 </span>
                 <span className={styles.resultStatLabel}>Tổng câu</span>
               </div>
-              <div className={styles.resultStat}>
-                <span
-                  className={styles.resultStatValue}
-                  style={{ color: "#22c55e" }}
-                >
-                  {result.correctAnswers || correctTurns}
+              <div className={`${styles.resultStat} ${styles.statCorrect}`}>
+                <span className={styles.resultStatValue}>
+                  {result?.correctAnswers ??
+                    practice?.correctCount ??
+                    correctTurns}
                 </span>
                 <span className={styles.resultStatLabel}>Đúng</span>
               </div>
-              <div className={styles.resultStat}>
+              <div className={`${styles.resultStat} ${styles.statAccuracy}`}>
                 <span className={styles.resultStatValue}>
-                  {result.accuracy || accuracy}%
+                  {result?.accuracy ?? accuracy}%
                 </span>
                 <span className={styles.resultStatLabel}>Độ chính xác</span>
               </div>
-              <div className={styles.resultStat}>
+              <div className={`${styles.resultStat} ${styles.statAverage}`}>
                 <span className={styles.resultStatValue}>
-                  {result.averageScore || 0}%
+                  {result?.averageScore != null
+                    ? `${result.averageScore}%`
+                    : turnHistory.length > 0
+                      ? `${Math.round(
+                          turnHistory.reduce(
+                            (s, t) => s + (Number(t.score) || 0),
+                            0,
+                          ) / turnHistory.length,
+                        )}%`
+                      : "0%"}
                 </span>
                 <span className={styles.resultStatLabel}>Điểm TB</span>
               </div>
             </div>
 
-            {result.commonErrors && result.commonErrors.length > 0 && (
+            {((result?.commonErrors && result.commonErrors.length > 0) ||
+              turnHistory.some((t) => t.errors && t.errors.length > 0)) && (
               <div className={styles.resultErrors}>
                 <h4>📝 Lỗi thường gặp</h4>
-                {result.commonErrors.map((error, index) => (
-                  <div key={index} className={styles.resultErrorItem}>
-                    <span>{error.errorType}</span>
-                    <span>{error.count} lần</span>
-                  </div>
-                ))}
+                <div className={styles.resultErrorList}>
+                  {(
+                    result?.commonErrors ||
+                    (() => {
+                      const counts = {};
+                      turnHistory.forEach((t) => {
+                        (t.errors || []).forEach((err) => {
+                          const type = err.errorType || "OTHER";
+                          counts[type] = (counts[type] || 0) + 1;
+                        });
+                      });
+                      return Object.entries(counts)
+                        .map(([errorType, count]) => ({ errorType, count }))
+                        .sort((a, b) => b.count - a.count);
+                    })()
+                  ).map((error, index) => (
+                    <div key={index} className={styles.resultErrorItem}>
+                      <span className={styles.errorTypeName}>
+                        {error.errorType}
+                      </span>
+                      <span className={styles.errorTypeCount}>
+                        {error.count} lần
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

@@ -27,10 +27,11 @@ public class AIError {
     @JoinColumn(name = "evaluation_id", nullable = false)
     private AIEvaluation evaluation;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ErrorType errorType;
+//    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)
 
+    @Column(nullable = false, length = 50)
+    private String errorType;
     @Column(columnDefinition = "TEXT")
     private String userText;
 
