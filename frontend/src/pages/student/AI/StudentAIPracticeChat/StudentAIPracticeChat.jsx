@@ -12,8 +12,6 @@ import {
   faSpinner,
   faChartBar,
   faHistory,
-  faChevronDown,
-  faChevronUp,
   faClock,
   faTriangleExclamation,
   faBolt,
@@ -32,6 +30,7 @@ import {
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import AnswerCheckingLoading from "../../../../components/AnswerCheckingLoading/AnswerCheckingLoading";
 import styles from "./StudentAIPracticeChat.module.css";
 
 function StudentAIPracticeChat() {
@@ -45,6 +44,7 @@ function StudentAIPracticeChat() {
   const [answer, setAnswer] = useState("");
   const [evaluation, setEvaluation] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingAnswer, setSubmittingAnswer] = useState("");
   const [result, setResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [turnHistory, setTurnHistory] = useState([]);
@@ -124,7 +124,7 @@ function StudentAIPracticeChat() {
     // Sắp xếp theo số lần mắc lỗi giảm dần
     const sortedErrors = Object.entries(errorCount)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 5) // Lấy tối đa 5 điểm yếu
+      .slice(0, 5)
       .map(([errorType, count]) => ({
         errorType: errorType,
         displayName: getDisplayName(errorType),
@@ -145,15 +145,12 @@ function StudentAIPracticeChat() {
       setCurrentTurn(data?.currentTurn || null);
       setActiveTurn(data?.currentTurn?.questionOrder || 1);
 
-      // Load history from backend
       if (data?.turnHistory && data.turnHistory.length > 0) {
-        // Sắp xếp lịch sử theo thứ tự giảm dần (mới nhất lên đầu)
         const sortedHistory = [...data.turnHistory].sort(
           (a, b) => b.questionOrder - a.questionOrder,
         );
         setTurnHistory(sortedHistory);
         setShowHistory(true);
-        // Set the latest turn as selected by default
         setSelectedHistoryTurn(sortedHistory[0]);
       }
 
@@ -190,23 +187,24 @@ function StudentAIPracticeChat() {
       return;
     }
 
+    const currentAnswer = answer.trim();
+
     try {
+      setSubmittingAnswer(currentAnswer);
       setIsSubmitting(true);
-      showLoading();
 
       const response = await practiceService.submitAnswer(chatId, {
         turnId: currentTurn.id,
-        studentAnswer: answer.trim(),
+        studentAnswer: currentAnswer,
       });
 
       const data = response?.data?.data;
 
-      // Add answered turn to history
       const answeredTurn = {
         id: currentTurn.id,
         questionOrder: currentTurn.questionOrder,
         vietnameseSentence: currentTurn.vietnameseSentence,
-        studentAnswer: answer.trim(),
+        studentAnswer: currentAnswer,
         score: data.score,
         isCorrect: data.isCorrect,
         feedback: data.feedback,
@@ -217,7 +215,6 @@ function StudentAIPracticeChat() {
         answeredAt: new Date().toISOString(),
       };
 
-      // Thêm vào đầu mảng (mới nhất lên trên)
       setTurnHistory((prev) => [answeredTurn, ...prev]);
       setSelectedHistoryTurn(answeredTurn);
 
@@ -249,7 +246,6 @@ function StudentAIPracticeChat() {
 
       toast.success("Đã nộp câu trả lời!");
 
-      // Scroll to feedback
       setTimeout(() => {
         feedbackRef.current?.scrollIntoView({
           behavior: "smooth",
@@ -263,7 +259,7 @@ function StudentAIPracticeChat() {
       );
     } finally {
       setIsSubmitting(false);
-      hideLoading();
+      setSubmittingAnswer("");
     }
   };
 
@@ -400,7 +396,6 @@ function StudentAIPracticeChat() {
           <p className={styles.feedbackDesc}>{turn.feedback}</p>
         )}
 
-        {/* ✅ Error Display - Đã map sang tiếng Việt */}
         {turn.errors && turn.errors.length > 0 && (
           <div className={styles.errorBoxesContainer}>
             {turn.errors.map((err, idx) => (
@@ -514,10 +509,17 @@ function StudentAIPracticeChat() {
                 Câu {currentTurn?.questionOrder || 0} (Lượt{" "}
                 {currentTurn?.questionOrder || 0}/{totalTurns})
               </span>
-              <span className={styles.waitingBadge}>
-                <span className={styles.waitingDot} />
-                <span>Đang chờ trả lời</span>
-              </span>
+              {isSubmitting ? (
+                <span className={styles.evaluatingBadge}>
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                  <span>AI đang chấm điểm...</span>
+                </span>
+              ) : (
+                <span className={styles.waitingBadge}>
+                  <span className={styles.waitingDot} />
+                  <span>Đang chờ trả lời</span>
+                </span>
+              )}
             </div>
 
             <div className={styles.aiPromptBox}>
@@ -537,49 +539,42 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* Answer Input */}
-        {!isCompleted && (
-          <form onSubmit={handleSubmitAnswer} className={styles.inputSection}>
-            <div className={styles.textareaWrapper}>
-              <textarea
-                rows={3}
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Nhập bản dịch tiếng Anh của bạn..."
-                maxLength={500}
-                disabled={isSubmitting}
-                autoFocus
-              />
-              <span className={styles.charCounter}>{answer.length}/500</span>
-            </div>
+        {/* Answer Input or Checking Loading */}
+        {!isCompleted &&
+          (isSubmitting ? (
+            <AnswerCheckingLoading studentAnswer={submittingAnswer || answer} />
+          ) : (
+            <form onSubmit={handleSubmitAnswer} className={styles.inputSection}>
+              <div className={styles.textareaWrapper}>
+                <textarea
+                  rows={3}
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Nhập bản dịch tiếng Anh của bạn..."
+                  maxLength={500}
+                  disabled={isSubmitting}
+                  autoFocus
+                />
+                <span className={styles.charCounter}>{answer.length}/500</span>
+              </div>
 
-            <div className={styles.inputFooter}>
-              <button type="button" className={styles.micBtn}>
-                <FontAwesomeIcon icon={faMicrophone} />
-                <span>Nhập bằng giọng nói</span>
-              </button>
-              <button
-                type="submit"
-                className={styles.submitBtn}
-                disabled={isSubmitting || !answer.trim()}
-              >
-                {isSubmitting ? (
-                  <>
-                    <FontAwesomeIcon icon={faSpinner} spin />
-                    <span>Đang gửi...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Kiểm tra đáp án / Gửi câu trả lời</span>
-                    <FontAwesomeIcon icon={faPaperPlane} />
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        )}
-
+              <div className={styles.inputFooter}>
+                <button type="button" className={styles.micBtn}>
+                  <FontAwesomeIcon icon={faMicrophone} />
+                  <span>Nhập bằng giọng nói</span>
+                </button>
+                <button
+                  type="submit"
+                  className={styles.submitBtn}
+                  disabled={isSubmitting || !answer.trim()}
+                >
+                  <span>Kiểm tra đáp án / Gửi câu trả lời</span>
+                  <FontAwesomeIcon icon={faPaperPlane} />
+                </button>
+              </div>
+            </form>
+          ))}
         <div ref={chatEndRef} />
       </main>
 
@@ -649,9 +644,13 @@ function StudentAIPracticeChat() {
               >
                 <span className={styles.historyItemName}>
                   <span>Câu {currentTurn.questionOrder}</span>
-                  <span className={styles.badgeDoing}>Đang làm</span>
+                  <span className={styles.badgeDoing}>
+                    {isSubmitting ? "Đang chấm..." : "Đang làm"}
+                  </span>
                 </span>
-                <span className={styles.scoreBlue}>Chờ nộp...</span>
+                <span className={styles.scoreBlue}>
+                  {isSubmitting ? "Đang xử lý..." : "Chờ nộp..."}
+                </span>
               </div>
             )}
 
@@ -706,7 +705,7 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* Focus Areas - Tính từ turnHistory của practice hiện tại */}
+        {/* Focus Areas */}
         <div className={styles.focusSection}>
           <div className={styles.sectionTitle}>
             <FontAwesomeIcon icon={faBullseye} />
@@ -796,11 +795,10 @@ function StudentAIPracticeChat() {
               </div>
             </div>
 
-            {/* ✅ Result Errors - Đã map sang tiếng Việt */}
             {((result?.commonErrors && result.commonErrors.length > 0) ||
               turnHistory.some((t) => t.errors && t.errors.length > 0)) && (
               <div className={styles.resultErrors}>
-                <h4>📝 Lỗi thường gặp</h4>
+                <h4>Lỗi thường gặp</h4>
                 <div className={styles.resultErrorList}>
                   {(
                     result?.commonErrors ||
