@@ -5,6 +5,7 @@ import com.englishlearning.backend.dto.request.SubmitAnswerRequest;
 import com.englishlearning.backend.dto.response.EvaluationResponse;
 import com.englishlearning.backend.dto.response.PracticeChatResponse;
 import com.englishlearning.backend.dto.response.PracticeResultResponse;
+import com.englishlearning.backend.dto.response.StudentWeaknessResponse;
 
 import java.util.List;
 
@@ -16,5 +17,5 @@ public interface PracticeService {
     List<PracticeChatResponse> getPracticeHistory(Long userId);
     PracticeResultResponse getPracticeResult(Long practiceId, Long userId);
     PracticeChatResponse getPracticeChat(Long practiceId, Long userId);
-
+    List<StudentWeaknessResponse> getStudentWeaknessesWithDetails(Long userId);
 }

@@ -27,6 +27,7 @@ import {
   faLanguage,
   faCircleCheck,
   faCircleXmark,
+  faList,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
@@ -65,6 +66,74 @@ function StudentAIPracticeChat() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [evaluation, turnHistory]);
 
+  // ✅ Map error type sang tên hiển thị tiếng Việt
+  const getDisplayName = (errorType) => {
+    const map = {
+      GRAMMAR: "Ngữ pháp",
+      VOCABULARY: "Từ vựng",
+      ARTICLE: "Mạo từ (a/an/the)",
+      PREPOSITION: "Giới từ",
+      TENSE: "Thì",
+      WORD_ORDER: "Trật tự từ",
+      SPELLING: "Chính tả",
+      WORD_CHOICE: "Dùng từ chưa phù hợp",
+      NATURALNESS: "Câu chưa tự nhiên",
+      MISSING_WORD: "Thiếu từ",
+      EXTRA_WORD: "Thừa từ",
+      PUNCTUATION: "Dấu câu",
+      CAPITALIZATION: "Viết hoa",
+      OTHER: "Lỗi khác",
+    };
+    return map[errorType] || errorType;
+  };
+
+  // ✅ Map error type sang icon
+  const getErrorIcon = (errorType) => {
+    const map = {
+      GRAMMAR: faSpellCheck,
+      VOCABULARY: faLightbulb,
+      ARTICLE: faTag,
+      PREPOSITION: faLocationDot,
+      TENSE: faStopwatch,
+      WORD_ORDER: faList,
+      SPELLING: faSpellCheck,
+      NATURALNESS: faStar,
+      MISSING_WORD: faTriangleExclamation,
+      EXTRA_WORD: faTriangleExclamation,
+      PUNCTUATION: faSpellCheck,
+      CAPITALIZATION: faSpellCheck,
+    };
+    return map[errorType] || faTriangleExclamation;
+  };
+
+  // ✅ Hàm tính điểm yếu từ turnHistory của practice hiện tại
+  const calculateWeaknessesFromHistory = () => {
+    if (turnHistory.length === 0) return [];
+
+    // Đếm số lần mắc lỗi theo loại
+    const errorCount = {};
+    turnHistory.forEach((turn) => {
+      if (turn.errors && turn.errors.length > 0) {
+        turn.errors.forEach((err) => {
+          const type = err.errorType || "OTHER";
+          errorCount[type] = (errorCount[type] || 0) + 1;
+        });
+      }
+    });
+
+    // Sắp xếp theo số lần mắc lỗi giảm dần
+    const sortedErrors = Object.entries(errorCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5) // Lấy tối đa 5 điểm yếu
+      .map(([errorType, count]) => ({
+        errorType: errorType,
+        displayName: getDisplayName(errorType),
+        count: count,
+      }));
+
+    return sortedErrors;
+  };
+
   const fetchPracticeChat = async (id) => {
     try {
       showLoading();
@@ -84,7 +153,7 @@ function StudentAIPracticeChat() {
         );
         setTurnHistory(sortedHistory);
         setShowHistory(true);
-        // Set the latest turn as selected by default (lấy câu mới nhất)
+        // Set the latest turn as selected by default
         setSelectedHistoryTurn(sortedHistory[0]);
       }
 
@@ -143,7 +212,6 @@ function StudentAIPracticeChat() {
         feedback: data.feedback,
         naturalnessScore: data.naturalnessScore,
         errors: data.errors || [],
-        // ✅ Lấy betterAnswers từ response (backend đã trả về)
         betterAnswers:
           data.betterAnswers?.map((item) => item.text || item) || [],
         answeredAt: new Date().toISOString(),
@@ -224,7 +292,6 @@ function StudentAIPracticeChat() {
   const handleHistoryClick = (turn) => {
     setSelectedHistoryTurn(turn);
     setActiveTurn(turn.questionOrder);
-    // Scroll to feedback section
     setTimeout(() => {
       feedbackRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -296,7 +363,6 @@ function StudentAIPracticeChat() {
           </span>
         </div>
 
-        {/* Question & Answer Compare */}
         <div className={styles.questionCompareBox}>
           <div className={styles.targetText}>
             <strong>Đề câu {turn.questionOrder}:</strong> "
@@ -316,7 +382,6 @@ function StudentAIPracticeChat() {
           </div>
         </div>
 
-        {/* Analysis */}
         <div className={styles.analysisHeaderRow}>
           <h3 className={styles.sectionHeading}>Phân tích chi tiết</h3>
           <div className={styles.scoreBadges}>
@@ -335,13 +400,13 @@ function StudentAIPracticeChat() {
           <p className={styles.feedbackDesc}>{turn.feedback}</p>
         )}
 
-        {/* Error Display */}
+        {/* ✅ Error Display - Đã map sang tiếng Việt */}
         {turn.errors && turn.errors.length > 0 && (
           <div className={styles.errorBoxesContainer}>
             {turn.errors.map((err, idx) => (
               <div key={idx} className={styles.errorBox}>
                 <div className={styles.errorCategory}>
-                  {err.errorType || "LỖI"}
+                  {getDisplayName(err.errorType) || "LỖI"}
                 </div>
                 <div className={styles.errorWrong}>
                   <span className={styles.errorIconWrong}>✕</span>
@@ -359,7 +424,6 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* ✅ Suggestions - Better Answers */}
         {turn.betterAnswers && turn.betterAnswers.length > 0 && (
           <div className={styles.betterWaysContainer}>
             <div className={styles.betterWaysLabel}>
@@ -368,7 +432,6 @@ function StudentAIPracticeChat() {
             </div>
             {turn.betterAnswers.map((sug, idx) => (
               <div key={idx} className={styles.suggestionBox}>
-
                 {sug}
               </div>
             ))}
@@ -380,7 +443,6 @@ function StudentAIPracticeChat() {
 
   return (
     <div className={styles.container}>
-      {/* MAIN CONTENT */}
       <main className={styles.mainContent}>
         {/* Progress Section */}
         <div className={styles.progressSection}>
@@ -411,7 +473,7 @@ function StudentAIPracticeChat() {
         {/* Feedback Section */}
         {selectedHistoryTurn && renderTurnFeedback(selectedHistoryTurn)}
 
-        {/* Divider - Only show if not completed */}
+        {/* Divider */}
         {!isCompleted && (
           <div className={styles.dividerDoing}>
             <span className={styles.dividerBadge}>
@@ -523,7 +585,6 @@ function StudentAIPracticeChat() {
 
       {/* SIDEBAR */}
       <aside className={styles.sidebar}>
-        {/* Profile */}
         <div className={styles.sidebarProfile}>
           <div className={styles.avatarPlaceholder}>
             <FontAwesomeIcon icon={faUser} />
@@ -541,7 +602,6 @@ function StudentAIPracticeChat() {
           )}
         </div>
 
-        {/* Session Stats */}
         <div className={styles.sessionBox}>
           <div className={styles.sessionHeader}>PHIÊN HIỆN TẠI</div>
           <div className={styles.sessionStats}>
@@ -575,7 +635,7 @@ function StudentAIPracticeChat() {
           </div>
         </div>
 
-        {/* History - LỊCH SỬ CÁC LƯỢT (đã sắp xếp ngược) */}
+        {/* History */}
         {showHistory && (
           <div className={styles.historySection} id="history">
             <div className={styles.sectionTitle}>
@@ -583,7 +643,6 @@ function StudentAIPracticeChat() {
               <span>LỊCH SỬ CÁC LƯỢT</span>
             </div>
 
-            {/* Hiển thị câu đang làm (chưa có trong history) - luôn ở trên cùng */}
             {!isCompleted && currentTurn && (
               <div
                 className={`${styles.historyItemRow} ${styles.historyItemDoing}`}
@@ -596,7 +655,6 @@ function StudentAIPracticeChat() {
               </div>
             )}
 
-            {/* Hiển thị lịch sử các câu đã làm (mới nhất lên đầu) */}
             {turnHistory.map((turn) => (
               <div
                 key={turn.id || turn.questionOrder}
@@ -648,28 +706,33 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* Focus Areas */}
+        {/* Focus Areas - Tính từ turnHistory của practice hiện tại */}
         <div className={styles.focusSection}>
           <div className={styles.sectionTitle}>
             <FontAwesomeIcon icon={faBullseye} />
             <span>ĐIỂM CẦN TẬP TRUNG</span>
           </div>
-          <div className={styles.focusItem}>
-            <FontAwesomeIcon icon={faTag} />
-            <span>Articles</span>
-          </div>
-          <div className={styles.focusItem}>
-            <FontAwesomeIcon icon={faStopwatch} />
-            <span>Present Perfect</span>
-          </div>
-          <div className={styles.focusItem}>
-            <FontAwesomeIcon icon={faLocationDot} />
-            <span>Prepositions</span>
-          </div>
-          <div className={styles.focusItem}>
-            <FontAwesomeIcon icon={faSpellCheck} />
-            <span>Spelling</span>
-          </div>
+          {(() => {
+            const weaknesses = calculateWeaknessesFromHistory();
+            if (weaknesses && weaknesses.length > 0) {
+              return weaknesses.map((item, idx) => (
+                <div key={idx} className={styles.focusItem}>
+                  <FontAwesomeIcon icon={getErrorIcon(item.errorType)} />
+                  <span>{item.displayName || item.errorType}</span>
+                  <span className={styles.errorCountBadge}>
+                    {item.count} lần
+                  </span>
+                </div>
+              ));
+            } else {
+              return (
+                <div className={styles.focusItem}>
+                  <FontAwesomeIcon icon={faLightbulb} />
+                  <span>Chưa có dữ liệu lỗi</span>
+                </div>
+              );
+            }
+          })()}
         </div>
       </aside>
 
@@ -733,6 +796,7 @@ function StudentAIPracticeChat() {
               </div>
             </div>
 
+            {/* ✅ Result Errors - Đã map sang tiếng Việt */}
             {((result?.commonErrors && result.commonErrors.length > 0) ||
               turnHistory.some((t) => t.errors && t.errors.length > 0)) && (
               <div className={styles.resultErrors}>
@@ -755,7 +819,7 @@ function StudentAIPracticeChat() {
                   ).map((error, index) => (
                     <div key={index} className={styles.resultErrorItem}>
                       <span className={styles.errorTypeName}>
-                        {error.errorType}
+                        {getDisplayName(error.errorType)}
                       </span>
                       <span className={styles.errorTypeCount}>
                         {error.count} lần

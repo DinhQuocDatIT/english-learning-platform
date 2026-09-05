@@ -900,7 +900,7 @@
   flex: 0 0 6px;
 
   margin: 0;
-  padding: 0 ;
+  padding: 0;
 
   background: var(--color-success);
   border-radius: 50%;
@@ -2059,7 +2059,7 @@
 }
 
 .iconWarning {
- color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .scoreGreen,
@@ -2398,4 +2398,13 @@
   .resultModalContent {
     padding: 18px 14px;
   }
+}
+.errorCountBadge {
+  margin-left: auto;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
 }

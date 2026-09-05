@@ -40,6 +40,14 @@ const practiceService = {
   getPracticeChat(chatId) {
     return axiosClient.get(`/v1/ai/practice/${chatId}`);
   },
+
+  /**
+   * 6. Lấy danh sách điểm yếu của học sinh
+   * @returns {Promise} - Danh sách điểm yếu chi tiết
+   */
+  getStudentWeaknesses() {
+    return axiosClient.get("/v1/ai/practice/weaknesses");
+  },
 };
 
 export default practiceService;

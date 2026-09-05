@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -581,5 +582,77 @@ public class PracticeServiceImpl implements PracticeService {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
+    }
+    @Override
+    public List<StudentWeaknessResponse> getStudentWeaknessesWithDetails(Long userId) {
+        log.info("Getting student weaknesses with details for user: {}", userId);
+
+        Student student = studentRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin học viên"));
+
+        Long studentId = student.getId();
+
+        // Lấy danh sách điểm yếu từ database
+        List<StudentAIError> weaknesses = studentAIErrorRepository
+                .findByStudentIdOrderByMasteryScoreAsc(studentId);
+
+        if (weaknesses.isEmpty()) {
+            log.info("No weaknesses found for student: {}", studentId);
+            return new ArrayList<>();
+        }
+
+        // Map sang DTO response
+        return weaknesses.stream()
+                .map(error -> StudentWeaknessResponse.builder()
+                        .errorType(error.getErrorType())
+                        .displayName(getDisplayName(error.getErrorType()))
+                        .count(error.getOccurrenceCount())
+                        .masteryScore(error.getMasteryScore())
+                        .suggestion(getSuggestion(error.getErrorType()))
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // ===== PRIVATE HELPER METHODS =====
+
+    // ===== PRIVATE HELPER METHODS =====
+
+    private String getDisplayName(String errorType) {
+        Map<String, String> displayMap = Map.ofEntries(
+                Map.entry("GRAMMAR", "Ngữ pháp"),
+                Map.entry("VOCABULARY", "Từ vựng"),
+                Map.entry("ARTICLE", "Mạo từ"),
+                Map.entry("PREPOSITION", "Giới từ"),
+                Map.entry("TENSE", "Thì"),
+                Map.entry("WORD_ORDER", "Trật tự từ"),
+                Map.entry("SPELLING", "Chính tả"),
+                Map.entry("WORD_CHOICE", "Lựa chọn từ"),
+                Map.entry("NATURALNESS", "Độ tự nhiên"),
+                Map.entry("MISSING_WORD", "Thiếu từ"),
+                Map.entry("EXTRA_WORD", "Thừa từ"),
+                Map.entry("PUNCTUATION", "Dấu câu"),
+                Map.entry("CAPITALIZATION", "Viết hoa")
+        );
+        return displayMap.getOrDefault(errorType, errorType);
+    }
+
+    private String getSuggestion(String errorType) {
+        Map<String, String> suggestionMap = Map.ofEntries(
+                Map.entry("GRAMMAR", "Ôn tập cấu trúc ngữ pháp cơ bản"),
+                Map.entry("VOCABULARY", "Học thêm từ vựng theo chủ đề"),
+                Map.entry("ARTICLE", "Ôn quy tắc dùng a/an/the"),
+                Map.entry("PREPOSITION", "Học các cụm giới từ thông dụng"),
+                Map.entry("TENSE", "Ôn thì và cách dùng"),
+                Map.entry("WORD_ORDER", "Ôn trật tự từ trong câu"),
+                Map.entry("SPELLING", "Luyện viết chính tả"),
+                Map.entry("WORD_CHOICE", "Luyện chọn từ phù hợp với ngữ cảnh"),
+                Map.entry("NATURALNESS", "Đọc nhiều để cải thiện độ tự nhiên"),
+                Map.entry("MISSING_WORD", "Kiểm tra câu trước khi gửi"),
+                Map.entry("EXTRA_WORD", "Kiểm tra câu trước khi gửi"),
+                Map.entry("PUNCTUATION", "Ôn quy tắc dùng dấu câu"),
+                Map.entry("CAPITALIZATION", "Ôn quy tắc viết hoa")
+        );
+        return suggestionMap.getOrDefault(errorType, "Luyện tập thêm");
     }
 }

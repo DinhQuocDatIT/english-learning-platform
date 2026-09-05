@@ -2,10 +2,7 @@ package com.englishlearning.backend.controller;
 
 import com.englishlearning.backend.dto.request.CreatePracticeRequest;
 import com.englishlearning.backend.dto.request.SubmitAnswerRequest;
-import com.englishlearning.backend.dto.response.ApiResponse;
-import com.englishlearning.backend.dto.response.EvaluationResponse;
-import com.englishlearning.backend.dto.response.PracticeChatResponse;
-import com.englishlearning.backend.dto.response.PracticeResultResponse;
+import com.englishlearning.backend.dto.response.*;
 import com.englishlearning.backend.entity.User;
 import com.englishlearning.backend.security.CustomUserDetails;
 import com.englishlearning.backend.service.PracticeService;
@@ -105,6 +102,20 @@ public class AIPracticeController {
 
         return ResponseEntity.ok(
                 new ApiResponse<>(200, "Lấy thông tin practice thành công", response)
+        );
+    }
+    @GetMapping("/weaknesses")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<ApiResponse<List<StudentWeaknessResponse>>> getStudentWeaknesses(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUser().getId();
+        log.info("Getting student weaknesses for user: {}", userId);
+
+        List<StudentWeaknessResponse> response = practiceService.getStudentWeaknessesWithDetails(userId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(200, "Lấy danh sách điểm yếu thành công", response)
         );
     }
 }
