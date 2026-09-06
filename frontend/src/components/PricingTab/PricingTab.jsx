@@ -3,18 +3,23 @@ import React, { useState } from "react";
 import {
   faDollarSign,
   faPlus,
-  faTrash,
+  faLock,
+  faUnlock,
   faSpinner,
   faCheckCircle,
-  faTimesCircle,
-  faExclamationTriangle,
+  faBan,
+  faTriangleExclamation,
+  faXmark,
+  faArrowRight,
+  faRobot,
+  faClock,
+  faCalendar,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
 import pricingService from "../../services/pricingService";
 import styles from "./PricingTab.module.css";
 
-// Danh sách model theo Provider
 const MODEL_LIST = {
   GEMINI: [
     { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
@@ -47,8 +52,12 @@ function PricingTab({ pricings, loading, onRefresh }) {
   });
 
   const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    return new Date(dateStr).toLocaleDateString("vi-VN");
+    if (!dateStr) return "—";
+    return new Date(dateStr).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
   const handleAddPricing = () => {
@@ -61,10 +70,10 @@ function PricingTab({ pricings, loading, onRefresh }) {
     setShowModal(true);
   };
 
-  const handleDeletePricing = async (id, isInUse, modelName) => {
+  const handleDeactivatePricing = async (id, isInUse, modelName) => {
     let confirmMessage = "Bạn có chắc muốn vô hiệu hóa pricing này?";
     if (isInUse) {
-      confirmMessage = `⚠️ CẢNH BÁO: Model "${modelName}" đang được sử dụng!\n\nVô hiệu hóa sẽ khiến học viên không thể sử dụng model này nữa.\n\nBạn có chắc muốn tiếp tục?`;
+      confirmMessage = `Model "${modelName}" đang được sử dụng.\nVô hiệu hóa sẽ khiến học viên không thể dùng model này nữa.\n\nBạn có chắc muốn tiếp tục?`;
     }
 
     if (!window.confirm(confirmMessage)) return;
@@ -73,7 +82,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
       await pricingService.deactivate(id);
       toast.success(
         isInUse
-          ? `✅ Đã vô hiệu hóa model "${modelName}". Học viên sẽ không dùng được model này nữa.`
+          ? `Đã vô hiệu hóa model "${modelName}". Học viên sẽ không dùng được model này nữa.`
           : "Đã vô hiệu hóa pricing",
       );
       onRefresh();
@@ -119,93 +128,139 @@ function PricingTab({ pricings, loading, onRefresh }) {
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <FontAwesomeIcon icon={faSpinner} spin />
+        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinnerIcon} />
         <p>Đang tải danh sách giá...</p>
       </div>
     );
   }
 
   return (
-    <div className={styles.pricingContainer}>
-      <div className={styles.pricingHeader}>
-        <h2 className={styles.sectionTitle}>
-          <FontAwesomeIcon icon={faDollarSign} />
-          Quản lý giá AI Model
-        </h2>
+    <div className={styles.container}>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <div className={styles.iconWrapper}>
+            <FontAwesomeIcon icon={faDollarSign} />
+          </div>
+          <div>
+            <h2 className={styles.title}>Quản lý AI Model</h2>
+            <p className={styles.subtitle}>
+              <FontAwesomeIcon icon={faRobot} className={styles.subIcon} />
+              Quản lý bảng giá cho các mô hình AI theo từng nhà cung cấp
+            </p>
+          </div>
+        </div>
         <button className={styles.addBtn} onClick={handleAddPricing}>
           <FontAwesomeIcon icon={faPlus} />
           Thêm giá mới
         </button>
       </div>
 
+      {/* Table */}
       <div className={styles.tableWrapper}>
-        <table className={styles.pricingTable}>
+        <table className={styles.table}>
           <thead>
             <tr>
-              <th>Provider</th>
-              <th>Model</th>
-              <th>Giá Input (1M)</th>
-              <th>Giá Output (1M)</th>
-              <th>Đang áp dụng</th>
-              <th>Đang dùng</th>
-              <th>Hiệu lực từ</th>
-              <th>Hết hiệu lực</th>
-              <th>Thao tác</th>
+              <th>Nhà cung cấp</th>
+              <th>Mô hình</th>
+              <th className={styles.priceCol}>Giá Input</th>
+              <th className={styles.priceCol}>Giá Output</th>
+              <th>Trạng thái</th>
+              <th>Sử dụng</th>
+              <th>Hiệu lực</th>
+              <th className={styles.actionCol}></th>
             </tr>
           </thead>
           <tbody>
             {pricings && pricings.length > 0 ? (
               pricings.map((pricing) => (
-                <tr key={pricing.id}>
+                <tr
+                  key={pricing.id}
+                  className={
+                    pricing.isActive ? styles.activeRow : styles.inactiveRow
+                  }
+                >
                   <td>
-                    <span className={styles.providerBadge}>
+                    <span className={styles.providerChip}>
                       {pricing.provider}
                     </span>
                   </td>
                   <td>
-                    <span className={styles.modelBadge}>{pricing.model}</span>
+                    <span className={styles.modelChip}>{pricing.model}</span>
                   </td>
-                  <td>${pricing.inputPricePerMillion}</td>
-                  <td>${pricing.outputPricePerMillion}</td>
+                  <td className={styles.priceCell}>
+                    <span className={styles.priceValue}>
+                      ${pricing.inputPricePerMillion}
+                    </span>
+                    <span className={styles.priceUnit}>/1M</span>
+                  </td>
+                  <td className={styles.priceCell}>
+                    <span className={styles.priceValue}>
+                      ${pricing.outputPricePerMillion}
+                    </span>
+                    <span className={styles.priceUnit}>/1M</span>
+                  </td>
                   <td>
                     {pricing.isActive ? (
                       <span className={styles.statusActive}>
-                        <FontAwesomeIcon icon={faCheckCircle} /> Đang áp dụng
+                        <FontAwesomeIcon icon={faCheckCircle} />
+                        Đang áp dụng
                       </span>
                     ) : (
                       <span className={styles.statusInactive}>
-                        <FontAwesomeIcon icon={faTimesCircle} /> Hết hiệu lực
+                        <FontAwesomeIcon icon={faLock} />
+                        Đã khóa
                       </span>
                     )}
                   </td>
                   <td>
                     {pricing.isInUse ? (
-                      <span className={styles.inUseBadge}>
-                        <FontAwesomeIcon icon={faExclamationTriangle} /> Đang
-                        dùng
+                      <span className={styles.inUseChip}>
+                        <FontAwesomeIcon icon={faTriangleExclamation} />
+                        Đang dùng
                       </span>
                     ) : (
-                      <span className={styles.notInUseBadge}>-</span>
-                    )}
-                  </td>
-                  <td>{formatDate(pricing.effectiveFrom)}</td>
-                  <td>
-                    {pricing.effectiveTo ? (
-                      formatDate(pricing.effectiveTo)
-                    ) : (
-                      <span className={styles.activeBadge}>Đang áp dụng</span>
+                      <span className={styles.notInUse}>—</span>
                     )}
                   </td>
                   <td>
+                    <div className={styles.effectiveDates}>
+                      <div className={styles.dateItem}>
+                       
+                        <span className={styles.dateFrom}>
+                          {formatDate(pricing.effectiveFrom)}
+                        </span>
+                      </div>
+                      {pricing.effectiveTo ? (
+                        <>
+                          <FontAwesomeIcon
+                            icon={faArrowRight}
+                            className={styles.dateArrow}
+                          />
+                          <div className={styles.dateItem}>
+                           
+                            <span className={styles.dateTo}>
+                              {formatDate(pricing.effectiveTo)}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <span className={styles.activeDateChip}>
+                          Đang áp dụng
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className={styles.actionCol}>
                     {pricing.isActive && (
                       <button
                         className={
                           pricing.isInUse
-                            ? styles.deleteBtnWarning
-                            : styles.deleteBtn
+                            ? styles.lockBtnDanger
+                            : styles.lockBtn
                         }
                         onClick={() =>
-                          handleDeletePricing(
+                          handleDeactivatePricing(
                             pricing.id,
                             pricing.isInUse,
                             pricing.model,
@@ -213,26 +268,37 @@ function PricingTab({ pricings, loading, onRefresh }) {
                         }
                         title={
                           pricing.isInUse
-                            ? "⚠️ Model đang được sử dụng!"
+                            ? "Model đang được sử dụng"
                             : "Vô hiệu hóa"
                         }
                       >
-                        <FontAwesomeIcon icon={faTrash} />
-                        {pricing.isInUse && (
-                          <span className={styles.warningIcon}>⚠️</span>
-                        )}
+                        <FontAwesomeIcon icon={faLock} />
                       </button>
                     )}
                     {!pricing.isActive && (
-                      <span className={styles.inactiveAction}>-</span>
+                      <span className={styles.inactiveAction}>
+                        <FontAwesomeIcon
+                          icon={faLock}
+                          className={styles.lockedIcon}
+                        />
+                      </span>
                     )}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="9" className={styles.noData}>
-                  Chưa có dữ liệu pricing
+                <td colSpan="8" className={styles.noData}>
+                  <div className={styles.noDataContent}>
+                    <FontAwesomeIcon
+                      icon={faDollarSign}
+                      className={styles.noDataIcon}
+                    />
+                    <span>Chưa có dữ liệu pricing</span>
+                    <span className={styles.noDataSub}>
+                      Hãy thêm bảng giá mới
+                    </span>
+                  </div>
                 </td>
               </tr>
             )}
@@ -240,29 +306,34 @@ function PricingTab({ pricings, loading, onRefresh }) {
         </table>
       </div>
 
-      {/* Modal - Thêm Pricing */}
+      {/* Modal */}
       {showModal && (
-        <div className={styles.modal} onClick={() => setShowModal(false)}>
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowModal(false)}
+        >
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>Thêm giá mới</h2>
+              <div className={styles.modalHeaderLeft}>
+                <div className={styles.modalIconWrapper}>
+                  <FontAwesomeIcon icon={faPlus} />
+                </div>
+                <h3>Thêm giá mới</h3>
+              </div>
               <button
                 className={styles.modalClose}
                 onClick={() => setShowModal(false)}
               >
-                ✕
+                <FontAwesomeIcon icon={faXmark} />
               </button>
             </div>
 
             {formData.model &&
               isModelActive(formData.provider, formData.model) && (
                 <div className={styles.modalWarning}>
-                  <FontAwesomeIcon icon={faTimesCircle} />
+                  <FontAwesomeIcon icon={faTriangleExclamation} />
                   <div>
-                    <strong>❌ Model này đang active!</strong>
+                    <strong>Model này đang active</strong>
                     <p>Vui lòng vô hiệu hóa pricing cũ trước khi thêm mới.</p>
                     <button
                       className={styles.goToDeleteBtn}
@@ -270,12 +341,12 @@ function PricingTab({ pricings, loading, onRefresh }) {
                         setShowModal(false);
                         setTimeout(() => {
                           document
-                            .querySelector(".pricingTable")
+                            .querySelector(`.${styles.table}`)
                             ?.scrollIntoView({ behavior: "smooth" });
                         }, 300);
                       }}
                     >
-                      Đi đến danh sách để vô hiệu hóa
+                      Xem danh sách
                     </button>
                   </div>
                 </div>
@@ -283,7 +354,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
 
             <form onSubmit={handleSubmitPricing}>
               <div className={styles.formGroup}>
-                <label>Provider</label>
+                <label>Nhà cung cấp</label>
                 <select
                   value={formData.provider}
                   onChange={(e) =>
@@ -301,7 +372,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Model</label>
+                <label>Mô hình</label>
                 <select
                   value={formData.model}
                   onChange={(e) =>
@@ -309,7 +380,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
                   }
                   required
                 >
-                  <option value="">-- Chọn model --</option>
+                  <option value="">— Chọn model —</option>
                   {getModelsByProvider(formData.provider).map((model) => {
                     const active = isModelActive(
                       formData.provider,
@@ -317,53 +388,54 @@ function PricingTab({ pricings, loading, onRefresh }) {
                     );
                     return (
                       <option key={model.value} value={model.value}>
-                        {model.label} {active ? "(⚠️ Đang active)" : ""}
+                        {model.label} {active ? "(đang active)" : ""}
                       </option>
                     );
                   })}
                 </select>
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Giá Input (USD/1M tokens)</label>
-                <input
-                  type="number"
-                  step="0.001"
-                  placeholder="VD: 0.10"
-                  value={formData.inputPricePerMillion}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      inputPricePerMillion: e.target.value,
-                    })
-                  }
-                  required
-                  disabled={
-                    formData.model &&
-                    isModelActive(formData.provider, formData.model)
-                  }
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Giá Output (USD/1M tokens)</label>
-                <input
-                  type="number"
-                  step="0.001"
-                  placeholder="VD: 0.30"
-                  value={formData.outputPricePerMillion}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      outputPricePerMillion: e.target.value,
-                    })
-                  }
-                  required
-                  disabled={
-                    formData.model &&
-                    isModelActive(formData.provider, formData.model)
-                  }
-                />
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Giá Input (USD/1M)</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="0.00"
+                    value={formData.inputPricePerMillion}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        inputPricePerMillion: e.target.value,
+                      })
+                    }
+                    required
+                    disabled={
+                      formData.model &&
+                      isModelActive(formData.provider, formData.model)
+                    }
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Giá Output (USD/1M)</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    placeholder="0.00"
+                    value={formData.outputPricePerMillion}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        outputPricePerMillion: e.target.value,
+                      })
+                    }
+                    required
+                    disabled={
+                      formData.model &&
+                      isModelActive(formData.provider, formData.model)
+                    }
+                  />
+                </div>
               </div>
 
               <div className={styles.formActions}>

@@ -92,12 +92,7 @@ function AdminAIUsage() {
   return (
     <div className={styles.container}>
       {/* Header */}
-      <div className={styles.header}>
-        <h1 className={styles.title}>
-          <FontAwesomeIcon icon={faRobot} className={styles.titleIcon} />
-          Quản lý AI Usage & Pricing
-        </h1>
-      </div>
+      
 
       {/* Tabs */}
       <div className={styles.tabs}>

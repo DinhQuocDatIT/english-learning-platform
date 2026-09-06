@@ -15,6 +15,7 @@ import {
   faLayerGroup,
   faAirFreshener,
   faRobot,
+  faHexagonNodesBolt,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -125,8 +126,8 @@ export const sidebarMenus = {
     },
     {
       path: "/dashboard/admin/ai-usage",
-      name: "ai usage",
-      icon: faBookOpen,
+      name: "AI usage",
+      icon: faHexagonNodesBolt,
     },
     {
       path: "/dashboard/admin/profile",
