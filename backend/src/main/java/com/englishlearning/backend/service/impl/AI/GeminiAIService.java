@@ -1,6 +1,7 @@
 package com.englishlearning.backend.service.impl.AI;
 
-import com.englishlearning.backend.constant.PromptConstants;  // ✅ Import
+import com.englishlearning.backend.config.GeminiConfig;
+import com.englishlearning.backend.constant.PromptConstants;
 import com.englishlearning.backend.dto.request.AIEvaluateRequest;
 import com.englishlearning.backend.dto.request.AIGenerateRequest;
 import com.englishlearning.backend.dto.request.gemini.GeminiContent;
@@ -17,7 +18,6 @@ import com.englishlearning.backend.exception.ErrorCode;
 import com.englishlearning.backend.service.AI.AIService;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.JsonNode;
@@ -33,13 +33,34 @@ public class GeminiAIService implements AIService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final String geminiApiUrl;
+    private final GeminiConfig geminiConfig;
+
+    // ✅ Lưu token usage của request hiện tại
+    private GeminiUsageMetadata currentUsage;
 
     public GeminiAIService(RestTemplate restTemplate,
                            ObjectMapper objectMapper,
-                           @Qualifier("geminiApiUrl") String geminiApiUrl) {
+                           String geminiApiUrl,
+                           GeminiConfig geminiConfig) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.geminiApiUrl = geminiApiUrl;
+        this.geminiConfig = geminiConfig;
+    }
+
+    // ✅ Getter để lấy token usage
+    public GeminiUsageMetadata getCurrentUsage() {
+        return currentUsage;
+    }
+
+    // ✅ Getter để lấy model name từ config
+    public String getCurrentModel() {
+        return geminiConfig.getModel();
+    }
+
+    // ✅ Getter để lấy provider từ config
+    public String getCurrentProvider() {
+        return geminiConfig.getProvider();
     }
 
     @Override
@@ -47,7 +68,6 @@ public class GeminiAIService implements AIService {
         log.info("Đang tạo câu cho level: {}, topic: {}", request.getLevel(), request.getTopic());
 
         try {
-            // ✅ Gọi prompt từ PromptConstants
             String vocabularyStr = request.getVocabularyWords() != null ?
                     String.join(", ", request.getVocabularyWords()) : null;
             String weaknessesStr = request.getWeaknesses() != null ?
@@ -74,7 +94,6 @@ public class GeminiAIService implements AIService {
         log.info("Đang đánh giá câu trả lời: {}", request.getVietnameseSentence());
 
         try {
-            // ✅ Gọi prompt từ PromptConstants
             String prompt = PromptConstants.formatEvaluatePrompt(
                     request.getVietnameseSentence(),
                     request.getStudentAnswer(),
@@ -95,7 +114,6 @@ public class GeminiAIService implements AIService {
         log.info("Đang đánh giá và tạo câu hỏi tiếp theo");
 
         try {
-            // ✅ Gọi prompt từ PromptConstants
             String vocabularyStr = request.getVocabularyWords() != null ?
                     String.join(", ", request.getVocabularyWords()) : null;
             String weaknessesStr = request.getWeaknesses() != null ?
@@ -149,12 +167,16 @@ public class GeminiAIService implements AIService {
 
             String text = response.getCandidates().get(0).getContent().getParts().get(0).getText();
 
+            // ✅ Lưu usage metadata
             GeminiUsageMetadata usage = response.getUsageMetadata();
             if (usage != null) {
-                log.info("Gemini tokens - Input: {}, Output: {}, Total: {}",
+                this.currentUsage = usage;
+                log.info("✅ Gemini tokens - Input: {}, Output: {}, Total: {}",
                         usage.getPromptTokenCount(),
                         usage.getCandidatesTokenCount(),
                         usage.getTotalTokenCount());
+            } else {
+                log.warn("⚠️ No usage metadata from Gemini");
             }
 
             return text;

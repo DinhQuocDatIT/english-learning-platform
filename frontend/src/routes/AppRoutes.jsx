@@ -54,6 +54,7 @@ import StudentListeningPractice from "../pages/student/Topic/StudentListeningPra
 import StudentAIPractice from "../pages/student/AI/StudentAIPractice/StudentAIPractice";
 import StudentAIPracticeCreate from "../pages/student/AI/StudentAIPracticeCreate/StudentAIPracticeCreate";
 import StudentAIPracticeChat from "../pages/student/AI/StudentAIPracticeChat/StudentAIPracticeChat";
+import AdminAIUsage from "../pages/admin/AIUsage/AdminAIUsage";
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
   return (
@@ -232,6 +233,7 @@ function AppRoutes() {
               path="topics/:topicId/listening-lessons/:lessonId/preview"
               element={<AdminListeningPreview />}
             />
+            <Route path="ai-usage" element={<AdminAIUsage />} />
           </Route>
         </Route>
       </Route>

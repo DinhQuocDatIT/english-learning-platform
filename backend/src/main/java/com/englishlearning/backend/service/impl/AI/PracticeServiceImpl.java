@@ -6,6 +6,7 @@ import com.englishlearning.backend.dto.request.AIGenerateRequest;
 import com.englishlearning.backend.dto.request.CreatePracticeRequest;
 import com.englishlearning.backend.dto.request.SubmitAnswerRequest;
 import com.englishlearning.backend.dto.response.*;
+import com.englishlearning.backend.dto.response.gemini.GeminiUsageMetadata;
 import com.englishlearning.backend.entity.*;
 import com.englishlearning.backend.enums.PracticeStatus;
 import com.englishlearning.backend.enums.RequestType;
@@ -17,6 +18,7 @@ import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.*;
 import com.englishlearning.backend.service.AI.AIService;
 import com.englishlearning.backend.service.PracticeService;
+import com.englishlearning.backend.service.PricingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,7 @@ public class PracticeServiceImpl implements PracticeService {
     private final AIErrorRepository errorRepository;
     private final StudentAIErrorRepository studentAIErrorRepository;
     private final AIUsageRepository aiUsageRepository;
+    private final PricingService pricingService;
 
     // ===== CREATE PRACTICE =====
     @Override
@@ -155,7 +158,19 @@ public class PracticeServiceImpl implements PracticeService {
         AIEvaluateResponse aiResponse = aiService.evaluateAndGenerate(aiRequest);
         long responseTime = System.currentTimeMillis() - startTime;
 
-        //  LƯU betterAnswers - Dùng separator "|||" thay vì ","
+        // ✅ Lấy token usage và model info từ Gemini service
+        GeminiUsageMetadata usage = null;
+        String modelName = "gemini-3.5-flash-lite";
+        String provider = "GEMINI";
+
+        if (aiService instanceof GeminiAIService) {
+            GeminiAIService geminiService = (GeminiAIService) aiService;
+            usage = geminiService.getCurrentUsage();
+            modelName = geminiService.getCurrentModel();
+            provider = geminiService.getCurrentProvider();
+        }
+
+        // Lưu betterAnswers - Dùng separator "|||"
         if (aiResponse.getBetterAnswers() != null && !aiResponse.getBetterAnswers().isEmpty()) {
             String betterAnswersStr = String.join("|||", aiResponse.getBetterAnswers());
             turn.setBetterAnswers(betterAnswersStr);
@@ -171,19 +186,17 @@ public class PracticeServiceImpl implements PracticeService {
         evaluation.setFeedback(aiResponse.getFeedback());
         evaluationRepository.save(evaluation);
 
-        // ✅ Save errors - KHÔNG cần parse Enum nữa
+        // Save errors
         List<AIError> errors = new ArrayList<>();
         if (aiResponse.getErrors() != null) {
             for (com.englishlearning.backend.dto.response.AIErrorResponse errorResp : aiResponse.getErrors()) {
                 AIError error = new AIError();
                 error.setEvaluation(evaluation);
-                // ✅ Lưu trực tiếp String, không cần ErrorType.valueOf()
                 error.setErrorType(errorResp.getErrorType());
                 error.setUserText(errorResp.getUserText());
                 error.setCorrectText(errorResp.getCorrectText());
                 error.setExplanation(errorResp.getExplanation());
 
-                // Xử lý severity an toàn
                 SeverityLevel severity;
                 try {
                     severity = SeverityLevel.valueOf(errorResp.getSeverity());
@@ -219,9 +232,10 @@ public class PracticeServiceImpl implements PracticeService {
         answer.setIsCorrect(isCorrect);
         answerRepository.save(answer);
 
-        // Save AI Usage
-        saveAIUsage(studentId, chat, RequestType.GENERATE_AND_EVALUATE, "GEMINI", "gemini-2.0-flash",
-                responseTime, true, null);
+        // ✅ Save AI Usage - Lưu chi phí request
+        saveAIUsageWithTokens(studentId, chat, RequestType.GENERATE_AND_EVALUATE,
+                provider, modelName,
+                responseTime, true, null, usage);
 
         // Build response
         EvaluationResponse response = buildEvaluationResponse(aiResponse, chat, isCompleted);
@@ -276,7 +290,6 @@ public class PracticeServiceImpl implements PracticeService {
 
         PracticeChatResponse response = buildPracticeChatResponse(chat, currentTurn);
 
-        // Build turn history với betterAnswers
         List<TurnHistoryResponse> turnHistory = allTurns.stream()
                 .filter(turn -> turn.getAnswer() != null)
                 .map(turn -> {
@@ -306,7 +319,6 @@ public class PracticeServiceImpl implements PracticeService {
                             .feedback(evaluation != null ? evaluation.getFeedback() : null)
                             .naturalnessScore(evaluation != null ? evaluation.getNaturalnessScore() : null)
                             .errors(errorDetails)
-                            // ✅ GỌI METHOD convertBetterAnswersToList
                             .betterAnswers(convertBetterAnswersToList(turn.getBetterAnswers()))
                             .build();
                 })
@@ -373,7 +385,6 @@ public class PracticeServiceImpl implements PracticeService {
 
                 if (answer.getEvaluation() != null && answer.getEvaluation().getErrors() != null) {
                     for (AIError error : answer.getEvaluation().getErrors()) {
-                        // ✅ Lấy trực tiếp String từ error
                         String errorType = error.getErrorType();
                         ErrorSummary summary = commonErrors.stream()
                                 .filter(e -> e.getErrorType().equals(errorType))
@@ -442,14 +453,12 @@ public class PracticeServiceImpl implements PracticeService {
         return weaknesses.stream()
                 .filter(e -> e.getMasteryScore() < PracticeConstants.WEAKNESS_THRESHOLD)
                 .limit(PracticeConstants.MAX_WEAKNESSES)
-                // ✅ Lấy trực tiếp String từ errorType
                 .map(StudentAIError::getErrorType)
                 .collect(Collectors.toList());
     }
 
     private void updateStudentAIErrors(Long studentId, List<AIError> errors) {
         for (AIError error : errors) {
-            // ✅ Dùng String trực tiếp
             String errorKey = generateErrorKey(error.getErrorType(), error.getCorrectText());
 
             StudentAIError studentError = studentAIErrorRepository
@@ -459,7 +468,6 @@ public class PracticeServiceImpl implements PracticeService {
             if (studentError == null) {
                 studentError = new StudentAIError();
                 studentError.setStudent(studentRepository.getReferenceById(studentId));
-                // ✅ Lưu trực tiếp String
                 studentError.setErrorType(error.getErrorType());
                 studentError.setErrorKey(errorKey);
                 studentError.setOccurrenceCount(1);
@@ -476,7 +484,6 @@ public class PracticeServiceImpl implements PracticeService {
         }
     }
 
-    // ✅ Cập nhật method generateErrorKey nhận String thay vì AIError
     private String generateErrorKey(String errorType, String correctText) {
         String corrected = correctText
                 .replaceAll("[^a-zA-Z]", " ")
@@ -488,23 +495,58 @@ public class PracticeServiceImpl implements PracticeService {
         return errorType + "_" + corrected.replaceAll(" ", "_");
     }
 
-    private void saveAIUsage(Long studentId, AIPracticeChat chat, RequestType requestType,
-                             String provider, String model, long responseTime,
-                             boolean success, String errorMessage) {
-        AIUsage usage = new AIUsage();
-        usage.setStudent(studentRepository.getReferenceById(studentId));
-        usage.setPracticeChat(chat);
-        usage.setRequestType(requestType);
-        usage.setProvider(provider);
-        usage.setModel(model);
-        usage.setInputTokens(0);
-        usage.setOutputTokens(0);
-        usage.setTotalTokens(0);
-        usage.setEstimatedCost(BigDecimal.ZERO);
-        usage.setResponseTimeMs((int) responseTime);
-        usage.setSuccess(success);
-        usage.setErrorMessage(errorMessage);
-        aiUsageRepository.save(usage);
+    // ✅ Lưu AI Usage với chi phí và giá TẠI THỜI ĐIỂM - CHỈ DÙNG DATABASE
+    private void saveAIUsageWithTokens(Long studentId, AIPracticeChat chat, RequestType requestType,
+                                       String provider, String model, long responseTime,
+                                       boolean success, String errorMessage,
+                                       GeminiUsageMetadata usage) {
+        AIUsage aiUsage = new AIUsage();
+        aiUsage.setStudent(studentRepository.getReferenceById(studentId));
+        aiUsage.setPracticeChat(chat);
+        aiUsage.setRequestType(requestType);
+        aiUsage.setProvider(provider);
+        aiUsage.setModel(model);
+
+        if (usage != null) {
+            int inputTokens = usage.getPromptTokenCount() != null ? usage.getPromptTokenCount() : 0;
+            int outputTokens = usage.getCandidatesTokenCount() != null ? usage.getCandidatesTokenCount() : 0;
+            int totalTokens = usage.getTotalTokenCount() != null ? usage.getTotalTokenCount() : 0;
+
+            aiUsage.setInputTokens(inputTokens);
+            aiUsage.setOutputTokens(outputTokens);
+            aiUsage.setTotalTokens(totalTokens);
+
+            // ✅ Tính chi phí từ PricingService (CHỈ TỪ DATABASE)
+            BigDecimal cost = pricingService.calculateCost(provider, model, inputTokens, outputTokens);
+            aiUsage.setEstimatedCost(cost);
+
+            // ✅ Lưu giá tại thời điểm từ DATABASE
+            AIModelPricing pricing = pricingService.getCurrentPricing(provider, model);
+            if (pricing != null) {
+                aiUsage.setInputPricePerMillion(pricing.getInputPricePerMillionTokens().doubleValue());
+                aiUsage.setOutputPricePerMillion(pricing.getOutputPricePerMillionTokens().doubleValue());
+            } else {
+                aiUsage.setInputPricePerMillion(0.0);
+                aiUsage.setOutputPricePerMillion(0.0);
+            }
+
+            log.info("✅ Saved AI Usage - Model: {}, Input: {}, Output: {}, Total: {}, Cost: {} VND",
+                    model, inputTokens, outputTokens, totalTokens,
+                    String.format("%,.0f", cost));
+        } else {
+            aiUsage.setInputTokens(0);
+            aiUsage.setOutputTokens(0);
+            aiUsage.setTotalTokens(0);
+            aiUsage.setInputPricePerMillion(0.0);
+            aiUsage.setOutputPricePerMillion(0.0);
+            aiUsage.setEstimatedCost(BigDecimal.ZERO);
+            log.warn("⚠️ No token usage available for this request");
+        }
+
+        aiUsage.setResponseTimeMs((int) responseTime);
+        aiUsage.setSuccess(success);
+        aiUsage.setErrorMessage(errorMessage);
+        aiUsageRepository.save(aiUsage);
     }
 
     private PracticeChatResponse buildPracticeChatResponse(AIPracticeChat chat, AIPracticeTurn currentTurn) {
@@ -577,12 +619,12 @@ public class PracticeServiceImpl implements PracticeService {
         if (betterAnswersStr == null || betterAnswersStr.isEmpty()) {
             return new ArrayList<>();
         }
-        // Dùng "|||" thay vì "," để tránh conflict với dấu phẩy trong câu
         return Arrays.stream(betterAnswersStr.split("\\|\\|\\|"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
     }
+
     @Override
     public List<StudentWeaknessResponse> getStudentWeaknessesWithDetails(Long userId) {
         log.info("Getting student weaknesses with details for user: {}", userId);
@@ -593,7 +635,6 @@ public class PracticeServiceImpl implements PracticeService {
 
         Long studentId = student.getId();
 
-        // Lấy danh sách điểm yếu từ database
         List<StudentAIError> weaknesses = studentAIErrorRepository
                 .findByStudentIdOrderByMasteryScoreAsc(studentId);
 
@@ -602,7 +643,6 @@ public class PracticeServiceImpl implements PracticeService {
             return new ArrayList<>();
         }
 
-        // Map sang DTO response
         return weaknesses.stream()
                 .map(error -> StudentWeaknessResponse.builder()
                         .errorType(error.getErrorType())
@@ -613,8 +653,6 @@ public class PracticeServiceImpl implements PracticeService {
                         .build())
                 .collect(Collectors.toList());
     }
-
-    // ===== PRIVATE HELPER METHODS =====
 
     // ===== PRIVATE HELPER METHODS =====
 

@@ -124,6 +124,11 @@ export const sidebarMenus = {
       icon: faBookOpen,
     },
     {
+      path: "/dashboard/admin/ai-usage",
+      name: "ai usage",
+      icon: faBookOpen,
+    },
+    {
       path: "/dashboard/admin/profile",
       name: "Thông tin cá nhân",
       icon: faCircleUser,

@@ -28,7 +28,8 @@ public enum ErrorCode {
     // AI errors
     AI_SERVICE_ERROR("AI_001", "AI service error"),
     AI_RESPONSE_PARSE_ERROR("AI_002", "Failed to parse AI response"),
-
+    PRICING_NOT_FOUND("PRICING_001", "Pricing not found"),
+    PRICING_ALREADY_EXISTS("PRICING_002", "Pricing already exists for this model"),
     // Quota errors
     QUOTA_EXCEEDED("QUOTA_001", "AI request quota exceeded");
 

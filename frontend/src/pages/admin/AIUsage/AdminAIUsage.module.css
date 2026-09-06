@@ -1,0 +1,233 @@
+/* frontend/src/pages/admin/AIUsage/AdminAIUsage.module.css */
+.container {
+  padding: 24px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.titleIcon {
+  color: var(--color-primary, #0ea792);
+}
+
+/* ===== TABS ===== */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: var(--color-surface-soft, #f8fafc);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted, #64748b);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: var(--color-primary, #0ea792);
+  background: rgba(14, 167, 146, 0.05);
+}
+
+.tabActive {
+  background: var(--color-background, #ffffff);
+  color: var(--color-primary, #0ea792);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.tabActive:hover {
+  background: var(--color-background, #ffffff);
+}
+
+/* ===== FILTER BAR ===== */
+.filterBar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.dateFilter {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dateInputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dateInputGroup label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dateInputGroup input {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--color-text, #1e293b);
+  background: var(--color-background, #ffffff);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.dateInputGroup input:focus {
+  border-color: var(--color-primary, #0ea792);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.1);
+}
+
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--color-primary, #0ea792);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 38px;
+}
+
+.refreshBtn:hover {
+  background: var(--color-primary-hover, #0d9488);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.3);
+}
+
+/* ===== TAB CONTENT ===== */
+.tabContent {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== LOADING ===== */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+  color: var(--color-text-muted, #64748b);
+}
+
+.loadingContainer svg {
+  font-size: 32px;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ===== NO DATA ===== */
+.noData {
+  text-align: center;
+  color: var(--color-text-muted, #64748b);
+  padding: 32px 0;
+  font-size: 14px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .tabs {
+    flex-direction: column;
+  }
+
+  .tab {
+    justify-content: center;
+  }
+
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dateFilter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dateInputGroup {
+    width: 100%;
+  }
+
+  .dateInputGroup input {
+    width: 100%;
+  }
+
+  .refreshBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+}

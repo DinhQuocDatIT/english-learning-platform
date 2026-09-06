@@ -65,4 +65,6 @@ public class AIUsage {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+    private Double inputPricePerMillion;
+    private Double outputPricePerMillion;
 }
