@@ -34,4 +34,11 @@ public interface ListeningLessonRepository extends JpaRepository<ListeningLesson
             @Param("topicId") Long topicId,
             @Param("status") ListeningLessonStatus status
     );
+    List<ListeningLesson> findAllByCreatedByIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long createdById);
+    List<ListeningLesson> findAllByCreatedByIdAndTopicIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long createdById, Long topicId);
+    List<ListeningLesson> findAllByDeletedAtIsNullOrderByCreatedAtDesc();
+    List<ListeningLesson> findAllByTopicIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long topicId);
+    List<ListeningLesson> findAllByTopicIdAndStatusAndDeletedAtIsNullOrderByCreatedAtDesc(Long topicId, ListeningLessonStatus status);
+    List<ListeningLesson> findAllByDeletedAtIsNotNullOrderByCreatedAtDesc();
+
 }

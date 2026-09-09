@@ -16,4 +16,6 @@ public interface ListeningSentenceRepository extends JpaRepository<ListeningSent
     List<ListeningSentence> findAllByLessonId(@Param("lessonId") Long lessonId);
     List<ListeningSentence> findByListeningLessonId(Long listeningLessonId);
     long countByListeningLessonId(Long listeningLessonId);
+    boolean existsByListeningLessonId(Long lessonId);
+    void deleteByListeningLessonId(Long lessonId);
 }

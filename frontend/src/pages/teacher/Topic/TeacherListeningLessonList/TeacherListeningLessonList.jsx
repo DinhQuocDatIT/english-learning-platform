@@ -16,6 +16,9 @@ import {
   faClock,
   faGraduationCap,
   faPlay,
+  faTrash,
+  faEye,
+  faPen
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -34,6 +37,7 @@ function TeacherListeningLessonList() {
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const [filters, setFilters] = useState({
     keyword: "",
@@ -87,14 +91,14 @@ function TeacherListeningLessonList() {
     navigate(`/dashboard/teacher/topics/${topicId}/listening-lessons/create`);
   };
 
-  // 👇 LUÔN CHO PHÉP CLICK VÀO CARD -> VÀO TRANG QUẢN LÝ CÂU HỎI
+  // Click vào card -> vào trang quản lý câu hỏi
   const handleCardClick = (lessonId) => {
     navigate(
       `/dashboard/teacher/topics/${topicId}/listening-lessons/${lessonId}/sentences`,
     );
   };
 
-  // 👇 MENU: Xem chi tiết (vẫn giữ)
+  // Xem chi tiết
   const handleViewLesson = (lessonId) => {
     setActiveMenuId(null);
     navigate(
@@ -102,6 +106,7 @@ function TeacherListeningLessonList() {
     );
   };
 
+  // Chỉnh sửa
   const handleEditLesson = (lessonId) => {
     setActiveMenuId(null);
     navigate(
@@ -109,17 +114,47 @@ function TeacherListeningLessonList() {
     );
   };
 
+  // ===== XÓA CỨNG (HARD DELETE) =====
+  const handleHardDelete = async (lesson) => {
+    // Kiểm tra trạng thái có được xóa không
+    if (lesson.status !== "DRAFT" && lesson.status !== "REJECTED") {
+      toast.warning(
+        `Bài học "${lesson.title}" đang ở trạng thái ${STATUS_MAP[lesson.status] || lesson.status}. Chỉ có thể xóa khi ở trạng thái Nháp (DRAFT) hoặc Từ chối (REJECTED).`,
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Bạn có chắc muốn XÓA bài học "${lesson.title}" không?\n` +
+        `Hành động này sẽ xóa hoàn toàn bài học và tất cả câu hỏi bên trong.\n` +
+        `Không thể khôi phục!`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(lesson.id);
+      await listeningLessonService.hardDelete(lesson.id);
+      toast.success(`Xóa bài học "${lesson.title}" thành công!`);
+      await fetchData(); // Refresh danh sách
+    } catch (error) {
+      console.error("Lỗi xóa bài học:", error);
+      const message = error.response?.data?.message || "Không thể xóa bài học.";
+      toast.error(message);
+    } finally {
+      setDeletingId(null);
+      setActiveMenuId(null);
+    }
+  };
+
   // Kiểm tra có thể chỉnh sửa không (DRAFT hoặc REJECTED)
   const canEdit = (status) => {
     return status === "DRAFT" || status === "REJECTED";
   };
 
-  // Hàm random số lượng người học (tạm thời)
-  const getLearnerCount = () => {
-    const counts = [
-      127, 89, 234, 56, 312, 45, 178, 93, 256, 67, 543, 23, 189, 76, 432,
-    ];
-    return counts[Math.floor(Math.random() * counts.length)];
+  // Kiểm tra có thể xóa không (DRAFT hoặc REJECTED)
+  const canDelete = (status) => {
+    return status === "DRAFT" || status === "REJECTED";
   };
 
   if (loading) {
@@ -255,14 +290,15 @@ function TeacherListeningLessonList() {
         <div className={styles.grid}>
           {filteredLessons.map((lesson) => {
             const isEditable = canEdit(lesson.status);
-            const learnerCount = getLearnerCount();
+            const isDeletable = canDelete(lesson.status);
+            const isDeleting = deletingId === lesson.id;
 
             return (
               <div
                 key={lesson.id}
                 className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
-                onClick={() => handleCardClick(lesson.id)} // 👈 LUÔN CHO PHÉP CLICK
-                style={{ cursor: "pointer" }} // 👈 LUÔN HIỂN THỊ CON TRỎ TAY
+                onClick={() => handleCardClick(lesson.id)}
+                style={{ cursor: "pointer" }}
               >
                 {/* Image */}
                 <div className={styles.imageWrapper}>
@@ -330,7 +366,7 @@ function TeacherListeningLessonList() {
                     </span>
                   )}
 
-                  {/* Play Overlay - Luôn hiển thị khi hover */}
+                  {/* Play Overlay */}
                   <div className={styles.playOverlay}>
                     <div className={styles.playBtn}>
                       <FontAwesomeIcon icon={faPlay} />
@@ -354,31 +390,8 @@ function TeacherListeningLessonList() {
 
                     {activeMenuId === lesson.id && (
                       <div className={styles.dropdownMenu}>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewLesson(lesson.id);
-                          }}
-                        >
-                          Xem chi tiết
-                        </button>
-
-                        {/* Chỉ hiển thị "Quản lý câu hỏi" nếu có thể chỉnh sửa */}
-                        {isEditable && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCardClick(lesson.id);
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faLanguage} />
-                            Quản lý câu hỏi
-                          </button>
-                        )}
-
-                        {/* Chỉ hiển thị "Chỉnh sửa" nếu có thể chỉnh sửa */}
+                        
+                  
                         {isEditable && (
                           <button
                             type="button"
@@ -387,21 +400,36 @@ function TeacherListeningLessonList() {
                               handleEditLesson(lesson.id);
                             }}
                           >
+                            <FontAwesomeIcon icon={faPen} />
                             Chỉnh sửa
                           </button>
                         )}
 
-                        {/* Thêm nút xem bài học cho các trạng thái khác */}
-                        {!isEditable && (
+                        {/* 3. Xem chi tiết - luôn hiển thị */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewLesson(lesson.id);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faEye} />
+                          Xem chi tiết
+                        </button>
+
+                        {/* 4. Xóa - chỉ hiển thị khi DRAFT hoặc REJECTED */}
+                        {isDeletable && (
                           <button
                             type="button"
+                            className={styles.deleteMenuItem}
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleViewLesson(lesson.id);
+                              handleHardDelete(lesson);
                             }}
+                            disabled={isDeleting}
                           >
-                            <FontAwesomeIcon icon={faHeadphones} />
-                            Xem bài học
+                            <FontAwesomeIcon icon={faTrash} />
+                            {isDeleting ? "Đang xóa..." : "Xóa"}
                           </button>
                         )}
                       </div>

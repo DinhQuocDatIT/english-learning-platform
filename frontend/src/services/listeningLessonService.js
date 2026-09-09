@@ -22,6 +22,11 @@ const listeningLessonService = {
     return axiosClient.post(`/v1/listening-lessons/${id}/submit`);
   },
 
+  // ===== TEACHER - HARD DELETE =====
+  hardDelete(id) {
+    return axiosClient.delete(`/v1/listening-lessons/${id}/hard`);
+  },
+
   // ===== PUBLIC =====
   getById(id) {
     return axiosClient.get(`/v1/listening-lessons/${id}`);
@@ -40,6 +45,11 @@ const listeningLessonService = {
     return axiosClient.get("/v1/listening-lessons/admin");
   },
 
+  // ===== ADMIN - GET BY TOPIC (bao gồm cả bài đã ẩn) =====
+  getByTopicForAdmin(topicId) {
+    return axiosClient.get(`/v1/listening-lessons/admin/topic/${topicId}`);
+  },
+
   approve(id) {
     return axiosClient.post(`/v1/listening-lessons/admin/${id}/approve`);
   },
@@ -50,6 +60,21 @@ const listeningLessonService = {
 
   publish(id) {
     return axiosClient.post(`/v1/listening-lessons/admin/${id}/publish`);
+  },
+
+  // ===== ADMIN - SOFT DELETE =====
+  softDelete(id) {
+    return axiosClient.delete(`/v1/listening-lessons/admin/${id}/soft`);
+  },
+
+  // ===== ADMIN - RESTORE =====
+  restore(id) {
+    return axiosClient.post(`/v1/listening-lessons/admin/${id}/restore`);
+  },
+
+  // ===== ADMIN - GET DELETED LESSONS =====
+  getDeletedLessons() {
+    return axiosClient.get("/v1/listening-lessons/admin/deleted");
   },
 };
 

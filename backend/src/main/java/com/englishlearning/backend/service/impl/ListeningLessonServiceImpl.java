@@ -9,17 +9,14 @@ import com.englishlearning.backend.entity.Topic;
 import com.englishlearning.backend.entity.User;
 import com.englishlearning.backend.enums.ListeningLessonStatus;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
-import com.englishlearning.backend.repository.LevelRepository;
-import com.englishlearning.backend.repository.ListeningLessonRepository;
-import com.englishlearning.backend.repository.TopicRepository;
-import com.englishlearning.backend.repository.UserRepository;
-import com.englishlearning.backend.repository.ListeningAnswerRepository; // ← THÊM IMPORT
+import com.englishlearning.backend.repository.*;
 import com.englishlearning.backend.service.FileStorageService;
 import com.englishlearning.backend.service.ListeningLessonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -33,7 +30,9 @@ public class ListeningLessonServiceImpl
     private final LevelRepository levelRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
-    private final ListeningAnswerRepository listeningAnswerRepository; // ← THÊM
+    private final ListeningAnswerRepository listeningAnswerRepository;
+    private final ListeningSentenceRepository listeningSentenceRepository;
+    private final ListeningLessonReviewRepository listeningLessonReviewRepository;
 
     // =====================================================
     // TEACHER - CREATE
@@ -76,7 +75,6 @@ public class ListeningLessonServiceImpl
                         : false
         );
 
-        // Mặc định tạo là DRAFT
         lesson.setStatus(
                 ListeningLessonStatus.DRAFT
         );
@@ -101,7 +99,6 @@ public class ListeningLessonServiceImpl
         ListeningLesson lesson =
                 getLesson(lessonId);
 
-        // Chỉ người tạo mới được sửa
         if (!lesson.getCreatedBy()
                 .getId()
                 .equals(teacherId)) {
@@ -161,6 +158,116 @@ public class ListeningLessonServiceImpl
     }
 
     // =====================================================
+    // TEACHER - HARD DELETE (XÓA CỨNG)
+    // Chỉ dành cho DRAFT và REJECTED
+    // =====================================================
+
+    @Override
+    public void hardDelete(Long teacherId, Long lessonId) {
+
+        ListeningLesson lesson = getLesson(lessonId);
+
+        // Kiểm tra quyền: chỉ người tạo mới được xóa
+        if (!lesson.getCreatedBy().getId().equals(teacherId)) {
+            throw new RuntimeException("Bạn không có quyền xóa bài nghe này");
+        }
+
+        // Cho phép xóa khi ở trạng thái DRAFT hoặc REJECTED
+        if (lesson.getStatus() != ListeningLessonStatus.DRAFT &&
+                lesson.getStatus() != ListeningLessonStatus.REJECTED) {
+            throw new RuntimeException(
+                    "Chỉ có thể xóa bài nghe đang ở trạng thái Nháp (DRAFT) hoặc Từ chối (REJECTED)"
+            );
+        }
+
+        // 1. Xóa tất cả câu hỏi con trước
+        listeningSentenceRepository.deleteByListeningLessonId(lessonId);
+
+        // 2. Xóa tất cả review liên quan
+        listeningLessonReviewRepository.deleteByListeningLessonId(lessonId);
+
+        // 3. Xóa luôn bài học khỏi database
+        listeningLessonRepository.delete(lesson);
+    }
+
+    // =====================================================
+    // ADMIN - SOFT DELETE (XÓA MỀM - ẨN BÀI)
+    // Dành cho APPROVED và PUBLISHED
+    // =====================================================
+    @Override
+    @Transactional(readOnly = true)
+    public List<ListeningLessonResponse> getByTopicForAdmin(Long topicId) {
+
+        getTopic(topicId);
+
+        // Admin thấy TẤT CẢ bài theo topic, kể cả đã xóa mềm
+        return listeningLessonRepository
+                .findAllByTopicIdOrderByCreatedAtDesc(topicId) // KHÔNG filter deletedAt
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+    @Override
+    public void softDelete(Long adminId, Long lessonId) {
+
+        getUser(adminId); // Kiểm tra admin tồn tại
+
+        ListeningLesson lesson = getLesson(lessonId);
+
+        // Chỉ cho phép xóa mềm khi ở trạng thái APPROVED hoặc PUBLISHED
+        if (lesson.getStatus() != ListeningLessonStatus.APPROVED &&
+                lesson.getStatus() != ListeningLessonStatus.PUBLISHED) {
+            throw new RuntimeException(
+                    "Chỉ có thể ẩn bài nghe đã được duyệt (APPROVED) hoặc đã phát hành (PUBLISHED)"
+            );
+        }
+
+        // Kiểm tra nếu đã bị xóa mềm rồi thì không xóa nữa
+        if (lesson.getDeletedAt() != null) {
+            throw new RuntimeException("Bài nghe này đã bị ẩn trước đó");
+        }
+
+        // Soft delete: set deletedAt
+        lesson.setDeletedAt(LocalDateTime.now());
+        listeningLessonRepository.save(lesson);
+    }
+
+    // =====================================================
+    // ADMIN - RESTORE (PHỤC HỒI BÀI ĐÃ ẨN)
+    // =====================================================
+
+    @Override
+    public void restore(Long adminId, Long lessonId) {
+
+        getUser(adminId); // Kiểm tra admin tồn tại
+
+        ListeningLesson lesson = getLesson(lessonId);
+
+        // Kiểm tra bài đã bị xóa mềm chưa
+        if (lesson.getDeletedAt() == null) {
+            throw new RuntimeException("Bài nghe này chưa bị ẩn, không cần phục hồi");
+        }
+
+        // Phục hồi: xóa deletedAt
+        lesson.setDeletedAt(null);
+        listeningLessonRepository.save(lesson);
+    }
+
+    // =====================================================
+    // ADMIN - GET DELETED LESSONS (LẤY BÀI ĐÃ XÓA MỀM)
+    // =====================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ListeningLessonResponse> getDeletedLessons() {
+        return listeningLessonRepository
+                .findAllByDeletedAtIsNotNullOrderByCreatedAtDesc()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    // =====================================================
     // TEACHER - MY LESSONS
     // =====================================================
 
@@ -171,7 +278,7 @@ public class ListeningLessonServiceImpl
     ) {
 
         return listeningLessonRepository
-                .findAllByCreatedByIdOrderByCreatedAtDesc(
+                .findAllByCreatedByIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                         teacherId
                 )
                 .stream()
@@ -189,7 +296,7 @@ public class ListeningLessonServiceImpl
         getUser(teacherId);
         getTopic(topicId);
         return listeningLessonRepository
-                .findAllByCreatedByIdAndTopicIdOrderByCreatedAtDesc(teacherId, topicId)
+                .findAllByCreatedByIdAndTopicIdAndDeletedAtIsNullOrderByCreatedAtDesc(teacherId, topicId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -236,13 +343,13 @@ public class ListeningLessonServiceImpl
     }
 
     // =====================================================
-    // ADMIN - GET ALL
+    // ADMIN - GET ALL (VẪN thấy bài đã xóa mềm)
     // =====================================================
 
     @Override
     @Transactional(readOnly = true)
     public List<ListeningLessonResponse> getAll() {
-
+        // Admin thấy TẤT CẢ kể cả đã xóa mềm
         return listeningLessonRepository
                 .findAllByOrderByCreatedAtDesc()
                 .stream()
@@ -366,7 +473,7 @@ public class ListeningLessonServiceImpl
     }
 
     // =====================================================
-    // GET BY TOPIC
+    // GET BY TOPIC (Student - KHÔNG thấy bài đã xóa mềm)
     // =====================================================
 
     @Override
@@ -375,11 +482,11 @@ public class ListeningLessonServiceImpl
             Long topicId
     ) {
 
-        // Kiểm tra Topic tồn tại
         getTopic(topicId);
 
+        // Student chỉ thấy bài chưa bị xóa mềm
         return listeningLessonRepository
-                .findAllByTopicIdOrderByCreatedAtDesc(
+                .findAllByTopicIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                         topicId
                 )
                 .stream()
@@ -388,7 +495,7 @@ public class ListeningLessonServiceImpl
     }
 
     // =====================================================
-    // GET PUBLISHED BY TOPIC
+    // GET PUBLISHED BY TOPIC (Student - KHÔNG thấy bài đã xóa mềm)
     // =====================================================
 
     @Override
@@ -399,8 +506,9 @@ public class ListeningLessonServiceImpl
 
         getTopic(topicId);
 
+        // Student chỉ thấy bài PUBLISHED và chưa bị xóa mềm
         return listeningLessonRepository
-                .findAllByTopicIdAndStatusOrderByCreatedAtDesc(
+                .findAllByTopicIdAndStatusAndDeletedAtIsNullOrderByCreatedAtDesc(
                         topicId,
                         ListeningLessonStatus.PUBLISHED
                 )
@@ -459,12 +567,9 @@ public class ListeningLessonServiceImpl
                 );
     }
 
-
-
     private ListeningLessonResponse toResponse(
             ListeningLesson lesson
     ) {
-
 
         int studentCount = listeningAnswerRepository
                 .countDistinctStudentsByLessonId(lesson.getId());
@@ -486,6 +591,7 @@ public class ListeningLessonServiceImpl
                 .createdAt(lesson.getCreatedAt())
                 .updatedAt(lesson.getUpdatedAt())
                 .studentCount(studentCount)
+                .deletedAt(lesson.getDeletedAt())
                 .build();
     }
 }

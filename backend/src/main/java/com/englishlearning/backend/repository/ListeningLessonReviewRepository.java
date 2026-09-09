@@ -10,4 +10,5 @@ public interface ListeningLessonReviewRepository extends JpaRepository<Listening
     List<ListeningLessonReview> findByListeningLessonIdOrderByCreatedAtDesc(Long listeningLessonId);
 
     List<ListeningLessonReview> findByListeningLessonIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long listeningLessonId);
+    void deleteByListeningLessonId(Long lessonId);
 }

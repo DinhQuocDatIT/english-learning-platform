@@ -51,6 +51,7 @@ public class ListeningLessonController {
     // =========================
     // TEACHER - UPDATE
     // =========================
+
     @PreAuthorize("hasRole('TEACHER')")
     @PutMapping(
             value = "/{lessonId}",
@@ -79,6 +80,99 @@ public class ListeningLessonController {
     }
 
     // =========================
+    // TEACHER - HARD DELETE (XÓA CỨNG)
+    // Chỉ dành cho DRAFT và REJECTED
+    // =========================
+
+    @PreAuthorize("hasRole('TEACHER')")
+    @DeleteMapping("/{lessonId}/hard")
+    public ResponseEntity<ApiResponse<Void>> hardDelete(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long lessonId
+    ) {
+        listeningLessonService.hardDelete(
+                userDetails.getUser().getId(),
+                lessonId
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Xóa bài nghe thành công",
+                        null
+                )
+        );
+    }
+
+    // =========================
+    // ADMIN - SOFT DELETE (XÓA MỀM - ẨN BÀI)
+    // Dành cho APPROVED và PUBLISHED
+    // =========================
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/admin/{lessonId}/soft")
+    public ResponseEntity<ApiResponse<Void>> softDelete(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long lessonId
+    ) {
+        listeningLessonService.softDelete(
+                userDetails.getUser().getId(),
+                lessonId
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Ẩn bài nghe thành công",
+                        null
+                )
+        );
+    }
+
+    // =========================
+    // ADMIN - RESTORE (PHỤC HỒI BÀI ĐÃ ẨN)
+    // =========================
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/{lessonId}/restore")
+    public ResponseEntity<ApiResponse<Void>> restore(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long lessonId
+    ) {
+        listeningLessonService.restore(
+                userDetails.getUser().getId(),
+                lessonId
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Phục hồi bài nghe thành công",
+                        null
+                )
+        );
+    }
+
+    // =========================
+    // ADMIN - GET DELETED LESSONS (LẤY BÀI ĐÃ XÓA MỀM)
+    // =========================
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/deleted")
+    public ResponseEntity<ApiResponse<List<ListeningLessonResponse>>> getDeletedLessons() {
+        List<ListeningLessonResponse> response =
+                listeningLessonService.getDeletedLessons();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy danh sách bài nghe đã xóa thành công",
+                        response
+                )
+        );
+    }
+
+    // =========================
     // TEACHER - MY LESSONS
     // =========================
 
@@ -101,6 +195,10 @@ public class ListeningLessonController {
                 )
         );
     }
+
+    // =========================
+    // TEACHER - MY LESSONS BY TOPIC
+    // =========================
 
     @PreAuthorize("hasRole('TEACHER')")
     @GetMapping("/topic/{topicId}/my")
@@ -150,7 +248,7 @@ public class ListeningLessonController {
     }
 
     // =========================
-    // ADMIN - GET ALL
+    // ADMIN - GET ALL (VẪN thấy bài đã xóa mềm)
     // =========================
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -196,7 +294,7 @@ public class ListeningLessonController {
     }
 
     // =========================
-    // ADMIN - REJECT ⭐ THÊM MỚI
+    // ADMIN - REJECT
     // =========================
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -248,7 +346,7 @@ public class ListeningLessonController {
     }
 
     // =========================
-    // GET BY ID
+    // GET BY ID (PUBLIC)
     // =========================
 
     @GetMapping("/{lessonId}")
@@ -269,7 +367,7 @@ public class ListeningLessonController {
     }
 
     // =========================
-    // GET BY TOPIC
+    // GET BY TOPIC (PUBLIC - STUDENT)
     // =========================
 
     @GetMapping("/topic/{topicId}")
@@ -290,7 +388,7 @@ public class ListeningLessonController {
     }
 
     // =========================
-    // GET PUBLISHED BY TOPIC
+    // GET PUBLISHED BY TOPIC (PUBLIC - STUDENT)
     // =========================
 
     @GetMapping("/topic/{topicId}/published")
@@ -306,6 +404,22 @@ public class ListeningLessonController {
                 new ApiResponse<>(
                         200,
                         "Lấy bài nghe đã phát hành thành công",
+                        response
+                )
+        );
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/topic/{topicId}")
+    public ResponseEntity<ApiResponse<List<ListeningLessonResponse>>> getByTopicForAdmin(
+            @PathVariable Long topicId
+    ) {
+        List<ListeningLessonResponse> response =
+                listeningLessonService.getByTopicForAdmin(topicId);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy danh sách bài nghe của topic thành công",
                         response
                 )
         );

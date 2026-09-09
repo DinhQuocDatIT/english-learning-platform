@@ -329,6 +329,7 @@
   background: var(--color-border);
   overflow: hidden;
   flex-shrink: 0;
+  border-radius: 16px 16px 0 0;
 }
 
 .lessonImage {
@@ -336,6 +337,7 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
+  border-radius: 16px 16px 0 0;
 }
 
 .card:hover .lessonImage {
@@ -350,6 +352,7 @@
   justify-content: center;
   background: linear-gradient(135deg, var(--color-tertiary) 0%, #a7f3d0 100%);
   color: var(--color-accent);
+  border-radius: 16px 16px 0 0;
 }
 
 .fallbackIcon {
@@ -369,6 +372,7 @@
     rgba(0, 0, 0, 0) 60%
   );
   pointer-events: none;
+  border-radius: 16px 16px 0 0;
 }
 
 /* ====== BADGES ====== */
@@ -438,6 +442,7 @@
   transition: all 0.35s ease;
   z-index: 3;
   cursor: pointer;
+  border-radius: 16px 16px 0 0;
 }
 
 .card:hover .playOverlay {
@@ -474,7 +479,7 @@
   position: absolute;
   top: 14px;
   right: 14px;
-  z-index: 5;
+  z-index: 10;
 }
 
 .actionBtn {
@@ -491,6 +496,8 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   transition: all 0.2s;
+  position: relative;
+  z-index: 11;
 }
 
 .actionBtn:hover {
@@ -503,29 +510,32 @@
   position: absolute;
   top: 44px;
   right: 0;
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  min-width: 160px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  min-width: 190px;
   padding: 6px 0;
-  overflow: hidden;
+  overflow: visible;
   animation: dropdownFade 0.18s ease;
+  z-index: 99999;
 }
 
 @keyframes dropdownFade {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-8px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 .dropdownMenu button {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   padding: 10px 20px;
   background: none;
@@ -536,6 +546,13 @@
   cursor: pointer;
   transition: background 0.15s;
   font-weight: 500;
+  white-space: nowrap;
+}
+
+.dropdownMenu button svg {
+  width: 14px;
+  font-size: 14px;
+  color: var(--color-text-muted);
 }
 
 .dropdownMenu button:hover {
@@ -543,8 +560,41 @@
   color: var(--color-accent);
 }
 
+.dropdownMenu button:hover svg {
+  color: var(--color-accent);
+}
+
 .dropdownMenu button:not(:last-child) {
   border-bottom: 1px solid var(--color-border);
+}
+
+/* ====== NÚT XÓA (MÀU ĐỎ) ====== */
+.dropdownMenu button.deleteMenuItem {
+  color: #ef4444;
+  border-bottom: none !important;
+}
+
+.dropdownMenu button.deleteMenuItem svg {
+  color: #ef4444;
+}
+
+.dropdownMenu button.deleteMenuItem:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.dropdownMenu button.deleteMenuItem:hover svg {
+  color: #dc2626;
+}
+
+.dropdownMenu button.deleteMenuItem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dropdownMenu button.deleteMenuItem:disabled:hover {
+  background: none;
+  color: #ef4444;
 }
 
 /* ====== CARD BODY ====== */
@@ -739,7 +789,7 @@
   }
 
   .dropdownMenu {
-    min-width: 140px;
+    min-width: 160px;
     right: -8px;
   }
 

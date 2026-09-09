@@ -23,6 +23,10 @@ import {
   faGraduationCap,
   faFileAlt,
   faPlay,
+  faTrash,
+  faTrashRestore,
+  faBan,
+  faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -69,6 +73,9 @@ function AdminListeningLessonList() {
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [actioningId, setActioningId] = useState(null);
+  // Mặc định true để hiển thị cả bài đã ẩn ngay từ đầu
+  const [showDeleted, setShowDeleted] = useState(true);
 
   // Filter
   const [filters, setFilters] = useState({
@@ -90,7 +97,7 @@ function AdminListeningLessonList() {
           ? adminTopicService.getById(topicId)
           : Promise.resolve({ data: { data: null } }),
         topicId
-          ? listeningLessonService.getByTopic(topicId)
+          ? listeningLessonService.getByTopicForAdmin(topicId)
           : listeningLessonService.getAllForAdmin(),
       ]);
 
@@ -111,8 +118,18 @@ function AdminListeningLessonList() {
     }
   };
 
-  // Filter
-  const filteredLessons = lessons.filter((lesson) => {
+  // Kiểm tra bài đã bị ẩn chưa
+  const isDeleted = (lesson) => {
+    return lesson.deletedAt !== null && lesson.deletedAt !== undefined;
+  };
+
+  // Lọc danh sách theo showDeleted
+  const displayedLessons = showDeleted
+    ? lessons
+    : lessons.filter((lesson) => !isDeleted(lesson));
+
+  // Filter theo keyword và status
+  const filteredLessons = displayedLessons.filter((lesson) => {
     const keyword = filters.keyword.trim().toLowerCase();
     const matchKeyword =
       !keyword || lesson.title?.toLowerCase().includes(keyword);
@@ -133,6 +150,11 @@ function AdminListeningLessonList() {
 
   const handleGoBack = () => {
     navigate(`/dashboard/admin/topics`);
+  };
+
+  // Toggle hiển thị bài đã ẩn
+  const toggleShowDeleted = () => {
+    setShowDeleted(!showDeleted);
   };
 
   // ===== CLICK CARD -> XEM CÂU HỎI =====
@@ -158,22 +180,86 @@ function AdminListeningLessonList() {
     );
   };
 
-  // Hàm random số lượng người học (tạm thời)
-  const getLearnerCount = () => {
-    const counts = [
-      127, 89, 234, 56, 312, 45, 178, 93, 256, 67, 543, 23, 189, 76, 432,
-    ];
-    return counts[Math.floor(Math.random() * counts.length)];
+  // ===== ADMIN - SOFT DELETE (ẨN BÀI) =====
+  const handleSoftDelete = async (lesson) => {
+    if (lesson.status !== "APPROVED" && lesson.status !== "PUBLISHED") {
+      toast.warning(
+        `Bài học "${lesson.title}" đang ở trạng thái ${STATUS_MAP[lesson.status] || lesson.status}. Chỉ có thể ẩn bài đã duyệt (APPROVED) hoặc đã phát hành (PUBLISHED).`,
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Bạn có chắc muốn ẨN bài học "${lesson.title}" không?\n` +
+        `Bài học sẽ bị ẩn khỏi học sinh và giáo viên.\n` +
+        `Có thể phục hồi sau.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setActioningId(lesson.id);
+      await listeningLessonService.softDelete(lesson.id);
+      toast.success(`Đã ẩn bài học "${lesson.title}" thành công!`);
+      await fetchData();
+    } catch (error) {
+      console.error("Lỗi ẩn bài học:", error);
+      const message = error.response?.data?.message || "Không thể ẩn bài học.";
+      toast.error(message);
+    } finally {
+      setActioningId(null);
+      setActiveMenuId(null);
+    }
+  };
+
+  // ===== ADMIN - RESTORE (PHỤC HỒI BÀI ĐÃ ẨN) =====
+  const handleRestore = async (lesson) => {
+    if (!isDeleted(lesson)) {
+      toast.warning(`Bài học "${lesson.title}" chưa bị ẩn.`);
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Bạn có chắc muốn PHỤC HỒI bài học "${lesson.title}" không?\n` +
+        `Bài học sẽ hiển thị lại cho học sinh và giáo viên.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setActioningId(lesson.id);
+      await listeningLessonService.restore(lesson.id);
+      toast.success(`Phục hồi bài học "${lesson.title}" thành công!`);
+      await fetchData();
+    } catch (error) {
+      console.error("Lỗi phục hồi bài học:", error);
+      const message =
+        error.response?.data?.message || "Không thể phục hồi bài học.";
+      toast.error(message);
+    } finally {
+      setActioningId(null);
+      setActiveMenuId(null);
+    }
+  };
+
+  // Kiểm tra có thể ẩn không (APPROVED hoặc PUBLISHED)
+  const canSoftDelete = (status) => {
+    return status === "APPROVED" || status === "PUBLISHED";
   };
 
   // Stats
   const statusCount = {
     all: lessons.length,
-    draft: lessons.filter((l) => l.status === "DRAFT").length,
-    pending: lessons.filter((l) => l.status === "PENDING").length,
-    approved: lessons.filter((l) => l.status === "APPROVED").length,
-    rejected: lessons.filter((l) => l.status === "REJECTED").length,
-    published: lessons.filter((l) => l.status === "PUBLISHED").length,
+    draft: lessons.filter((l) => l.status === "DRAFT" && !isDeleted(l)).length,
+    pending: lessons.filter((l) => l.status === "PENDING" && !isDeleted(l))
+      .length,
+    approved: lessons.filter((l) => l.status === "APPROVED" && !isDeleted(l))
+      .length,
+    rejected: lessons.filter((l) => l.status === "REJECTED" && !isDeleted(l))
+      .length,
+    published: lessons.filter((l) => l.status === "PUBLISHED" && !isDeleted(l))
+      .length,
+    deleted: lessons.filter((l) => isDeleted(l)).length,
   };
 
   if (loading) {
@@ -194,9 +280,20 @@ function AdminListeningLessonList() {
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại</span>
         </button>
+        <button
+          className={`${styles.toggleDeletedBtn} ${showDeleted ? styles.toggleDeletedActive : ""}`}
+          onClick={toggleShowDeleted}
+        >
+          <FontAwesomeIcon icon={faTrashAlt} />
+          <span>
+            {showDeleted
+              ? `Ẩn bài đã xóa (${statusCount.deleted})`
+              : `Hiện bài đã ẩn (${statusCount.deleted})`}
+          </span>
+        </button>
       </div>
 
-      {/* Stats - Simple & Clean */}
+      {/* Stats */}
       <div className={styles.statsGrid}>
         <div className={`${styles.statCard} ${styles.statAll}`}>
           <div className={styles.statIconWrapper}>
@@ -320,6 +417,7 @@ function AdminListeningLessonList() {
           )}{" "}
           học viên
         </span>
+        
       </div>
 
       {/* Grid */}
@@ -336,11 +434,13 @@ function AdminListeningLessonList() {
       ) : (
         <div className={styles.grid}>
           {filteredLessons.map((lesson) => {
-            const learnerCount = getLearnerCount();
+            const isDeletedLesson = isDeleted(lesson);
+            const isActioning = actioningId === lesson.id;
+
             return (
               <div
                 key={lesson.id}
-                className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
+                className={`${styles.card} ${lesson.isPremium ? styles.pro : ""} ${isDeletedLesson ? styles.cardDeleted : ""}`}
                 onClick={() => handleCardClick(lesson.id)}
               >
                 {/* Image */}
@@ -409,7 +509,28 @@ function AdminListeningLessonList() {
                     </span>
                   )}
 
-                  {/* Play Overlay - Giống Student */}
+                  {/* Deleted Overlay - Hiển thị rõ bài đang bị ẩn */}
+                  {isDeletedLesson && (
+                    <div className={styles.deletedOverlay}>
+                      <div className={styles.deletedOverlayContent}>
+                        <FontAwesomeIcon
+                          icon={faBan}
+                          className={styles.deletedOverlayIcon}
+                        />
+                        <span className={styles.deletedOverlayText}>
+                          BÀI ĐÃ BỊ ẨN
+                        </span>
+                        <span className={styles.deletedOverlaySub}>
+                          Ẩn từ{" "}
+                          {new Date(lesson.deletedAt).toLocaleDateString(
+                            "vi-VN",
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Play Overlay */}
                   <div className={styles.playOverlay}>
                     <div className={styles.playBtn}>
                       <FontAwesomeIcon icon={faPlay} />
@@ -443,6 +564,7 @@ function AdminListeningLessonList() {
                           <FontAwesomeIcon icon={faEye} />
                           Xem chi tiết
                         </button>
+
                         <button
                           type="button"
                           onClick={(e) => {
@@ -453,6 +575,38 @@ function AdminListeningLessonList() {
                           <FontAwesomeIcon icon={faList} />
                           Xem câu hỏi
                         </button>
+
+                        {/* Nút Ẩn - chỉ hiển thị khi chưa bị ẩn và ở trạng thái APPROVED/PUBLISHED */}
+                        {!isDeletedLesson && canSoftDelete(lesson.status) && (
+                          <button
+                            type="button"
+                            className={styles.softDeleteMenuItem}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSoftDelete(lesson);
+                            }}
+                            disabled={isActioning}
+                          >
+                            <FontAwesomeIcon icon={faTrash} />
+                            {isActioning ? "Đang xử lý..." : "Ẩn bài"}
+                          </button>
+                        )}
+
+                        {/* Nút Phục hồi - chỉ hiển thị khi đã bị ẩn */}
+                        {isDeletedLesson && (
+                          <button
+                            type="button"
+                            className={styles.restoreMenuItem}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRestore(lesson);
+                            }}
+                            disabled={isActioning}
+                          >
+                            <FontAwesomeIcon icon={faTrashRestore} />
+                            {isActioning ? "Đang xử lý..." : "Phục hồi"}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -460,9 +614,18 @@ function AdminListeningLessonList() {
 
                 {/* Body */}
                 <div className={styles.cardBody}>
-                  <h3 className={styles.cardTitle}>{lesson.title}</h3>
+                  <h3
+                    className={`${styles.cardTitle} ${isDeletedLesson ? styles.cardTitleDeleted : ""}`}
+                  >
+                    {lesson.title}
+                    {isDeletedLesson && (
+                      <span className={styles.deletedTag}> (Đã ẩn)</span>
+                    )}
+                  </h3>
                   {lesson.description && (
-                    <p className={styles.cardDescription}>
+                    <p
+                      className={`${styles.cardDescription} ${isDeletedLesson ? styles.cardDescriptionDeleted : ""}`}
+                    >
                       {lesson.description}
                     </p>
                   )}

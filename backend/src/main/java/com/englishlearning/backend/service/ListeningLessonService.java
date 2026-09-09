@@ -45,4 +45,10 @@ public interface ListeningLessonService {
     List<ListeningLessonResponse> getPublishedByTopic(
             Long topicId
     );
+
+    void hardDelete(Long teacherId, Long lessonId);
+    void softDelete(Long adminId, Long lessonId);
+    void restore(Long adminId, Long lessonId);
+    List<ListeningLessonResponse> getDeletedLessons();
+    List<ListeningLessonResponse> getByTopicForAdmin(Long topicId);
 }
