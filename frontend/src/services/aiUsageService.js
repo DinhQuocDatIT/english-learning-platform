@@ -24,6 +24,47 @@ const aiUsageService = {
   getDashboard(params) {
     return axiosClient.get("/v1/admin/ai-usage/dashboard", { params });
   },
+  getOverview(params) {
+    return axiosClient.get("/v1/admins/ai-usage/statistics/overview", {
+      params,
+    });
+  },
+
+  getTimeline(params) {
+    return axiosClient.get("/v1/admins/ai-usage/statistics/timeline", {
+      params,
+    });
+  },
+
+  getByRequestType(params) {
+    return axiosClient.get("/v1/admins/ai-usage/statistics/by-request-type", {
+      params,
+    });
+  },
+
+  getByModel(params) {
+    return axiosClient.get("/v1/admins/ai-usage/statistics/by-model", {
+      params,
+    });
+  },
+
+  getCost(params) {
+    return axiosClient.get("/v1/admins/ai-usage/statistics/cost", {
+      params,
+    });
+  },
+
+  getPerformance(params) {
+    return axiosClient.get("/v1/admins/ai-usage/statistics/performance", {
+      params,
+    });
+  },
+
+  getTopStudents(params) {
+    return axiosClient.get("/v1/admins/ai-usage/statistics/top-students", {
+      params,
+    });
+  },
 };
 
 export default aiUsageService;

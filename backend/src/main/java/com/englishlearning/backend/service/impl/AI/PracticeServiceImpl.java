@@ -158,7 +158,7 @@ public class PracticeServiceImpl implements PracticeService {
         AIEvaluateResponse aiResponse = aiService.evaluateAndGenerate(aiRequest);
         long responseTime = System.currentTimeMillis() - startTime;
 
-        // ✅ Lấy token usage và model info từ Gemini service
+
         GeminiUsageMetadata usage = null;
         String modelName = "gemini-3.5-flash-lite";
         String provider = "GEMINI";
@@ -495,7 +495,7 @@ public class PracticeServiceImpl implements PracticeService {
         return errorType + "_" + corrected.replaceAll(" ", "_");
     }
 
-    // ✅ Lưu AI Usage với chi phí và giá TẠI THỜI ĐIỂM - CHỈ DÙNG DATABASE
+    // Lưu AI Usage với chi phí và giá TẠI THỜI ĐIỂM - CHỈ DÙNG DATABASE
     private void saveAIUsageWithTokens(Long studentId, AIPracticeChat chat, RequestType requestType,
                                        String provider, String model, long responseTime,
                                        boolean success, String errorMessage,

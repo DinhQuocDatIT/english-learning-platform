@@ -59,7 +59,10 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-
+.tab span {
+  font-size: 14px;
+  font-weight: 500;
+}
 .tab:hover {
   color: var(--color-primary, #0ea792);
   background: rgba(14, 167, 146, 0.05);

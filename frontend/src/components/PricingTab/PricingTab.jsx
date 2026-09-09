@@ -73,7 +73,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
   const handleDeactivatePricing = async (id, isInUse, modelName) => {
     let confirmMessage = "Bạn có chắc muốn vô hiệu hóa pricing này?";
     if (isInUse) {
-      confirmMessage = `Model "${modelName}" đang được sử dụng.\nVô hiệu hóa sẽ khiến học viên không thể dùng model này nữa.\n\nBạn có chắc muốn tiếp tục?`;
+      confirmMessage = `⚠️ CẢNH BÁO: Model "${modelName}" đang được sử dụng!\n\nVô hiệu hóa sẽ khiến học viên không thể sử dụng model này nữa.\n\nBạn có chắc muốn tiếp tục?`;
     }
 
     if (!window.confirm(confirmMessage)) return;
@@ -82,7 +82,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
       await pricingService.deactivate(id);
       toast.success(
         isInUse
-          ? `Đã vô hiệu hóa model "${modelName}". Học viên sẽ không dùng được model này nữa.`
+          ? `✅ Đã vô hiệu hóa model "${modelName}". Học viên sẽ không dùng được model này nữa.`
           : "Đã vô hiệu hóa pricing",
       );
       onRefresh();
@@ -226,7 +226,10 @@ function PricingTab({ pricings, loading, onRefresh }) {
                   <td>
                     <div className={styles.effectiveDates}>
                       <div className={styles.dateItem}>
-                       
+                        <FontAwesomeIcon
+                          icon={faCalendar}
+                          className={styles.dateIcon}
+                        />
                         <span className={styles.dateFrom}>
                           {formatDate(pricing.effectiveFrom)}
                         </span>
@@ -238,7 +241,10 @@ function PricingTab({ pricings, loading, onRefresh }) {
                             className={styles.dateArrow}
                           />
                           <div className={styles.dateItem}>
-                           
+                            <FontAwesomeIcon
+                              icon={faClock}
+                              className={styles.dateIcon}
+                            />
                             <span className={styles.dateTo}>
                               {formatDate(pricing.effectiveTo)}
                             </span>
@@ -252,7 +258,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
                     </div>
                   </td>
                   <td className={styles.actionCol}>
-                    {pricing.isActive && (
+                    {pricing.isActive ? (
                       <button
                         className={
                           pricing.isInUse
@@ -268,14 +274,13 @@ function PricingTab({ pricings, loading, onRefresh }) {
                         }
                         title={
                           pricing.isInUse
-                            ? "Model đang được sử dụng"
+                            ? "⚠️ Model đang được sử dụng! Vô hiệu hóa sẽ ảnh hưởng đến học viên."
                             : "Vô hiệu hóa"
                         }
                       >
                         <FontAwesomeIcon icon={faLock} />
                       </button>
-                    )}
-                    {!pricing.isActive && (
+                    ) : (
                       <span className={styles.inactiveAction}>
                         <FontAwesomeIcon
                           icon={faLock}
@@ -333,7 +338,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
                 <div className={styles.modalWarning}>
                   <FontAwesomeIcon icon={faTriangleExclamation} />
                   <div>
-                    <strong>Model này đang active</strong>
+                    <strong>❌ Model này đang active!</strong>
                     <p>Vui lòng vô hiệu hóa pricing cũ trước khi thêm mới.</p>
                     <button
                       className={styles.goToDeleteBtn}
@@ -346,7 +351,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
                         }, 300);
                       }}
                     >
-                      Xem danh sách
+                      Đi đến danh sách để vô hiệu hóa
                     </button>
                   </div>
                 </div>
@@ -388,7 +393,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
                     );
                     return (
                       <option key={model.value} value={model.value}>
-                        {model.label} {active ? "(đang active)" : ""}
+                        {model.label} {active ? "(⚠️ Đang active)" : ""}
                       </option>
                     );
                   })}

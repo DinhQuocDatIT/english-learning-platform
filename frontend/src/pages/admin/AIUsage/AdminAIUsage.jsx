@@ -1,7 +1,7 @@
 // frontend/src/pages/admin/AIUsage/AdminAIUsage.jsx
-import React, { useState, useEffect } from "react";
+
+import React, { useEffect, useState } from "react";
 import {
-  faRobot,
   faChartBar,
   faDollarSign,
   faSearch,
@@ -9,147 +9,194 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
-import aiUsageService from "../../../services/aiUsageService";
+
 import pricingService from "../../../services/pricingService";
+
 import StatsTab from "../../../components/StatsTab/StatsTab";
 import PricingTab from "../../../components/PricingTab/PricingTab";
+
 import styles from "./AdminAIUsage.module.css";
 
 function AdminAIUsage() {
-  // State
+  // =========================================================
+  // STATE
+  // =========================================================
+
   const [activeTab, setActiveTab] = useState("stats");
-  const [dashboard, setDashboard] = useState(null);
+
   const [pricings, setPricings] = useState([]);
-  const [loading, setLoading] = useState(false);
+
+  const [loadingPricing, setLoadingPricing] = useState(false);
+
   const [dateRange, setDateRange] = useState({
-    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    startDate: new Date(
+      Date.now() - 30 * 24 * 60 * 60 * 1000
+    )
       .toISOString()
       .split("T")[0],
-    endDate: new Date().toISOString().split("T")[0],
-  });
-  const [topLimit, setTopLimit] = useState(5);
 
-  // Fetch data
+    endDate: new Date()
+      .toISOString()
+      .split("T")[0],
+  });
+
+  // =========================================================
+  // EFFECT
+  // =========================================================
+
   useEffect(() => {
-    if (activeTab === "stats") {
-      fetchDashboard();
-    } else {
+    if (activeTab === "pricing") {
       fetchPricings();
     }
-  }, [activeTab, dateRange, topLimit]);
+  }, [activeTab]);
 
-  const fetchDashboard = async () => {
-    try {
-      setLoading(true);
-      const startDateObj = new Date(dateRange.startDate);
-      const endDateObj = new Date(dateRange.endDate);
-      endDateObj.setHours(23, 59, 59, 999);
-
-      const response = await aiUsageService.getDashboard({
-        startDate: startDateObj.toISOString(),
-        endDate: endDateObj.toISOString(),
-        topLimit: topLimit,
-      });
-      setDashboard(response?.data?.data);
-    } catch (error) {
-      console.error("Lỗi lấy dashboard:", error);
-      toast.error("Không thể tải dashboard AI Usage");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // =========================================================
+  // FETCH PRICING
+  // =========================================================
 
   const fetchPricings = async () => {
     try {
-      setLoading(true);
+      setLoadingPricing(true);
+
       const response = await pricingService.getAll();
+
       setPricings(response?.data?.data || []);
     } catch (error) {
       console.error("Lỗi lấy pricing:", error);
-      toast.error("Không thể tải danh sách pricing");
+      console.error(
+        "API error response:",
+        error?.response?.data
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+          "Không thể tải danh sách pricing"
+      );
     } finally {
-      setLoading(false);
+      setLoadingPricing(false);
     }
   };
+
+  // =========================================================
+  // DATE CHANGE
+  // =========================================================
 
   const handleDateChange = (e) => {
     const { name, value } = e.target;
-    setDateRange((prev) => ({ ...prev, [name]: value }));
+
+    setDateRange((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleRefresh = () => {
-    if (activeTab === "stats") {
-      fetchDashboard();
-    } else {
-      fetchPricings();
-    }
-  };
+  // =========================================================
+  // TAB CHANGE
+  // =========================================================
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
+  // =========================================================
+  // RENDER
+  // =========================================================
+
   return (
     <div className={styles.container}>
-      {/* Header */}
-      
+      {/* =====================================================
+          TABS
+      ===================================================== */}
 
-      {/* Tabs */}
       <div className={styles.tabs}>
         <button
-          className={`${styles.tab} ${activeTab === "stats" ? styles.tabActive : ""}`}
+          type="button"
+          className={`${styles.tab} ${
+            activeTab === "stats"
+              ? styles.tabActive
+              : ""
+          }`}
           onClick={() => handleTabChange("stats")}
         >
           <FontAwesomeIcon icon={faChartBar} />
-          Thống kê
+
+          <span>Thống kê</span>
         </button>
+
         <button
-          className={`${styles.tab} ${activeTab === "pricing" ? styles.tabActive : ""}`}
+          type="button"
+          className={`${styles.tab} ${
+            activeTab === "pricing"
+              ? styles.tabActive
+              : ""
+          }`}
           onClick={() => handleTabChange("pricing")}
         >
           <FontAwesomeIcon icon={faDollarSign} />
-          Quản lý giá
+
+          <span>Quản lý giá</span>
         </button>
       </div>
 
-      {/* Filter - chỉ hiển thị ở tab stats */}
+      {/* =====================================================
+          STATS FILTER
+      ===================================================== */}
+
       {activeTab === "stats" && (
         <div className={styles.filterBar}>
           <div className={styles.dateFilter}>
             <div className={styles.dateInputGroup}>
-              <label>Từ ngày</label>
+              <label htmlFor="startDate">
+                Từ ngày
+              </label>
+
               <input
+                id="startDate"
                 type="date"
                 name="startDate"
                 value={dateRange.startDate}
+                max={dateRange.endDate}
                 onChange={handleDateChange}
               />
             </div>
+
             <div className={styles.dateInputGroup}>
-              <label>Đến ngày</label>
+              <label htmlFor="endDate">
+                Đến ngày
+              </label>
+
               <input
+                id="endDate"
                 type="date"
                 name="endDate"
                 value={dateRange.endDate}
+                min={dateRange.startDate}
+                max={
+                  new Date()
+                    .toISOString()
+                    .split("T")[0]
+                }
                 onChange={handleDateChange}
               />
             </div>
           </div>
-          <button className={styles.refreshBtn} onClick={handleRefresh}>
-            <FontAwesomeIcon icon={faSearch} />
-            Cập nhật
-          </button>
         </div>
       )}
 
-      {/* Content */}
+      {/* =====================================================
+          CONTENT
+      ===================================================== */}
+
       <div className={styles.tabContent}>
         {activeTab === "stats" ? (
-          <StatsTab dashboard={dashboard} loading={loading} />
+          <StatsTab
+            from={dateRange.startDate}
+            to={dateRange.endDate}
+          />
         ) : (
           <PricingTab
             pricings={pricings}
-            loading={loading}
+            loading={loadingPricing}
             onRefresh={fetchPricings}
           />
         )}
