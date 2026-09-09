@@ -14,4 +14,5 @@ public class LevelResponse {
     private String color;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
 }

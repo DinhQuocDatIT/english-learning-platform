@@ -16,7 +16,7 @@ public interface LevelService {
 
     LevelResponse update(Long id, LevelUpdateRequest request);
 
-
+    void delete(Long id);
     void lock(Long id);
 
     void unlock(Long id);

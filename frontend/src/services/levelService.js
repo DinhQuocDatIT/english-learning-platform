@@ -24,6 +24,9 @@ const levelService = {
   unlock(id) {
     return axiosClient.post(`/v1/levels/${id}/unlock`);
   },
+  delete(id) {
+    return axiosClient.delete(`/v1/levels/${id}`);
+  },
 };
 
 export default levelService;

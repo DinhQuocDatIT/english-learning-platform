@@ -119,4 +119,15 @@ public class LevelController {
                 )
         );
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @PathVariable Long id
+    ) {
+        levelService.delete(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(200, "Xóa level thành công", null)
+        );
+    }
 }

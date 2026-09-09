@@ -9,6 +9,8 @@ import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.LevelRepository;
 import com.englishlearning.backend.service.LevelService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class LevelServiceImpl implements LevelService {
 
     private final LevelRepository levelRepository;
@@ -27,7 +30,7 @@ public class LevelServiceImpl implements LevelService {
     public List<LevelResponse> getAll() {
 
         return levelRepository
-                .findAllByDeletedAtIsNullOrderByCreatedAtDesc()
+                .findAllOrderByCreatedAtDesc()
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -109,7 +112,22 @@ public class LevelServiceImpl implements LevelService {
 
         levelRepository.save(level);
     }
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        Level level = findActiveById(id);
 
+        try {
+            levelRepository.delete(level);
+            log.info("Level {} deleted successfully", id);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Cannot delete level {} because it has referenced data", id, e);
+            throw new BusinessException(
+                    "Không thể xóa cấp độ này vì đang có dữ liệu tham chiếu! " +
+                            "Vui lòng xóa các bài học hoặc dữ liệu liên quan trước."
+            );
+        }
+    }
     private Level findActiveById(Long id) {
 
         return levelRepository
@@ -130,6 +148,7 @@ public class LevelServiceImpl implements LevelService {
                 .color(level.getColor())
                 .createdAt(level.getCreatedAt())
                 .updatedAt(level.getUpdatedAt())
+                .deletedAt(level.getDeletedAt())
                 .build();
     }
 }

@@ -1,6 +1,7 @@
 package com.englishlearning.backend.exception;
 
 import com.englishlearning.backend.dto.response.ErrorResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -74,5 +75,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(500, "Internal server error", LocalDateTime.now()));
+    }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        ex.printStackTrace();
+
+        String message = "Không thể xóa cấp độ này vì đang có dữ liệu tham chiếu! " +
+                "Vui lòng xóa các bài học hoặc dữ liệu liên quan trước.";
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT) // 409 Conflict
+                .body(new ErrorResponse(409, message, LocalDateTime.now()));
     }
 }
