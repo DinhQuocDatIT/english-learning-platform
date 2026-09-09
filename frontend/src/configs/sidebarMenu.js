@@ -23,11 +23,6 @@ import { ROLES } from "../constants/roles";
 export const sidebarMenus = {
   [ROLES.STUDENT]: [
     {
-      path: "/dashboard",
-      name: "Tổng quan",
-      icon: faChartSimple,
-    },
-    {
       path: "/dashboard/courses",
       name: "Khóa học của tôi",
       icon: faBookOpen,
@@ -47,19 +42,9 @@ export const sidebarMenus = {
       name: "Luyện tập với AI",
       icon: faRobot,
     },
-    {
-      path: "/dashboard/settings",
-      name: "Cài đặt",
-      icon: faGear,
-    },
   ],
 
   [ROLES.TEACHER]: [
-    {
-      path: "/teacher/dashboard",
-      name: "Tổng quan",
-      icon: faChartSimple,
-    },
     {
       path: "/dashboard/teacher/students",
       name: "Quản lý học sinh",
@@ -75,11 +60,6 @@ export const sidebarMenus = {
       path: "/dashboard/teacher/topics",
       name: "Quản lý chủ đề",
       icon: faBookOpen,
-    },
-    {
-      path: "/teacher/settings",
-      name: "Cài đặt",
-      icon: faGear,
     },
     {
       path: "/dashboard/teacher/profile",
@@ -133,11 +113,6 @@ export const sidebarMenus = {
       path: "/dashboard/admin/profile",
       name: "Thông tin cá nhân",
       icon: faCircleUser,
-    },
-    {
-      path: "/dashboard/admin/settings",
-      name: "Cài đặt",
-      icon: faGear,
     },
   ],
 };

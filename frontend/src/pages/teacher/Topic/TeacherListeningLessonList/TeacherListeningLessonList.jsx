@@ -87,7 +87,7 @@ function TeacherListeningLessonList() {
     navigate(`/dashboard/teacher/topics/${topicId}/listening-lessons/create`);
   };
 
-  // 👇 KHI CLICK VÀO CARD -> VÀO TRANG QUẢN LÝ CÂU HỎI
+  // 👇 LUÔN CHO PHÉP CLICK VÀO CARD -> VÀO TRANG QUẢN LÝ CÂU HỎI
   const handleCardClick = (lessonId) => {
     navigate(
       `/dashboard/teacher/topics/${topicId}/listening-lessons/${lessonId}/sentences`,
@@ -261,12 +261,8 @@ function TeacherListeningLessonList() {
               <div
                 key={lesson.id}
                 className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
-                onClick={() => {
-                  if (isEditable) {
-                    handleCardClick(lesson.id);
-                  }
-                }}
-                style={{ cursor: isEditable ? "pointer" : "default" }}
+                onClick={() => handleCardClick(lesson.id)} // 👈 LUÔN CHO PHÉP CLICK
+                style={{ cursor: "pointer" }} // 👈 LUÔN HIỂN THỊ CON TRỎ TAY
               >
                 {/* Image */}
                 <div className={styles.imageWrapper}>
@@ -317,7 +313,7 @@ function TeacherListeningLessonList() {
                   {lesson.isPremium && (
                     <span className={styles.premiumBadge}>
                       <FontAwesomeIcon icon={faCrown} />
-                      Pro
+                      Premium
                     </span>
                   )}
 
@@ -334,14 +330,12 @@ function TeacherListeningLessonList() {
                     </span>
                   )}
 
-                  {/* Play Overlay - Giống Student */}
-                  {isEditable && (
-                    <div className={styles.playOverlay}>
-                      <div className={styles.playBtn}>
-                        <FontAwesomeIcon icon={faPlay} />
-                      </div>
+                  {/* Play Overlay - Luôn hiển thị khi hover */}
+                  <div className={styles.playOverlay}>
+                    <div className={styles.playBtn}>
+                      <FontAwesomeIcon icon={faPlay} />
                     </div>
-                  )}
+                  </div>
 
                   {/* Menu */}
                   <div className={styles.actionContainer}>
@@ -370,6 +364,7 @@ function TeacherListeningLessonList() {
                           Xem chi tiết
                         </button>
 
+                        {/* Chỉ hiển thị "Quản lý câu hỏi" nếu có thể chỉnh sửa */}
                         {isEditable && (
                           <button
                             type="button"
@@ -383,6 +378,7 @@ function TeacherListeningLessonList() {
                           </button>
                         )}
 
+                        {/* Chỉ hiển thị "Chỉnh sửa" nếu có thể chỉnh sửa */}
                         {isEditable && (
                           <button
                             type="button"
@@ -392,6 +388,20 @@ function TeacherListeningLessonList() {
                             }}
                           >
                             Chỉnh sửa
+                          </button>
+                        )}
+
+                        {/* Thêm nút xem bài học cho các trạng thái khác */}
+                        {!isEditable && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewLesson(lesson.id);
+                            }}
+                          >
+                            <FontAwesomeIcon icon={faHeadphones} />
+                            Xem bài học
                           </button>
                         )}
                       </div>

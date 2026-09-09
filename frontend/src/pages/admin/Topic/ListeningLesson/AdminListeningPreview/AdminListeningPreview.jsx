@@ -7,13 +7,14 @@ import {
   faPlay,
   faPause,
   faChevronRight,
-  faKeyboard,
   faMicrophone,
   faCheck,
-  faTriangleExclamation,
   faArrowLeft,
   faEye,
-  faLock,
+  faCrown,
+  faXmark,
+  faCircleCheck,
+  faHeadphones,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import { speakText } from "../../../../../utils/textToSpeech";
@@ -22,10 +23,7 @@ import listeningSentenceService from "../../../../../services/listeningSentenceS
 import { useLoading } from "../../../../../contexts/LoadingContext";
 import PlaybackSpeedPopup from "../../../../../components/PlaybackSpeedPopup/PlaybackSpeedPopup";
 import PlaybackVoicePopup from "../../../../../components/PlaybackVoicePopup/PlaybackVoicePopup";
-import {
-  STATUS_MAP,
-  STATUS_BG_COLOR_MAP,
-} from "../../../../../constants/status";
+import getImageUrl from "../../../../../utils/imageUrl";
 import styles from "./AdminListeningPreview.module.css";
 
 function AdminListeningPreview() {
@@ -53,17 +51,15 @@ function AdminListeningPreview() {
   const [userInput, setUserInput] = useState("");
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-
-  const [completedSentences, setCompletedSentences] = useState({});
   const [revealedWordsMap, setRevealedWordsMap] = useState({});
   const [showAllWordsMap, setShowAllWordsMap] = useState({});
-  const [showTranslationMap, setShowTranslationMap] = useState({});
 
   const inputRef = useRef(null);
 
   const getNumericSpeed = (speedStr) =>
     parseFloat(speedStr.replace("x", "")) || 1.0;
 
+  // Load voices
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
     const loadVoices = () => {
@@ -190,16 +186,9 @@ function AdminListeningPreview() {
     setShowResult(true);
 
     if (isMatch) {
-      setShowTranslationMap((prev) => ({
-        ...prev,
-        [currentSentenceIndex]: true,
-      }));
-      setCompletedSentences((prev) => ({
-        ...prev,
-        [currentSentenceIndex]: true,
-      }));
+      toast.success("🎉 Chính xác!");
     } else {
-      toast.info("Chưa chính xác, thử lại nhé!");
+      toast.info("Chưa chính xác, thử lại nhé! 💪");
     }
 
     if (inputRef.current) inputRef.current.focus();
@@ -259,27 +248,15 @@ function AdminListeningPreview() {
       ...prev,
       [currentSentenceIndex]: nextState,
     }));
-    setShowTranslationMap((prev) => ({
-      ...prev,
-      [currentSentenceIndex]: nextState,
-    }));
     if (inputRef.current) inputRef.current.focus();
   };
 
   if (loading) {
     return (
       <div className={styles.container}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            width: "100%",
-            gridColumn: "1 / -1",
-          }}
-        >
-          <p>Đang tải bài nghe...</p>
+        <div className={styles.loadingWrapper}>
+          <div className={styles.loadingSpinner} />
+          <p>Đang tải bài học...</p>
         </div>
       </div>
     );
@@ -290,46 +267,47 @@ function AdminListeningPreview() {
     ? currentSentence.englishText.trim().split(/\s+/)
     : [];
   const userTypedWords = userInput.trim().split(/\s+/);
-  const progressPercent =
-    sentences.length > 0
-      ? Math.round(
-          (Object.keys(completedSentences).length / sentences.length) * 100,
-        )
-      : 0;
 
   const isCurrentAllShown = showAllWordsMap[currentSentenceIndex];
   const currentRevealed = revealedWordsMap[currentSentenceIndex] || {};
 
-  const statusColor = STATUS_BG_COLOR_MAP[lesson?.status] || "#64748b";
-
   return (
     <div className={styles.container}>
+      {/* LEFT MAIN SECTION */}
       <div className={styles.leftMainSection}>
-        <div className={styles.headerTop}>
-          <button onClick={handleGoBack} className={styles.backButton}>
-            <FontAwesomeIcon icon={faArrowLeft} /> Quay lại danh sách bài nghe
-          </button>
-          {/* <div className={styles.headerInfo}>
-            <span
-              className={styles.statusBadge}
-              style={{ backgroundColor: statusColor }}
-            >
-              {STATUS_MAP[lesson?.status] || lesson?.status}
-            </span>
-            <span className={styles.headerLocked}>
-              <FontAwesomeIcon icon={faLock} />
-              Chỉ xem
-            </span>
-          </div> */}
+        {/* Hero Header Banner */}
+        <div
+          className={styles.heroHeader}
+          style={{
+            backgroundImage: getImageUrl(lesson?.lessonImage)
+              ? `linear-gradient(135deg, rgba(13, 148, 136, 0.85), rgba(15, 23, 42, 0.95)), url(${getImageUrl(lesson.lessonImage)})`
+              : `linear-gradient(135deg, var(--color-primary, #0ea792), var(--color-secondary, #0f172a))`,
+          }}
+        >
+          <div className={styles.heroTopRow}>
+            <button onClick={handleGoBack} className={styles.backButton}>
+              <FontAwesomeIcon icon={faArrowLeft} /> Quay lại
+            </button>
+            <div className={styles.heroBadges}>
+              {lesson?.isPremium && (
+                <span className={styles.premiumBadge}>
+                  <FontAwesomeIcon icon={faCrown} /> Premium
+                </span>
+              )}
+              <span className={styles.previewBadge}>
+                <FontAwesomeIcon icon={faEye} /> Xem trước (Admin)
+              </span>
+            </div>
+          </div>
+          <div className={styles.heroContent}>
+            <h1 className={styles.lessonTitle}>{lesson?.title}</h1>
+            {lesson?.description && (
+              <p className={styles.lessonDescription}>{lesson.description}</p>
+            )}
+          </div>
         </div>
 
-        {/* <div className={styles.lessonInfo}>
-          <h2 className={styles.lessonTitle}>{lesson?.title}</h2>
-          {lesson?.description && (
-            <p className={styles.lessonDescription}>{lesson?.description}</p>
-          )}
-        </div> */}
-
+        {/* Player Bar */}
         <div className={styles.playerBar}>
           <div className={styles.playerControlsLeft}>
             <button
@@ -339,11 +317,13 @@ function AdminListeningPreview() {
             >
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
+
             <button className={styles.controlIconBtn} onClick={handleReplay}>
               <FontAwesomeIcon icon={faRotateRight} />
             </button>
+
             <button
-              className={styles.controlIconBtn}
+              className={`${styles.controlIconBtn} ${styles.playBtn}`}
               onClick={() =>
                 currentSentence &&
                 handlePlaySentence(currentSentence, currentSentenceIndex)
@@ -358,6 +338,7 @@ function AdminListeningPreview() {
                 }
               />
             </button>
+
             <button
               className={styles.controlIconBtn}
               onClick={handleNextSentence}
@@ -365,6 +346,7 @@ function AdminListeningPreview() {
             >
               <FontAwesomeIcon icon={faChevronRight} />
             </button>
+
             <span className={styles.sentenceCounter}>
               {currentSentenceIndex + 1} / {sentences.length}
             </span>
@@ -394,10 +376,12 @@ function AdminListeningPreview() {
           </div>
         </div>
 
+        {/* Input Box */}
         <div className={styles.inputBoxCard}>
           <div className={styles.inputLabelHeader}>
             GÕ NHỮNG GÌ BẠN NGHE ĐƯỢC:
           </div>
+
           <textarea
             ref={inputRef}
             className={styles.textareaField}
@@ -409,27 +393,34 @@ function AdminListeningPreview() {
             }}
             rows={3}
           />
-          <div className={styles.micButtonAbsolute}>
+
+          <button
+            className={styles.micButtonAbsolute}
+            title="Nhập bằng giọng nói (đang phát triển)"
+            onClick={() =>
+              toast.info("🎤 Tính năng nhập bằng giọng nói đang phát triển!")
+            }
+          >
             <FontAwesomeIcon icon={faMicrophone} />
-          </div>
+          </button>
         </div>
 
+        {/* Word Boxes */}
         {targetWords.length > 0 && (
           <div className={styles.wordBoxesContainer}>
             {targetWords.map((targetWord, idx) => {
               const cleanTarget = targetWord
                 .toLowerCase()
                 .replace(/[.,!?;:'"()]/g, "");
+
               const typedWord = userTypedWords[idx]
                 ? userTypedWords[idx].toLowerCase().replace(/[.,!?;:'"()]/g, "")
                 : "";
 
               const isTypedCorrectly = typedWord && typedWord === cleanTarget;
+
               const isShown =
-                isCurrentAllShown ||
-                currentRevealed[idx] ||
-                isTypedCorrectly ||
-                completedSentences[currentSentenceIndex];
+                isCurrentAllShown || currentRevealed[idx] || isTypedCorrectly;
 
               return (
                 <div key={idx} className={styles.wordBoxItem}>
@@ -440,13 +431,11 @@ function AdminListeningPreview() {
                   >
                     <FontAwesomeIcon icon={faEye} />
                   </button>
+
                   <div
-                    className={styles.wordBoxValue}
-                    style={{
-                      color: isTypedCorrectly
-                        ? "var(--color-primary)"
-                        : "var(--color-text)",
-                    }}
+                    className={`${styles.wordBoxValue} ${
+                      isTypedCorrectly ? styles.wordCorrect : styles.wordNormal
+                    }`}
                   >
                     {isShown ? targetWord : "*".repeat(targetWord.length)}
                   </div>
@@ -456,11 +445,6 @@ function AdminListeningPreview() {
           </div>
         )}
 
-        <p className={styles.hintWarningText}>
-          Các từ được tiết lộ sẽ bị tính là lỗi và ảnh hưởng đến điểm số của
-          bạn.
-        </p>
-
         <button
           className={styles.showAllBtn}
           onClick={handleShowAllWords}
@@ -469,40 +453,34 @@ function AdminListeningPreview() {
           {isCurrentAllShown ? "ẨN TẤT CẢ TỪ" : "HIỆN TẤT CẢ TỪ"}
         </button>
 
+        {/* Result Banner */}
         {showResult && (
           <div
-            className={styles.resultBanner}
-            style={{
-              backgroundColor: isCorrect ? "var(--color-tertiary)" : "#fef2f2",
-              borderColor: isCorrect ? "var(--color-primary)" : "#fecaca",
-              color: isCorrect ? "var(--color-accent)" : "#dc2626",
-            }}
+            className={`${styles.resultBanner} ${
+              isCorrect ? styles.resultCorrect : styles.resultIncorrect
+            }`}
           >
-            <span className={styles.resultCheckIcon}>
-              <FontAwesomeIcon
-                icon={isCorrect ? faCheck : faTriangleExclamation}
-              />
-            </span>
-            <span className={styles.resultText}>
-              {isCorrect ? "CHÍNH XÁC!" : "CHƯA CHÍNH XÁC, THỬ LẠI NHÉ!"}
-            </span>
+            <div className={styles.resultIconWrapper}>
+              <FontAwesomeIcon icon={isCorrect ? faCircleCheck : faXmark} />
+            </div>
+
+            <div className={styles.resultContent}>
+              <div className={styles.resultTitle}>
+                {isCorrect ? "CHÍNH XÁC!" : "CHƯA CHÍNH XÁC"}
+              </div>
+              <div className={styles.resultSubtitle}>
+                {isCorrect
+                  ? "Bạn đã nghe và gõ chính xác câu này!"
+                  : "Hãy nghe lại và thử một lần nữa nhé!"}
+              </div>
+            </div>
           </div>
         )}
 
-        {showTranslationMap[currentSentenceIndex] &&
-          currentSentence?.vietnameseMeaning && (
-            <div className={styles.translationCard}>
-              <div className={styles.translationTag}>BẢN DỊCH</div>
-              <p className={styles.translationContent}>
-                {currentSentence.vietnameseMeaning}
-              </p>
-            </div>
-          )}
-
-        <div style={{ display: "flex", gap: "0.75rem" }}>
+        {/* Action Buttons */}
+        <div className={styles.actionButtons}>
           <button
-            className={styles.nextButton}
-            style={{ flex: 1 }}
+            className={styles.checkButton}
             onClick={handleCheckResult}
             disabled={!currentSentence || !userInput.trim()}
           >
@@ -510,11 +488,7 @@ function AdminListeningPreview() {
           </button>
 
           {currentSentenceIndex < sentences.length - 1 && (
-            <button
-              className={styles.nextButtonOutline}
-              style={{ flex: 1 }}
-              onClick={handleNextSentence}
-            >
+            <button className={styles.nextButton} onClick={handleNextSentence}>
               TIẾP THEO{" "}
               <FontAwesomeIcon
                 icon={faChevronRight}
@@ -525,34 +499,25 @@ function AdminListeningPreview() {
         </div>
       </div>
 
+      {/* RIGHT SIDEBAR - Transcript */}
       <div className={styles.rightSidebar}>
         <div className={styles.sidebarHeader}>
-          <span className={styles.sidebarTitle}>BẢN CHÉP</span>
-          <span className={styles.progressPercentBadge}>
-            {progressPercent}%
+          <span className={styles.sidebarTitle}>
+            <FontAwesomeIcon icon={faHeadphones} /> BẢN CHÉP
           </span>
-        </div>
-
-        <div className={styles.progressBarTrack}>
-          <div
-            className={styles.progressBarFill}
-            style={{ width: `${progressPercent}%` }}
-          ></div>
+          <span className={styles.sentenceCount}>{sentences.length} câu</span>
         </div>
 
         <div className={styles.transcriptList}>
           {sentences.map((item, index) => {
             const isActive = index === currentSentenceIndex;
-            const isCompleted = completedSentences[index];
-            const displaySnippet =
-              isCompleted || revealedWordsMap[index] || showAllWordsMap[index]
-                ? item.englishText
-                : item.englishText.replace(/[a-zA-Z0-9]/g, "*");
 
             return (
               <div
                 key={item.id}
-                className={`${styles.transcriptCardItem} ${isActive ? styles.transcriptActive : ""}`}
+                className={`${styles.sentenceCard} ${
+                  isActive ? styles.sentenceActive : ""
+                }`}
                 onClick={() => {
                   setCurrentSentenceIndex(index);
                   setUserInput("");
@@ -564,17 +529,24 @@ function AdminListeningPreview() {
                 }}
                 style={{ cursor: "pointer" }}
               >
-                <div className={styles.transcriptCardHeader}>
-                  <span className={styles.itemIndexBadge}>#{index + 1}</span>
-                  <div className={styles.itemActionIcons}>
-                    {isCompleted && (
-                      <span className={styles.checkIconGreen}>
-                        <FontAwesomeIcon icon={faCheck} />
-                      </span>
-                    )}
-                  </div>
+                <div className={styles.sentenceHeader}>
+                  <span className={styles.sentenceOrder}>{index + 1}</span>
                 </div>
-                <p className={styles.transcriptTextSnippet}>{displaySnippet}</p>
+
+                <div className={styles.sentenceContent}>
+                  <div className={styles.englishText}>
+                    {item.englishText.length > 60
+                      ? item.englishText.slice(0, 60) + "..."
+                      : item.englishText}
+                  </div>
+                  {item.vietnameseMeaning && (
+                    <div className={styles.vietnameseText}>
+                      {item.vietnameseMeaning.length > 60
+                        ? item.vietnameseMeaning.slice(0, 60) + "..."
+                        : item.vietnameseMeaning}
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}

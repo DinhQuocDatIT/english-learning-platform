@@ -379,7 +379,7 @@ function TeacherListeningLessonCreate() {
           <span>Quay lại</span>
         </button>
 
-        <div className={styles.headerInfo}>
+        {/* <div className={styles.headerInfo}>
           <h1 className={styles.pageTitle}>
             <FontAwesomeIcon icon={faHeadphones} className={styles.titleIcon} />
             Tạo bài nghe mới
@@ -387,7 +387,7 @@ function TeacherListeningLessonCreate() {
           <p className={styles.subtitle}>
             Tạo bài nghe trong topic <strong>"{topic?.title}"</strong>
           </p>
-        </div>
+        </div> */}
       </div>
 
       {/* PROGRESS STEPPER */}
