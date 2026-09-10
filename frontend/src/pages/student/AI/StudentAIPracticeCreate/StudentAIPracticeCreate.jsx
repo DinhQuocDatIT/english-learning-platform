@@ -15,6 +15,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
+import studentMembershipService from "../../../../services/studentMembershipService";
 import { useLoading } from "../../../../contexts/LoadingContext";
 import styles from "./StudentAIPracticeCreate.module.css";
 
@@ -30,9 +31,45 @@ function StudentAIPracticeCreate() {
     vocabularyWords: [],
   });
 
-  // ✅ State cho từ vựng nhập tay
-  const [vocabInputs, setVocabInputs] = useState([""]); // Mỗi ô là 1 từ
+  const [vocabInputs, setVocabInputs] = useState([""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+
+  // ===== KIỂM TRA MEMBERSHIP KHI VÀO TRANG =====
+  useEffect(() => {
+    checkMembershipAndLoad();
+  }, []);
+
+  const checkMembershipAndLoad = async () => {
+    try {
+      showLoading();
+      setIsCheckingAccess(true);
+
+      const response = await studentMembershipService.getCurrentMembership();
+      const membershipInfo = response?.data?.data;
+
+      if (!membershipInfo) {
+        toast.warning(
+          "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!",
+          {
+            position: "top-center",
+            autoClose: 5000,
+          },
+        );
+        // Quay lại trang trước đó
+        navigate("/dashboard/student/ai-practice");
+        return;
+      }
+
+      setIsCheckingAccess(false);
+    } catch (error) {
+      console.error("Lỗi kiểm tra membership:", error);
+      toast.error("Không thể kiểm tra quyền truy cập.");
+      navigate("/dashboard/student/ai-practice");
+    } finally {
+      hideLoading();
+    }
+  };
 
   // ✅ LEVELS - Khớp với backend (A1, A2, B1, B2, C1, C2)
   const LEVELS = [
@@ -44,7 +81,6 @@ function StudentAIPracticeCreate() {
     { value: "C2", label: "C2 - Thành thạo", color: "#8b5cf6" },
   ];
 
-  // ✅ SENTENCE_TYPES - Khớp với backend (QUESTION, ANSWER, RANDOM)
   const SENTENCE_TYPES = [
     { value: "QUESTION", label: "Câu hỏi" },
     { value: "ANSWER", label: "Câu trả lời" },
@@ -68,7 +104,6 @@ function StudentAIPracticeCreate() {
     { value: "DAILY_ROUTINE", label: "🌅 Thói quen hàng ngày" },
   ];
 
-  // ✅ QUESTION_LIMITS - Khớp với backend (10, 20, 30, 50)
   const QUESTION_LIMITS = [
     { value: 10, label: "10 câu" },
     { value: 20, label: "20 câu" },
@@ -76,19 +111,14 @@ function StudentAIPracticeCreate() {
     { value: 50, label: "50 câu" },
   ];
 
-  // ✅ MAX VOCABULARY WORDS
-  const MAX_VOCAB_WORDS = 5; // Tối đa 5 từ
+  const MAX_VOCAB_WORDS = 5;
 
-  // ===== HANDLE VOCABULARY INPUT =====
-
-  // Thay đổi giá trị của 1 ô nhập
   const handleVocabChange = (index, value) => {
     const newInputs = [...vocabInputs];
     newInputs[index] = value;
     setVocabInputs(newInputs);
   };
 
-  // Thêm ô nhập mới
   const addVocabInput = () => {
     if (vocabInputs.length >= MAX_VOCAB_WORDS) {
       toast.warning(`Chỉ được nhập tối đa ${MAX_VOCAB_WORDS} từ vựng`);
@@ -97,10 +127,8 @@ function StudentAIPracticeCreate() {
     setVocabInputs([...vocabInputs, ""]);
   };
 
-  // Xóa 1 ô nhập
   const removeVocabInput = (index) => {
     if (vocabInputs.length <= 1) {
-      // Không xóa ô cuối cùng, chỉ clear giá trị
       setVocabInputs([""]);
       return;
     }
@@ -108,28 +136,22 @@ function StudentAIPracticeCreate() {
     setVocabInputs(newInputs);
   };
 
-  // Lấy danh sách từ vựng hợp lệ (không rỗng)
   const getValidVocabWords = () => {
     return vocabInputs
       .map((word) => word.trim())
       .filter((word) => word.length > 0);
   };
 
-  // ===== HANDLE SUBMIT =====
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate: Phải chọn topic
     if (!formData.topic) {
       toast.warning("Vui lòng chọn chủ đề.");
       return;
     }
 
-    // Lấy danh sách từ vựng hợp lệ
     const vocabularyWords = getValidVocabWords();
 
-    // Kiểm tra số lượng từ vựng
     if (vocabularyWords.length > MAX_VOCAB_WORDS) {
       toast.warning(`Chỉ được nhập tối đa ${MAX_VOCAB_WORDS} từ vựng`);
       return;
@@ -139,13 +161,12 @@ function StudentAIPracticeCreate() {
       setIsSubmitting(true);
       showLoading();
 
-      // ✅ Payload đúng với CreatePracticeRequest của backend
       const payload = {
         level: formData.level,
         sentenceType: formData.sentenceType,
         topic: formData.topic,
         questionLimit: formData.questionLimit,
-        vocabularyWords: vocabularyWords, // Gửi danh sách từ đã nhập
+        vocabularyWords: vocabularyWords,
       };
 
       console.log("📤 Payload gửi lên backend:", payload);
@@ -173,8 +194,19 @@ function StudentAIPracticeCreate() {
     navigate("/dashboard/student/ai-practice");
   };
 
-  // ✅ Kiểm tra form đã hợp lệ chưa
   const isFormValid = formData.level && formData.topic && formData.sentenceType;
+
+  // ===== LOADING KHI ĐANG KIỂM TRA =====
+  if (isCheckingAccess) {
+    return (
+      <div className={styles.wrapper}>
+        <div className={styles.loadingWrapper}>
+          <div className={styles.loadingSpinner} />
+          <p>Đang kiểm tra quyền truy cập...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -302,7 +334,7 @@ function StudentAIPracticeCreate() {
             </div>
           </div>
 
-          {/* ✅ VOCABULARY - NHẬP TAY TỪNG Ô */}
+          {/* VOCABULARY */}
           <div className={styles.formGroupFull}>
             <label className={styles.formLabel}>
               <FontAwesomeIcon icon={faLightbulb} />
@@ -349,7 +381,6 @@ function StudentAIPracticeCreate() {
               )}
             </div>
 
-            {/* Hiển thị số từ đã nhập */}
             <div className={styles.vocabCounter}>
               <span>
                 Đã nhập: {getValidVocabWords().length} / {MAX_VOCAB_WORDS} từ

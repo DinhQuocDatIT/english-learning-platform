@@ -19,6 +19,7 @@ import com.englishlearning.backend.repository.*;
 import com.englishlearning.backend.service.AI.AIService;
 import com.englishlearning.backend.service.PracticeService;
 import com.englishlearning.backend.service.PricingService;
+import com.englishlearning.backend.service.StudentMembershipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,11 +49,18 @@ public class PracticeServiceImpl implements PracticeService {
     private final StudentAIErrorRepository studentAIErrorRepository;
     private final AIUsageRepository aiUsageRepository;
     private final PricingService pricingService;
+    private final StudentMembershipService studentMembershipService;
+
 
     // ===== CREATE PRACTICE =====
     @Override
     public PracticeChatResponse createPractice(Long userId, CreatePracticeRequest request) {
         log.info("Creating practice for user: {}", userId);
+        if (!studentMembershipService.hasActiveMembership(userId)) {
+            throw new BusinessException(
+                    "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!"
+            );
+        }
 
         validateCreatePracticeRequest(request);
 
@@ -107,7 +115,13 @@ public class PracticeServiceImpl implements PracticeService {
     // ===== SUBMIT ANSWER =====
     @Override
     public EvaluationResponse submitAnswer(Long userId, SubmitAnswerRequest request) {
+
         log.info("Submitting answer for user: {}, turn: {}", userId, request.getTurnId());
+        if (!studentMembershipService.hasActiveMembership(userId)) {
+            throw new BusinessException(
+                    "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!"
+            );
+        }
 
         Student student = studentRepository
                 .findByUserId(userId)

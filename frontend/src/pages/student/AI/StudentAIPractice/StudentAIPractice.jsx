@@ -25,6 +25,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
+import studentMembershipService from "../../../../services/studentMembershipService";
 import { useLoading } from "../../../../contexts/LoadingContext";
 import styles from "./StudentAIPractice.module.css";
 
@@ -40,12 +41,42 @@ const TOPIC_CONFIG = {
 };
 
 const LEVEL_CONFIG = {
-  A1: { label: "A1 - Sơ cấp", bg: "#f0fdf4", color: "#16a34a", border: "#bbf7d0" },
-  A2: { label: "A2 - Sơ cấp+", bg: "#f7fee7", color: "#65a30d", border: "#d9f99d" },
-  B1: { label: "B1 - Trung cấp", bg: "#fefce8", color: "#ca8a04", border: "#fef08a" },
-  B2: { label: "B2 - Trung cấp+", bg: "#fff7ed", color: "#ea580c", border: "#fed7aa" },
-  C1: { label: "C1 - Cao cấp", bg: "#fef2f2", color: "#dc2626", border: "#fecaca" },
-  C2: { label: "C2 - Thành thạo", bg: "#f5f3ff", color: "#7c3aed", border: "#ddd6fe" },
+  A1: {
+    label: "A1 - Sơ cấp",
+    bg: "#f0fdf4",
+    color: "#16a34a",
+    border: "#bbf7d0",
+  },
+  A2: {
+    label: "A2 - Sơ cấp+",
+    bg: "#f7fee7",
+    color: "#65a30d",
+    border: "#d9f99d",
+  },
+  B1: {
+    label: "B1 - Trung cấp",
+    bg: "#fefce8",
+    color: "#ca8a04",
+    border: "#fef08a",
+  },
+  B2: {
+    label: "B2 - Trung cấp+",
+    bg: "#fff7ed",
+    color: "#ea580c",
+    border: "#fed7aa",
+  },
+  C1: {
+    label: "C1 - Cao cấp",
+    bg: "#fef2f2",
+    color: "#dc2626",
+    border: "#fecaca",
+  },
+  C2: {
+    label: "C2 - Thành thạo",
+    bg: "#f5f3ff",
+    color: "#7c3aed",
+    border: "#ddd6fe",
+  },
 };
 
 const getTopicInfo = (topicKey) => {
@@ -98,38 +129,64 @@ function StudentAIPractice() {
 
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("ALL"); // "ALL" | "IN_PROGRESS" | "COMPLETED"
+  const [activeTab, setActiveTab] = useState("ALL");
+  const [hasMembership, setHasMembership] = useState(false);
+  const [checkingMembership, setCheckingMembership] = useState(true);
 
   useEffect(() => {
-    fetchHistory();
+    fetchData();
   }, []);
 
-  const fetchHistory = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
       showLoading();
-      const response = await practiceService.getPracticeHistory();
-      setHistory(response?.data?.data || []);
+
+      // ✅ Kiểm tra membership (không chặn vào trang)
+      const membershipResponse =
+        await studentMembershipService.getCurrentMembership();
+      const membershipInfo = membershipResponse?.data?.data;
+      setHasMembership(!!membershipInfo);
+
+      // Load lịch sử (luôn được xem)
+      const historyResponse = await practiceService.getPracticeHistory();
+      setHistory(historyResponse?.data?.data || []);
     } catch (error) {
-      console.error("Lỗi lấy lịch sử:", error);
-      toast.error(error.response?.data?.message || "Không thể tải lịch sử.");
+      console.error("Lỗi lấy dữ liệu:", error);
+      toast.error(error.response?.data?.message || "Không thể tải dữ liệu.");
       setHistory([]);
     } finally {
       setLoading(false);
+      setCheckingMembership(false);
       hideLoading();
     }
   };
 
-  const handleCreatePractice = () => {
+  // ===== KIỂM TRA MEMBERSHIP TRƯỚC KHI TẠO =====
+  const handleCreatePractice = async () => {
+    if (!hasMembership) {
+      toast.warning(
+        "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!",
+        {
+          position: "top-center",
+          autoClose: 5000,
+        },
+      );
+      return;
+    }
+
     navigate("/dashboard/student/ai-practice/create");
   };
 
+  // ===== VÀO CHAT (không cần kiểm tra membership) =====
   const handleViewPractice = (chatId) => {
     navigate(`/dashboard/student/ai-practice/chat/${chatId}`);
   };
 
   const totalCompleted = history.filter((h) => h.status === "COMPLETED").length;
-  const totalInProgress = history.filter((h) => h.status === "IN_PROGRESS").length;
+  const totalInProgress = history.filter(
+    (h) => h.status === "IN_PROGRESS",
+  ).length;
 
   const evaluatedSessions = history.filter((h) => (h.questionCount || 0) > 0);
   const avgAccuracy =
@@ -138,8 +195,8 @@ function StudentAIPractice() {
           evaluatedSessions.reduce(
             (acc, h) =>
               acc + ((h.correctCount || 0) / (h.questionCount || 1)) * 100,
-            0
-          ) / evaluatedSessions.length
+            0,
+          ) / evaluatedSessions.length,
         )
       : 0;
 
@@ -174,10 +231,14 @@ function StudentAIPractice() {
           </h1>
           <p className={styles.heroSubtitle}>
             Thực hành dịch câu từ tiếng Việt sang tiếng Anh theo từng cấp độ.
-            Nhận phân tích ngữ pháp, chấm điểm và đề xuất cách diễn đạt bản ngữ tức thì.
+            Nhận phân tích ngữ pháp, chấm điểm và đề xuất cách diễn đạt bản ngữ
+            tức thì.
           </p>
           <div className={styles.heroActions}>
-            <button className={styles.heroCreateBtn} onClick={handleCreatePractice}>
+            <button
+              className={styles.heroCreateBtn}
+              onClick={handleCreatePractice}
+            >
               <FontAwesomeIcon icon={faPlus} />
               <span>Bắt đầu bài tập mới</span>
             </button>
@@ -269,7 +330,9 @@ function StudentAIPractice() {
               <FontAwesomeIcon icon={faHistory} />
               Lịch sử bài luyện tập
             </h2>
-            <span className={styles.historyTotalBadge}>{history.length} bài</span>
+            <span className={styles.historyTotalBadge}>
+              {history.length} bài
+            </span>
           </div>
 
           {/* Filter Tabs */}
@@ -305,28 +368,45 @@ function StudentAIPractice() {
             </div>
             <h3>Chào mừng bạn đến với Luyện Dịch AI!</h3>
             <p>
-              Bạn chưa có bài luyện tập nào. Hãy chọn chủ đề bạn yêu thích và thử
-              thách phản xạ ngôn ngữ cùng Gia sư AI ngay hôm nay!
+              Bạn chưa có bài luyện tập nào. Hãy chọn chủ đề bạn yêu thích và
+              thử thách phản xạ ngôn ngữ cùng Gia sư AI ngay hôm nay!
             </p>
-            <button className={styles.emptyStartBtn} onClick={handleCreatePractice}>
+            <button
+              className={styles.emptyStartBtn}
+              onClick={handleCreatePractice}
+            >
               <FontAwesomeIcon icon={faPlus} />
               Bắt đầu bài tập đầu tiên
             </button>
 
             {/* Quick topics recommendation */}
             <div className={styles.quickTopicsContainer}>
-              <span className={styles.quickTopicsTitle}>Gợi ý chủ đề thú vị:</span>
+              <span className={styles.quickTopicsTitle}>
+                Gợi ý chủ đề thú vị:
+              </span>
               <div className={styles.quickTopicsList}>
-                <span className={styles.quickTopicItem} onClick={handleCreatePractice}>
+                <span
+                  className={styles.quickTopicItem}
+                  onClick={handleCreatePractice}
+                >
                   ✈️ Du lịch
                 </span>
-                <span className={styles.quickTopicItem} onClick={handleCreatePractice}>
+                <span
+                  className={styles.quickTopicItem}
+                  onClick={handleCreatePractice}
+                >
                   ☕ Đời sống hàng ngày
                 </span>
-                <span className={styles.quickTopicItem} onClick={handleCreatePractice}>
+                <span
+                  className={styles.quickTopicItem}
+                  onClick={handleCreatePractice}
+                >
                   🛍️ Mua sắm
                 </span>
-                <span className={styles.quickTopicItem} onClick={handleCreatePractice}>
+                <span
+                  className={styles.quickTopicItem}
+                  onClick={handleCreatePractice}
+                >
                   💼 Công việc
                 </span>
               </div>
@@ -336,7 +416,10 @@ function StudentAIPractice() {
           /* Empty state for specific filter tab */
           <div className={styles.emptyFilterState}>
             <p>Không có bài luyện tập nào ở trạng thái này.</p>
-            <button className={styles.resetFilterBtn} onClick={() => setActiveTab("ALL")}>
+            <button
+              className={styles.resetFilterBtn}
+              onClick={() => setActiveTab("ALL")}
+            >
               Xem tất cả bài tập
             </button>
           </div>
@@ -349,11 +432,18 @@ function StudentAIPractice() {
               const isDone = item.status === "COMPLETED";
               const progressPct =
                 item.questionLimit > 0
-                  ? Math.min(Math.round((item.questionCount / item.questionLimit) * 100), 100)
+                  ? Math.min(
+                      Math.round(
+                        (item.questionCount / item.questionLimit) * 100,
+                      ),
+                      100,
+                    )
                   : 0;
               const accuracy =
                 item.questionCount > 0
-                  ? Math.round(((item.correctCount || 0) / item.questionCount) * 100)
+                  ? Math.round(
+                      ((item.correctCount || 0) / item.questionCount) * 100,
+                    )
                   : 0;
 
               return (
@@ -368,7 +458,9 @@ function StudentAIPractice() {
                       <span className={styles.topicIconBox}>
                         <FontAwesomeIcon icon={topicInfo.icon} />
                       </span>
-                      <span className={styles.topicName}>{topicInfo.label}</span>
+                      <span className={styles.topicName}>
+                        {topicInfo.label}
+                      </span>
                     </div>
 
                     <span
@@ -376,7 +468,10 @@ function StudentAIPractice() {
                         isDone ? styles.statusPillDone : styles.statusPillDoing
                       }`}
                     >
-                      <FontAwesomeIcon icon={isDone ? faCheckCircle : faSpinner} spin={!isDone} />
+                      <FontAwesomeIcon
+                        icon={isDone ? faCheckCircle : faSpinner}
+                        spin={!isDone}
+                      />
                       <span>{isDone ? "Hoàn thành" : "Đang học"}</span>
                     </span>
                   </div>
@@ -403,7 +498,10 @@ function StudentAIPractice() {
                   <div className={styles.cardProgressSection}>
                     <div className={styles.progressInfoRow}>
                       <span className={styles.progressLabel}>
-                        Tiến độ: <strong>{item.questionCount}/{item.questionLimit} câu</strong>
+                        Tiến độ:{" "}
+                        <strong>
+                          {item.questionCount}/{item.questionLimit} câu
+                        </strong>
                       </span>
                       <span className={styles.accuracyTag}>
                         {accuracy}% đúng

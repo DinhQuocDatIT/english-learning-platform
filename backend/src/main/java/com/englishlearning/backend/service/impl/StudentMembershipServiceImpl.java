@@ -180,7 +180,22 @@ public class StudentMembershipServiceImpl
                 remainingDays
         );
     }
+    @Override
+    public boolean hasActiveMembership(Long userId) {
+        Student student = studentRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy thông tin học viên"
+                ));
 
+        return studentMembershipRepository
+                .findFirstByStudentIdAndStatusOrderByEndDateDesc(
+                        student.getId(),
+                        StudentMembershipStatus.ACTIVE
+                )
+                .map(m -> !m.getEndDate().isBefore(LocalDate.now()))
+                .orElse(false);
+    }
     private StudentMembershipResponse toResponse(
             StudentMembership membership
     ) {

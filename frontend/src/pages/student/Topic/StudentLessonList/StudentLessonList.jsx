@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 
 import topicService from "../../../../services/topicService";
 import listeningLessonService from "../../../../services/listeningLessonService";
+import studentMembershipService from "../../../../services/studentMembershipService";
 import getImageUrl from "../../../../utils/imageUrl";
 import { useLoading } from "../../../../contexts/LoadingContext";
 
@@ -32,6 +33,7 @@ function StudentLessonList() {
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [checkingId, setCheckingId] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -75,10 +77,48 @@ function StudentLessonList() {
     navigate(`/dashboard/student/topics`);
   };
 
-  const handleLessonClick = (lessonId) => {
-    navigate(
-      `/dashboard/student/topics/${topicId}/lessons/${lessonId}/preview`,
-    );
+  // ===== XỬ LÝ CLICK VÀO BÀI HỌC =====
+  const handleLessonClick = async (lesson) => {
+    // Nếu bài không phải Premium -> vào thẳng
+    if (!lesson.isPremium) {
+      navigate(
+        `/dashboard/student/topics/${topicId}/lessons/${lesson.id}/preview`,
+      );
+      return;
+    }
+
+    // Bài Premium -> kiểm tra membership
+    try {
+      setCheckingId(lesson.id);
+      showLoading();
+
+      const response = await studentMembershipService.getCurrentMembership();
+      const membershipInfo = response?.data?.data;
+
+      if (membershipInfo) {
+        // Có membership -> vào bài
+        navigate(
+          `/dashboard/student/topics/${topicId}/lessons/${lesson.id}/preview`,
+        );
+      } else {
+        // Không có membership -> hiện thông báo
+        toast.warning(
+          `Bài học "${lesson.title}" yêu cầu gói Premium. Vui lòng đăng ký để truy cập!`,
+          {
+            position: "top-center",
+            autoClose: 5000,
+          },
+        );
+        // Chuyển hướng đến trang đăng ký membership
+        // navigate("/dashboard/student/membership");
+      }
+    } catch (error) {
+      console.error("Lỗi kiểm tra quyền truy cập:", error);
+      toast.error("Không thể kiểm tra quyền truy cập.");
+    } finally {
+      setCheckingId(null);
+      hideLoading();
+    }
   };
 
   // Hàm random số lượng người học (tạm thời)
@@ -196,11 +236,15 @@ function StudentLessonList() {
         <div className={styles.grid}>
           {filteredLessons.map((lesson) => {
             const learnerCount = getLearnerCount();
+            const isChecking = checkingId === lesson.id;
+            const isPremium = lesson.isPremium;
+
             return (
               <div
                 key={lesson.id}
-                className={`${styles.card} ${lesson.isPremium ? styles.pro : ""}`}
-                onClick={() => handleLessonClick(lesson.id)}
+                className={`${styles.card} ${isPremium ? styles.pro : ""}`}
+                onClick={() => handleLessonClick(lesson)}
+                style={{ cursor: isChecking ? "wait" : "pointer" }}
               >
                 {/* Image */}
                 <div className={styles.imageWrapper}>
@@ -247,8 +291,8 @@ function StudentLessonList() {
                     </span>
                   )}
 
-                  {/* Premium */}
-                  {lesson.isPremium && (
+                  {/* Premium Badge */}
+                  {isPremium && (
                     <span className={styles.premiumBadge}>
                       <FontAwesomeIcon icon={faCrown} />
                       Premium
@@ -265,7 +309,14 @@ function StudentLessonList() {
 
                 {/* Body */}
                 <div className={styles.cardBody}>
-                  <h3 className={styles.cardTitle}>{lesson.title}</h3>
+                  <h3 className={styles.cardTitle}>
+                    {lesson.title}
+                    {isPremium && (
+                      <span className={styles.premiumTag}>
+                        <FontAwesomeIcon icon={faCrown} /> Premium
+                      </span>
+                    )}
+                  </h3>
                   {lesson.description && (
                     <p className={styles.cardDescription}>
                       {lesson.description}
@@ -278,17 +329,9 @@ function StudentLessonList() {
                         <FontAwesomeIcon icon={faUsers} />
                         {lesson.studentCount || 0} học viên
                       </span>
-                      {/* <span className={styles.metaItem}>
-                        <FontAwesomeIcon icon={faClock} />
-                        {lesson.createdAt
-                          ? new Date(lesson.createdAt).toLocaleDateString(
-                              "vi-VN",
-                            )
-                          : "N/A"}
-                      </span> */}
                     </div>
                     <button className={styles.startBtn}>
-                      Bắt đầu
+                      {isChecking ? "Đang kiểm tra..." : "Bắt đầu"}
                       <FontAwesomeIcon icon={faPlayCircle} />
                     </button>
                   </div>

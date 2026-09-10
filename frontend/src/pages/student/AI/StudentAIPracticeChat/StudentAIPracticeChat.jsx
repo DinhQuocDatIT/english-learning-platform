@@ -26,9 +26,12 @@ import {
   faCircleCheck,
   faCircleXmark,
   faList,
+  faLock,
+  faCrown,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
+import studentMembershipService from "../../../../services/studentMembershipService";
 import { useLoading } from "../../../../contexts/LoadingContext";
 import AnswerCheckingLoading from "../../../../components/AnswerCheckingLoading/AnswerCheckingLoading";
 import styles from "./StudentAIPracticeChat.module.css";
@@ -51,15 +54,36 @@ function StudentAIPracticeChat() {
   const [showHistory, setShowHistory] = useState(true);
   const [activeTurn, setActiveTurn] = useState(null);
   const [selectedHistoryTurn, setSelectedHistoryTurn] = useState(null);
+  const [hasMembership, setHasMembership] = useState(false);
   const chatEndRef = useRef(null);
   const feedbackRef = useRef(null);
 
-  // Fetch practice chat
+  // ✅ LOAD DỮ LIỆU (không chặn nếu không có membership)
   useEffect(() => {
-    if (chatId) {
-      fetchPracticeChat(chatId);
-    }
+    fetchData();
   }, [chatId]);
+
+  const fetchData = async () => {
+    try {
+      showLoading();
+
+      // ✅ Kiểm tra membership (không chặn)
+      const membershipResponse =
+        await studentMembershipService.getCurrentMembership();
+      const membershipInfo = membershipResponse?.data?.data;
+      setHasMembership(!!membershipInfo);
+
+      // Load chat (luôn được xem)
+      if (chatId) {
+        await fetchPracticeChat(chatId);
+      }
+    } catch (error) {
+      console.error("Lỗi lấy dữ liệu:", error);
+      toast.error("Không thể tải dữ liệu.");
+    } finally {
+      hideLoading();
+    }
+  };
 
   // Scroll to bottom
   useEffect(() => {
@@ -106,11 +130,10 @@ function StudentAIPracticeChat() {
     return map[errorType] || faTriangleExclamation;
   };
 
-  // ✅ Hàm tính điểm yếu từ turnHistory của practice hiện tại
+  // ✅ Hàm tính điểm yếu từ turnHistory
   const calculateWeaknessesFromHistory = () => {
     if (turnHistory.length === 0) return [];
 
-    // Đếm số lần mắc lỗi theo loại
     const errorCount = {};
     turnHistory.forEach((turn) => {
       if (turn.errors && turn.errors.length > 0) {
@@ -121,8 +144,7 @@ function StudentAIPracticeChat() {
       }
     });
 
-    // Sắp xếp theo số lần mắc lỗi giảm dần
-    const sortedErrors = Object.entries(errorCount)
+    return Object.entries(errorCount)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([errorType, count]) => ({
@@ -130,13 +152,10 @@ function StudentAIPracticeChat() {
         displayName: getDisplayName(errorType),
         count: count,
       }));
-
-    return sortedErrors;
   };
 
   const fetchPracticeChat = async (id) => {
     try {
-      showLoading();
       const response = await practiceService.getPracticeChat(id);
       const data = response?.data?.data;
       console.log("Practice data:", data);
@@ -146,12 +165,15 @@ function StudentAIPracticeChat() {
       setActiveTurn(data?.currentTurn?.questionOrder || 1);
 
       if (data?.turnHistory && data.turnHistory.length > 0) {
+        // ✅ Sort tăng dần theo questionOrder để hiển thị đúng thứ tự 1, 2, 3...
         const sortedHistory = [...data.turnHistory].sort(
-          (a, b) => b.questionOrder - a.questionOrder,
+          (a, b) => a.questionOrder - b.questionOrder,
         );
         setTurnHistory(sortedHistory);
         setShowHistory(true);
-        setSelectedHistoryTurn(sortedHistory[0]);
+        setSelectedHistoryTurn(
+          sortedHistory[sortedHistory.length - 1] || sortedHistory[0],
+        );
       }
 
       if (data?.status === "COMPLETED") {
@@ -162,8 +184,6 @@ function StudentAIPracticeChat() {
       toast.error(
         error.response?.data?.message || "Không thể tải bài luyện tập.",
       );
-    } finally {
-      hideLoading();
     }
   };
 
@@ -176,7 +196,20 @@ function StudentAIPracticeChat() {
     }
   };
 
+  // ✅ SUBMIT ANSWER - Kiểm tra membership
   const handleSubmitAnswer = async () => {
+    // ✅ Kiểm tra membership trước khi gửi
+    if (!hasMembership) {
+      toast.warning(
+        "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để tiếp tục!",
+        {
+          position: "top-center",
+          autoClose: 5000,
+        },
+      );
+      return;
+    }
+
     if (!answer.trim()) {
       toast.warning("Vui lòng nhập câu trả lời.");
       return;
@@ -215,7 +248,13 @@ function StudentAIPracticeChat() {
         answeredAt: new Date().toISOString(),
       };
 
-      setTurnHistory((prev) => [answeredTurn, ...prev]);
+      // ✅ Thêm vào cuối mảng (tăng dần theo thứ tự)
+      setTurnHistory((prev) => {
+        const newHistory = [...prev, answeredTurn].sort(
+          (a, b) => a.questionOrder - b.questionOrder,
+        );
+        return newHistory;
+      });
       setSelectedHistoryTurn(answeredTurn);
 
       setEvaluation(data);
@@ -285,8 +324,8 @@ function StudentAIPracticeChat() {
     setShowHistory(!showHistory);
   };
 
-  const handleHistoryClick = (turn) => {
-    setSelectedHistoryTurn(turn);
+  const handleHistoryClick = (turn, displayIndex) => {
+    setSelectedHistoryTurn({ ...turn, displayIndex });
     setActiveTurn(turn.questionOrder);
     setTimeout(() => {
       feedbackRef.current?.scrollIntoView({
@@ -332,6 +371,9 @@ function StudentAIPracticeChat() {
   const renderTurnFeedback = (turn) => {
     if (!turn) return null;
 
+    // ✅ Hiển thị số thứ tự đúng (dùng displayIndex nếu có, fallback questionOrder)
+    const displayNumber = turn.displayIndex || turn.questionOrder;
+
     return (
       <div className={styles.feedbackCard} ref={feedbackRef}>
         <div className={styles.feedbackHeaderTop}>
@@ -340,7 +382,7 @@ function StudentAIPracticeChat() {
               icon={faRobot}
               className={styles.feedbackRobotIcon}
             />
-            <span>Đánh giá câu {turn.questionOrder}</span>
+            <span>Đánh giá câu {displayNumber}</span>
             {turn.answeredAt && (
               <span className={styles.subTagBadge}>
                 {new Date(turn.answeredAt).toLocaleTimeString()}
@@ -361,8 +403,7 @@ function StudentAIPracticeChat() {
 
         <div className={styles.questionCompareBox}>
           <div className={styles.targetText}>
-            <strong>Đề câu {turn.questionOrder}:</strong> "
-            {turn.vietnameseSentence}"
+            <strong>Đề câu {displayNumber}:</strong> "{turn.vietnameseSentence}"
           </div>
           <div
             className={
@@ -509,7 +550,12 @@ function StudentAIPracticeChat() {
                 Câu {currentTurn?.questionOrder || 0} (Lượt{" "}
                 {currentTurn?.questionOrder || 0}/{totalTurns})
               </span>
-              {isSubmitting ? (
+              {!hasMembership ? (
+                <span className={styles.lockedBadge}>
+                  <FontAwesomeIcon icon={faLock} />
+                  <span>Cần Premium</span>
+                </span>
+              ) : isSubmitting ? (
                 <span className={styles.evaluatingBadge}>
                   <FontAwesomeIcon icon={faSpinner} spin />
                   <span>AI đang chấm điểm...</span>
@@ -543,7 +589,7 @@ function StudentAIPracticeChat() {
         {!isCompleted &&
           (isSubmitting ? (
             <AnswerCheckingLoading studentAnswer={submittingAnswer || answer} />
-          ) : (
+          ) : hasMembership ? (
             <form onSubmit={handleSubmitAnswer} className={styles.inputSection}>
               <div className={styles.textareaWrapper}>
                 <textarea
@@ -574,6 +620,27 @@ function StudentAIPracticeChat() {
                 </button>
               </div>
             </form>
+          ) : (
+            /* ✅ Hết hạn membership - hiện thông báo */
+            <div className={styles.expiredNotice}>
+              <div className={styles.expiredIcon}>
+                <FontAwesomeIcon icon={faCrown} />
+              </div>
+              <h3>Gói Premium đã hết hạn</h3>
+              <p>
+                Bạn vẫn có thể xem lại lịch sử luyện tập. Để tiếp tục gửi câu
+                trả lời và nhận phân tích từ AI, vui lòng gia hạn gói Premium.
+              </p>
+              <button
+                className={styles.renewBtn}
+                onClick={() =>
+                  navigate("/dashboard/student/student-membership")
+                }
+              >
+                <FontAwesomeIcon icon={faCrown} />
+                Gia hạn ngay
+              </button>
+            </div>
           ))}
         <div ref={chatEndRef} />
       </main>
@@ -638,12 +705,13 @@ function StudentAIPracticeChat() {
               <span>LỊCH SỬ CÁC LƯỢT</span>
             </div>
 
+            {/* Đang làm */}
             {!isCompleted && currentTurn && (
               <div
                 className={`${styles.historyItemRow} ${styles.historyItemDoing}`}
               >
                 <span className={styles.historyItemName}>
-                  <span>Câu {currentTurn.questionOrder}</span>
+                  <span>Câu {completedTurns + 1}</span>
                   <span className={styles.badgeDoing}>
                     {isSubmitting ? "Đang chấm..." : "Đang làm"}
                   </span>
@@ -654,7 +722,8 @@ function StudentAIPracticeChat() {
               </div>
             )}
 
-            {turnHistory.map((turn) => (
+            {/* Lịch sử các câu đã làm - hiển thị tăng dần 1, 2, 3... */}
+            {turnHistory.map((turn, index) => (
               <div
                 key={turn.id || turn.questionOrder}
                 className={`${styles.historyItemRow} ${
@@ -662,10 +731,10 @@ function StudentAIPracticeChat() {
                     ? styles.activeHistoryRow
                     : ""
                 }`}
-                onClick={() => handleHistoryClick(turn)}
+                onClick={() => handleHistoryClick(turn, index + 1)}
               >
                 <span className={styles.historyItemName}>
-                  <span>Câu {turn.questionOrder}</span>
+                  <span>Câu {index + 1}</span>
                   {turn.isCorrect ? (
                     <span className={styles.iconCheck}>
                       <FontAwesomeIcon icon={faCheckCircle} />

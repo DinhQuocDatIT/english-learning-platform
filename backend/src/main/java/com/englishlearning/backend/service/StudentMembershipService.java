@@ -13,4 +13,5 @@ public interface StudentMembershipService {
     StudentMembershipResponse getCurrentMembership(
             Long userId
     );
+    boolean hasActiveMembership(Long userId);
 }
