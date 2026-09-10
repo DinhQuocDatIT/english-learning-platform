@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/student-memberships")
 public class StudentMembershipController {
@@ -60,6 +63,31 @@ public class StudentMembershipController {
                                 ? "Bạn chưa đăng ký gói thành viên"
                                 : "Lấy thông tin gói thành viên thành công",
                         response
+                )
+        );
+    }
+    @GetMapping("/ai-usage")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAIUsage(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUser().getId();
+
+        boolean hasMembership = studentMembershipService.hasActiveMembership(userId);
+        int remaining = studentMembershipService.getRemainingAIRequests(userId);
+        boolean canMake = studentMembershipService.canMakeAIRequest(userId);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("hasMembership", hasMembership);
+        data.put("remainingRequests", remaining);
+        data.put("canMakeRequest", canMake);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        hasMembership
+                                ? "Lấy thông tin lượt sử dụng AI thành công"
+                                : "Bạn chưa đăng ký gói thành viên",
+                        data
                 )
         );
     }

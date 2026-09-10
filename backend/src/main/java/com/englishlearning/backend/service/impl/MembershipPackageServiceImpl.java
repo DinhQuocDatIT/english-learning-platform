@@ -26,7 +26,7 @@ public class MembershipPackageServiceImpl
 
     private final MembershipPackageRepository membershipPackageRepository;
     private final StudentMembershipRepository studentMembershipRepository;
-
+    private static final int DEFAULT_DAILY_AI_LIMIT = 0;
     @Override
     @Transactional(readOnly = true)
     public List<MembershipPackageResponse> getAll() {
@@ -101,6 +101,7 @@ public class MembershipPackageServiceImpl
                 .description(membershipPackage.getDescription())
                 .status(membershipPackage.getStatus())
                 .isFeatured(membershipPackage.getIsFeatured())
+                .dailyAiRequestLimit(membershipPackage.getDailyAiRequestLimit())
                 .totalSubscribers(totalSubscribers)
                 .totalRevenue(totalRevenue)
                 .createdAt(membershipPackage.getCreatedAt())
@@ -139,6 +140,11 @@ public class MembershipPackageServiceImpl
 
         membershipPackage.setStatus(
                 MembershipPackageStatus.ACTIVE
+        );
+        membershipPackage.setDailyAiRequestLimit(
+                request.getDailyAiRequestLimit() != null
+                        ? request.getDailyAiRequestLimit()
+                        : DEFAULT_DAILY_AI_LIMIT
         );
 
         boolean isFeatured =
@@ -195,7 +201,9 @@ public class MembershipPackageServiceImpl
         membershipPackage.setDescription(
                 request.getDescription()
         );
-
+        if (request.getDailyAiRequestLimit() != null) {
+            membershipPackage.setDailyAiRequestLimit(request.getDailyAiRequestLimit());
+        }
         boolean isFeatured =
                 Boolean.TRUE.equals(request.getIsFeatured());
 
@@ -323,6 +331,7 @@ public class MembershipPackageServiceImpl
                 .description(membershipPackage.getDescription())
                 .status(membershipPackage.getStatus())
                 .isFeatured(membershipPackage.getIsFeatured())
+                .dailyAiRequestLimit(membershipPackage.getDailyAiRequestLimit())
                 .createdAt(membershipPackage.getCreatedAt())
                 .updatedAt(membershipPackage.getUpdatedAt())
                 .build();
@@ -349,6 +358,7 @@ public class MembershipPackageServiceImpl
                 .description(membershipPackage.getDescription())
                 .status(membershipPackage.getStatus())
                 .isFeatured(membershipPackage.getIsFeatured())
+                .dailyAiRequestLimit(membershipPackage.getDailyAiRequestLimit())
                 .totalSubscribers(totalSubscribers)
                 .totalRevenue(totalRevenue)
                 .createdAt(membershipPackage.getCreatedAt())

@@ -14,4 +14,10 @@ public interface StudentMembershipService {
             Long userId
     );
     boolean hasActiveMembership(Long userId);
+
+    boolean canMakeAIRequest(Long userId);
+
+    int getRemainingAIRequests(Long userId);
+
+    void incrementAIRequestCount(Long userId);
 }

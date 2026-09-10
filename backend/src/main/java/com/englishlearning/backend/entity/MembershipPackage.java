@@ -36,6 +36,9 @@ public class MembershipPackage {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "daily_ai_request_limit")
+    private Integer dailyAiRequestLimit = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MembershipPackageStatus status = MembershipPackageStatus.ACTIVE;

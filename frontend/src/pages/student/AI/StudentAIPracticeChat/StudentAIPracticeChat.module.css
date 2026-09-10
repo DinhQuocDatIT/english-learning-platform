@@ -2898,3 +2898,60 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
 }
+/* ====== USAGE BANNER ====== */
+.usageBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #e9f8f5, #d4f3ef);
+  border: 1px solid #0ea792;
+  border-radius: 12px;
+  color: #0d9488;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.usageBanner span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+.usageBanner strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0ea792;
+}
+
+.usageBanner svg {
+  color: var(--color-primary);
+  font-size: 16px;
+}
+
+.usageBannerWarning {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fbbf24;
+  color: #92400e;
+}
+
+.usageBannerWarning strong {
+  color: #d97706;
+}
+
+.usageBannerWarning svg {
+  color: #f59e0b;
+}
+
+.usageBannerDanger {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+.usageBannerDanger strong {
+  color: #dc2626;
+}
+
+.usageBannerDanger svg {
+  color: #ef4444;
+}

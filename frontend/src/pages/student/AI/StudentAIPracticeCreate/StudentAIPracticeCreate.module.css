@@ -459,3 +459,46 @@
     justify-content: center;
   }
 }
+/* ====== USAGE BANNER ====== */
+.usageBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #e9f8f5, #d4f3ef);
+  border: 1px solid #0ea792;
+  border-radius: 12px;
+  color: #0d9488;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+.usageBanner span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+.usageBanner strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0ea792;
+}
+
+.usageBanner svg {
+  color: #0ea792;
+  font-size: 16px;
+}
+
+.usageBannerWarning {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fbbf24;
+  color: #92400e;
+}
+
+.usageBannerWarning strong {
+  color: #d97706;
+}
+
+.usageBannerWarning svg {
+  color: #f59e0b;
+}

@@ -10,12 +10,14 @@ import {
   faCheck,
   faBoxOpen,
   faXmark,
+  faBolt,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 
 import membershipPackageService from "../../../../services/membershipPackageService";
 import { useLoading } from "../../../../contexts/LoadingContext";
 import { formatDuration } from "../../../../utils/MembershipPackageManage";
+
 function MembershipPackageAdd() {
   const navigate = useNavigate();
   const { showLoading, hideLoading } = useLoading();
@@ -26,6 +28,7 @@ function MembershipPackageAdd() {
     price: 0,
     description: [""],
     isFeatured: false,
+    dailyAiRequestLimit: 0,
   });
 
   const [error, setError] = useState("");
@@ -42,9 +45,7 @@ function MembershipPackageAdd() {
   const handleFeatureChange = (index, value) => {
     setForm((prev) => {
       const newDescription = [...prev.description];
-
       newDescription[index] = value;
-
       return {
         ...prev,
         description: newDescription,
@@ -62,7 +63,6 @@ function MembershipPackageAdd() {
   const removeFeature = (index) => {
     setForm((prev) => {
       const newDescription = prev.description.filter((_, i) => i !== index);
-
       return {
         ...prev,
         description: newDescription.length > 0 ? newDescription : [""],
@@ -72,7 +72,6 @@ function MembershipPackageAdd() {
 
   const handleFeaturedChange = (e) => {
     const checked = e.target.checked;
-
     setForm((prev) => ({
       ...prev,
       isFeatured: checked,
@@ -116,6 +115,11 @@ function MembershipPackageAdd() {
         price: Number(form.price),
         description,
         isFeatured: form.isFeatured,
+        // 0 = không giới hạn, gửi null
+        dailyAiRequestLimit:
+          Number(form.dailyAiRequestLimit) > 0
+            ? Number(form.dailyAiRequestLimit)
+            : null,
       };
 
       console.log("Dữ liệu gửi backend:", data);
@@ -125,7 +129,6 @@ function MembershipPackageAdd() {
       navigate("/dashboard/admin/membership-package");
     } catch (err) {
       console.error("Lỗi khi thêm gói:", err);
-
       setError(err.response?.data?.message || "Không thể thêm gói thành viên.");
     } finally {
       hideLoading();
@@ -135,6 +138,7 @@ function MembershipPackageAdd() {
   const handleCancel = () => {
     navigate("/dashboard/admin/membership-package");
   };
+
   const previewFeatures = form.description
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
@@ -150,7 +154,6 @@ function MembershipPackageAdd() {
             icon={faChevronRight}
             className={styles.breadcrumbIcon}
           />
-
           <span className={styles.breadcrumbActive}>Thêm gói mới</span>
         </div>
 
@@ -209,7 +212,6 @@ function MembershipPackageAdd() {
                 {/* TÊN */}
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Tên gói</label>
-
                   <input
                     type="text"
                     name="name"
@@ -223,7 +225,6 @@ function MembershipPackageAdd() {
                 {/* THỜI HẠN */}
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Thời hạn</label>
-
                   <div className={styles.inputWithSuffix}>
                     <input
                       type="number"
@@ -233,17 +234,15 @@ function MembershipPackageAdd() {
                       onChange={handleChange}
                       className={styles.input}
                     />
-
                     <span className={styles.suffixText}>ngày</span>
                   </div>
                 </div>
               </div>
 
-              {/* GIÁ */}
+              {/* GIÁ VÀ LƯỢT AI */}
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Giá</label>
-
                   <div className={styles.inputWithSuffix}>
                     <input
                       type="number"
@@ -254,8 +253,26 @@ function MembershipPackageAdd() {
                       onChange={handleChange}
                       className={styles.input}
                     />
-
                     <span className={styles.suffixText}> VNĐ</span>
+                  </div>
+                </div>
+
+                {/* ✅ GIỚI HẠN REQUEST AI */}
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>
+                    <FontAwesomeIcon icon={faBolt} style={{ marginRight: 6 }} />
+                    Lượt AI/ngày
+                  </label>
+                  <div className={styles.inputWithSuffix}>
+                    <input
+                      type="number"
+                      name="dailyAiRequestLimit"
+                      min="0"
+                      value={form.dailyAiRequestLimit}
+                      onChange={handleChange}
+                      className={styles.input}
+                    />
+                    <span className={styles.suffixText}>lượt</span>
                   </div>
                 </div>
               </div>
@@ -264,7 +281,6 @@ function MembershipPackageAdd() {
             <div className={styles.cardSection}>
               <div className={styles.sectionHeaderFlex}>
                 <h2 className={styles.sectionHeading}>Quyền lợi của gói</h2>
-
                 <button
                   type="button"
                   className={styles.addFeatureBtn}
@@ -282,7 +298,6 @@ function MembershipPackageAdd() {
                       icon={faGripVertical}
                       className={styles.gripIcon}
                     />
-
                     <input
                       type="text"
                       value={feature}
@@ -292,7 +307,6 @@ function MembershipPackageAdd() {
                       placeholder="Ví dụ: Truy cập toàn bộ bài học"
                       className={styles.input}
                     />
-
                     <button
                       type="button"
                       className={styles.deleteFeatureBtn}
@@ -310,12 +324,10 @@ function MembershipPackageAdd() {
                 <div className={styles.toggleInfo}>
                   <div className={styles.titleBadgeRow}>
                     <span className={styles.toggleTitle}>Gói nổi bật</span>
-
                     <span className={styles.featuredBadgeLabel}>
                       PHỔ BIẾN NHẤT
                     </span>
                   </div>
-
                   <span className={styles.toggleDesc}>
                     Đánh dấu gói này là gói được đề xuất cho người dùng.
                   </span>
@@ -327,7 +339,6 @@ function MembershipPackageAdd() {
                     checked={form.isFeatured}
                     onChange={handleFeaturedChange}
                   />
-
                   <span className={styles.slider}></span>
                 </label>
               </div>
@@ -369,7 +380,6 @@ function MembershipPackageAdd() {
                 <span className={styles.previewPriceValue}>
                   {Number(form.price || 0).toLocaleString("vi-VN")}
                 </span>
-
                 <span className={styles.previewPricePeriod}> VNĐ</span>
               </div>
 
@@ -389,7 +399,6 @@ function MembershipPackageAdd() {
                         icon={faCheck}
                         className={styles.checkIcon}
                       />
-
                       <span>{feature}</span>
                     </div>
                   ))
@@ -412,7 +421,6 @@ function MembershipPackageAdd() {
                 icon={faCircleInfo}
                 className={styles.noteIcon}
               />
-
               <p className={styles.noteText}>
                 Gói sẽ được tạo ở trạng thái <strong>ACTIVE</strong> và có thể
                 được cung cấp cho người dùng ngay sau khi tạo.

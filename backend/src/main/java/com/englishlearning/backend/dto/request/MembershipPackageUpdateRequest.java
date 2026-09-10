@@ -31,4 +31,6 @@ public class MembershipPackageUpdateRequest {
     private String description;
 
     private Boolean isFeatured ;
+    @Min(value = 1, message = "Giới hạn request phải lớn hơn 0")
+    private Integer dailyAiRequestLimit;
 }

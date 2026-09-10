@@ -61,7 +61,11 @@ public class PracticeServiceImpl implements PracticeService {
                     "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!"
             );
         }
-
+        if (!studentMembershipService.canMakeAIRequest(userId)) {
+            throw new BusinessException(
+                    "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai hoặc nâng cấp gói!"
+            );
+        }
         validateCreatePracticeRequest(request);
 
         Student student = studentRepository
@@ -106,7 +110,7 @@ public class PracticeServiceImpl implements PracticeService {
 
         chat.setQuestionCount(1);
         practiceChatRepository.save(chat);
-
+        studentMembershipService.incrementAIRequestCount(userId);
         log.info("Practice created successfully. Chat ID: {}, Turn ID: {}", chat.getId(), turn.getId());
 
         return buildPracticeChatResponse(chat, turn);
@@ -122,7 +126,11 @@ public class PracticeServiceImpl implements PracticeService {
                     "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!"
             );
         }
-
+        if (!studentMembershipService.canMakeAIRequest(userId)) {
+            throw new BusinessException(
+                    "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai hoặc nâng cấp gói!"
+            );
+        }
         Student student = studentRepository
                 .findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin học viên"));
@@ -183,7 +191,7 @@ public class PracticeServiceImpl implements PracticeService {
             modelName = geminiService.getCurrentModel();
             provider = geminiService.getCurrentProvider();
         }
-
+        studentMembershipService.incrementAIRequestCount(userId);
         // Lưu betterAnswers - Dùng separator "|||"
         if (aiResponse.getBetterAnswers() != null && !aiResponse.getBetterAnswers().isEmpty()) {
             String betterAnswersStr = String.join("|||", aiResponse.getBetterAnswers());

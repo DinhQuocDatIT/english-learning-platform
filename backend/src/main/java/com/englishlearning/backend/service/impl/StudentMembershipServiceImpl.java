@@ -2,6 +2,7 @@ package com.englishlearning.backend.service.impl;
 
 import com.englishlearning.backend.dto.request.StudentMembershipCreateRequest;
 import com.englishlearning.backend.dto.response.StudentMembershipResponse;
+import com.englishlearning.backend.entity.AIRequestDailyLog;
 import com.englishlearning.backend.entity.MembershipPackage;
 import com.englishlearning.backend.entity.Student;
 import com.englishlearning.backend.entity.StudentMembership;
@@ -9,10 +10,12 @@ import com.englishlearning.backend.enums.MembershipPackageStatus;
 import com.englishlearning.backend.enums.StudentMembershipStatus;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
+import com.englishlearning.backend.repository.AIRequestDailyLogRepository;
 import com.englishlearning.backend.repository.MembershipPackageRepository;
 import com.englishlearning.backend.repository.StudentMembershipRepository;
 import com.englishlearning.backend.repository.StudentRepository;
 import com.englishlearning.backend.service.StudentMembershipService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,21 +25,25 @@ import java.util.Optional;
 
 @Service
 @Transactional
+
 public class StudentMembershipServiceImpl
         implements StudentMembershipService {
 
     private final StudentMembershipRepository studentMembershipRepository;
     private final StudentRepository studentRepository;
     private final MembershipPackageRepository membershipPackageRepository;
+    private final AIRequestDailyLogRepository aiRequestDailyLogRepository;
 
     public StudentMembershipServiceImpl(
             StudentMembershipRepository studentMembershipRepository,
             StudentRepository studentRepository,
-            MembershipPackageRepository membershipPackageRepository
+            MembershipPackageRepository membershipPackageRepository,
+            AIRequestDailyLogRepository aiRequestDailyLogRepository
     ) {
         this.studentMembershipRepository = studentMembershipRepository;
         this.studentRepository = studentRepository;
         this.membershipPackageRepository = membershipPackageRepository;
+        this.aiRequestDailyLogRepository = aiRequestDailyLogRepository;
     }
 
     @Override
@@ -196,6 +203,103 @@ public class StudentMembershipServiceImpl
                 .map(m -> !m.getEndDate().isBefore(LocalDate.now()))
                 .orElse(false);
     }
+    @Override
+    @Transactional(readOnly = true)
+    public boolean canMakeAIRequest(Long userId) {
+        Student student = studentRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy thông tin học viên"
+                ));
+
+        // Lấy membership đang active
+        StudentMembership membership = studentMembershipRepository
+                .findFirstByStudentIdAndStatusOrderByEndDateDesc(
+                        student.getId(),
+                        StudentMembershipStatus.ACTIVE
+                )
+                .filter(m -> !m.getEndDate().isBefore(LocalDate.now()))
+                .orElse(null);
+
+        if (membership == null) {
+            return false; // Không có membership active
+        }
+
+        Integer limit = membership.getMembershipPackage().getDailyAiRequestLimit();
+
+        // null = không giới hạn (gói VIP)
+        if (limit == null) {
+            return true;
+        }
+
+        int currentCount = aiRequestDailyLogRepository
+                .findByStudentIdAndRequestDate(student.getId(), LocalDate.now())
+                .map(AIRequestDailyLog::getRequestCount)
+                .orElse(0);
+
+        return currentCount < limit;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int getRemainingAIRequests(Long userId) {
+        Student student = studentRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy thông tin học viên"
+                ));
+
+        StudentMembership membership = studentMembershipRepository
+                .findFirstByStudentIdAndStatusOrderByEndDateDesc(
+                        student.getId(),
+                        StudentMembershipStatus.ACTIVE
+                )
+                .filter(m -> !m.getEndDate().isBefore(LocalDate.now()))
+                .orElse(null);
+
+        if (membership == null) {
+            return 0;
+        }
+
+        Integer limit = membership.getMembershipPackage().getDailyAiRequestLimit();
+
+        // null = không giới hạn
+        if (limit == null) {
+            return Integer.MAX_VALUE;
+        }
+
+        int currentCount = aiRequestDailyLogRepository
+                .findByStudentIdAndRequestDate(student.getId(), LocalDate.now())
+                .map(AIRequestDailyLog::getRequestCount)
+                .orElse(0);
+
+        return Math.max(0, limit - currentCount);
+    }
+
+    @Override
+    public void incrementAIRequestCount(Long userId) {
+        Student student = studentRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy thông tin học viên"
+                ));
+
+        LocalDate today = LocalDate.now();
+
+        AIRequestDailyLog log = aiRequestDailyLogRepository
+                .findByStudentIdAndRequestDate(student.getId(), today)
+                .orElseGet(() -> {
+                    AIRequestDailyLog newLog = new AIRequestDailyLog();
+                    newLog.setStudent(student);
+                    newLog.setRequestDate(today);
+                    newLog.setRequestCount(0);
+                    return newLog;
+                });
+
+        log.setRequestCount(log.getRequestCount() + 1);
+        aiRequestDailyLogRepository.save(log);
+    }
+
     private StudentMembershipResponse toResponse(
             StudentMembership membership
     ) {

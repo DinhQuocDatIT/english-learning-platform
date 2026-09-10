@@ -10,6 +10,7 @@ import {
   faEye,
   faCheck,
   faXmark,
+  faBolt,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -30,6 +31,7 @@ function MembershipPackageEdit() {
     description: "",
     status: "ACTIVE",
     isFeatured: false,
+    dailyAiRequestLimit: 0,
     createdAt: null,
     updatedAt: null,
   });
@@ -51,7 +53,6 @@ function MembershipPackageEdit() {
         setError("");
 
         const response = await membershipPackageService.getById(id);
-
         const data = response.data?.data;
 
         if (!data) {
@@ -69,16 +70,13 @@ function MembershipPackageEdit() {
           description: data.description ?? "",
           status: packageStatus,
           isFeatured: Boolean(data.isFeatured),
+          dailyAiRequestLimit: data.dailyAiRequestLimit ?? 0,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
         });
 
-        // Quan trọng:
-        // Lưu lại status ban đầu từ backend.
         setInitialStatus(packageStatus);
 
-        // Backend lưu description dạng:
-        // "Quyền lợi 1,Quyền lợi 2,Quyền lợi 3"
         const parsedFeatures = data.description
           ? data.description
               .split(",")
@@ -89,7 +87,6 @@ function MembershipPackageEdit() {
         setFeatures(parsedFeatures.length > 0 ? parsedFeatures : [""]);
       } catch (err) {
         console.error("Lỗi khi lấy chi tiết gói:", err);
-
         setError(
           err.response?.data?.message ||
             "Không thể tải thông tin gói thành viên.",
@@ -134,7 +131,6 @@ function MembershipPackageEdit() {
   const handleRemoveFeature = (index) => {
     setFeatures((prev) => {
       const updated = prev.filter((_, i) => i !== index);
-
       return updated.length > 0 ? updated : [""];
     });
   };
@@ -148,9 +144,6 @@ function MembershipPackageEdit() {
     setFormData((prev) => ({
       ...prev,
       status: isActive ? "ACTIVE" : "INACTIVE",
-
-      // Nếu tắt hoạt động thì Featured cũng phải tắt ở UI.
-      // Backend deactivate() cũng xử lý việc này.
       isFeatured: isActive ? prev.isFeatured : false,
     }));
   };
@@ -175,10 +168,7 @@ function MembershipPackageEdit() {
 
     const cleanedFeatures = features.map((item) => item.trim()).filter(Boolean);
 
-    // =========================
     // VALIDATE
-    // =========================
-
     if (!formData.name.trim()) {
       setError("Vui lòng nhập tên gói.");
       return;
@@ -202,23 +192,7 @@ function MembershipPackageEdit() {
     try {
       showLoading();
 
-      // =========================
       // 1. UPDATE THÔNG TIN
-      // =========================
-      //
-      // API:
-      // PUT /api/v1/membership-packages/{id}
-      //
-      // API này chỉ xử lý:
-      // - name
-      // - duration
-      // - price
-      // - description
-      // - isFeatured
-      //
-      // KHÔNG xử lý status.
-      //
-
       const description = cleanedFeatures.join(",");
 
       const payload = {
@@ -227,39 +201,32 @@ function MembershipPackageEdit() {
         price: Number(formData.price),
         description,
         isFeatured: Boolean(formData.isFeatured),
+        // 0 = không giới hạn, gửi null
+        dailyAiRequestLimit:
+          Number(formData.dailyAiRequestLimit) > 0
+            ? Number(formData.dailyAiRequestLimit)
+            : null,
       };
 
       console.log("Payload update:", payload);
 
       await membershipPackageService.update(id, payload);
 
-      // =========================
       // 2. UPDATE STATUS RIÊNG
-      // =========================
-      //
-      // Chỉ gọi API status khi user thực sự thay đổi status.
-      //
-
       if (initialStatus !== null && initialStatus !== formData.status) {
         if (formData.status === "ACTIVE") {
           console.log("Gọi API activate:", id);
-
           await membershipPackageService.activate(id);
         } else {
           console.log("Gọi API deactivate:", id);
-
           await membershipPackageService.deactivate(id);
         }
       }
 
-      // =========================
       // 3. DONE
-      // =========================
-
       navigate(`/dashboard/admin/membership-package/${id}`);
     } catch (err) {
       console.error("Lỗi khi cập nhật gói:", err);
-
       setError(
         err.response?.data?.message || "Không thể cập nhật gói thành viên.",
       );
@@ -292,25 +259,19 @@ function MembershipPackageEdit() {
 
   return (
     <div className={styles.container}>
-      {/* =========================
-          HEADER
-      ========================= */}
+      {/* HEADER */}
       <div className={styles.topHeader}>
         <div className={styles.breadcrumb}>
           <Link to="/dashboard/admin/membership-package">Gói dịch vụ</Link>
-
           <FontAwesomeIcon
             icon={faChevronRight}
             className={styles.breadcrumbIcon}
           />
-
           <Link to={`/dashboard/admin/membership-package/${id}`}>Chi tiết</Link>
-
           <FontAwesomeIcon
             icon={faChevronRight}
             className={styles.breadcrumbIcon}
           />
-
           <span className={styles.breadcrumbActive}>Chỉnh sửa</span>
         </div>
 
@@ -335,9 +296,7 @@ function MembershipPackageEdit() {
 
       <h1 className={styles.pageTitle}>Chỉnh sửa Gói dịch vụ</h1>
 
-      {/* =========================
-          ERROR
-      ========================= */}
+      {/* ERROR */}
       {error && (
         <div
           style={{
@@ -354,9 +313,7 @@ function MembershipPackageEdit() {
       )}
 
       <div className={styles.mainGrid}>
-        {/* =========================
-            LEFT
-        ========================= */}
+        {/* LEFT */}
         <div className={styles.leftColumn}>
           {/* THÔNG TIN CƠ BẢN */}
           <div className={styles.card}>
@@ -371,7 +328,6 @@ function MembershipPackageEdit() {
             <div className={styles.formGrid}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>ID Gói (Chỉ đọc)</label>
-
                 <input
                   type="text"
                   className={`${styles.input} ${styles.inputDisabled}`}
@@ -382,7 +338,6 @@ function MembershipPackageEdit() {
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Tên gói</label>
-
                 <input
                   type="text"
                   name="name"
@@ -394,7 +349,6 @@ function MembershipPackageEdit() {
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Thời hạn (Ngày)</label>
-
                 <input
                   type="number"
                   name="duration"
@@ -407,7 +361,6 @@ function MembershipPackageEdit() {
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Giá (VNĐ)</label>
-
                 <input
                   type="number"
                   name="price"
@@ -416,6 +369,23 @@ function MembershipPackageEdit() {
                   className={styles.input}
                   value={formData.price}
                   onChange={handleChange}
+                />
+              </div>
+
+              {/* ✅ LƯỢT AI/NGÀY */}
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  <FontAwesomeIcon icon={faBolt} style={{ marginRight: 6 }} />
+                  Lượt AI/ngày
+                </label>
+                <input
+                  type="number"
+                  name="dailyAiRequestLimit"
+                  min="0"
+                  className={styles.input}
+                  value={formData.dailyAiRequestLimit}
+                  onChange={handleChange}
+                  placeholder="0 = không giới hạn"
                 />
               </div>
             </div>
@@ -464,9 +434,7 @@ function MembershipPackageEdit() {
           </div>
         </div>
 
-        {/* =========================
-            RIGHT
-        ========================= */}
+        {/* RIGHT */}
         <div className={styles.rightColumn}>
           {/* STATUS */}
           <div className={styles.card}>
@@ -482,7 +450,6 @@ function MembershipPackageEdit() {
                   checked={formData.status === "ACTIVE"}
                   onChange={handleStatusChange}
                 />
-
                 <span className={`${styles.slider} ${styles.round}`}></span>
               </label>
             </div>
@@ -498,7 +465,6 @@ function MembershipPackageEdit() {
                   disabled={formData.status !== "ACTIVE"}
                   onChange={handleFeaturedChange}
                 />
-
                 <span className={`${styles.slider} ${styles.round}`}></span>
               </label>
             </div>
@@ -514,7 +480,6 @@ function MembershipPackageEdit() {
             <div className={styles.systemInfoList}>
               <div className={styles.systemInfoItem}>
                 <span className={styles.infoLabel}>Ngày tạo</span>
-
                 <span className={styles.systemInfoValue}>
                   {formatDateTime(formData.createdAt)}
                 </span>
@@ -522,7 +487,6 @@ function MembershipPackageEdit() {
 
               <div className={styles.systemInfoItem}>
                 <span className={styles.infoLabel}>Cập nhật lần cuối</span>
-
                 <span className={styles.systemInfoValue}>
                   {formatDateTime(formData.updatedAt)}
                 </span>
@@ -530,7 +494,6 @@ function MembershipPackageEdit() {
             </div>
           </div>
 
-          {/* PREVIEW */}
           {/* PREVIEW */}
           <div className={styles.card}>
             <h2 className={styles.cardHeading}>

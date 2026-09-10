@@ -17,6 +17,7 @@ public class MembershipPackageResponse {
     private String description;
     private MembershipPackageStatus status;
     private Boolean isFeatured;
+    private Integer dailyAiRequestLimit;
     private Long totalSubscribers;
     private BigDecimal totalRevenue;
     private LocalDateTime createdAt;

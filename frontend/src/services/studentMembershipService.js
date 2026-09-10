@@ -8,6 +8,9 @@ const studentMembershipService = {
   getCurrentMembership() {
     return axiosClient.get("/v1/student-memberships/current");
   },
+  getAIUsage() {
+    return axiosClient.get("/v1/student-memberships/ai-usage");
+  },
 };
 
 export default studentMembershipService;

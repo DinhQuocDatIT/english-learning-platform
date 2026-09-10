@@ -12,6 +12,7 @@ import {
   faLightbulb,
   faPlus,
   faTimes,
+  faBolt,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
@@ -34,8 +35,9 @@ function StudentAIPracticeCreate() {
   const [vocabInputs, setVocabInputs] = useState([""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+  const [aiUsage, setAiUsage] = useState(null);
 
-  // ===== KIỂM TRA MEMBERSHIP KHI VÀO TRANG =====
+  // ===== KIỂM TRA MEMBERSHIP VÀ LƯỢT AI KHI VÀO TRANG =====
   useEffect(() => {
     checkMembershipAndLoad();
   }, []);
@@ -45,8 +47,13 @@ function StudentAIPracticeCreate() {
       showLoading();
       setIsCheckingAccess(true);
 
-      const response = await studentMembershipService.getCurrentMembership();
-      const membershipInfo = response?.data?.data;
+      const [membershipResponse, usageResponse] = await Promise.all([
+        studentMembershipService.getCurrentMembership(),
+        studentMembershipService.getAIUsage(),
+      ]);
+
+      const membershipInfo = membershipResponse?.data?.data;
+      const usageInfo = usageResponse?.data?.data;
 
       if (!membershipInfo) {
         toast.warning(
@@ -56,14 +63,26 @@ function StudentAIPracticeCreate() {
             autoClose: 5000,
           },
         );
-        // Quay lại trang trước đó
         navigate("/dashboard/student/ai-practice");
         return;
       }
 
+      if (usageInfo && !usageInfo.canMakeRequest) {
+        toast.warning(
+          "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai!",
+          {
+            position: "top-center",
+            autoClose: 5000,
+          },
+        );
+        navigate("/dashboard/student/ai-practice");
+        return;
+      }
+
+      setAiUsage(usageInfo);
       setIsCheckingAccess(false);
     } catch (error) {
-      console.error("Lỗi kiểm tra membership:", error);
+      console.error("Lỗi kiểm tra quyền truy cập:", error);
       toast.error("Không thể kiểm tra quyền truy cập.");
       navigate("/dashboard/student/ai-practice");
     } finally {
@@ -71,7 +90,6 @@ function StudentAIPracticeCreate() {
     }
   };
 
-  // ✅ LEVELS - Khớp với backend (A1, A2, B1, B2, C1, C2)
   const LEVELS = [
     { value: "A1", label: "A1 - Sơ cấp", color: "#22c55e" },
     { value: "A2", label: "A2 - Sơ cấp+", color: "#84cc16" },
@@ -150,6 +168,14 @@ function StudentAIPracticeCreate() {
       return;
     }
 
+    // ✅ Kiểm tra lại lượt trước khi submit
+    if (aiUsage && !aiUsage.canMakeRequest) {
+      toast.warning(
+        "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai!",
+      );
+      return;
+    }
+
     const vocabularyWords = getValidVocabWords();
 
     if (vocabularyWords.length > MAX_VOCAB_WORDS) {
@@ -221,6 +247,22 @@ function StudentAIPracticeCreate() {
           Tạo bài luyện tập
         </h1>
       </div>
+
+      {/* ✅ HIỂN THỊ LƯỢT AI CÒN LẠI */}
+      {aiUsage && (
+        <div
+          className={`${styles.usageBanner} ${
+            aiUsage.remainingRequests <= 3 ? styles.usageBannerWarning : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faBolt} />
+          <span>
+            Bạn còn <strong>{aiUsage.remainingRequests}</strong> lượt sử dụng AI
+            hôm nay.
+            {aiUsage.remainingRequests <= 3 && " Hãy sử dụng tiết kiệm nhé!"}
+          </span>
+        </div>
+      )}
 
       {/* Form */}
       <form className={styles.form} onSubmit={handleSubmit}>

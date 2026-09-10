@@ -13,6 +13,7 @@ import {
   faCheck,
   faUsers,
   faWallet,
+  faBolt,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -32,6 +33,7 @@ function MembershipPackageDetail() {
   const [error, setError] = useState("");
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
+
   // =========================
   // GET DETAIL
   // =========================
@@ -93,6 +95,7 @@ function MembershipPackageDetail() {
       minute: "2-digit",
     });
   };
+
   const handleConfirmStatusChange = async () => {
     try {
       setIsChangingStatus(true);
@@ -119,6 +122,7 @@ function MembershipPackageDetail() {
       hideLoading();
     }
   };
+
   // =========================
   // FORMAT MONEY
   // =========================
@@ -153,12 +157,12 @@ function MembershipPackageDetail() {
   const featuresList = parseDescription(packageData.description);
 
   const isActive = packageData.status === "ACTIVE";
+  const dailyAiLimit = packageData.dailyAiRequestLimit;
   console.log(packageData);
+
   return (
     <div className={styles.container}>
-      {/* =========================
-          HEADER
-      ========================= */}
+      {/* HEADER */}
       <div className={styles.topHeader}>
         <div className={styles.breadcrumb}>
           <Link to="/dashboard/admin/membership-package">
@@ -236,39 +240,50 @@ function MembershipPackageDetail() {
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>ID GÓI</span>
-
                 <span className={styles.infoValueMono}>{packageData.id}</span>
               </div>
 
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>TÊN GÓI</span>
-
                 <span className={styles.infoValueBold}>{packageData.name}</span>
               </div>
 
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>GIÁ</span>
-
                 <span className={styles.infoValueHighlight}>
                   {formatMoney(packageData.price)}
-
                   <span className={styles.infoUnit}> VNĐ</span>
                 </span>
               </div>
 
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>THỜI HẠN</span>
-
                 <span className={styles.infoValueBold}>
                   {formatDuration(packageData.duration)}
+                </span>
+              </div>
+
+              {/* ✅ LƯỢT AI/NGÀY */}
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>LƯỢT AI/NGÀY</span>
+                <span className={styles.infoValueBold}>
+                  <FontAwesomeIcon
+                    icon={faBolt}
+                    style={{
+                      marginRight: 6,
+                      color: "#0ea792",
+                      fontSize: 14,
+                    }}
+                  />
+                  {dailyAiLimit && Number(dailyAiLimit) > 0
+                    ? `${dailyAiLimit} lượt`
+                    : "Không giới hạn"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* =========================
-              FEATURES
-          ========================= */}
+          {/* FEATURES */}
           <div className={styles.card}>
             <div className={styles.cardHeaderBetween}>
               <h2 className={styles.cardHeading}>
@@ -302,9 +317,7 @@ function MembershipPackageDetail() {
             </div>
           </div>
 
-          {/* =========================
-              STATISTICS
-          ========================= */}
+          {/* STATISTICS */}
           <div className={styles.statsGridRow}>
             <div className={styles.statCardMini}>
               <div className={styles.statIconBoxUsers}>
@@ -338,13 +351,9 @@ function MembershipPackageDetail() {
           </div>
         </div>
 
-        {/* =========================
-            RIGHT COLUMN
-        ========================= */}
+        {/* RIGHT COLUMN */}
         <div className={styles.rightColumn}>
-          {/* =========================
-              SYSTEM INFO
-          ========================= */}
+          {/* SYSTEM INFO */}
           <div className={styles.card}>
             <h2 className={styles.cardHeading}>
               <FontAwesomeIcon icon={faServer} className={styles.headingIcon} />
@@ -354,7 +363,6 @@ function MembershipPackageDetail() {
             <div className={styles.systemInfoList}>
               <div className={styles.systemInfoItem}>
                 <span className={styles.infoLabel}>NGÀY TẠO</span>
-
                 <span className={styles.systemInfoValue}>
                   {formatDateTime(packageData.createdAt)}
                 </span>
@@ -362,7 +370,6 @@ function MembershipPackageDetail() {
 
               <div className={styles.systemInfoItem}>
                 <span className={styles.infoLabel}>CẬP NHẬT LẦN CUỐI</span>
-
                 <span className={styles.systemInfoValue}>
                   {formatDateTime(packageData.updatedAt)}
                 </span>
@@ -370,9 +377,7 @@ function MembershipPackageDetail() {
             </div>
           </div>
 
-          {/* =========================
-              PREVIEW
-          ========================= */}
+          {/* PREVIEW */}
           <div className={styles.card}>
             <h2 className={styles.cardHeading}>
               <FontAwesomeIcon icon={faEye} className={styles.headingIcon} />

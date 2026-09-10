@@ -55,6 +55,7 @@ function StudentAIPracticeChat() {
   const [activeTurn, setActiveTurn] = useState(null);
   const [selectedHistoryTurn, setSelectedHistoryTurn] = useState(null);
   const [hasMembership, setHasMembership] = useState(false);
+  const [aiUsage, setAiUsage] = useState(null); // ✅ THÊM
   const chatEndRef = useRef(null);
   const feedbackRef = useRef(null);
 
@@ -67,11 +68,17 @@ function StudentAIPracticeChat() {
     try {
       showLoading();
 
-      // ✅ Kiểm tra membership (không chặn)
-      const membershipResponse =
-        await studentMembershipService.getCurrentMembership();
+      // ✅ Gọi song song 2 API
+      const [membershipResponse, usageResponse] = await Promise.all([
+        studentMembershipService.getCurrentMembership(),
+        studentMembershipService.getAIUsage(),
+      ]);
+
       const membershipInfo = membershipResponse?.data?.data;
+      const usageInfo = usageResponse?.data?.data;
+
       setHasMembership(!!membershipInfo);
+      setAiUsage(usageInfo);
 
       // Load chat (luôn được xem)
       if (chatId) {
@@ -165,7 +172,6 @@ function StudentAIPracticeChat() {
       setActiveTurn(data?.currentTurn?.questionOrder || 1);
 
       if (data?.turnHistory && data.turnHistory.length > 0) {
-        // ✅ Sort tăng dần theo questionOrder để hiển thị đúng thứ tự 1, 2, 3...
         const sortedHistory = [...data.turnHistory].sort(
           (a, b) => a.questionOrder - b.questionOrder,
         );
@@ -196,12 +202,24 @@ function StudentAIPracticeChat() {
     }
   };
 
-  // ✅ SUBMIT ANSWER - Kiểm tra membership
+  // ✅ SUBMIT ANSWER - Kiểm tra membership + lượt
   const handleSubmitAnswer = async () => {
-    // ✅ Kiểm tra membership trước khi gửi
+    // ✅ Kiểm tra membership
     if (!hasMembership) {
       toast.warning(
         "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để tiếp tục!",
+        {
+          position: "top-center",
+          autoClose: 5000,
+        },
+      );
+      return;
+    }
+
+    // ✅ Kiểm tra còn lượt không
+    if (aiUsage && !aiUsage.canMakeRequest) {
+      toast.warning(
+        "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai!",
         {
           position: "top-center",
           autoClose: 5000,
@@ -233,6 +251,14 @@ function StudentAIPracticeChat() {
 
       const data = response?.data?.data;
 
+      // ✅ Cập nhật lại số lượt còn lại sau khi submit thành công
+      try {
+        const usageResponse = await studentMembershipService.getAIUsage();
+        setAiUsage(usageResponse?.data?.data || null);
+      } catch (err) {
+        console.error("Lỗi cập nhật lượt AI:", err);
+      }
+
       const answeredTurn = {
         id: currentTurn.id,
         questionOrder: currentTurn.questionOrder,
@@ -248,7 +274,6 @@ function StudentAIPracticeChat() {
         answeredAt: new Date().toISOString(),
       };
 
-      // ✅ Thêm vào cuối mảng (tăng dần theo thứ tự)
       setTurnHistory((prev) => {
         const newHistory = [...prev, answeredTurn].sort(
           (a, b) => a.questionOrder - b.questionOrder,
@@ -371,7 +396,6 @@ function StudentAIPracticeChat() {
   const renderTurnFeedback = (turn) => {
     if (!turn) return null;
 
-    // ✅ Hiển thị số thứ tự đúng (dùng displayIndex nếu có, fallback questionOrder)
     const displayNumber = turn.displayIndex || turn.questionOrder;
 
     return (
@@ -480,6 +504,26 @@ function StudentAIPracticeChat() {
   return (
     <div className={styles.container}>
       <main className={styles.mainContent}>
+        {/* ✅ USAGE BANNER */}
+        {aiUsage && hasMembership && !isCompleted && (
+          <div
+            className={`${styles.usageBanner} ${
+              aiUsage.remainingRequests <= 3 ? styles.usageBannerWarning : ""
+            } ${aiUsage.remainingRequests === 0 ? styles.usageBannerDanger : ""}`}
+          >
+            <FontAwesomeIcon icon={faBolt} />
+            <span>
+              Còn <strong>{aiUsage.remainingRequests}</strong> lượt sử dụng AI
+              hôm nay
+              {aiUsage.remainingRequests <= 3 &&
+                aiUsage.remainingRequests > 0 &&
+                " - Sắp hết, hãy tiết kiệm nhé!"}
+              {aiUsage.remainingRequests === 0 &&
+                " - Đã hết lượt, quay lại vào ngày mai!"}
+            </span>
+          </div>
+        )}
+
         {/* Progress Section */}
         <div className={styles.progressSection}>
           <div className={styles.progressHeader}>
@@ -555,6 +599,11 @@ function StudentAIPracticeChat() {
                   <FontAwesomeIcon icon={faLock} />
                   <span>Cần Premium</span>
                 </span>
+              ) : aiUsage && !aiUsage.canMakeRequest ? (
+                <span className={styles.lockedBadge}>
+                  <FontAwesomeIcon icon={faLock} />
+                  <span>Hết lượt</span>
+                </span>
               ) : isSubmitting ? (
                 <span className={styles.evaluatingBadge}>
                   <FontAwesomeIcon icon={faSpinner} spin />
@@ -589,7 +638,50 @@ function StudentAIPracticeChat() {
         {!isCompleted &&
           (isSubmitting ? (
             <AnswerCheckingLoading studentAnswer={submittingAnswer || answer} />
-          ) : hasMembership ? (
+          ) : !hasMembership ? (
+            /* Hết hạn membership */
+            <div className={styles.expiredNotice}>
+              <div className={styles.expiredIcon}>
+                <FontAwesomeIcon icon={faCrown} />
+              </div>
+              <h3>Gói Premium đã hết hạn</h3>
+              <p>
+                Bạn vẫn có thể xem lại lịch sử luyện tập. Để tiếp tục gửi câu
+                trả lời và nhận phân tích từ AI, vui lòng gia hạn gói Premium.
+              </p>
+              <button
+                className={styles.renewBtn}
+                onClick={() =>
+                  navigate("/dashboard/student/student-membership")
+                }
+              >
+                <FontAwesomeIcon icon={faCrown} />
+                Gia hạn ngay
+              </button>
+            </div>
+          ) : aiUsage && !aiUsage.canMakeRequest ? (
+            /* ✅ Hết lượt AI hôm nay */
+            <div className={styles.expiredNotice}>
+              <div className={styles.expiredIcon}>
+                <FontAwesomeIcon icon={faBolt} />
+              </div>
+              <h3>Hết lượt sử dụng AI hôm nay</h3>
+              <p>
+                Bạn đã sử dụng hết{" "}
+                <strong>{aiUsage.remainingRequests + 0}</strong> lượt AI trong
+                ngày hôm nay. Vui lòng quay lại vào ngày mai!
+              </p>
+              <button
+                className={styles.renewBtn}
+                onClick={() =>
+                  navigate("/dashboard/student/student-membership")
+                }
+              >
+                <FontAwesomeIcon icon={faCrown} />
+                Nâng cấp gói
+              </button>
+            </div>
+          ) : (
             <form onSubmit={handleSubmitAnswer} className={styles.inputSection}>
               <div className={styles.textareaWrapper}>
                 <textarea
@@ -620,27 +712,6 @@ function StudentAIPracticeChat() {
                 </button>
               </div>
             </form>
-          ) : (
-            /* ✅ Hết hạn membership - hiện thông báo */
-            <div className={styles.expiredNotice}>
-              <div className={styles.expiredIcon}>
-                <FontAwesomeIcon icon={faCrown} />
-              </div>
-              <h3>Gói Premium đã hết hạn</h3>
-              <p>
-                Bạn vẫn có thể xem lại lịch sử luyện tập. Để tiếp tục gửi câu
-                trả lời và nhận phân tích từ AI, vui lòng gia hạn gói Premium.
-              </p>
-              <button
-                className={styles.renewBtn}
-                onClick={() =>
-                  navigate("/dashboard/student/student-membership")
-                }
-              >
-                <FontAwesomeIcon icon={faCrown} />
-                Gia hạn ngay
-              </button>
-            </div>
           ))}
         <div ref={chatEndRef} />
       </main>
@@ -705,7 +776,6 @@ function StudentAIPracticeChat() {
               <span>LỊCH SỬ CÁC LƯỢT</span>
             </div>
 
-            {/* Đang làm */}
             {!isCompleted && currentTurn && (
               <div
                 className={`${styles.historyItemRow} ${styles.historyItemDoing}`}
@@ -722,7 +792,6 @@ function StudentAIPracticeChat() {
               </div>
             )}
 
-            {/* Lịch sử các câu đã làm - hiển thị tăng dần 1, 2, 3... */}
             {turnHistory.map((turn, index) => (
               <div
                 key={turn.id || turn.questionOrder}
