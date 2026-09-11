@@ -16,6 +16,7 @@ import {
   faAirFreshener,
   faRobot,
   faHexagonNodesBolt,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -41,6 +42,11 @@ export const sidebarMenus = {
       path: "/dashboard/student/ai-practice",
       name: "Luyện tập với AI",
       icon: faRobot,
+    },
+    {
+      path: "/dashboard/student/profile",
+      name: "Hồ sơ",
+      icon: faUser,
     },
   ],
 

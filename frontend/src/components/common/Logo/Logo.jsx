@@ -1,5 +1,5 @@
 import styles from "./Logo.module.css";
-import mainlogo from "../../../assets/mainlogo.png";
+import mainlogo from "../../../assets/FPTP_English_Logo.png";
 
 function Logo({ color = "default" }) {
   const titleColor =

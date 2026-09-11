@@ -55,6 +55,7 @@ import StudentAIPractice from "../pages/student/AI/StudentAIPractice/StudentAIPr
 import StudentAIPracticeCreate from "../pages/student/AI/StudentAIPracticeCreate/StudentAIPracticeCreate";
 import StudentAIPracticeChat from "../pages/student/AI/StudentAIPracticeChat/StudentAIPracticeChat";
 import AdminAIUsage from "../pages/admin/AIUsage/AdminAIUsage";
+import StudentProfile from "../pages/student/StudentProfile/StudentProfile";
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
   return (
@@ -72,7 +73,7 @@ function AppRoutes() {
             path="student"
             element={<RoleRoute allowedRoles={[ROLES.STUDENT]} />}
           >
-            <Route path="profile" element={<Profile />} />
+           
 
             {/* Tự vừng của học sinh */}
             <Route path="myvocabulary" element={<MyVocabulary />} />
@@ -103,6 +104,7 @@ function AppRoutes() {
               path="ai-practice/chat/:chatId"
               element={<StudentAIPracticeChat />}
             />
+            <Route path="profile" element={<StudentProfile />} />
             {/* <Route
               path="ai-practice/create"
               element={<StudentAIPracticeCreate />}
