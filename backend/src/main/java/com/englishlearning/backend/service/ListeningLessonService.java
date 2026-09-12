@@ -2,6 +2,7 @@ package com.englishlearning.backend.service;
 import com.englishlearning.backend.dto.request.ListeningLessonCreateRequest;
 import com.englishlearning.backend.dto.request.UpdateListeningLessonRequest;
 import com.englishlearning.backend.dto.response.ListeningLessonResponse;
+import com.englishlearning.backend.enums.ListeningLessonStatus;
 
 import java.util.List;
 
@@ -51,4 +52,5 @@ public interface ListeningLessonService {
     void restore(Long adminId, Long lessonId);
     List<ListeningLessonResponse> getDeletedLessons();
     List<ListeningLessonResponse> getByTopicForAdmin(Long topicId);
+    List<ListeningLessonResponse> getAll(ListeningLessonStatus status);
 }

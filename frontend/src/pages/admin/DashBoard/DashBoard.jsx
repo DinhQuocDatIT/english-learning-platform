@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./DashBoard.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -8,14 +8,65 @@ import {
   faCoins,
   faRobot,
   faCheckCircle,
-  faTimesCircle,
   faChevronRight,
   faCalendarAlt,
 } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
+import paymentService from "../../../services/paymentService";
+import listeningLessonService from "../../../services/listeningLessonService";
 
 function DashBoard() {
+  const navigate = useNavigate();
+
   const [timeRange, setTimeRange] = useState("30days");
   const [activeChartTooltip, setActiveChartTooltip] = useState(null);
+
+  // ===== Recent purchases (real data) =====
+  const [recentPurchases, setRecentPurchases] = useState([]);
+  const [purchasesLoading, setPurchasesLoading] = useState(false);
+
+  // ===== Pending lessons (real data) =====
+  const [pendingLessons, setPendingLessons] = useState([]);
+  const [pendingLoading, setPendingLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchRecentPurchases = async () => {
+      try {
+        setPurchasesLoading(true);
+
+        const res = await paymentService.getPaymentHistory({
+          page: 0,
+          size: 5,
+          sortBy: "createdAt",
+          direction: "desc",
+        });
+
+        setRecentPurchases(res.data?.data?.content ?? []);
+      } catch (err) {
+        console.error("Lỗi khi lấy giao dịch gần đây:", err);
+        setRecentPurchases([]);
+      } finally {
+        setPurchasesLoading(false);
+      }
+    };
+
+    const fetchPendingLessons = async () => {
+      try {
+        setPendingLoading(true);
+
+        const res = await listeningLessonService.getByStatus("PENDING");
+        setPendingLessons(res.data?.data ?? []);
+      } catch (err) {
+        console.error("Lỗi khi lấy bài chờ duyệt:", err);
+        setPendingLessons([]);
+      } finally {
+        setPendingLoading(false);
+      }
+    };
+
+    fetchRecentPurchases();
+    fetchPendingLessons();
+  }, []);
 
   // Mock statistics based on platform features
   const stats = [
@@ -83,72 +134,12 @@ function DashBoard() {
     { name: "Học từ vựng", value: 412, color: "#f59e0b" },
   ];
 
-  // Pending content approval from teachers
-  const [approvals, setApprovals] = useState([
-    {
-      id: 1,
-      title: "Chủ đề: Giao tiếp tại sân bay",
-      teacher: "Nguyễn Văn A",
-      level: "A2",
-      type: "Luyện dịch AI",
-      date: "23/08/2026",
-    },
-    {
-      id: 2,
-      title: "Bài nghe: Cuộc hẹn cuối tuần",
-      teacher: "Trần Thị B",
-      level: "B1",
-      type: "Luyện nghe",
-      date: "22/08/2026",
-    },
-    {
-      id: 3,
-      title: "Chủ đề: Phỏng vấn xin việc ngành IT",
-      teacher: "Lê Hoàng C",
-      level: "B2",
-      type: "Luyện dịch AI",
-      date: "22/08/2026",
-    },
-  ]);
-
-  const handleApprove = (id) => {
-    setApprovals(approvals.filter((app) => app.id !== id));
+  // Navigate to lesson detail
+  const handleGoToLessonDetail = (lesson) => {
+    navigate(
+      `/dashboard/admin/topics/${lesson.topicId}/listening-lessons/${lesson.id}`,
+    );
   };
-
-  const handleReject = (id) => {
-    const confirmed = window.confirm("Bạn có chắc chắn muốn từ chối bài đăng này?");
-    if (confirmed) {
-      setApprovals(approvals.filter((app) => app.id !== id));
-    }
-  };
-
-  // Recent purchases
-  const recentPurchases = [
-    {
-      id: "TX9021",
-      user: "Đinh Quốc Đạt",
-      package: "VIP 1 Năm",
-      amount: "699,000đ",
-      date: "23/08/2026 09:12",
-      status: "Thành công",
-    },
-    {
-      id: "TX9020",
-      user: "Phạm Minh Thư",
-      package: "VIP 6 Tháng",
-      amount: "399,000đ",
-      date: "23/08/2026 08:45",
-      status: "Thành công",
-    },
-    {
-      id: "TX9019",
-      user: "Hoàng Anh Tuấn",
-      package: "VIP 1 Tháng",
-      amount: "89,000đ",
-      date: "22/08/2026 19:30",
-      status: "Thành công",
-    },
-  ];
 
   return (
     <div className={styles.container}>
@@ -162,7 +153,10 @@ function DashBoard() {
         </div>
         <div className={styles.actions}>
           <div className={styles.dateSelector}>
-            <FontAwesomeIcon icon={faCalendarAlt} className={styles.calendarIcon} />
+            <FontAwesomeIcon
+              icon={faCalendarAlt}
+              className={styles.calendarIcon}
+            />
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
@@ -216,35 +210,72 @@ function DashBoard() {
             </div>
           </div>
           <div className={styles.chartBody}>
-            {/* Interactive SVG Area Chart */}
             <div className={styles.svgContainer}>
               <svg viewBox="0 0 500 200" className={styles.lineChartSvg}>
                 <defs>
-                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id="chartGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop offset="0%" stopColor="#0ea792" stopOpacity="0.4" />
                     <stop offset="100%" stopColor="#0ea792" stopOpacity="0" />
                   </linearGradient>
                 </defs>
 
-                {/* Grid Lines */}
-                <line x1="40" y1="30" x2="480" y2="30" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="40" y1="80" x2="480" y2="80" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="40" y1="130" x2="480" y2="130" stroke="#f1f5f9" strokeWidth="1" />
-                <line x1="40" y1="170" x2="480" y2="170" stroke="#cbd5e1" strokeWidth="1" />
+                <line
+                  x1="40"
+                  y1="30"
+                  x2="480"
+                  y2="30"
+                  stroke="#f1f5f9"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="40"
+                  y1="80"
+                  x2="480"
+                  y2="80"
+                  stroke="#f1f5f9"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="40"
+                  y1="130"
+                  x2="480"
+                  y2="130"
+                  stroke="#f1f5f9"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="40"
+                  y1="170"
+                  x2="480"
+                  y2="170"
+                  stroke="#cbd5e1"
+                  strokeWidth="1"
+                />
 
-                {/* Y-axis Labels */}
-                <text x="15" y="34" className={styles.svgText}>50M</text>
-                <text x="15" y="84" className={styles.svgText}>30M</text>
-                <text x="15" y="134" className={styles.svgText}>15M</text>
-                <text x="15" y="174" className={styles.svgText}>0</text>
+                <text x="15" y="34" className={styles.svgText}>
+                  50M
+                </text>
+                <text x="15" y="84" className={styles.svgText}>
+                  30M
+                </text>
+                <text x="15" y="134" className={styles.svgText}>
+                  15M
+                </text>
+                <text x="15" y="174" className={styles.svgText}>
+                  0
+                </text>
 
-                {/* Area under the line */}
                 <path
                   d="M 40 170 L 40 94.8 L 128 74.4 L 216 50.4 L 304 64 L 392 36 L 480 18.2 L 480 170 Z"
                   fill="url(#chartGradient)"
                 />
 
-                {/* Line Path */}
                 <path
                   d="M 40 94.8 L 128 74.4 L 216 50.4 L 304 64 L 392 36 L 480 18.2"
                   fill="none"
@@ -253,7 +284,6 @@ function DashBoard() {
                   strokeLinecap="round"
                 />
 
-                {/* Interactive Points */}
                 {monthlyRevenueData.map((item, index) => {
                   const xPositions = [40, 128, 216, 304, 392, 480];
                   const yPositions = [94.8, 74.4, 50.4, 64, 36, 18.2];
@@ -291,7 +321,6 @@ function DashBoard() {
                   );
                 })}
 
-                {/* Tooltip Overlay inside SVG */}
                 {activeChartTooltip && (
                   <g>
                     <rect
@@ -319,7 +348,7 @@ function DashBoard() {
           </div>
         </div>
 
-        {/* Study Activity Metrics (Bar chart layout) */}
+        {/* Study Activity Metrics */}
         <div className={styles.chartCard}>
           <div className={styles.chartHeader}>
             <div>
@@ -335,7 +364,9 @@ function DashBoard() {
                 <div key={act.name} className={styles.activityRow}>
                   <div className={styles.activityInfo}>
                     <span className={styles.activityName}>{act.name}</span>
-                    <span className={styles.activityValue}>{act.value} bài</span>
+                    <span className={styles.activityValue}>
+                      {act.value} bài
+                    </span>
                   </div>
                   <div className={styles.progressBarBg}>
                     <div
@@ -351,8 +382,8 @@ function DashBoard() {
               <div className={styles.aiTip}>
                 <FontAwesomeIcon icon={faRobot} className={styles.tipIcon} />
                 <span>
-                  Lượt luyện dịch tiếng Anh bằng <strong>Gemini AI</strong> chiếm 43%
-                  tổng số bài làm.
+                  Lượt luyện dịch tiếng Anh bằng <strong>Gemini AI</strong>{" "}
+                  chiếm 43% tổng số bài làm.
                 </span>
               </div>
             </div>
@@ -366,41 +397,69 @@ function DashBoard() {
         <div className={styles.detailsCard}>
           <div className={styles.detailsHeader}>
             <h3 className={styles.detailsTitle}>Yêu cầu duyệt nội dung</h3>
-            <span className={styles.badge}>{approvals.length} chờ duyệt</span>
+            <span className={styles.badge}>
+              {pendingLessons.length} chờ duyệt
+            </span>
           </div>
-          {approvals.length === 0 ? (
+
+          {pendingLoading ? (
             <div className={styles.emptyList}>
-              <FontAwesomeIcon icon={faCheckCircle} className={styles.emptyIcon} />
+              <p>Đang tải danh sách chờ duyệt...</p>
+            </div>
+          ) : pendingLessons.length === 0 ? (
+            <div className={styles.emptyList}>
+              <FontAwesomeIcon
+                icon={faCheckCircle}
+                className={styles.emptyIcon}
+              />
               <p>Đã duyệt hết bài. Không có bài học nào chờ xử lý.</p>
             </div>
           ) : (
             <div className={styles.listWrapper}>
-              {approvals.map((app) => (
-                <div key={app.id} className={styles.listItem}>
+              {pendingLessons.map((lesson) => (
+                <div
+                  key={lesson.id}
+                  className={styles.listItem}
+                  onClick={() => handleGoToLessonDetail(lesson)}
+                  style={{ cursor: "pointer" }}
+                >
                   <div className={styles.listItemLeft}>
-                    <h4 className={styles.itemTitle}>{app.title}</h4>
+                    <h4 className={styles.itemTitle}>{lesson.title}</h4>
                     <div className={styles.itemMeta}>
-                      <span>Gửi bởi: <strong>{app.teacher}</strong></span>
-                      <span className={styles.metaDot}>•</span>
-                      <span>Cấp độ: <span className={styles.levelTag}>{app.level}</span></span>
-                      <span className={styles.metaDot}>•</span>
-                      <span className={styles.typeTag}>{app.type}</span>
+                      <span>
+                        Gửi bởi: <strong>{lesson.createdByName}</strong>
+                      </span>
+                      {lesson.levelName && (
+                        <>
+                          <span className={styles.metaDot}>•</span>
+                          <span>
+                            Cấp độ:{" "}
+                            <span className={styles.levelTag}>
+                              {lesson.levelName}
+                            </span>
+                          </span>
+                        </>
+                      )}
+                      {lesson.topicTitle && (
+                        <>
+                          <span className={styles.metaDot}>•</span>
+                          <span className={styles.typeTag}>
+                            {lesson.topicTitle}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className={styles.itemActions}>
                     <button
-                      onClick={() => handleApprove(app.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleGoToLessonDetail(lesson);
+                      }}
                       className={styles.approveBtn}
-                      title="Duyệt xuất bản"
+                      title="Xem chi tiết"
                     >
-                      Duyệt
-                    </button>
-                    <button
-                      onClick={() => handleReject(app.id)}
-                      className={styles.rejectBtn}
-                      title="Từ chối"
-                    >
-                      Từ chối
+                      Xem chi tiết
                     </button>
                   </div>
                 </div>
@@ -413,35 +472,77 @@ function DashBoard() {
         <div className={styles.detailsCard}>
           <div className={styles.detailsHeader}>
             <h3 className={styles.detailsTitle}>Giao dịch VIP gần đây</h3>
-            <button className={styles.viewMoreBtn}>
+            <button
+              className={styles.viewMoreBtn}
+              onClick={() => navigate("/dashboard/admin/payment-history")}
+            >
               Xem thêm <FontAwesomeIcon icon={faChevronRight} />
             </button>
           </div>
+
           <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Mã giao dịch</th>
-                  <th>Người dùng</th>
-                  <th>Gói mua</th>
-                  <th>Số tiền</th>
-                  <th>Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentPurchases.map((p) => (
-                  <tr key={p.id}>
-                    <td><span className={styles.txId}>{p.id}</span></td>
-                    <td><span className={styles.txUser}>{p.user}</span></td>
-                    <td><span className={styles.vipPackage}>{p.package}</span></td>
-                    <td><strong className={styles.txAmount}>{p.amount}</strong></td>
-                    <td>
-                      <span className={styles.txSuccessBadge}>{p.status}</span>
-                    </td>
+            {purchasesLoading ? (
+              <div className={styles.emptyList}>
+                <p>Đang tải giao dịch...</p>
+              </div>
+            ) : recentPurchases.length === 0 ? (
+              <div className={styles.emptyList}>
+                <FontAwesomeIcon
+                  icon={faCheckCircle}
+                  className={styles.emptyIcon}
+                />
+                <p>Chưa có giao dịch nào.</p>
+              </div>
+            ) : (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Mã giao dịch</th>
+                    <th>Người dùng</th>
+                    <th>Gói mua</th>
+                    <th>Số tiền</th>
+                    <th>Trạng thái</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {recentPurchases.map((p) => (
+                    <tr key={p.id}>
+                      <td>
+                        <span className={styles.txId}>{p.id}</span>
+                      </td>
+                      <td>
+                        <span className={styles.txUser}>
+                          {p.userName || "—"}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={styles.vipPackage}>
+                          {p.packageName || "—"}
+                        </span>
+                      </td>
+                      <td>
+                        <strong className={styles.txAmount}>
+                          {Number(p.paidPrice || 0).toLocaleString("vi-VN")}đ
+                        </strong>
+                      </td>
+                      <td>
+                        <span
+                          className={
+                            p.status === "ACTIVE"
+                              ? styles.txSuccessBadge
+                              : styles.txExpiredBadge
+                          }
+                        >
+                          {p.status === "ACTIVE"
+                            ? "Đang hoạt động"
+                            : "Đã hết hạn"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

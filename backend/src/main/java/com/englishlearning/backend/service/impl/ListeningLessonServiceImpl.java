@@ -566,7 +566,17 @@ public class ListeningLessonServiceImpl
                         )
                 );
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<ListeningLessonResponse> getAll(ListeningLessonStatus status) {
+        List<ListeningLesson> lessons = (status != null)
+                ? listeningLessonRepository.findAllByStatusOrderByCreatedAtDesc(status)
+                : listeningLessonRepository.findAllByOrderByCreatedAtDesc();
 
+        return lessons.stream()
+                .map(this::toResponse)
+                .toList();
+    }
     private ListeningLessonResponse toResponse(
             ListeningLesson lesson
     ) {

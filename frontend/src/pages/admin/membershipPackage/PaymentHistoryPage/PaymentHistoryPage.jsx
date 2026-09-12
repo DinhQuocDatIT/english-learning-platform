@@ -168,7 +168,7 @@ function PaymentHistoryPage() {
       <button
         type="button"
         className={styles.backBtn}
-        onClick={() => navigate("/dashboard/admin/membership-packages")}
+        onClick={() => navigate("/dashboard/admin/membership-package")}
       >
         <FontAwesomeIcon icon={faArrowLeft} />
         <span>Quay lại quản lý gói</span>

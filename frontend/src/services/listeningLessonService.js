@@ -76,6 +76,11 @@ const listeningLessonService = {
   getDeletedLessons() {
     return axiosClient.get("/v1/listening-lessons/admin/deleted");
   },
+  getByStatus(status) {
+    return axiosClient.get("/v1/listening-lessons/admin/filter", {
+      params: status ? { status } : {},
+    });
+  },
 };
 
 export default listeningLessonService;

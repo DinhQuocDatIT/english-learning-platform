@@ -4,6 +4,7 @@ import com.englishlearning.backend.dto.request.ListeningLessonCreateRequest;
 import com.englishlearning.backend.dto.request.UpdateListeningLessonRequest;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.dto.response.ListeningLessonResponse;
+import com.englishlearning.backend.enums.ListeningLessonStatus;
 import com.englishlearning.backend.security.CustomUserDetails;
 import com.englishlearning.backend.service.ListeningLessonService;
 import jakarta.validation.Valid;
@@ -420,6 +421,23 @@ public class ListeningLessonController {
                 new ApiResponse<>(
                         200,
                         "Lấy danh sách bài nghe của topic thành công",
+                        response
+                )
+        );
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/filter")
+    public ResponseEntity<ApiResponse<List<ListeningLessonResponse>>> getAllWithFilter(
+            @RequestParam(required = false) ListeningLessonStatus status
+    ) {
+
+        List<ListeningLessonResponse> response =
+                listeningLessonService.getAll(status);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Lấy danh sách bài nghe thành công",
                         response
                 )
         );

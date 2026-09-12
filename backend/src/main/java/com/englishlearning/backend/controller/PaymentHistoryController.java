@@ -53,7 +53,7 @@ public class PaymentHistoryController {
                         status,
                         keyword,
                         fromDate,
-                        toDate,      
+                        toDate,
                         pageable
                 );
 

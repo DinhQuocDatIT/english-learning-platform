@@ -7,8 +7,6 @@ import {
   faEllipsisV,
   faCrown,
   faBook,
-  faImage,
-  faTag,
   faArrowLeft,
   faFilter,
   faClock,
@@ -21,12 +19,10 @@ import {
   faUsers,
   faPlayCircle,
   faGraduationCap,
-  faFileAlt,
   faPlay,
   faTrash,
   faTrashRestore,
   faBan,
-  faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -55,14 +51,17 @@ const STATUS_COLOR_MAP = {
   PUBLISHED: "#34d399",
 };
 
+// Status options — BỎ DRAFT
 const STATUS_OPTIONS = [
   { value: "", label: "Tất cả" },
   { value: "PENDING", label: "Chờ duyệt" },
   { value: "APPROVED", label: "Đã duyệt" },
   { value: "REJECTED", label: "Từ chối" },
   { value: "PUBLISHED", label: "Đã phát hành" },
-  { value: "DRAFT", label: "Nháp" },
 ];
+
+// Trạng thái bị ẩn với Admin
+const HIDDEN_STATUSES = ["DRAFT"];
 
 function AdminListeningLessonList() {
   const navigate = useNavigate();
@@ -74,8 +73,6 @@ function AdminListeningLessonList() {
   const [loading, setLoading] = useState(true);
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [actioningId, setActioningId] = useState(null);
-  // Mặc định true để hiển thị cả bài đã ẩn ngay từ đầu
-  const [showDeleted, setShowDeleted] = useState(true);
 
   // Filter
   const [filters, setFilters] = useState({
@@ -105,7 +102,15 @@ function AdminListeningLessonList() {
       const lessonData = lessonResponse?.data?.data;
 
       setTopic(topicData || null);
-      setLessons(Array.isArray(lessonData) ? lessonData : []);
+
+      // 🔥 LỌC BỎ DRAFT — Admin không thấy bài nháp của giáo viên
+      const visibleLessons = Array.isArray(lessonData)
+        ? lessonData.filter(
+            (lesson) => !HIDDEN_STATUSES.includes(lesson.status),
+          )
+        : [];
+
+      setLessons(visibleLessons);
     } catch (error) {
       console.error("Lỗi lấy danh sách bài nghe:", error);
       toast.error(
@@ -123,13 +128,8 @@ function AdminListeningLessonList() {
     return lesson.deletedAt !== null && lesson.deletedAt !== undefined;
   };
 
-  // Lọc danh sách theo showDeleted
-  const displayedLessons = showDeleted
-    ? lessons
-    : lessons.filter((lesson) => !isDeleted(lesson));
-
   // Filter theo keyword và status
-  const filteredLessons = displayedLessons.filter((lesson) => {
+  const filteredLessons = lessons.filter((lesson) => {
     const keyword = filters.keyword.trim().toLowerCase();
     const matchKeyword =
       !keyword || lesson.title?.toLowerCase().includes(keyword);
@@ -150,11 +150,6 @@ function AdminListeningLessonList() {
 
   const handleGoBack = () => {
     navigate(`/dashboard/admin/topics`);
-  };
-
-  // Toggle hiển thị bài đã ẩn
-  const toggleShowDeleted = () => {
-    setShowDeleted(!showDeleted);
   };
 
   // ===== CLICK CARD -> XEM CÂU HỎI =====
@@ -247,10 +242,9 @@ function AdminListeningLessonList() {
     return status === "APPROVED" || status === "PUBLISHED";
   };
 
-  // Stats
+  // Stats — KHÔNG đếm DRAFT
   const statusCount = {
     all: lessons.length,
-    draft: lessons.filter((l) => l.status === "DRAFT" && !isDeleted(l)).length,
     pending: lessons.filter((l) => l.status === "PENDING" && !isDeleted(l))
       .length,
     approved: lessons.filter((l) => l.status === "APPROVED" && !isDeleted(l))
@@ -280,20 +274,9 @@ function AdminListeningLessonList() {
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại</span>
         </button>
-        <button
-          className={`${styles.toggleDeletedBtn} ${showDeleted ? styles.toggleDeletedActive : ""}`}
-          onClick={toggleShowDeleted}
-        >
-          <FontAwesomeIcon icon={faTrashAlt} />
-          <span>
-            {showDeleted
-              ? `Ẩn bài đã xóa (${statusCount.deleted})`
-              : `Hiện bài đã ẩn (${statusCount.deleted})`}
-          </span>
-        </button>
       </div>
 
-      {/* Stats */}
+      {/* Stats — BỎ card DRAFT */}
       <div className={styles.statsGrid}>
         <div className={`${styles.statCard} ${styles.statAll}`}>
           <div className={styles.statIconWrapper}>
@@ -302,16 +285,6 @@ function AdminListeningLessonList() {
           <div className={styles.statInfo}>
             <span className={styles.statValue}>{statusCount.all}</span>
             <span className={styles.statLabel}>Tổng số</span>
-          </div>
-        </div>
-
-        <div className={`${styles.statCard} ${styles.statDraft}`}>
-          <div className={styles.statIconWrapper}>
-            <FontAwesomeIcon icon={faFileAlt} />
-          </div>
-          <div className={styles.statInfo}>
-            <span className={styles.statValue}>{statusCount.draft}</span>
-            <span className={styles.statLabel}>Nháp</span>
           </div>
         </div>
 
@@ -356,7 +329,7 @@ function AdminListeningLessonList() {
         </div>
       </div>
 
-      {/* Filter */}
+      {/* Filter — BỎ option DRAFT */}
       <div className={styles.filterCard}>
         <div className={styles.searchGroup}>
           <label className={styles.filterLabel}>Tìm kiếm</label>
@@ -417,7 +390,6 @@ function AdminListeningLessonList() {
           )}{" "}
           học viên
         </span>
-        
       </div>
 
       {/* Grid */}
@@ -509,7 +481,7 @@ function AdminListeningLessonList() {
                     </span>
                   )}
 
-                  {/* Deleted Overlay - Hiển thị rõ bài đang bị ẩn */}
+                  {/* Deleted Overlay */}
                   {isDeletedLesson && (
                     <div className={styles.deletedOverlay}>
                       <div className={styles.deletedOverlayContent}>
@@ -576,7 +548,7 @@ function AdminListeningLessonList() {
                           Xem câu hỏi
                         </button>
 
-                        {/* Nút Ẩn - chỉ hiển thị khi chưa bị ẩn và ở trạng thái APPROVED/PUBLISHED */}
+                        {/* Nút Ẩn */}
                         {!isDeletedLesson && canSoftDelete(lesson.status) && (
                           <button
                             type="button"
@@ -592,7 +564,7 @@ function AdminListeningLessonList() {
                           </button>
                         )}
 
-                        {/* Nút Phục hồi - chỉ hiển thị khi đã bị ẩn */}
+                        {/* Nút Phục hồi */}
                         {isDeletedLesson && (
                           <button
                             type="button"
