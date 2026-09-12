@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface StudentMembershipRepository
@@ -67,5 +68,21 @@ public interface StudentMembershipRepository
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable
+    );
+
+    @Query(value = """
+    SELECT
+        DATE_FORMAT(sm.created_at, '%Y-%m') AS period,
+        COALESCE(SUM(sm.paid_price), 0) AS revenue,
+        COUNT(sm.id) AS transactions
+    FROM student_membership sm
+    WHERE sm.created_at >= :fromDate
+      AND sm.created_at <= :toDate
+    GROUP BY DATE_FORMAT(sm.created_at, '%Y-%m')
+    ORDER BY period ASC
+""", nativeQuery = true)
+    List<Object[]> sumRevenueGroupByMonth(
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate
     );
 }

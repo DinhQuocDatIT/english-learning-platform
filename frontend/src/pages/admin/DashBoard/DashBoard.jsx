@@ -14,6 +14,27 @@ import {
 import { useNavigate } from "react-router-dom";
 import paymentService from "../../../services/paymentService";
 import listeningLessonService from "../../../services/listeningLessonService";
+import statisticsService from "../../../services/statisticsService";
+
+// ===== HELPERS: Format tiền VNĐ =====
+
+/**
+ * Format VNĐ đầy đủ, có dấu chấm phân cách
+ * 1398000 → "1.398.000"
+ */
+const formatVNDNumber = (value) => {
+  return new Intl.NumberFormat("vi-VN").format(Math.round(value || 0));
+};
+
+/**
+ * Format VNĐ cho trục Y — hiện đầy đủ, tự động rút gọn đơn vị
+ * 1398000     → "1.398.000"
+ * 45800000    → "45.800.000"
+ * 1500000000  → "1.500.000.000"
+ */
+const formatAxisVND = (value) => {
+  return formatVNDNumber(value);
+};
 
 function DashBoard() {
   const navigate = useNavigate();
@@ -28,6 +49,10 @@ function DashBoard() {
   // ===== Pending lessons (real data) =====
   const [pendingLessons, setPendingLessons] = useState([]);
   const [pendingLoading, setPendingLoading] = useState(false);
+
+  // ===== Revenue trend (real data) =====
+  const [revenueTrend, setRevenueTrend] = useState(null);
+  const [revenueLoading, setRevenueLoading] = useState(false);
 
   useEffect(() => {
     const fetchRecentPurchases = async () => {
@@ -64,8 +89,26 @@ function DashBoard() {
       }
     };
 
+    const fetchRevenueTrend = async () => {
+      try {
+        setRevenueLoading(true);
+
+        const res = await statisticsService.getRevenueTrend({
+          groupBy: "month",
+        });
+
+        setRevenueTrend(res.data?.data ?? null);
+      } catch (err) {
+        console.error("Lỗi khi lấy xu hướng doanh thu:", err);
+        setRevenueTrend(null);
+      } finally {
+        setRevenueLoading(false);
+      }
+    };
+
     fetchRecentPurchases();
     fetchPendingLessons();
+    fetchRevenueTrend();
   }, []);
 
   // Mock statistics based on platform features
@@ -117,24 +160,104 @@ function DashBoard() {
     },
   ];
 
-  // SVG Chart data: Revenue trend for past 6 months
-  const monthlyRevenueData = [
-    { month: "Tháng 3", revenue: 22, activeUsers: 640 },
-    { month: "Tháng 4", revenue: 28, activeUsers: 780 },
-    { month: "Tháng 5", revenue: 35, activeUsers: 920 },
-    { month: "Tháng 6", revenue: 31, activeUsers: 890 },
-    { month: "Tháng 7", revenue: 40, activeUsers: 1100 },
-    { month: "Tháng 8", revenue: 45.8, activeUsers: 1248 },
+  // ===== Tính toán điểm cho chart doanh thu =====
+
+  /**
+   * Chuyển data từ API thành toạ độ SVG
+   */
+  const buildChartPoints = (points) => {
+    if (!points || points.length === 0) return [];
+
+    const CHART_LEFT = 40;
+    const CHART_RIGHT = 480;
+    const CHART_TOP = 20;
+    const CHART_BOTTOM = 170;
+
+    const chartWidth = CHART_RIGHT - CHART_LEFT;
+    const chartHeight = CHART_BOTTOM - CHART_TOP;
+
+    // Đơn vị: VNĐ → triệu VNĐ (dùng để tính toạ độ, không dùng để hiển thị)
+    const revenuesInMillions = points.map((p) => Number(p.revenue) / 1_000_000);
+
+    const maxRevenue = Math.max(...revenuesInMillions, 1); // tránh chia 0
+    const yMax = maxRevenue * 1.2; // dư 20%
+
+    const N = points.length;
+
+    return points.map((p, index) => {
+      // X position
+      let x;
+      if (N === 1) {
+        x = (CHART_LEFT + CHART_RIGHT) / 2; // giữa
+      } else {
+        x = CHART_LEFT + (index * chartWidth) / (N - 1);
+      }
+
+      // Y position
+      const valueInMillions = revenuesInMillions[index];
+      const y = CHART_BOTTOM - (valueInMillions / yMax) * chartHeight;
+
+      return {
+        x,
+        y,
+        label: p.label,
+        period: p.period,
+        value: valueInMillions,
+        rawRevenue: Number(p.revenue), // VNĐ gốc
+        transactions: p.transactions,
+      };
+    });
+  };
+
+  /**
+   * Tạo SVG path cho đường line + area
+   */
+  const buildChartPaths = (chartPoints) => {
+    if (chartPoints.length === 0) {
+      return { linePath: "", areaPath: "" };
+    }
+
+    if (chartPoints.length === 1) {
+      const p = chartPoints[0];
+      return {
+        linePath: `M ${p.x - 5} ${p.y} L ${p.x + 5} ${p.y}`,
+        areaPath: `M ${p.x - 5} 170 L ${p.x - 5} ${p.y} L ${p.x + 5} ${p.y} L ${p.x + 5} 170 Z`,
+      };
+    }
+
+    const linePath = "M " + chartPoints.map((p) => `${p.x} ${p.y}`).join(" L ");
+
+    const first = chartPoints[0];
+    const last = chartPoints[chartPoints.length - 1];
+    const areaPath =
+      `M ${first.x} 170 ` +
+      `L ${first.x} ${first.y} ` +
+      chartPoints.map((p) => `L ${p.x} ${p.y}`).join(" ") +
+      ` L ${last.x} 170 Z`;
+
+    return { linePath, areaPath };
+  };
+
+  const chartPoints = revenueTrend?.points
+    ? buildChartPoints(revenueTrend.points)
+    : [];
+  const { linePath, areaPath } = buildChartPaths(chartPoints);
+
+  // Y-axis labels động — giá trị VNĐ gốc
+  const maxRevenueInMillions =
+    chartPoints.length > 0
+      ? Math.max(...chartPoints.map((p) => p.value)) * 1.2
+      : 50;
+
+  const yAxisLabels = [
+    { value: maxRevenueInMillions * 1_000_000, y: 34 },
+    { value: maxRevenueInMillions * 0.6 * 1_000_000, y: 84 },
+    { value: maxRevenueInMillions * 0.3 * 1_000_000, y: 134 },
+    { value: 0, y: 174 },
   ];
 
-  // SVG Chart data: Study activities
-  const studyActivities = [
-    { name: "Luyện nghe", value: 342, color: "#0ea792" },
-    { name: "Dịch bằng AI", value: 584, color: "#8b5cf6" },
-    { name: "Học từ vựng", value: 412, color: "#f59e0b" },
-  ];
+  // ===== Handle xong =====
 
-  // Navigate to lesson detail
   const handleGoToLessonDetail = (lesson) => {
     navigate(
       `/dashboard/admin/topics/${lesson.topicId}/listening-lessons/${lesson.id}`,
@@ -199,102 +322,121 @@ function DashBoard() {
 
       {/* Charts Section */}
       <div className={styles.chartsGrid}>
-        {/* Area Line Chart for Revenue */}
+        {/* ===== Revenue Trend Chart ===== */}
         <div className={styles.chartCard}>
           <div className={styles.chartHeader}>
             <div>
               <h3 className={styles.chartTitle}>Xu hướng doanh thu</h3>
               <p className={styles.chartSubtitle}>
-                Thống kê doanh thu theo tháng (Đơn vị: Triệu VNĐ)
+                Thống kê doanh thu theo tháng (Đơn vị: VNĐ)
               </p>
             </div>
           </div>
           <div className={styles.chartBody}>
-            <div className={styles.svgContainer}>
-              <svg viewBox="0 0 500 200" className={styles.lineChartSvg}>
-                <defs>
-                  <linearGradient
-                    id="chartGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="0%" stopColor="#0ea792" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#0ea792" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
+            {revenueLoading ? (
+              <div
+                style={{
+                  height: 200,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#64748b",
+                  fontSize: 13,
+                }}
+              >
+                Đang tải dữ liệu...
+              </div>
+            ) : chartPoints.length === 0 ? (
+              <div
+                style={{
+                  height: 200,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#64748b",
+                  fontSize: 13,
+                }}
+              >
+                Chưa có dữ liệu doanh thu
+              </div>
+            ) : (
+              <div className={styles.svgContainer}>
+                <svg viewBox="0 0 500 200" className={styles.lineChartSvg}>
+                  <defs>
+                    <linearGradient
+                      id="chartGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor="#0ea792" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#0ea792" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
 
-                <line
-                  x1="40"
-                  y1="30"
-                  x2="480"
-                  y2="30"
-                  stroke="#f1f5f9"
-                  strokeWidth="1"
-                />
-                <line
-                  x1="40"
-                  y1="80"
-                  x2="480"
-                  y2="80"
-                  stroke="#f1f5f9"
-                  strokeWidth="1"
-                />
-                <line
-                  x1="40"
-                  y1="130"
-                  x2="480"
-                  y2="130"
-                  stroke="#f1f5f9"
-                  strokeWidth="1"
-                />
-                <line
-                  x1="40"
-                  y1="170"
-                  x2="480"
-                  y2="170"
-                  stroke="#cbd5e1"
-                  strokeWidth="1"
-                />
+                  {/* Grid Lines */}
+                  <line
+                    x1="40"
+                    y1="30"
+                    x2="480"
+                    y2="30"
+                    stroke="#f1f5f9"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1="40"
+                    y1="80"
+                    x2="480"
+                    y2="80"
+                    stroke="#f1f5f9"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1="40"
+                    y1="130"
+                    x2="480"
+                    y2="130"
+                    stroke="#f1f5f9"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1="40"
+                    y1="170"
+                    x2="480"
+                    y2="170"
+                    stroke="#cbd5e1"
+                    strokeWidth="1"
+                  />
 
-                <text x="15" y="34" className={styles.svgText}>
-                  50M
-                </text>
-                <text x="15" y="84" className={styles.svgText}>
-                  30M
-                </text>
-                <text x="15" y="134" className={styles.svgText}>
-                  15M
-                </text>
-                <text x="15" y="174" className={styles.svgText}>
-                  0
-                </text>
+                  {/* Y-axis Labels - hiện đầy đủ VNĐ */}
+                  {yAxisLabels.map((lbl, i) => (
+                    <text key={i} x="15" y={lbl.y} className={styles.svgText}>
+                      {formatAxisVND(lbl.value)}
+                    </text>
+                  ))}
 
-                <path
-                  d="M 40 170 L 40 94.8 L 128 74.4 L 216 50.4 L 304 64 L 392 36 L 480 18.2 L 480 170 Z"
-                  fill="url(#chartGradient)"
-                />
+                  {/* Area under the line */}
+                  {areaPath && <path d={areaPath} fill="url(#chartGradient)" />}
 
-                <path
-                  d="M 40 94.8 L 128 74.4 L 216 50.4 L 304 64 L 392 36 L 480 18.2"
-                  fill="none"
-                  stroke="#0ea792"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
+                  {/* Line Path */}
+                  {linePath && (
+                    <path
+                      d={linePath}
+                      fill="none"
+                      stroke="#0ea792"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
 
-                {monthlyRevenueData.map((item, index) => {
-                  const xPositions = [40, 128, 216, 304, 392, 480];
-                  const yPositions = [94.8, 74.4, 50.4, 64, 36, 18.2];
-                  const cx = xPositions[index];
-                  const cy = yPositions[index];
-
-                  return (
+                  {/* Interactive Points */}
+                  {chartPoints.map((item, index) => (
                     <g key={index}>
                       <circle
-                        cx={cx}
-                        cy={cy}
+                        cx={item.x}
+                        cy={item.y}
                         r="5"
                         fill="#ffffff"
                         stroke="#0ea792"
@@ -302,53 +444,56 @@ function DashBoard() {
                         className={styles.chartPoint}
                         onMouseEnter={() =>
                           setActiveChartTooltip({
-                            x: cx,
-                            y: cy - 15,
-                            text: `${item.month}: ${item.revenue} triệu`,
+                            x: item.x,
+                            y: item.y - 15,
+                            text: `${item.label}: ${formatVNDNumber(
+                              item.rawRevenue,
+                            )} VNĐ`,
                           })
                         }
                         onMouseLeave={() => setActiveChartTooltip(null)}
                       />
                       <text
-                        x={cx}
+                        x={item.x}
                         y="190"
                         textAnchor="middle"
                         className={styles.svgText}
                       >
-                        {item.month}
+                        {item.label}
                       </text>
                     </g>
-                  );
-                })}
+                  ))}
 
-                {activeChartTooltip && (
-                  <g>
-                    <rect
-                      x={activeChartTooltip.x - 70}
-                      y={activeChartTooltip.y - 25}
-                      width="140"
-                      height="24"
-                      rx="6"
-                      fill="#1e293b"
-                    />
-                    <text
-                      x={activeChartTooltip.x}
-                      y={activeChartTooltip.y - 9}
-                      fill="#ffffff"
-                      fontSize="10"
-                      fontWeight="bold"
-                      textAnchor="middle"
-                    >
-                      {activeChartTooltip.text}
-                    </text>
-                  </g>
-                )}
-              </svg>
-            </div>
+                  {/* Tooltip */}
+                  {activeChartTooltip && (
+                    <g>
+                      <rect
+                        x={activeChartTooltip.x - 80}
+                        y={activeChartTooltip.y - 25}
+                        width="160"
+                        height="24"
+                        rx="6"
+                        fill="#1e293b"
+                      />
+                      <text
+                        x={activeChartTooltip.x}
+                        y={activeChartTooltip.y - 9}
+                        fill="#ffffff"
+                        fontSize="10"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                      >
+                        {activeChartTooltip.text}
+                      </text>
+                    </g>
+                  )}
+                </svg>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Study Activity Metrics */}
+        {/* ===== Study Activities ===== */}
         <div className={styles.chartCard}>
           <div className={styles.chartHeader}>
             <div>
@@ -360,7 +505,11 @@ function DashBoard() {
           </div>
           <div className={styles.chartBody}>
             <div className={styles.activitiesContainer}>
-              {studyActivities.map((act) => (
+              {[
+                { name: "Luyện nghe", value: 342, color: "#0ea792" },
+                { name: "Dịch bằng AI", value: 584, color: "#8b5cf6" },
+                { name: "Học từ vựng", value: 412, color: "#f59e0b" },
+              ].map((act) => (
                 <div key={act.name} className={styles.activityRow}>
                   <div className={styles.activityInfo}>
                     <span className={styles.activityName}>{act.name}</span>
@@ -522,7 +671,7 @@ function DashBoard() {
                       </td>
                       <td>
                         <strong className={styles.txAmount}>
-                          {Number(p.paidPrice || 0).toLocaleString("vi-VN")}đ
+                          {formatVNDNumber(p.paidPrice)}đ
                         </strong>
                       </td>
                       <td>
