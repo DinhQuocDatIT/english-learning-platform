@@ -13,4 +13,6 @@ public class ErrorDetail {
     private String correctText;
     private String explanation;
     private String severity;
+    private String errorCategory;
+    private String errorSubtype;
 }

@@ -8,6 +8,8 @@ import com.englishlearning.backend.dto.request.SubmitAnswerRequest;
 import com.englishlearning.backend.dto.response.*;
 import com.englishlearning.backend.dto.response.gemini.GeminiUsageMetadata;
 import com.englishlearning.backend.entity.*;
+import com.englishlearning.backend.enums.ErrorCategory;
+import com.englishlearning.backend.enums.ErrorSubtype;
 import com.englishlearning.backend.enums.PracticeStatus;
 import com.englishlearning.backend.enums.RequestType;
 import com.englishlearning.backend.enums.SeverityLevel;
@@ -24,13 +26,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -50,6 +53,7 @@ public class PracticeServiceImpl implements PracticeService {
     private final AIUsageRepository aiUsageRepository;
     private final PricingService pricingService;
     private final StudentMembershipService studentMembershipService;
+    private final ObjectMapper objectMapper;
 
 
     // ===== CREATE PRACTICE =====
@@ -192,6 +196,7 @@ public class PracticeServiceImpl implements PracticeService {
             provider = geminiService.getCurrentProvider();
         }
         studentMembershipService.incrementAIRequestCount(userId);
+
         // Lưu betterAnswers - Dùng separator "|||"
         if (aiResponse.getBetterAnswers() != null && !aiResponse.getBetterAnswers().isEmpty()) {
             String betterAnswersStr = String.join("|||", aiResponse.getBetterAnswers());
@@ -208,16 +213,24 @@ public class PracticeServiceImpl implements PracticeService {
         evaluation.setFeedback(aiResponse.getFeedback());
         evaluationRepository.save(evaluation);
 
-        // Save errors
+        // ============ SAVE ERRORS — CÓ VALIDATE ============
         List<AIError> errors = new ArrayList<>();
         if (aiResponse.getErrors() != null) {
-            for (com.englishlearning.backend.dto.response.AIErrorResponse errorResp : aiResponse.getErrors()) {
+            for (AIErrorResponse errorResp : aiResponse.getErrors()) {
                 AIError error = new AIError();
                 error.setEvaluation(evaluation);
                 error.setErrorType(errorResp.getErrorType());
                 error.setUserText(errorResp.getUserText());
                 error.setCorrectText(errorResp.getCorrectText());
                 error.setExplanation(errorResp.getExplanation());
+
+                // ✅ VALIDATE + FALLBACK category/subtype
+                String safeCategory = safeCategory(errorResp.getErrorCategory());
+                String safeSubtype = safeSubtype(errorResp.getErrorSubtype());
+
+                error.setErrorCategory(safeCategory);
+                error.setErrorSubtype(safeSubtype);
+                error.setErrorKey(safeCategory + "_" + safeSubtype);
 
                 SeverityLevel severity;
                 try {
@@ -254,7 +267,7 @@ public class PracticeServiceImpl implements PracticeService {
         answer.setIsCorrect(isCorrect);
         answerRepository.save(answer);
 
-        // ✅ Save AI Usage - Lưu chi phí request
+        // Save AI Usage
         saveAIUsageWithTokens(studentId, chat, RequestType.GENERATE_AND_EVALUATE,
                 provider, modelName,
                 responseTime, true, null, usage);
@@ -327,6 +340,8 @@ public class PracticeServiceImpl implements PracticeService {
                                     .correctText(error.getCorrectText())
                                     .explanation(error.getExplanation())
                                     .severity(error.getSeverity().name())
+                                    .errorCategory(error.getErrorCategory())
+                                    .errorSubtype(error.getErrorSubtype())
                                     .build());
                         }
                     }
@@ -407,15 +422,34 @@ public class PracticeServiceImpl implements PracticeService {
 
                 if (answer.getEvaluation() != null && answer.getEvaluation().getErrors() != null) {
                     for (AIError error : answer.getEvaluation().getErrors()) {
-                        String errorType = error.getErrorType();
+                        // ✅ Dùng errorKey để group chi tiết (KHÔNG dùng errorType)
+                        String errorKey = error.getErrorKey();
+                        if (errorKey == null || errorKey.isEmpty()) {
+                            errorKey = (error.getErrorCategory() != null && error.getErrorSubtype() != null)
+                                    ? error.getErrorCategory() + "_" + error.getErrorSubtype()
+                                    : error.getErrorType();
+                        }
+
+                        final String finalErrorKey = errorKey;
+
                         ErrorSummary summary = commonErrors.stream()
-                                .filter(e -> e.getErrorType().equals(errorType))
+                                .filter(e -> e.getErrorType().equals(finalErrorKey))
                                 .findFirst()
                                 .orElse(null);
 
                         if (summary == null) {
+                            // ✅ Lấy displayName tiếng Việt
+                            String displayName = null;
+                            try {
+                                ErrorSubtype subtypeEnum = ErrorSubtype.fromString(error.getErrorSubtype());
+                                displayName = subtypeEnum.getDisplayName();
+                            } catch (Exception ignored) {}
+
                             summary = ErrorSummary.builder()
-                                    .errorType(errorType)
+                                    .errorType(errorKey)
+                                    .errorCategory(error.getErrorCategory())
+                                    .errorSubtype(error.getErrorSubtype())
+                                    .displayName(displayName)
                                     .count(0)
                                     .example(error.getUserText())
                                     .build();
@@ -479,42 +513,129 @@ public class PracticeServiceImpl implements PracticeService {
                 .collect(Collectors.toList());
     }
 
+    // ============ UPDATE WEAKNESS ============
     private void updateStudentAIErrors(Long studentId, List<AIError> errors) {
         for (AIError error : errors) {
-            String errorKey = generateErrorKey(error.getErrorType(), error.getCorrectText());
+            String errorKey = error.getErrorKey();
+            if (errorKey == null || errorKey.isEmpty()) {
+                errorKey = ErrorSubtype.buildErrorKey(
+                        error.getErrorCategory(),
+                        error.getErrorSubtype()
+                );
+            }
 
             StudentAIError studentError = studentAIErrorRepository
                     .findByStudentIdAndErrorKey(studentId, errorKey)
                     .orElse(null);
 
             if (studentError == null) {
+                // ✅ Tạo mới
                 studentError = new StudentAIError();
                 studentError.setStudent(studentRepository.getReferenceById(studentId));
-                studentError.setErrorType(error.getErrorType());
+                studentError.setErrorCategory(error.getErrorCategory());
+                studentError.setErrorSubtype(error.getErrorSubtype());
                 studentError.setErrorKey(errorKey);
+                studentError.setErrorType(error.getErrorType());
                 studentError.setOccurrenceCount(1);
                 studentError.setCorrectedCount(0);
                 studentError.setMasteryScore(0);
+                studentError.setFirstOccurredAt(LocalDateTime.now());
                 studentError.setLastOccurredAt(LocalDateTime.now());
+
+                String exampleJson = toJsonArray(List.of(
+                        error.getUserText() != null ? error.getUserText() : ""
+                ));
+                studentError.setExamples(exampleJson);
+
+                log.info("✅ Tạo weakness mới: studentId={}, errorKey={}", studentId, errorKey);
             } else {
+                // ✅ Cập nhật
                 studentError.setOccurrenceCount(studentError.getOccurrenceCount() + 1);
                 studentError.setLastOccurredAt(LocalDateTime.now());
+
                 int newMastery = Math.max(0, studentError.getMasteryScore() - 10);
                 studentError.setMasteryScore(newMastery);
+
+                studentError.setExamples(addExample(
+                        studentError.getExamples(),
+                        error.getUserText()
+                ));
+
+                log.info("✅ Cập nhật weakness: studentId={}, errorKey={}, count={}",
+                        studentId, errorKey, studentError.getOccurrenceCount());
             }
             studentAIErrorRepository.save(studentError);
         }
     }
 
-    private String generateErrorKey(String errorType, String correctText) {
-        String corrected = correctText
-                .replaceAll("[^a-zA-Z]", " ")
-                .trim()
-                .toUpperCase();
-        if (corrected.length() > 20) {
-            corrected = corrected.substring(0, 20);
+    // ===== HELPER: Convert list to JSON =====
+    private String toJsonArray(List<String> items) {
+        try {
+            return objectMapper.writeValueAsString(items);
+        } catch (Exception e) {
+            log.warn("Lỗi convert to JSON: {}", e.getMessage());
+            return "[]";
         }
-        return errorType + "_" + corrected.replaceAll(" ", "_");
+    }
+
+    // ===== HELPER: Thêm example mới, giữ max 5 =====
+    private String addExample(String currentJson, String newExample) {
+        try {
+            List<String> examples = new ArrayList<>();
+            if (currentJson != null && !currentJson.isEmpty() && !currentJson.equals("[]")) {
+                examples = objectMapper.readValue(
+                        currentJson,
+                        objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
+                );
+            }
+            if (newExample != null && !newExample.isEmpty()) {
+                examples.add(newExample);
+            }
+            if (examples.size() > 5) {
+                examples = examples.subList(examples.size() - 5, examples.size());
+            }
+            return objectMapper.writeValueAsString(examples);
+        } catch (Exception e) {
+            log.warn("Lỗi xử lý examples: {}", e.getMessage());
+            return "[]";
+        }
+    }
+
+    // ===== ✅ HELPER MỚI: Safe category =====
+    private String safeCategory(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "TENSE";
+        }
+        String upper = raw.toUpperCase().trim();
+        try {
+            ErrorCategory.valueOf(upper);
+            return upper;
+        } catch (IllegalArgumentException e) {
+            log.warn("⚠️ Category lạ: {} → fallback TENSE", raw);
+            return "TENSE";
+        }
+    }
+
+    // ===== ✅ HELPER MỚI: Safe subtype =====
+    private String safeSubtype(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "MIXED_TENSE";
+        }
+        String upper = raw.toUpperCase().trim();
+        try {
+            ErrorSubtype.valueOf(upper);
+            return upper;
+        } catch (IllegalArgumentException e) {
+            // Fuzzy match: subtype bắt đầu bằng subtype hợp lệ
+            for (ErrorSubtype valid : ErrorSubtype.values()) {
+                if (upper.startsWith(valid.name())) {
+                    log.info("✅ Fuzzy match: {} → {}", raw, valid.name());
+                    return valid.name();
+                }
+            }
+            log.warn("⚠️ Subtype lạ: {} → fallback MIXED_TENSE", raw);
+            return "MIXED_TENSE";
+        }
     }
 
     // Lưu AI Usage với chi phí và giá TẠI THỜI ĐIỂM - CHỈ DÙNG DATABASE
@@ -538,11 +659,9 @@ public class PracticeServiceImpl implements PracticeService {
             aiUsage.setOutputTokens(outputTokens);
             aiUsage.setTotalTokens(totalTokens);
 
-            // ✅ Tính chi phí từ PricingService (CHỈ TỪ DATABASE)
             BigDecimal cost = pricingService.calculateCost(provider, model, inputTokens, outputTokens);
             aiUsage.setEstimatedCost(cost);
 
-            // ✅ Lưu giá tại thời điểm từ DATABASE
             AIModelPricing pricing = pricingService.getCurrentPricing(provider, model);
             if (pricing != null) {
                 aiUsage.setInputPricePerMillion(pricing.getInputPricePerMillionTokens().doubleValue());
@@ -613,13 +732,15 @@ public class PracticeServiceImpl implements PracticeService {
 
         List<ErrorDetail> errorDetails = new ArrayList<>();
         if (aiResponse.getErrors() != null) {
-            for (com.englishlearning.backend.dto.response.AIErrorResponse error : aiResponse.getErrors()) {
+            for (AIErrorResponse error : aiResponse.getErrors()) {
                 errorDetails.add(ErrorDetail.builder()
                         .errorType(error.getErrorType())
                         .userText(error.getUserText())
                         .correctText(error.getCorrectText())
                         .explanation(error.getExplanation())
                         .severity(error.getSeverity())
+                        .errorCategory(error.getErrorCategory())
+                        .errorSubtype(error.getErrorSubtype())
                         .build());
             }
         }
@@ -647,6 +768,7 @@ public class PracticeServiceImpl implements PracticeService {
                 .collect(Collectors.toList());
     }
 
+    // ============ GET WEAKNESSES ============
     @Override
     public List<StudentWeaknessResponse> getStudentWeaknessesWithDetails(Long userId) {
         log.info("Getting student weaknesses with details for user: {}", userId);
@@ -666,53 +788,29 @@ public class PracticeServiceImpl implements PracticeService {
         }
 
         return weaknesses.stream()
-                .map(error -> StudentWeaknessResponse.builder()
-                        .errorType(error.getErrorType())
-                        .displayName(getDisplayName(error.getErrorType()))
-                        .count(error.getOccurrenceCount())
-                        .masteryScore(error.getMasteryScore())
-                        .suggestion(getSuggestion(error.getErrorType()))
-                        .build())
+                .filter(e -> e.getMasteryScore() < 80)
+                .sorted(Comparator.comparing(StudentAIError::getOccurrenceCount).reversed())
+                .map(error -> {
+                    ErrorSubtype subtype = ErrorSubtype.fromString(error.getErrorSubtype());
+                    ErrorCategory category = null;
+                    try {
+                        category = ErrorCategory.valueOf(error.getErrorCategory());
+                    } catch (Exception ignored) {}
+
+                    return StudentWeaknessResponse.builder()
+                            .errorKey(error.getErrorKey())
+                            .category(error.getErrorCategory())
+                            .subtype(error.getErrorSubtype())
+                            .categoryDisplayName(category != null ? category.getDisplayName() : null)
+                            .subtypeDescription(subtype.getDescription())
+                            .displayName(subtype.getDisplayName())
+                            .suggestion(subtype.getDescription())
+                            .count(error.getOccurrenceCount())
+                            .masteryScore(error.getMasteryScore())
+                            .firstOccurredAt(error.getFirstOccurredAt())
+                            .lastOccurredAt(error.getLastOccurredAt())
+                            .build();
+                })
                 .collect(Collectors.toList());
-    }
-
-    // ===== PRIVATE HELPER METHODS =====
-
-    private String getDisplayName(String errorType) {
-        Map<String, String> displayMap = Map.ofEntries(
-                Map.entry("GRAMMAR", "Ngữ pháp"),
-                Map.entry("VOCABULARY", "Từ vựng"),
-                Map.entry("ARTICLE", "Mạo từ"),
-                Map.entry("PREPOSITION", "Giới từ"),
-                Map.entry("TENSE", "Thì"),
-                Map.entry("WORD_ORDER", "Trật tự từ"),
-                Map.entry("SPELLING", "Chính tả"),
-                Map.entry("WORD_CHOICE", "Lựa chọn từ"),
-                Map.entry("NATURALNESS", "Độ tự nhiên"),
-                Map.entry("MISSING_WORD", "Thiếu từ"),
-                Map.entry("EXTRA_WORD", "Thừa từ"),
-                Map.entry("PUNCTUATION", "Dấu câu"),
-                Map.entry("CAPITALIZATION", "Viết hoa")
-        );
-        return displayMap.getOrDefault(errorType, errorType);
-    }
-
-    private String getSuggestion(String errorType) {
-        Map<String, String> suggestionMap = Map.ofEntries(
-                Map.entry("GRAMMAR", "Ôn tập cấu trúc ngữ pháp cơ bản"),
-                Map.entry("VOCABULARY", "Học thêm từ vựng theo chủ đề"),
-                Map.entry("ARTICLE", "Ôn quy tắc dùng a/an/the"),
-                Map.entry("PREPOSITION", "Học các cụm giới từ thông dụng"),
-                Map.entry("TENSE", "Ôn thì và cách dùng"),
-                Map.entry("WORD_ORDER", "Ôn trật tự từ trong câu"),
-                Map.entry("SPELLING", "Luyện viết chính tả"),
-                Map.entry("WORD_CHOICE", "Luyện chọn từ phù hợp với ngữ cảnh"),
-                Map.entry("NATURALNESS", "Đọc nhiều để cải thiện độ tự nhiên"),
-                Map.entry("MISSING_WORD", "Kiểm tra câu trước khi gửi"),
-                Map.entry("EXTRA_WORD", "Kiểm tra câu trước khi gửi"),
-                Map.entry("PUNCTUATION", "Ôn quy tắc dùng dấu câu"),
-                Map.entry("CAPITALIZATION", "Ôn quy tắc viết hoa")
-        );
-        return suggestionMap.getOrDefault(errorType, "Luyện tập thêm");
     }
 }

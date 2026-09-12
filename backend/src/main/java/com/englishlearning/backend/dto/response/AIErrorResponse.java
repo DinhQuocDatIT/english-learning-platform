@@ -18,4 +18,6 @@ public class AIErrorResponse {
     private String correctText;
     private String explanation;
     private String severity;     // HIGH, MEDIUM, LOW
+    private String errorCategory;
+    private String errorSubtype;
 }

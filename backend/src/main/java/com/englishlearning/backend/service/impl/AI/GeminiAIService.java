@@ -251,6 +251,8 @@ public class GeminiAIService implements AIService {
         if (errorsNode.isArray()) {
             for (JsonNode errorNode : errorsNode) {
                 String errorType = errorNode.path("errorType").asText();
+                String errorCategory = errorNode.path("errorCategory").asText();
+                String errorSubtype = errorNode.path("errorSubtype").asText();
                 String userText = errorNode.path("userText").asText();
                 String correctText = errorNode.path("correctText").asText();
                 String explanation = errorNode.path("explanation").asText();
@@ -261,8 +263,20 @@ public class GeminiAIService implements AIService {
                     continue;
                 }
 
+                // ✅ Fallback nếu Gemini quên category
+                if (errorCategory == null || errorCategory.isEmpty()) {
+                    errorCategory = errorType; // dùng errorType làm category
+                }
+                // ✅ Fallback nếu Gemini quên subtype
+                if (errorSubtype == null || errorSubtype.isEmpty()) {
+                    errorSubtype = "MIXED_TENSE";
+                    log.warn("⚠️ Gemini không trả errorSubtype cho lỗi: {}", errorType);
+                }
+
                 errors.add(AIErrorResponse.builder()
                         .errorType(errorType)
+                        .errorCategory(errorCategory)     // ← MỚI
+                        .errorSubtype(errorSubtype)       // ← MỚI
                         .userText(userText != null ? userText : "")
                         .correctText(correctText != null ? correctText : "")
                         .explanation(explanation)

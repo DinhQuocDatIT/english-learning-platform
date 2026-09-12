@@ -59,7 +59,6 @@ public class PromptConstants {
 
     // ========================================
     // 2. TOPIC DESCRIPTIONS (Mô tả chủ đề)
-    // Sử dụng Map.ofEntries() để hỗ trợ nhiều entry
     // ========================================
     public static final Map<String, String> TOPIC = Map.ofEntries(
             Map.entry("FAMILY", """
@@ -162,7 +161,93 @@ public class PromptConstants {
     );
 
     // ========================================
-    // 3. PROMPT TEMPLATES (Mẫu prompt)
+    // 3. ERROR TAXONOMY (Phân loại lỗi chi tiết)
+    // ========================================
+    public static final String ERROR_TAXONOMY = """
+        
+        ===== PHÂN LOẠI LỖI (BẮT BUỘC - 2 CẤP) =====
+        
+        Mỗi lỗi PHẢI được phân loại theo 2 cấp: errorCategory + errorSubtype.
+        
+        ─────────────────────────────────────────
+        CẤP 1 — errorCategory (chọn 1 trong 8):
+        ─────────────────────────────────────────
+        - TENSE         : Lỗi về thì
+        - ARTICLE       : Lỗi về mạo từ (a/an/the)
+        - PREPOSITION   : Lỗi về giới từ
+        - CONJUNCTION   : Lỗi về liên từ
+        - STRUCTURE     : Lỗi về cấu trúc câu
+        - POS           : Lỗi về từ loại (danh/tính/trạng/đại từ)
+        - VERB          : Lỗi về dạng động từ (bị động, tường thuật...)
+        - NATURALNESS   : Lỗi về độ tự nhiên
+        
+        ─────────────────────────────────────────
+        CẤP 2 — errorSubtype (chọn theo category):
+        ─────────────────────────────────────────
+        
+        Nếu TENSE:
+          PRESENT_SIMPLE, PRESENT_CONTINUOUS, PRESENT_PERFECT, PRESENT_PERFECT_CONTINUOUS,
+          PAST_SIMPLE, PAST_CONTINUOUS, PAST_PERFECT, PAST_PERFECT_CONTINUOUS,
+          FUTURE_SIMPLE, FUTURE_CONTINUOUS, FUTURE_PERFECT, FUTURE_PERFECT_CONTINUOUS,
+          NEAR_FUTURE_GOING_TO, MIXED_TENSE
+        
+        Nếu ARTICLE:
+          A_AN, THE, ZERO_ARTICLE, A_AN_VS_THE
+        
+        Nếu PREPOSITION:
+          TIME_IN, TIME_ON, TIME_AT,
+          PLACE_IN, PLACE_ON, PLACE_AT,
+          DIRECTION_TO, MOVEMENT_INTO,
+          AGENT_BY, INSTRUMENT_WITH,
+          PHRASAL_VERB, ADJECTIVE_PREP, VERB_PREP
+        
+        Nếu CONJUNCTION:
+          COORDINATING, SUBORDINATING, CORRELATIVE, CONNECTING_ADVERB, WRONG_CONJUNCTION
+        
+        Nếu STRUCTURE:
+          WORD_ORDER, SUBJECT_VERB_AGREEMENT, MISSING_SUBJECT, MISSING_VERB,
+          MISSING_OBJECT, DOUBLE_NEGATIVE, DOUBLE_VERB, REDUNDANCY, FRAGMENT, RUN_ON
+        
+        Nếu POS:
+          NOUN_ADJECTIVE, ADJECTIVE_ADVERB, VERB_NOUN, PRONOUN, REFLEXIVE_PRONOUN,
+          POSSESSIVE, DEMONSTRATIVE, QUANTIFIER, DETERMINER
+        
+        Nếu VERB:
+          IRREGULAR_PAST, IRREGULAR_PAST_PARTICIPLE, MODAL_VERB, GERUND_INFINITIVE,
+          PASSIVE_VOICE, CAUSATIVE, REPORTED_SPEECH, CONDITIONAL, WISH_CLAUSE
+        
+        Nếu NATURALNESS:
+          VIETLISH, LITERAL_TRANSLATION, FORMALITY, AWKWARD_PHRASING
+        
+        ─────────────────────────────────────────
+        VÍ DỤ PHÂN LOẠI ĐÚNG:
+        ─────────────────────────────────────────
+        - "She go to school"      → TENSE / PRESENT_SIMPLE
+        - "I go yesterday"        → TENSE / PAST_SIMPLE
+        - "in Monday"             → PREPOSITION / TIME_ON
+        - "at 2020"               → PREPOSITION / TIME_IN
+        - "a apple"               → ARTICLE / A_AN
+        - "I very like it"        → NATURALNESS / VIETLISH
+        - "Because...so..."       → CONJUNCTION / WRONG_CONJUNCTION
+        - "make him to go"        → VERB / CAUSATIVE
+        - "run quick"             → POS / ADJECTIVE_ADVERB
+        - "Me go to school"       → POS / PRONOUN
+        - "She happy"             → STRUCTURE / MISSING_VERB
+        - "is wrote"              → VERB / PASSIVE_VOICE
+        - "If I would"            → VERB / CONDITIONAL
+        - "return back"           → STRUCTURE / REDUNDANCY
+        
+        ─────────────────────────────────────────
+        LƯU Ý QUAN TRỌNG:
+        ─────────────────────────────────────────
+        - Mỗi lỗi CHỈ thuộc 1 errorCategory và 1 errorSubtype
+        - errorType PHẢI TRÙNG với errorCategory (VD: "TENSE")
+        - explanation viết bằng TIẾNG VIỆT, ngắn gọn, dễ hiểu
+        - Nếu lỗi không khớp subtype nào, dùng MIXED_TENSE cho TENSE
+        """;
+
+    // ========================================
+    // 4. PROMPT TEMPLATES
     // ========================================
 
     public static final String GENERATE_PROMPT_TEMPLATE = """
@@ -213,8 +298,7 @@ public class PromptConstants {
         === HƯỚNG DẪN CHẤM ===
         %s
         
-        === CÁC LOẠI LỖI ===
-        GRAMMAR|TENSE|PREPOSITION|WORD_ORDER|WORD_CHOICE|VOCABULARY|SPELLING|NATURALNESS|MISSING_WORD|EXTRA_WORD
+        %s
         
         === JSON OUTPUT ===
         {
@@ -225,7 +309,9 @@ public class PromptConstants {
           "betterAnswers": ["string"],
           "errors": [
             {
-              "errorType": "GRAMMAR|TENSE|PREPOSITION|WORD_ORDER|WORD_CHOICE|VOCABULARY|SPELLING|NATURALNESS|MISSING_WORD|EXTRA_WORD",
+              "errorType": "TENSE|ARTICLE|PREPOSITION|CONJUNCTION|STRUCTURE|POS|VERB|NATURALNESS",
+              "errorCategory": "TENSE|ARTICLE|PREPOSITION|CONJUNCTION|STRUCTURE|POS|VERB|NATURALNESS",
+              "errorSubtype": "PRESENT_SIMPLE|PAST_SIMPLE|TIME_ON|A_AN|...",
               "userText": "phần sai (TIẾNG ANH)",
               "correctText": "phần đúng (TIẾNG ANH)",
               "explanation": "giải thích (TIẾNG VIỆT)",
@@ -243,7 +329,8 @@ public class PromptConstants {
         2. CHỈ expectedAnswer, correctText, userText, betterAnswers là TIẾNG ANH
         3. PHẢI phân tích TỪNG LỖI một cách riêng biệt trong errors array
         4. NẾU CÓ LỖI thì errors array KHÔNG ĐƯỢC để trống
-        5. Mỗi lỗi PHẢI có đủ 5 thành phần: errorType, userText, correctText, explanation, severity
+        5. Mỗi lỗi PHẢI có đủ 7 thành phần:
+           errorType, errorCategory, errorSubtype, userText, correctText, explanation, severity
         6. KHÔNG được gộp nhiều lỗi vào 1 error
         7. Chỉ trả về JSON, KHÔNG có bất kỳ văn bản nào khác
         
@@ -270,10 +357,6 @@ public class PromptConstants {
         5. Sai ý chính, hiểu sai nghĩa: 30-49 điểm
         6. Trả lời không liên quan hoặc bỏ trống: 0-29 điểm
         
-        === CÁC LOẠI LỖI ===
-        GRAMMAR, TENSE, PREPOSITION, WORD_ORDER, WORD_CHOICE, 
-        VOCABULARY, SPELLING, NATURALNESS, MISSING_WORD, EXTRA_WORD
-        
         === MỨC ĐỘ NGHIÊM TRỌNG ===
         HIGH: Lỗi làm thay đổi nghĩa của câu
         MEDIUM: Lỗi ảnh hưởng đến độ tự nhiên nhưng không làm thay đổi nghĩa
@@ -292,6 +375,8 @@ public class PromptConstants {
         5. Độ dài câu phù hợp với level
         6. Nếu học viên có điểm yếu: ưu tiên tạo câu sửa lỗi đó
         
+        %s
+        
         === VÍ DỤ PHÂN TÍCH LỖI ĐÚNG ===
         Ví dụ câu sai: "If I have time, I will learn new language."
         Câu đúng: "If I had time, I would learn a new language."
@@ -299,21 +384,27 @@ public class PromptConstants {
         errors PHẢI trả về:
         [
           {
-            "errorType": "GRAMMAR",
+            "errorType": "VERB",
+            "errorCategory": "VERB",
+            "errorSubtype": "CONDITIONAL",
             "userText": "if I have",
             "correctText": "If I had",
             "explanation": "Đây là câu điều kiện loại 2, mệnh đề 'if' cần dùng quá khứ đơn ('had') thay vì hiện tại đơn ('have').",
             "severity": "HIGH"
           },
           {
-            "errorType": "GRAMMAR",
+            "errorType": "VERB",
+            "errorCategory": "VERB",
+            "errorSubtype": "CONDITIONAL",
             "userText": "I will learn",
             "correctText": "I would learn",
             "explanation": "Trong câu điều kiện loại 2, mệnh đề chính dùng 'would' + động từ nguyên mẫu.",
             "severity": "HIGH"
           },
           {
-            "errorType": "MISSING_WORD",
+            "errorType": "ARTICLE",
+            "errorCategory": "ARTICLE",
+            "errorSubtype": "A_AN",
             "userText": "new language",
             "correctText": "a new language",
             "explanation": "Cần thêm mạo từ 'a' trước danh từ số ít 'language'.",
@@ -321,7 +412,7 @@ public class PromptConstants {
           }
         ]
         
-        ⚠️ LƯU Ý QUAN TRỌNG: 
+        ⚠️ LƯU Ý QUAN TRỌNG:
         - errors là một MẢNG các đối tượng lỗi
         - MỖI LỖI là một object RIÊNG BIỆT
         - KHÔNG được gộp nhiều lỗi vào cùng một object
@@ -337,7 +428,9 @@ public class PromptConstants {
           "betterAnswers": ["câu tiếng Anh hay hơn"],
           "errors": [
             {
-              "errorType": "GRAMMAR|TENSE|PREPOSITION|WORD_ORDER|WORD_CHOICE|VOCABULARY|SPELLING|NATURALNESS|MISSING_WORD|EXTRA_WORD",
+              "errorType": "TENSE|ARTICLE|PREPOSITION|CONJUNCTION|STRUCTURE|POS|VERB|NATURALNESS",
+              "errorCategory": "TENSE|ARTICLE|PREPOSITION|CONJUNCTION|STRUCTURE|POS|VERB|NATURALNESS",
+              "errorSubtype": "PRESENT_SIMPLE|PAST_SIMPLE|TIME_ON|A_AN|...",
               "userText": "phần sai (TIẾNG ANH)",
               "correctText": "phần đúng (TIẾNG ANH)",
               "explanation": "giải thích (TIẾNG VIỆT)",
@@ -353,7 +446,7 @@ public class PromptConstants {
         """;
 
     // ========================================
-    // 4. HELPER METHODS
+    // 5. HELPER METHODS
     // ========================================
 
     public static String getLevelDescription(String level) {
@@ -390,7 +483,8 @@ public class PromptConstants {
                 studentAnswer,
                 expectedAnswer,
                 level,
-                getLevelDescription(level)
+                getLevelDescription(level),
+                ERROR_TAXONOMY   // ← ✅ THÊM TAXONOMY
         );
     }
 
@@ -409,7 +503,8 @@ public class PromptConstants {
                 vocabularyWords != null && !vocabularyWords.isEmpty() ? vocabularyWords : "Không có",
                 weaknesses != null && !weaknesses.isEmpty() ? weaknesses : "Không có",
                 getLevelDescription(level),
-                getTopicDescription(topic)
+                getTopicDescription(topic),
+                ERROR_TAXONOMY   // ← ✅ THÊM TAXONOMY
         );
     }
 }

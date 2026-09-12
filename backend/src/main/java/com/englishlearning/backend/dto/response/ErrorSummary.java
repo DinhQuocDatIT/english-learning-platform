@@ -11,4 +11,7 @@ public class ErrorSummary {
     private String errorType;
     private Integer count;
     private String example;
+    private String errorCategory;
+    private String errorSubtype;
+    private String displayName;
 }

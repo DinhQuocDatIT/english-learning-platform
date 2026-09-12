@@ -48,4 +48,13 @@ public class AIError {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(length = 50)
+    private String errorCategory;
+
+    @Column(length = 100)
+    private String errorSubtype;
+
+    @Column(length = 150)
+    private String errorKey;
 }

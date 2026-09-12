@@ -2,11 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowLeft,
   faRobot,
   faPaperPlane,
   faCheckCircle,
-  faTimesCircle,
   faLightbulb,
   faStar,
   faSpinner,
@@ -18,22 +16,23 @@ import {
   faMicrophone,
   faUser,
   faBullseye,
-  faTag,
-  faStopwatch,
-  faLocationDot,
-  faSpellCheck,
   faLanguage,
-  faCircleCheck,
   faCircleXmark,
-  faList,
   faLock,
   faCrown,
+  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
 import studentMembershipService from "../../../../services/studentMembershipService";
 import { useLoading } from "../../../../contexts/LoadingContext";
 import AnswerCheckingLoading from "../../../../components/AnswerCheckingLoading/AnswerCheckingLoading";
+import {
+  getDisplayName,
+  getDescription,
+  getExample,
+  buildErrorKey,
+} from "../../../../constants/errorTypeConstants";
 import styles from "./StudentAIPracticeChat.module.css";
 
 function StudentAIPracticeChat() {
@@ -55,11 +54,19 @@ function StudentAIPracticeChat() {
   const [activeTurn, setActiveTurn] = useState(null);
   const [selectedHistoryTurn, setSelectedHistoryTurn] = useState(null);
   const [hasMembership, setHasMembership] = useState(false);
-  const [aiUsage, setAiUsage] = useState(null); // ✅ THÊM
+  const [aiUsage, setAiUsage] = useState(null);
+
+  // ✅ State cho dropdown mô tả lỗi
+  const [expandedErrorKey, setExpandedErrorKey] = useState(null);
+  const [expandedResultErrorKey, setExpandedResultErrorKey] = useState(null);
+
   const chatEndRef = useRef(null);
   const feedbackRef = useRef(null);
 
-  // ✅ LOAD DỮ LIỆU (không chặn nếu không có membership)
+  // ✅ Icon chung cho TẤT CẢ lỗi
+  const ERROR_ICON = faTriangleExclamation;
+
+  // ✅ LOAD DỮ LIỆU
   useEffect(() => {
     fetchData();
   }, [chatId]);
@@ -68,7 +75,6 @@ function StudentAIPracticeChat() {
     try {
       showLoading();
 
-      // ✅ Gọi song song 2 API
       const [membershipResponse, usageResponse] = await Promise.all([
         studentMembershipService.getCurrentMembership(),
         studentMembershipService.getAIUsage(),
@@ -80,7 +86,6 @@ function StudentAIPracticeChat() {
       setHasMembership(!!membershipInfo);
       setAiUsage(usageInfo);
 
-      // Load chat (luôn được xem)
       if (chatId) {
         await fetchPracticeChat(chatId);
       }
@@ -97,68 +102,33 @@ function StudentAIPracticeChat() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [evaluation, turnHistory]);
 
-  // ✅ Map error type sang tên hiển thị tiếng Việt
-  const getDisplayName = (errorType) => {
-    const map = {
-      GRAMMAR: "Ngữ pháp",
-      VOCABULARY: "Từ vựng",
-      ARTICLE: "Mạo từ (a/an/the)",
-      PREPOSITION: "Giới từ",
-      TENSE: "Thì",
-      WORD_ORDER: "Trật tự từ",
-      SPELLING: "Chính tả",
-      WORD_CHOICE: "Dùng từ chưa phù hợp",
-      NATURALNESS: "Câu chưa tự nhiên",
-      MISSING_WORD: "Thiếu từ",
-      EXTRA_WORD: "Thừa từ",
-      PUNCTUATION: "Dấu câu",
-      CAPITALIZATION: "Viết hoa",
-      OTHER: "Lỗi khác",
-    };
-    return map[errorType] || errorType;
-  };
-
-  // ✅ Map error type sang icon
-  const getErrorIcon = (errorType) => {
-    const map = {
-      GRAMMAR: faSpellCheck,
-      VOCABULARY: faLightbulb,
-      ARTICLE: faTag,
-      PREPOSITION: faLocationDot,
-      TENSE: faStopwatch,
-      WORD_ORDER: faList,
-      SPELLING: faSpellCheck,
-      NATURALNESS: faStar,
-      MISSING_WORD: faTriangleExclamation,
-      EXTRA_WORD: faTriangleExclamation,
-      PUNCTUATION: faSpellCheck,
-      CAPITALIZATION: faSpellCheck,
-    };
-    return map[errorType] || faTriangleExclamation;
-  };
-
-  // ✅ Hàm tính điểm yếu từ turnHistory
+  // ✅ Tính điểm yếu từ turnHistory - group theo errorKey
   const calculateWeaknessesFromHistory = () => {
     if (turnHistory.length === 0) return [];
 
-    const errorCount = {};
+    const errorMap = {};
+
     turnHistory.forEach((turn) => {
       if (turn.errors && turn.errors.length > 0) {
         turn.errors.forEach((err) => {
-          const type = err.errorType || "OTHER";
-          errorCount[type] = (errorCount[type] || 0) + 1;
+          const key = buildErrorKey(err);
+
+          if (!errorMap[key]) {
+            errorMap[key] = {
+              errorKey: key,
+              errorCategory: err.errorCategory || err.errorType,
+              errorSubtype: err.errorSubtype,
+              count: 0,
+            };
+          }
+          errorMap[key].count += 1;
         });
       }
     });
 
-    return Object.entries(errorCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([errorType, count]) => ({
-        errorType: errorType,
-        displayName: getDisplayName(errorType),
-        count: count,
-      }));
+    return Object.values(errorMap)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
   };
 
   const fetchPracticeChat = async (id) => {
@@ -202,28 +172,20 @@ function StudentAIPracticeChat() {
     }
   };
 
-  // ✅ SUBMIT ANSWER - Kiểm tra membership + lượt
+  // ✅ SUBMIT ANSWER
   const handleSubmitAnswer = async () => {
-    // ✅ Kiểm tra membership
     if (!hasMembership) {
       toast.warning(
         "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để tiếp tục!",
-        {
-          position: "top-center",
-          autoClose: 5000,
-        },
+        { position: "top-center", autoClose: 5000 },
       );
       return;
     }
 
-    // ✅ Kiểm tra còn lượt không
     if (aiUsage && !aiUsage.canMakeRequest) {
       toast.warning(
         "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai!",
-        {
-          position: "top-center",
-          autoClose: 5000,
-        },
+        { position: "top-center", autoClose: 5000 },
       );
       return;
     }
@@ -251,7 +213,7 @@ function StudentAIPracticeChat() {
 
       const data = response?.data?.data;
 
-      // ✅ Cập nhật lại số lượt còn lại sau khi submit thành công
+      // Cập nhật số lượt còn lại
       try {
         const usageResponse = await studentMembershipService.getAIUsage();
         setAiUsage(usageResponse?.data?.data || null);
@@ -334,10 +296,6 @@ function StudentAIPracticeChat() {
     }
   };
 
-  const handleBack = () => {
-    navigate("/dashboard/student/ai-practice");
-  };
-
   const handleViewResult = () => {
     if (!result && chatId) {
       fetchResult(chatId);
@@ -358,18 +316,6 @@ function StudentAIPracticeChat() {
         block: "start",
       });
     }, 200);
-  };
-
-  const getLevelColor = (level) => {
-    const colors = {
-      A1: "#22c55e",
-      A2: "#84cc16",
-      B1: "#eab308",
-      B2: "#f97316",
-      C1: "#ef4444",
-      C2: "#8b5cf6",
-    };
-    return colors[level] || "#64748b";
   };
 
   // Loading state
@@ -466,7 +412,7 @@ function StudentAIPracticeChat() {
             {turn.errors.map((err, idx) => (
               <div key={idx} className={styles.errorBox}>
                 <div className={styles.errorCategory}>
-                  {getDisplayName(err.errorType) || "LỖI"}
+                  {getDisplayName(err) || "LỖI"}
                 </div>
                 <div className={styles.errorWrong}>
                   <span className={styles.errorIconWrong}>✕</span>
@@ -504,12 +450,14 @@ function StudentAIPracticeChat() {
   return (
     <div className={styles.container}>
       <main className={styles.mainContent}>
-        {/* ✅ USAGE BANNER */}
+        {/* USAGE BANNER */}
         {aiUsage && hasMembership && !isCompleted && (
           <div
             className={`${styles.usageBanner} ${
               aiUsage.remainingRequests <= 3 ? styles.usageBannerWarning : ""
-            } ${aiUsage.remainingRequests === 0 ? styles.usageBannerDanger : ""}`}
+            } ${
+              aiUsage.remainingRequests === 0 ? styles.usageBannerDanger : ""
+            }`}
           >
             <FontAwesomeIcon icon={faBolt} />
             <span>
@@ -542,9 +490,7 @@ function StudentAIPracticeChat() {
               className={styles.progressBarFill}
               style={{
                 width: `${Math.min(progress, 100)}%`,
-                background: isCompleted
-                  ? "linear-gradient(90deg, #0ea792, #059669)"
-                  : "linear-gradient(90deg, #0ea792, #059669)",
+                background: "linear-gradient(90deg, #0ea792, #059669)",
               }}
             />
           </div>
@@ -639,7 +585,6 @@ function StudentAIPracticeChat() {
           (isSubmitting ? (
             <AnswerCheckingLoading studentAnswer={submittingAnswer || answer} />
           ) : !hasMembership ? (
-            /* Hết hạn membership */
             <div className={styles.expiredNotice}>
               <div className={styles.expiredIcon}>
                 <FontAwesomeIcon icon={faCrown} />
@@ -660,7 +605,6 @@ function StudentAIPracticeChat() {
               </button>
             </div>
           ) : aiUsage && !aiUsage.canMakeRequest ? (
-            /* ✅ Hết lượt AI hôm nay */
             <div className={styles.expiredNotice}>
               <div className={styles.expiredIcon}>
                 <FontAwesomeIcon icon={faBolt} />
@@ -843,7 +787,7 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* Focus Areas */}
+        {/* ✅ FOCUS AREAS với DROPDOWN */}
         <div className={styles.focusSection}>
           <div className={styles.sectionTitle}>
             <FontAwesomeIcon icon={faBullseye} />
@@ -852,15 +796,68 @@ function StudentAIPracticeChat() {
           {(() => {
             const weaknesses = calculateWeaknessesFromHistory();
             if (weaknesses && weaknesses.length > 0) {
-              return weaknesses.map((item, idx) => (
-                <div key={idx} className={styles.focusItem}>
-                  <FontAwesomeIcon icon={getErrorIcon(item.errorType)} />
-                  <span>{item.displayName || item.errorType}</span>
-                  <span className={styles.errorCountBadge}>
-                    {item.count} lần
-                  </span>
-                </div>
-              ));
+              return weaknesses.map((item, idx) => {
+                const itemKey = buildErrorKey(item);
+                const isExpanded = expandedErrorKey === itemKey;
+                const description = getDescription(item);
+                const example = getExample(item);
+
+                return (
+                  <div key={idx} className={styles.focusItemWrapper}>
+                    <div
+                      className={`${styles.focusItem} ${
+                        isExpanded ? styles.focusItemExpanded : ""
+                      }`}
+                      onClick={() =>
+                        setExpandedErrorKey(isExpanded ? null : itemKey)
+                      }
+                    >
+                      <FontAwesomeIcon
+                        icon={ERROR_ICON}
+                        className={styles.focusIconCommon}
+                      />
+                      <span className={styles.focusName}>
+                        {getDisplayName(item)}
+                      </span>
+                      <span className={styles.errorCountBadge}>
+                        {item.count} lần
+                      </span>
+                      <FontAwesomeIcon
+                        icon={faChevronDown}
+                        className={`${styles.focusChevron} ${
+                          isExpanded ? styles.focusChevronRotated : ""
+                        }`}
+                      />
+                    </div>
+
+                    {/* DROPDOWN MÔ TẢ */}
+                    {isExpanded && (description || example) && (
+                      <div className={styles.focusDropdown}>
+                        {description && (
+                          <div className={styles.focusDropdownRow}>
+                            <span className={styles.focusDropdownLabel}>
+                              Giải thích:
+                            </span>
+                            <span className={styles.focusDropdownText}>
+                              {description}
+                            </span>
+                          </div>
+                        )}
+                        {example && (
+                          <div className={styles.focusDropdownRow}>
+                            <span className={styles.focusDropdownLabel}>
+                              Ví dụ:
+                            </span>
+                            <span className={styles.focusDropdownExample}>
+                              {example}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              });
             } else {
               return (
                 <div className={styles.focusItem}>
@@ -938,30 +935,108 @@ function StudentAIPracticeChat() {
               <div className={styles.resultErrors}>
                 <h4>Lỗi thường gặp</h4>
                 <div className={styles.resultErrorList}>
-                  {(
-                    result?.commonErrors ||
-                    (() => {
-                      const counts = {};
+                  {(() => {
+                    // Lấy danh sách errors (ưu tiên result.commonErrors)
+                    let errors = [];
+                    if (
+                      result?.commonErrors &&
+                      result.commonErrors.length > 0
+                    ) {
+                      errors = result.commonErrors;
+                    } else {
+                      const errorMap = {};
                       turnHistory.forEach((t) => {
                         (t.errors || []).forEach((err) => {
-                          const type = err.errorType || "OTHER";
-                          counts[type] = (counts[type] || 0) + 1;
+                          const key = buildErrorKey(err);
+                          if (!errorMap[key]) {
+                            errorMap[key] = {
+                              errorKey: key,
+                              errorCategory: err.errorCategory || err.errorType,
+                              errorSubtype: err.errorSubtype,
+                              count: 0,
+                            };
+                          }
+                          errorMap[key].count += 1;
                         });
                       });
-                      return Object.entries(counts)
-                        .map(([errorType, count]) => ({ errorType, count }))
-                        .sort((a, b) => b.count - a.count);
-                    })()
-                  ).map((error, index) => (
-                    <div key={index} className={styles.resultErrorItem}>
-                      <span className={styles.errorTypeName}>
-                        {getDisplayName(error.errorType)}
-                      </span>
-                      <span className={styles.errorTypeCount}>
-                        {error.count} lần
-                      </span>
-                    </div>
-                  ))}
+                      errors = Object.values(errorMap).sort(
+                        (a, b) => b.count - a.count,
+                      );
+                    }
+
+                    return errors.map((error, index) => {
+                      const itemKey = buildErrorKey(error);
+                      const isExpanded = expandedResultErrorKey === itemKey;
+                      const description = getDescription(error);
+                      const example = getExample(error);
+
+                      return (
+                        <div key={index} className={styles.resultErrorWrapper}>
+                          <div
+                            className={`${styles.resultErrorItem} ${
+                              isExpanded ? styles.resultErrorItemExpanded : ""
+                            }`}
+                            onClick={() =>
+                              setExpandedResultErrorKey(
+                                isExpanded ? null : itemKey,
+                              )
+                            }
+                          >
+                            <span className={styles.errorTypeName}>
+                              {getDisplayName(error)}
+                            </span>
+                            <span className={styles.errorTypeCount}>
+                              {error.count} lần
+                            </span>
+                            <FontAwesomeIcon
+                              icon={faChevronDown}
+                              className={`${styles.resultErrorChevron} ${
+                                isExpanded
+                                  ? styles.resultErrorChevronRotated
+                                  : ""
+                              }`}
+                            />
+                          </div>
+
+                          {/* DROPDOWN */}
+                          {isExpanded && (description || example) && (
+                            <div className={styles.resultErrorDropdown}>
+                              {description && (
+                                <div className={styles.resultErrorDropdownRow}>
+                                  <span
+                                    className={styles.resultErrorDropdownLabel}
+                                  >
+                                    Giải thích:
+                                  </span>
+                                  <span
+                                    className={styles.resultErrorDropdownText}
+                                  >
+                                    {description}
+                                  </span>
+                                </div>
+                              )}
+                              {example && (
+                                <div className={styles.resultErrorDropdownRow}>
+                                  <span
+                                    className={styles.resultErrorDropdownLabel}
+                                  >
+                                    Ví dụ:
+                                  </span>
+                                  <span
+                                    className={
+                                      styles.resultErrorDropdownExample
+                                    }
+                                  >
+                                    {example}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             )}

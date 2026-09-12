@@ -2955,3 +2955,234 @@
 .usageBannerDanger svg {
   color: #ef4444;
 }
+/* =========================================================
+   FOCUS ITEM WRAPPER (cho dropdown)
+   ========================================================= */
+
+.focusItemWrapper {
+  width: 100%;
+  border-bottom: 1px solid var(--color-surface-muted);
+}
+
+.focusItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 7px 0;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  border-bottom: none;
+  border-radius: var(--radius-sm);
+}
+
+.focusItem:hover {
+  background-color: var(--color-primary-lighter);
+}
+
+.focusItemExpanded {
+  background-color: var(--color-primary-light);
+  font-weight: 600;
+}
+
+.focusIconCommon {
+  width: 13px;
+  flex: 0 0 13px;
+  color: rgb(201, 197, 0) !important;
+  font-size: 11px;
+}
+
+.focusName {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+  color: inherit;
+}
+
+.focusChevron {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.focusChevronRotated {
+  transform: rotate(180deg);
+}
+
+/* =========================================================
+   FOCUS DROPDOWN (mô tả chi tiết)
+   ========================================================= */
+
+.focusDropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  margin: 4px 0 8px 0;
+  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+.focusDropdownRow {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.focusDropdownLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-accent);
+  letter-spacing: 0.3px;
+}
+
+.focusDropdownText {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text);
+  font-weight: 400;
+}
+
+.focusDropdownExample {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #0d9488;
+  font-weight: 500;
+  font-style: italic;
+  padding: 4px 8px;
+  background: #e9f8f5;
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   RESULT MODAL — ERROR DROPDOWN
+   ========================================================= */
+
+.resultErrorWrapper {
+  width: 100%;
+}
+
+.resultErrorItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  padding: 6px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.resultErrorItem:hover {
+  background-color: var(--color-primary-lighter);
+  border-color: #a9ddd5;
+}
+
+.resultErrorItemExpanded {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.resultErrorItem > span:first-child,
+.errorTypeName {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-family: inherit;
+}
+
+.resultErrorItem > span:last-child,
+.errorTypeCount {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+.resultErrorChevron {
+  flex-shrink: 0;
+  font-size: 9px;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.resultErrorChevronRotated {
+  transform: rotate(180deg);
+}
+
+.resultErrorDropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  margin: 4px 0 6px 0;
+  background: #f8fafc;
+  border-left: 3px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+.resultErrorDropdownRow {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.resultErrorDropdownLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-danger);
+  letter-spacing: 0.3px;
+}
+
+.resultErrorDropdownText {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text);
+  font-weight: 400;
+}
+
+.resultErrorDropdownExample {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #0d9488;
+  font-weight: 500;
+  font-style: italic;
+  padding: 4px 8px;
+  background: #e9f8f5;
+  border-radius: 4px;
+  word-break: break-word;
+}
