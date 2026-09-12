@@ -1,7 +1,10 @@
 package com.englishlearning.backend.service.impl;
 
+import com.englishlearning.backend.dto.response.OverviewStatsResponse;
 import com.englishlearning.backend.dto.response.RevenueTrendResponse;
-import com.englishlearning.backend.repository.StudentMembershipRepository;
+import com.englishlearning.backend.dto.response.StudyActivitiesResponse;
+import com.englishlearning.backend.enums.ListeningLessonStatus;
+import com.englishlearning.backend.repository.*;
 import com.englishlearning.backend.service.AdminStatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,10 @@ import java.util.stream.Collectors;
 public class AdminStatisticsServiceImpl implements AdminStatisticsService {
 
     private final StudentMembershipRepository studentMembershipRepository;
+    private final ListeningLessonRepository listeningLessonRepository;
+    private final AIPracticeChatRepository aiPracticeChatRepository;
+    private final UserRepository userRepository;
+    private final AIUsageRepository aiUsageRepository;
 
     @Override
     public RevenueTrendResponse getRevenueTrend(
@@ -93,6 +100,111 @@ public class AdminStatisticsServiceImpl implements AdminStatisticsService {
                 .totalRevenue(totalRevenue)
                 .totalTransactions(totalTransactions)
                 .points(points)
+                .build();
+    }
+    @Override
+    public StudyActivitiesResponse getStudyActivities() {
+        // ===== Listening lessons =====
+        long pendingCount = listeningLessonRepository
+                .countByStatusAndNotDeleted(ListeningLessonStatus.PENDING);
+
+        long approvedCount = listeningLessonRepository
+                .countByStatusAndNotDeleted(ListeningLessonStatus.APPROVED);
+
+        long publishedCount = listeningLessonRepository
+                .countByStatusAndNotDeleted(ListeningLessonStatus.PUBLISHED);
+
+        long rejectedCount = listeningLessonRepository
+                .countByStatusAndNotDeleted(ListeningLessonStatus.REJECTED);
+
+        long deletedCount = listeningLessonRepository.countDeleted();
+
+        // ===== AI practice chat =====
+        long aiTranslateCount = aiPracticeChatRepository.count();
+
+        // ===== Build activities =====
+        List<StudyActivitiesResponse.Activity> activities = new ArrayList<>();
+
+        activities.add(
+                StudyActivitiesResponse.Activity.builder()
+                        .key("pending")
+                        .name("Chờ duyệt")
+                        .value(pendingCount)
+                        .color("#60a5fa")
+                        .build()
+        );
+
+        activities.add(
+                StudyActivitiesResponse.Activity.builder()
+                        .key("approved")
+                        .name("Đã duyệt (chưa PH)")
+                        .value(approvedCount)
+                        .color("#a78bfa")
+                        .build()
+        );
+
+        activities.add(
+                StudyActivitiesResponse.Activity.builder()
+                        .key("published")
+                        .name("Đã phát hành")
+                        .value(publishedCount)
+                        .color("#34d399")
+                        .build()
+        );
+
+        activities.add(
+                StudyActivitiesResponse.Activity.builder()
+                        .key("rejected")
+                        .name("Từ chối")
+                        .value(rejectedCount)
+                        .color("#f87171")
+                        .build()
+        );
+
+        activities.add(
+                StudyActivitiesResponse.Activity.builder()
+                        .key("deleted")
+                        .name("Đã ẩn")
+                        .value(deletedCount)
+                        .color("#94a3b8")
+                        .build()
+        );
+
+        activities.add(
+                StudyActivitiesResponse.Activity.builder()
+                        .key("ai-translate")
+                        .name("Dịch bằng AI")
+                        .value(aiTranslateCount)
+                        .color("#8b5cf6")
+                        .build()
+        );
+
+        long total = activities.stream()
+                .mapToLong(StudyActivitiesResponse.Activity::getValue)
+                .sum();
+
+        return StudyActivitiesResponse.builder()
+                .total(total)
+                .activities(activities)
+                .build();
+    }
+    @Override
+    public OverviewStatsResponse getOverview() {
+        long totalStudents = userRepository.countByRoleName("STUDENT");
+        long totalTeachers = userRepository.countByRoleName("TEACHER");
+
+        long vipSold = studentMembershipRepository.count();
+
+        BigDecimal totalRevenue = studentMembershipRepository.sumAllPaidPrice();
+
+        long totalAIRequests = aiUsageRepository.count();
+
+        return OverviewStatsResponse.builder()
+                .totalStudents(totalStudents)
+                .totalTeachers(totalTeachers)
+                .vipSold(vipSold)
+                .totalRevenue(totalRevenue)
+                .totalAIRequests(totalAIRequests)
                 .build();
     }
 }

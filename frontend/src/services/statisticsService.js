@@ -12,6 +12,12 @@ const statisticsService = {
       },
     });
   },
+  getStudyActivities() {
+    return axiosClient.get("/v1/admin/statistics/study-activities");
+  },
+  getOverview() {
+    return axiosClient.get("/v1/admin/statistics/overview");
+  },
 };
 
 export default statisticsService;

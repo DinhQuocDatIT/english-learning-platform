@@ -48,4 +48,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 @Param("keyword") String keyword,
                 Pageable pageable
         );
+        @Query("""
+    SELECT COUNT(u)
+    FROM User u
+    JOIN u.role r
+    WHERE r.name = :roleName
+      AND u.deletedAt IS NULL
+""")
+        long countByRoleName(@Param("roleName") String roleName);
 }

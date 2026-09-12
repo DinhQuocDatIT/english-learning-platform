@@ -85,4 +85,6 @@ public interface StudentMembershipRepository
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate
     );
+    @Query("SELECT COALESCE(SUM(sm.paidPrice), 0) FROM StudentMembership sm")
+    BigDecimal sumAllPaidPrice();
 }

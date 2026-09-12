@@ -17,43 +17,70 @@ import listeningLessonService from "../../../services/listeningLessonService";
 import statisticsService from "../../../services/statisticsService";
 
 // ===== HELPERS: Format tiền VNĐ =====
-
-/**
- * Format VNĐ đầy đủ, có dấu chấm phân cách
- * 1398000 → "1.398.000"
- */
 const formatVNDNumber = (value) => {
   return new Intl.NumberFormat("vi-VN").format(Math.round(value || 0));
 };
 
-/**
- * Format VNĐ cho trục Y — hiện đầy đủ, tự động rút gọn đơn vị
- * 1398000     → "1.398.000"
- * 45800000    → "45.800.000"
- * 1500000000  → "1.500.000.000"
- */
 const formatAxisVND = (value) => {
   return formatVNDNumber(value);
+};
+
+// ===== HELPERS: Tính khoảng ngày theo năm =====
+/**
+ * Tính fromDate / toDate theo năm được chọn
+ * @param {number} year - ví dụ 2026
+ */
+const getDateRangeForYear = (year) => {
+  const fromDate = `${year}-01-01`;
+  const toDate = `${year}-12-31`;
+
+  return {
+    fromDate,
+    toDate,
+    groupBy: "month", // luôn group theo tháng
+  };
+};
+
+/**
+ * Format "2026-01-01" → "01/01/2026"
+ */
+const formatDateShort = (isoDate) => {
+  if (!isoDate) return "";
+  const [y, m, d] = isoDate.split("-");
+  return `${d}/${m}/${y}`;
 };
 
 function DashBoard() {
   const navigate = useNavigate();
 
-  const [timeRange, setTimeRange] = useState("30days");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [activeChartTooltip, setActiveChartTooltip] = useState(null);
 
-  // ===== Recent purchases (real data) =====
+  // ===== Recent purchases =====
   const [recentPurchases, setRecentPurchases] = useState([]);
   const [purchasesLoading, setPurchasesLoading] = useState(false);
 
-  // ===== Pending lessons (real data) =====
+  // ===== Pending lessons =====
   const [pendingLessons, setPendingLessons] = useState([]);
   const [pendingLoading, setPendingLoading] = useState(false);
 
-  // ===== Revenue trend (real data) =====
+  // ===== Revenue trend =====
   const [revenueTrend, setRevenueTrend] = useState(null);
   const [revenueLoading, setRevenueLoading] = useState(false);
 
+  // ===== Study activities =====
+  const [studyActivities, setStudyActivities] = useState([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
+
+  // ===== Overview stats =====
+  const [overview, setOverview] = useState(null);
+  const [overviewLoading, setOverviewLoading] = useState(false);
+
+  // ===== Danh sách năm cho dropdown =====
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i); // [2024, 2025, 2026, 2027, 2028]
+
+  // ===== Fetch 1 lần: purchases, pending, activities, overview =====
   useEffect(() => {
     const fetchRecentPurchases = async () => {
       try {
@@ -89,12 +116,52 @@ function DashBoard() {
       }
     };
 
+    const fetchStudyActivities = async () => {
+      try {
+        setActivitiesLoading(true);
+
+        const res = await statisticsService.getStudyActivities();
+        setStudyActivities(res.data?.data?.activities ?? []);
+      } catch (err) {
+        console.error("Lỗi khi lấy hoạt động học tập:", err);
+        setStudyActivities([]);
+      } finally {
+        setActivitiesLoading(false);
+      }
+    };
+
+    const fetchOverview = async () => {
+      try {
+        setOverviewLoading(true);
+
+        const res = await statisticsService.getOverview();
+        setOverview(res.data?.data ?? null);
+      } catch (err) {
+        console.error("Lỗi khi lấy tổng quan:", err);
+        setOverview(null);
+      } finally {
+        setOverviewLoading(false);
+      }
+    };
+
+    fetchRecentPurchases();
+    fetchPendingLessons();
+    fetchStudyActivities();
+    fetchOverview();
+  }, []);
+
+  // ===== Fetch revenue trend riêng — refetch khi đổi năm =====
+  useEffect(() => {
     const fetchRevenueTrend = async () => {
       try {
         setRevenueLoading(true);
 
+        const { fromDate, toDate, groupBy } = getDateRangeForYear(selectedYear);
+
         const res = await statisticsService.getRevenueTrend({
-          groupBy: "month",
+          fromDate,
+          toDate,
+          groupBy,
         });
 
         setRevenueTrend(res.data?.data ?? null);
@@ -106,65 +173,59 @@ function DashBoard() {
       }
     };
 
-    fetchRecentPurchases();
-    fetchPendingLessons();
     fetchRevenueTrend();
-  }, []);
+  }, [selectedYear]);
 
-  // Mock statistics based on platform features
+  // ===== Stats cards =====
   const stats = [
     {
       id: "users",
       label: "Tổng học viên",
-      value: "1,248",
-      growth: "+12.4%",
-      isPositive: true,
+      value: overviewLoading
+        ? "..."
+        : Number(overview?.totalStudents || 0).toLocaleString("vi-VN"),
       icon: faUsers,
       color: "#0ea792",
     },
     {
       id: "teachers",
       label: "Giáo viên",
-      value: "42",
-      growth: "+5.2%",
-      isPositive: true,
+      value: overviewLoading
+        ? "..."
+        : Number(overview?.totalTeachers || 0).toLocaleString("vi-VN"),
       icon: faChalkboardTeacher,
       color: "#3b82f6",
     },
     {
       id: "vip",
       label: "Gói VIP đã bán",
-      value: "382",
-      growth: "+18.7%",
-      isPositive: true,
+      value: overviewLoading
+        ? "..."
+        : Number(overview?.vipSold || 0).toLocaleString("vi-VN"),
       icon: faCrown,
       color: "#f59e0b",
     },
     {
       id: "revenue",
-      label: "Doanh thu tháng",
-      value: "45.8Mđ",
-      growth: "+14.2%",
-      isPositive: true,
+      label: "Tổng doanh thu",
+      value: overviewLoading
+        ? "..."
+        : `${formatVNDNumber(overview?.totalRevenue)}đ`,
       icon: faCoins,
       color: "#10b981",
     },
     {
       id: "ai",
       label: "Lượt gọi Gemini API",
-      value: "18,492",
-      growth: "+32.1%",
-      isPositive: true,
+      value: overviewLoading
+        ? "..."
+        : Number(overview?.totalAIRequests || 0).toLocaleString("vi-VN"),
       icon: faRobot,
       color: "#8b5cf6",
     },
   ];
 
-  // ===== Tính toán điểm cho chart doanh thu =====
-
-  /**
-   * Chuyển data từ API thành toạ độ SVG
-   */
+  // ===== Chart doanh thu =====
   const buildChartPoints = (points) => {
     if (!points || points.length === 0) return [];
 
@@ -176,24 +237,21 @@ function DashBoard() {
     const chartWidth = CHART_RIGHT - CHART_LEFT;
     const chartHeight = CHART_BOTTOM - CHART_TOP;
 
-    // Đơn vị: VNĐ → triệu VNĐ (dùng để tính toạ độ, không dùng để hiển thị)
     const revenuesInMillions = points.map((p) => Number(p.revenue) / 1_000_000);
 
-    const maxRevenue = Math.max(...revenuesInMillions, 1); // tránh chia 0
-    const yMax = maxRevenue * 1.2; // dư 20%
+    const maxRevenue = Math.max(...revenuesInMillions, 1);
+    const yMax = maxRevenue * 1.2;
 
     const N = points.length;
 
     return points.map((p, index) => {
-      // X position
       let x;
       if (N === 1) {
-        x = (CHART_LEFT + CHART_RIGHT) / 2; // giữa
+        x = (CHART_LEFT + CHART_RIGHT) / 2;
       } else {
         x = CHART_LEFT + (index * chartWidth) / (N - 1);
       }
 
-      // Y position
       const valueInMillions = revenuesInMillions[index];
       const y = CHART_BOTTOM - (valueInMillions / yMax) * chartHeight;
 
@@ -203,15 +261,12 @@ function DashBoard() {
         label: p.label,
         period: p.period,
         value: valueInMillions,
-        rawRevenue: Number(p.revenue), // VNĐ gốc
+        rawRevenue: Number(p.revenue),
         transactions: p.transactions,
       };
     });
   };
 
-  /**
-   * Tạo SVG path cho đường line + area
-   */
   const buildChartPaths = (chartPoints) => {
     if (chartPoints.length === 0) {
       return { linePath: "", areaPath: "" };
@@ -243,7 +298,6 @@ function DashBoard() {
     : [];
   const { linePath, areaPath } = buildChartPaths(chartPoints);
 
-  // Y-axis labels động — giá trị VNĐ gốc
   const maxRevenueInMillions =
     chartPoints.length > 0
       ? Math.max(...chartPoints.map((p) => p.value)) * 1.2
@@ -256,7 +310,15 @@ function DashBoard() {
     { value: 0, y: 174 },
   ];
 
-  // ===== Handle xong =====
+  // ===== Study activities =====
+  const maxActivityValue = Math.max(...studyActivities.map((a) => a.value), 1);
+
+  const totalListeningLessons = studyActivities
+    .filter((a) => a.key !== "ai-translate")
+    .reduce((sum, a) => sum + a.value, 0);
+
+  const totalAIPractice =
+    studyActivities.find((a) => a.key === "ai-translate")?.value ?? 0;
 
   const handleGoToLessonDetail = (lesson) => {
     navigate(
@@ -273,23 +335,6 @@ function DashBoard() {
           <p className={styles.subtitle}>
             Chào mừng Admin! Theo dõi tình hình hoạt động và duyệt bài hôm nay.
           </p>
-        </div>
-        <div className={styles.actions}>
-          <div className={styles.dateSelector}>
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              className={styles.calendarIcon}
-            />
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className={styles.select}
-            >
-              <option value="7days">7 ngày qua</option>
-              <option value="30days">30 ngày qua</option>
-              <option value="90days">90 ngày qua</option>
-            </select>
-          </div>
         </div>
       </div>
 
@@ -308,13 +353,6 @@ function DashBoard() {
             </div>
             <div className={styles.statBody}>
               <h2 className={styles.statValue}>{s.value}</h2>
-              <span
-                className={`${styles.statGrowth} ${
-                  s.isPositive ? styles.growthPositive : styles.growthNegative
-                }`}
-              >
-                {s.growth}
-              </span>
             </div>
           </div>
         ))}
@@ -328,35 +366,36 @@ function DashBoard() {
             <div>
               <h3 className={styles.chartTitle}>Xu hướng doanh thu</h3>
               <p className={styles.chartSubtitle}>
-                Thống kê doanh thu theo tháng (Đơn vị: VNĐ)
+                {revenueTrend
+                  ? `Từ ${formatDateShort(revenueTrend.fromDate)} đến ${formatDateShort(revenueTrend.toDate)} (Đơn vị: VNĐ)`
+                  : "Đang tải..."}
               </p>
+            </div>
+
+            {/* ===== Dropdown chọn năm ===== */}
+            <div className={styles.yearSelector}>
+              <FontAwesomeIcon
+                icon={faCalendarAlt}
+                className={styles.calendarIcon}
+              />
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className={styles.select}
+              >
+                {yearOptions.map((y) => (
+                  <option key={y} value={y}>
+                    Năm {y}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className={styles.chartBody}>
             {revenueLoading ? (
-              <div
-                style={{
-                  height: 200,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#64748b",
-                  fontSize: 13,
-                }}
-              >
-                Đang tải dữ liệu...
-              </div>
+              <div className={styles.chartPlaceholder}>Đang tải dữ liệu...</div>
             ) : chartPoints.length === 0 ? (
-              <div
-                style={{
-                  height: 200,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#64748b",
-                  fontSize: 13,
-                }}
-              >
+              <div className={styles.chartPlaceholder}>
                 Chưa có dữ liệu doanh thu
               </div>
             ) : (
@@ -409,17 +448,17 @@ function DashBoard() {
                     strokeWidth="1"
                   />
 
-                  {/* Y-axis Labels - hiện đầy đủ VNĐ */}
+                  {/* Y-axis Labels */}
                   {yAxisLabels.map((lbl, i) => (
                     <text key={i} x="15" y={lbl.y} className={styles.svgText}>
                       {formatAxisVND(lbl.value)}
                     </text>
                   ))}
 
-                  {/* Area under the line */}
+                  {/* Area */}
                   {areaPath && <path d={areaPath} fill="url(#chartGradient)" />}
 
-                  {/* Line Path */}
+                  {/* Line */}
                   {linePath && (
                     <path
                       d={linePath}
@@ -431,7 +470,7 @@ function DashBoard() {
                     />
                   )}
 
-                  {/* Interactive Points */}
+                  {/* Points */}
                   {chartPoints.map((item, index) => (
                     <g key={index}>
                       <circle
@@ -499,43 +538,56 @@ function DashBoard() {
             <div>
               <h3 className={styles.chartTitle}>Hoạt động học tập</h3>
               <p className={styles.chartSubtitle}>
-                Thống kê số lượng bài hoàn thành theo kỹ năng (tuần qua)
+                Thống kê bài nghe theo trạng thái và lượt dịch AI
               </p>
             </div>
           </div>
           <div className={styles.chartBody}>
-            <div className={styles.activitiesContainer}>
-              {[
-                { name: "Luyện nghe", value: 342, color: "#0ea792" },
-                { name: "Dịch bằng AI", value: 584, color: "#8b5cf6" },
-                { name: "Học từ vựng", value: 412, color: "#f59e0b" },
-              ].map((act) => (
-                <div key={act.name} className={styles.activityRow}>
-                  <div className={styles.activityInfo}>
-                    <span className={styles.activityName}>{act.name}</span>
-                    <span className={styles.activityValue}>
-                      {act.value} bài
-                    </span>
-                  </div>
-                  <div className={styles.progressBarBg}>
-                    <div
-                      className={styles.progressBarFill}
-                      style={{
-                        width: `${(act.value / 600) * 100}%`,
-                        backgroundColor: act.color,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-              <div className={styles.aiTip}>
-                <FontAwesomeIcon icon={faRobot} className={styles.tipIcon} />
-                <span>
-                  Lượt luyện dịch tiếng Anh bằng <strong>Gemini AI</strong>{" "}
-                  chiếm 43% tổng số bài làm.
-                </span>
+            {activitiesLoading ? (
+              <div className={styles.chartPlaceholder}>Đang tải dữ liệu...</div>
+            ) : studyActivities.length === 0 ? (
+              <div className={styles.chartPlaceholder}>
+                Chưa có dữ liệu hoạt động
               </div>
-            </div>
+            ) : (
+              <div className={styles.activitiesContainer}>
+                {studyActivities.map((act) => {
+                  const percentage =
+                    maxActivityValue > 0
+                      ? (act.value / maxActivityValue) * 100
+                      : 0;
+
+                  return (
+                    <div key={act.key} className={styles.activityRow}>
+                      <div className={styles.activityInfo}>
+                        <span className={styles.activityName}>{act.name}</span>
+                        <span className={styles.activityValue}>
+                          {act.value} bài
+                        </span>
+                      </div>
+                      <div className={styles.progressBarBg}>
+                        <div
+                          className={styles.progressBarFill}
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: act.color,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div className={styles.aiTip}>
+                  <FontAwesomeIcon icon={faRobot} className={styles.tipIcon} />
+                  <span>
+                    Hệ thống có{" "}
+                    <strong>{totalListeningLessons} bài nghe</strong> và{" "}
+                    <strong>{totalAIPractice} phiên</strong> luyện dịch AI.
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

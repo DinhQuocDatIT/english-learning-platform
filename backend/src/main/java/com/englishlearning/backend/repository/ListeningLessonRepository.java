@@ -40,5 +40,23 @@ public interface ListeningLessonRepository extends JpaRepository<ListeningLesson
     List<ListeningLesson> findAllByTopicIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long topicId);
     List<ListeningLesson> findAllByTopicIdAndStatusAndDeletedAtIsNullOrderByCreatedAtDesc(Long topicId, ListeningLessonStatus status);
     List<ListeningLesson> findAllByDeletedAtIsNotNullOrderByCreatedAtDesc();
+    @Query("""
+    SELECT COUNT(ll)
+    FROM ListeningLesson ll
+    WHERE ll.status = :status
+      AND ll.deletedAt IS NULL
+""")
+    long countByStatusAndNotDeleted(
+            @Param("status") ListeningLessonStatus status
+    );
 
+    /**
+     * Đếm bài đã bị ẩn
+     */
+    @Query("""
+    SELECT COUNT(ll)
+    FROM ListeningLesson ll
+    WHERE ll.deletedAt IS NOT NULL
+""")
+    long countDeleted();
 }

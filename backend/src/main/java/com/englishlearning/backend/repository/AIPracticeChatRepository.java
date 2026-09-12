@@ -20,4 +20,5 @@ public interface AIPracticeChatRepository extends JpaRepository<AIPracticeChat, 
     long countByStudentIdAndStatus(Long studentId, PracticeStatus status);
     // Lấy practice đang in progress của student
     Optional<AIPracticeChat> findByStudentIdAndStatus(Long studentId, PracticeStatus status);
+    long count();
 }
