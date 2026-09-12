@@ -7,6 +7,7 @@ import {
   faBox,
   faDollarSign,
   faLock,
+  faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { useNavigate } from "react-router-dom";
@@ -128,7 +129,14 @@ function MembershipPackageManage() {
             Theo dõi và quản lý các gói thành viên của hệ thống.
           </p>
         </div>
-
+        <button
+          type="button"
+          className={styles.historyBtn}
+          onClick={() => navigate("/dashboard/admin/payment-history")}
+        >
+          <FontAwesomeIcon icon={faReceipt} />
+          <span>Lịch sử thanh toán</span>
+        </button>
         <button
           type="button"
           className={styles.addPlanBtn}

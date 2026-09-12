@@ -56,6 +56,7 @@ import StudentAIPracticeCreate from "../pages/student/AI/StudentAIPracticeCreate
 import StudentAIPracticeChat from "../pages/student/AI/StudentAIPracticeChat/StudentAIPracticeChat";
 import AdminAIUsage from "../pages/admin/AIUsage/AdminAIUsage";
 import StudentProfile from "../pages/student/StudentProfile/StudentProfile";
+import PaymentHistoryPage from "../pages/admin/membershipPackage/PaymentHistoryPage/PaymentHistoryPage";
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
   return (
@@ -73,8 +74,6 @@ function AppRoutes() {
             path="student"
             element={<RoleRoute allowedRoles={[ROLES.STUDENT]} />}
           >
-           
-
             {/* Tự vừng của học sinh */}
             <Route path="myvocabulary" element={<MyVocabulary />} />
             <Route
@@ -206,6 +205,7 @@ function AppRoutes() {
               path="membership-package/:id/edit"
               element={<MembershipPackageEdit />}
             />
+            <Route path="payment-history" element={<PaymentHistoryPage />} />
             {/* quản lý cấp độ */}
 
             <Route path="level" element={<LevelManage />} />
