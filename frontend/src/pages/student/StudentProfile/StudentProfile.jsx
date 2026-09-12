@@ -51,6 +51,9 @@ function StudentProfile() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
+  // ===== Tooltip cho chart =====
+  const [activeChartTooltip, setActiveChartTooltip] = useState(null);
+
   // =====================================================
   // FETCH
   // =====================================================
@@ -185,6 +188,71 @@ function StudentProfile() {
     return `${d.getDate()}/${d.getMonth() + 1}`;
   };
 
+  // ===== BUILD CHART POINTS cho weekly activity =====
+  const buildWeeklyChartPoints = (weeklyActivity) => {
+    if (!weeklyActivity || weeklyActivity.length === 0) return [];
+
+    const CHART_LEFT = 40;
+    const CHART_RIGHT = 480;
+    const CHART_TOP = 20;
+    const CHART_BOTTOM = 170;
+
+    const chartWidth = CHART_RIGHT - CHART_LEFT;
+    const chartHeight = CHART_BOTTOM - CHART_TOP;
+
+    const counts = weeklyActivity.map((d) => d.questionCount || 0);
+    const maxCount = Math.max(...counts, 1);
+    const yMax = maxCount * 1.2;
+
+    const N = weeklyActivity.length;
+
+    return weeklyActivity.map((day, index) => {
+      let x;
+      if (N === 1) {
+        x = (CHART_LEFT + CHART_RIGHT) / 2;
+      } else {
+        x = CHART_LEFT + (index * chartWidth) / (N - 1);
+      }
+
+      const value = counts[index];
+      const y = CHART_BOTTOM - (value / yMax) * chartHeight;
+
+      return {
+        x,
+        y,
+        count: value,
+        dayLabel: getDayLabel(day.date),
+        dateLabel: getDayShort(day.date),
+      };
+    });
+  };
+
+  const buildWeeklyChartPaths = (chartPoints) => {
+    if (chartPoints.length === 0) {
+      return { linePath: "", areaPath: "" };
+    }
+
+    if (chartPoints.length === 1) {
+      const p = chartPoints[0];
+      return {
+        linePath: `M ${p.x - 5} ${p.y} L ${p.x + 5} ${p.y}`,
+        areaPath: `M ${p.x - 5} 170 L ${p.x - 5} ${p.y} L ${p.x + 5} ${p.y} L ${p.x + 5} 170 Z`,
+      };
+    }
+
+    const linePath = "M " + chartPoints.map((p) => `${p.x} ${p.y}`).join(" L ");
+
+    const first = chartPoints[0];
+    const last = chartPoints[chartPoints.length - 1];
+    const areaPath =
+      `M ${first.x} 170 ` +
+      `L ${first.x} ${first.y} ` +
+      chartPoints.map((p) => `L ${p.x} ${p.y}`).join(" ") +
+      ` L ${last.x} 170 Z`;
+
+    return { linePath, areaPath };
+  };
+
   // =====================================================
   // LOADING / EMPTY
   // =====================================================
@@ -261,11 +329,22 @@ function StudentProfile() {
   const isAiWarning = !isUnlimited && aiPercent >= 70;
   const isAiDanger = !isUnlimited && aiRemaining === 0;
 
-  // ===== Weekly max =====
-  const weeklyMax = Math.max(
-    ...weeklyActivity.map((d) => d.questionCount || 0),
-    1,
-  );
+  // ===== Weekly chart data =====
+  const weeklyChartPoints = buildWeeklyChartPoints(weeklyActivity);
+  const { linePath: weeklyLinePath, areaPath: weeklyAreaPath } =
+    buildWeeklyChartPaths(weeklyChartPoints);
+
+  const weeklyMaxCount =
+    weeklyChartPoints.length > 0
+      ? Math.max(...weeklyChartPoints.map((p) => p.count)) * 1.2
+      : 10;
+
+  const weeklyYAxisLabels = [
+    { value: weeklyMaxCount, y: 34 },
+    { value: weeklyMaxCount * 0.6, y: 84 },
+    { value: weeklyMaxCount * 0.3, y: 134 },
+    { value: 0, y: 174 },
+  ];
 
   return (
     <div className={styles.wrapper}>
@@ -399,7 +478,7 @@ function StudentProfile() {
       </section>
 
       {/* =====================================================
-          GRID 2x2: Membership + Weekly + Listening + Errors
+          GRID 2x2
           ===================================================== */}
       <section className={styles.dashboardGrid}>
         {/* 1. Membership - Top Left */}
@@ -526,82 +605,238 @@ function StudentProfile() {
               </p>
             </div>
           ) : (
-            <div className={styles.weeklyChart}>
-              {weeklyActivity.map((day, idx) => {
-                const heightPercent =
-                  ((day.questionCount || 0) / weeklyMax) * 100;
-                return (
-                  <div key={idx} className={styles.weeklyBarWrapper}>
-                    <div className={styles.weeklyBarValueTop}>
-                      {day.questionCount > 0 ? day.questionCount : ""}
-                    </div>
-                    <div className={styles.weeklyBarTrack}>
-                      <div
-                        className={styles.weeklyBarFill}
-                        style={{
-                          height: `${Math.max(heightPercent, 4)}%`,
-                        }}
-                      />
-                    </div>
-                    <span className={styles.weeklyBarLabel}>
-                      {getDayLabel(day.date)}
-                    </span>
-                    <span className={styles.weeklyBarDate}>
-                      {getDayShort(day.date)}
-                    </span>
-                  </div>
-                );
-              })}
+            <div className={styles.weeklyChartSvgWrapper}>
+              <svg viewBox="0 0 500 210" className={styles.weeklyChartSvg}>
+                <defs>
+                  <linearGradient
+                    id="weeklyChartGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="0%" stopColor="#0ea792" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#0ea792" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+
+                <line
+                  x1="40"
+                  y1="30"
+                  x2="480"
+                  y2="30"
+                  stroke="#f1f5f9"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="40"
+                  y1="80"
+                  x2="480"
+                  y2="80"
+                  stroke="#f1f5f9"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="40"
+                  y1="130"
+                  x2="480"
+                  y2="130"
+                  stroke="#f1f5f9"
+                  strokeWidth="1"
+                />
+                <line
+                  x1="40"
+                  y1="170"
+                  x2="480"
+                  y2="170"
+                  stroke="#cbd5e1"
+                  strokeWidth="1"
+                />
+
+                {weeklyYAxisLabels.map((lbl, i) => (
+                  <text key={i} x="15" y={lbl.y} className={styles.svgText}>
+                    {Math.round(lbl.value)}
+                  </text>
+                ))}
+
+                {weeklyAreaPath && (
+                  <path d={weeklyAreaPath} fill="url(#weeklyChartGradient)" />
+                )}
+
+                {weeklyLinePath && (
+                  <path
+                    d={weeklyLinePath}
+                    fill="none"
+                    stroke="#0ea792"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                )}
+
+                {weeklyChartPoints.map((item, index) => (
+                  <g key={index}>
+                    <circle
+                      cx={item.x}
+                      cy={item.y}
+                      r="5"
+                      fill="#ffffff"
+                      stroke="#0ea792"
+                      strokeWidth="3"
+                      className={styles.chartPoint}
+                      onMouseEnter={() =>
+                        setActiveChartTooltip({
+                          x: item.x,
+                          y: item.y - 15,
+                          text: `${item.dayLabel} (${item.dateLabel}): ${item.count} câu`,
+                        })
+                      }
+                      onMouseLeave={() => setActiveChartTooltip(null)}
+                    />
+                    <text
+                      x={item.x}
+                      y="188"
+                      textAnchor="middle"
+                      className={styles.svgTextBold}
+                    >
+                      {item.dayLabel}
+                    </text>
+                    <text
+                      x={item.x}
+                      y="202"
+                      textAnchor="middle"
+                      className={styles.svgTextSmall}
+                    >
+                      {item.dateLabel}
+                    </text>
+                  </g>
+                ))}
+
+                {activeChartTooltip && (
+                  <g>
+                    <rect
+                      x={activeChartTooltip.x - 80}
+                      y={activeChartTooltip.y - 25}
+                      width="160"
+                      height="24"
+                      rx="6"
+                      fill="#1e293b"
+                    />
+                    <text
+                      x={activeChartTooltip.x}
+                      y={activeChartTooltip.y - 9}
+                      fill="#ffffff"
+                      fontSize="10"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                    >
+                      {activeChartTooltip.text}
+                    </text>
+                  </g>
+                )}
+              </svg>
             </div>
           )}
         </div>
 
-        {/* 3. Listening - Bottom Left */}
+        {/* 3. AI Stats - Bottom Left */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
-              <div className={styles.iconBoxCyan}>
-                <FontAwesomeIcon icon={faHeadphones} />
+              <div className={styles.iconBoxPurple}>
+                <FontAwesomeIcon icon={faRobot} />
               </div>
               <div>
-                <h3 className={styles.cardTitle}>Luyện nghe</h3>
-                <p className={styles.cardSubtitle}>Kết quả bài nghe</p>
+                <h3 className={styles.cardTitle}>Thống kê luyện tập AI</h3>
+                <p className={styles.cardSubtitle}>Tổng hợp hoạt động</p>
               </div>
             </div>
           </div>
 
-          <div className={styles.listeningStats}>
-            <div className={styles.listeningItem}>
-              <span className={styles.listeningLabel}>Tổng số câu</span>
-              <span className={styles.listeningValue}>
-                {listening.totalAnswers || 0}
-              </span>
+          {/* AI Stats Grid 2x2 */}
+          <div className={styles.aiStatsGridNew}>
+            <div className={`${styles.aiStatNew} ${styles.aiStatNewTeal}`}>
+              <div className={styles.aiStatNewIcon}>
+                <FontAwesomeIcon icon={faChartLine} />
+              </div>
+              <div className={styles.aiStatNewInfo}>
+                <span className={styles.aiStatNewValue}>
+                  {practice.completedSessions || 0}
+                </span>
+                <span className={styles.aiStatNewLabel}>Buổi hoàn thành</span>
+              </div>
             </div>
-            <div className={styles.listeningItem}>
-              <span className={styles.listeningLabel}>Trả lời đúng</span>
-              <span className={styles.listeningValueGreen}>
-                {listening.correctAnswers || 0}
-              </span>
+
+            <div className={`${styles.aiStatNew} ${styles.aiStatNewBlue}`}>
+              <div className={styles.aiStatNewIcon}>
+                <FontAwesomeIcon icon={faBookmark} />
+              </div>
+              <div className={styles.aiStatNewInfo}>
+                <span className={styles.aiStatNewValue}>
+                  {practice.totalQuestions || 0}
+                </span>
+                <span className={styles.aiStatNewLabel}>Câu hỏi đã làm</span>
+              </div>
             </div>
-            <div className={styles.listeningItem}>
-              <span className={styles.listeningLabel}>Độ chính xác</span>
-              <span className={styles.listeningValueHighlight}>
-                {listening.accuracyRate || 0}%
-              </span>
+
+            <div className={`${styles.aiStatNew} ${styles.aiStatNewOrange}`}>
+              <div className={styles.aiStatNewIcon}>
+                <FontAwesomeIcon icon={faBullseye} />
+              </div>
+              <div className={styles.aiStatNewInfo}>
+                <span className={styles.aiStatNewValue}>
+                  {practice.averageScore || 0}
+                </span>
+                <span className={styles.aiStatNewLabel}>Điểm trung bình</span>
+              </div>
+            </div>
+
+            <div className={`${styles.aiStatNew} ${styles.aiStatNewGreen}`}>
+              <div className={styles.aiStatNewIcon}>
+                <FontAwesomeIcon icon={faBolt} />
+              </div>
+              <div className={styles.aiStatNewInfo}>
+                <span className={styles.aiStatNewValue}>
+                  {aiUsageStats.totalRequests || 0}
+                </span>
+                <span className={styles.aiStatNewLabel}>Lượt gọi AI</span>
+              </div>
             </div>
           </div>
 
-          <div className={styles.vocabProgressTrack}>
-            <div
-              className={styles.vocabProgressFill}
-              style={{
-                width: `${listening.accuracyRate || 0}%`,
-              }}
-            />
+          {/* Divider */}
+          <div className={styles.aiStatsDivider} />
+
+          {/* Listening compact stats */}
+          <div className={styles.listeningCompact}>
+            <div className={styles.listeningCompactHeader}>
+              <FontAwesomeIcon icon={faHeadphones} />
+              <span>Luyện nghe</span>
+            </div>
+            <div className={styles.listeningCompactRow}>
+              <div className={styles.listeningCompactItem}>
+                <span className={styles.listeningCompactLabel}>Tổng câu</span>
+                <span className={styles.listeningCompactValue}>
+                  {listening.totalAnswers || 0}
+                </span>
+              </div>
+              <div className={styles.listeningCompactItem}>
+                <span className={styles.listeningCompactLabel}>Đúng</span>
+                <span className={styles.listeningCompactValueGreen}>
+                  {listening.correctAnswers || 0}
+                </span>
+              </div>
+              <div className={styles.listeningCompactItem}>
+                <span className={styles.listeningCompactLabel}>Chính xác</span>
+                <span className={styles.listeningCompactValueHighlight}>
+                  {listening.accuracyRate || 0}%
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* 4. Top Errors - Bottom Right */}
+        {/* 4. Top Errors - Bottom Right — List với số thứ tự */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -629,110 +864,41 @@ function StudentProfile() {
               </p>
             </div>
           ) : (
-            <div className={styles.weaknessList}>
+            <div className={styles.errorListNumbered}>
               {topErrors.map((error, index) => {
                 const icon = getErrorIcon(error.errorType);
                 const color = getErrorColor(error.errorType);
-                const isHigh = (error.highSeverity || 0) > 0;
 
                 return (
                   <div
                     key={index}
-                    className={styles.weaknessItemSimple}
-                    style={{ borderLeftColor: color }}
+                    className={styles.errorRowNumbered}
+                    style={{ "--item-color": color }}
                   >
+                    <span className={styles.errorRowIndex}>
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
                     <div
-                      className={styles.weaknessIcon}
+                      className={styles.errorRowIcon}
                       style={{ background: `${color}15`, color }}
                     >
                       <FontAwesomeIcon icon={icon} />
                     </div>
-                    <div className={styles.weaknessTitle}>
-                      <span className={styles.weaknessName}>
-                        {error.displayName}
-                      </span>
-                      <span className={styles.weaknessCount}>
-                        Mắc {error.count} lần
-                      </span>
-                    </div>
-                    <span
-                      className={styles.weaknessBadge}
-                      style={{
-                        background: isHigh ? "#fee2e2" : "#fef3c7",
-                        color: isHigh ? "#dc2626" : "#d97706",
-                      }}
-                    >
-                      {isHigh ? "Nghiêm trọng" : "Trung bình"}
+
+                    <span className={styles.errorRowName}>
+                      {error.displayName}
+                    </span>
+
+                    <span className={styles.errorRowCount}>
+                      <strong>{error.count}</strong>
+                      <span>lần</span>
                     </span>
                   </div>
                 );
               })}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* =====================================================
-          AI STATS
-          ===================================================== */}
-      <section className={styles.card}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardHeaderLeft}>
-            <div className={styles.iconBoxPurple}>
-              <FontAwesomeIcon icon={faRobot} />
-            </div>
-            <div>
-              <h3 className={styles.cardTitle}>Thống kê luyện tập AI</h3>
-              <p className={styles.cardSubtitle}>Tổng hợp hoạt động</p>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.aiStatsGrid}>
-          <div className={`${styles.aiStatItem} ${styles.aiStatTeal}`}>
-            <div className={styles.aiStatIcon}>
-              <FontAwesomeIcon icon={faChartLine} />
-            </div>
-            <div>
-              <span className={styles.aiStatValue}>
-                {practice.completedSessions || 0}
-              </span>
-              <span className={styles.aiStatLabel}>Buổi hoàn thành</span>
-            </div>
-          </div>
-          <div className={`${styles.aiStatItem} ${styles.aiStatBlue}`}>
-            <div className={styles.aiStatIcon}>
-              <FontAwesomeIcon icon={faBookmark} />
-            </div>
-            <div>
-              <span className={styles.aiStatValue}>
-                {practice.totalQuestions || 0}
-              </span>
-              <span className={styles.aiStatLabel}>Câu hỏi đã làm</span>
-            </div>
-          </div>
-          <div className={`${styles.aiStatItem} ${styles.aiStatOrange}`}>
-            <div className={styles.aiStatIcon}>
-              <FontAwesomeIcon icon={faBullseye} />
-            </div>
-            <div>
-              <span className={styles.aiStatValue}>
-                {practice.averageScore || 0}
-              </span>
-              <span className={styles.aiStatLabel}>Điểm trung bình</span>
-            </div>
-          </div>
-          <div className={`${styles.aiStatItem} ${styles.aiStatGreen}`}>
-            <div className={styles.aiStatIcon}>
-              <FontAwesomeIcon icon={faBolt} />
-            </div>
-            <div>
-              <span className={styles.aiStatValue}>
-                {aiUsageStats.totalRequests || 0}
-              </span>
-              <span className={styles.aiStatLabel}>Lượt gọi AI</span>
-            </div>
-          </div>
         </div>
       </section>
 

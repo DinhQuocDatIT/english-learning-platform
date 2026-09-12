@@ -16,7 +16,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 /* =====================================================
@@ -32,8 +32,8 @@
 }
 
 .loadingSpinner {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border: 3px solid #e2e8f0;
   border-top-color: #0ea792;
   border-radius: 50%;
@@ -50,7 +50,6 @@
   color: #64748b;
   font-size: 14px;
   font-weight: 500;
-  font-family: inherit;
 }
 
 .retryBtn {
@@ -61,7 +60,6 @@
   background: #0ea792;
   color: #fff;
   cursor: pointer;
-  font-family: inherit;
   font-weight: 600;
 }
 
@@ -69,44 +67,27 @@
    HERO BANNER
    ===================================================== */
 .heroSection {
-  background: linear-gradient(135deg, #0ea792 0%, #0d9488 50%, #115e59 100%);
-  border-radius: 20px;
-  padding: 36px 42px;
+  background: linear-gradient(135deg, #0ea792 0%, #0d9488 100%);
+  border-radius: 16px;
+  padding: 32px 36px;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 32px;
-  box-shadow: 0 10px 25px -5px rgba(14, 167, 146, 0.25);
 }
 
 .heroSection::before {
   content: "";
   position: absolute;
-  top: -80px;
-  right: -50px;
-  width: 320px;
-  height: 320px;
+  top: -60px;
+  right: -60px;
+  width: 260px;
+  height: 260px;
   background: radial-gradient(
     circle,
-    rgba(255, 255, 255, 0.12) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.heroSection::after {
-  content: "";
-  position: absolute;
-  bottom: -60px;
-  left: 20%;
-  width: 240px;
-  height: 240px;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.1) 0%,
     transparent 70%
   );
   border-radius: 50%;
@@ -123,43 +104,38 @@
 .heroTag {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(8px);
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
   padding: 4px 12px;
   border-radius: 20px;
-  letter-spacing: 0.4px;
   margin-bottom: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .heroTag svg {
-  font-size: 12px;
+  font-size: 11px;
   color: #ffffff;
 }
 
 .heroTag span {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   color: #ffffff;
-  font-family: inherit;
 }
 
 .heroTitle {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   color: #ffffff;
-  margin: 0 0 14px 0;
-  line-height: 1.35;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
   letter-spacing: -0.3px;
-  font-family: inherit;
 }
 
 .heroMeta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
 .heroMetaItem {
@@ -168,24 +144,21 @@
   gap: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.95);
   background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(8px);
-  padding: 5px 12px;
+  padding: 4px 12px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  font-family: inherit;
 }
 
 .heroMetaItem svg {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .heroActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -193,23 +166,19 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 22px;
+  padding: 9px 20px;
   background: #ffffff;
   color: #0d9488;
   border: none;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 700;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: inherit;
+  transition: background 0.2s ease;
 }
 
 .heroBtnPrimary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
-  background: #f8fafc;
+  background: #f1f5f9;
 }
 
 .heroBtnPrimary svg {
@@ -219,30 +188,27 @@
 
 .heroBtnPrimary span {
   color: #0d9488;
-  font-size: 13.5px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .heroBtnGhost {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 22px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
+  padding: 9px 20px;
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
-  font-size: 13.5px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
+  transition: background 0.2s ease;
 }
 
 .heroBtnGhost:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .heroBtnGhost svg {
@@ -250,27 +216,24 @@
 }
 
 .heroBtnGhost span {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   color: #ffffff;
 }
 
-/* ====== Level Box - Floating Card ====== */
+/* ====== Level Box ====== */
 .heroLevelBox {
   position: relative;
   z-index: 2;
   flex-shrink: 0;
-  width: 300px;
-  padding: 20px 22px;
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 16px;
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+  width: 280px;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .levelBoxHeader {
@@ -280,24 +243,20 @@
 }
 
 .levelIconSmall {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 800;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   flex-shrink: 0;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  font-family: inherit;
-  background-color: var(--color-secondary, #0ea792);
 }
 
 .levelIconSmall span {
   color: #ffffff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
 }
 
@@ -308,109 +267,78 @@
 }
 
 .levelBoxLabel {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.75);
-  letter-spacing: 0.6px;
-  font-family: inherit;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.5px;
 }
 
 .levelBoxTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #ffffff;
-  font-family: inherit;
 }
 
 .levelBoxProgress {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .levelBoxProgressHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-  font-family: inherit;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .levelBoxProgressHeader span {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .levelBoxProgressHeader strong {
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 700;
   color: #ffffff;
-  font-family: inherit;
 }
 
 .levelBoxTrack {
-  height: 8px;
+  height: 6px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   overflow: hidden;
-  position: relative;
 }
 
 .levelBoxFill {
   height: 100%;
   border-radius: 10px;
-  background: linear-gradient(90deg, #ffffff, #f0fdf9);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
-  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-  overflow: hidden;
+  background: #ffffff;
+  transition: width 0.6s ease;
 }
 
 .shimmer {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.6),
-    transparent
-  );
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
+  display: none;
 }
 
 .levelBoxFooter {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  font-size: 11.5px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  font-family: inherit;
+  gap: 5px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 11px;
 }
 
 .levelBoxFooter span {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .levelBoxFooter svg {
@@ -419,17 +347,16 @@
 }
 
 .levelBoxFooter strong {
-  font-weight: 800;
+  font-weight: 700;
   color: #ffffff;
-  font-family: inherit;
 }
 
 /* =====================================================
-   STATS GRID
+   STATS GRID — 3 ô
    ===================================================== */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
 
@@ -440,37 +367,29 @@
   gap: 14px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 20px 22px;
+  border-radius: 12px;
+  padding: 18px 20px;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .statCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
-  border-color: transparent;
+  border-color: #0ea792;
+  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.08);
 }
 
 .statIconBox {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font-size: 20px;
+  font-size: 18px;
   flex-shrink: 0;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  position: relative;
-  z-index: 1;
-  transition: transform 0.3s ease;
-}
-
-.statCard:hover .statIconBox {
-  transform: scale(1.08) rotate(-5deg);
 }
 
 .statContent {
@@ -485,11 +404,10 @@
   font-size: 12px;
   font-weight: 600;
   color: #64748b;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: inherit;
 }
 
 .statValueRow {
@@ -499,44 +417,29 @@
 }
 
 .statValue {
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 700;
   line-height: 1.2;
-  letter-spacing: -0.5px;
-  font-family: inherit;
+  letter-spacing: -0.3px;
 }
 
 .statSuffix {
   font-size: 12px;
   font-weight: 600;
   color: #94a3b8;
-  font-family: inherit;
 }
 
 .statDecorCircle {
-  position: absolute;
-  bottom: -30px;
-  right: -30px;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  opacity: 0.5;
-  transition: all 0.4s ease;
-  pointer-events: none;
-}
-
-.statCard:hover .statDecorCircle {
-  transform: scale(1.3);
-  opacity: 0.7;
+  display: none;
 }
 
 /* =====================================================
-   DASHBOARD GRID (2x2) — Layout mới
+   DASHBOARD GRID (2x2)
    ===================================================== */
 .dashboardGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 16px;
   align-items: start;
 }
 
@@ -545,10 +448,9 @@
    ===================================================== */
 .card {
   background: #ffffff;
-  border-radius: 16px;
-  padding: 20px 22px;
+  border-radius: 12px;
+  padding: 20px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -574,14 +476,13 @@
   font-weight: 700;
   color: #1e293b;
   margin: 0;
-  font-family: inherit;
 }
 
 .cardSubtitle {
   font-size: 11.5px;
   color: #64748b;
   margin: 2px 0 0 0;
-  font-family: inherit;
+  font-weight: 400;
 }
 
 /* ===== Icon boxes cho card headers ===== */
@@ -590,13 +491,13 @@
 .iconBoxPurple,
 .iconBoxBlue,
 .iconBoxCyan {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   flex-shrink: 0;
 }
 
@@ -631,7 +532,7 @@
 .membershipContent {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .membershipTop {
@@ -643,21 +544,19 @@
 }
 
 .packageName {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
-  font-family: inherit;
 }
 
 .statusBadge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
-  font-family: inherit;
 }
 
 .statusActive {
@@ -673,16 +572,16 @@
 .membershipInfoGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .membershipInfoItem {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 10px 14px;
+  padding: 10px 12px;
   background: #f8fafc;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #f1f5f9;
 }
 
@@ -690,30 +589,27 @@
   font-size: 11px;
   font-weight: 500;
   color: #64748b;
-  font-family: inherit;
 }
 
 .membershipInfoValue {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #1e293b;
-  font-family: inherit;
 }
 
 .membershipInfoValueHighlight {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #0ea792;
-  font-family: inherit;
 }
 
 .aiBox {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   padding: 12px 14px;
   background: #f8fafc;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #f1f5f9;
 }
 
@@ -727,10 +623,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   color: #1e293b;
-  font-family: inherit;
 }
 
 .aiBoxLabel svg {
@@ -739,10 +634,9 @@
 }
 
 .aiBoxCount {
-  font-size: 13.5px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 700;
   color: #0ea792;
-  font-family: inherit;
 }
 
 .aiBoxWarning {
@@ -758,9 +652,8 @@
   font-weight: 700;
   color: #d97706;
   background: #fef3c7;
-  padding: 3px 10px;
+  padding: 2px 10px;
   border-radius: 20px;
-  font-family: inherit;
 }
 
 .aiBoxTrack {
@@ -772,17 +665,17 @@
 
 .aiBoxFill {
   height: 100%;
-  background: linear-gradient(90deg, #0ea792, #0d9488);
+  background: #0ea792;
   border-radius: 10px;
   transition: width 0.6s ease;
 }
 
 .aiBoxFillWarning {
-  background: linear-gradient(90deg, #f59e0b, #d97706);
+  background: #f59e0b;
 }
 
 .aiBoxFillDanger {
-  background: linear-gradient(90deg, #ef4444, #dc2626);
+  background: #ef4444;
 }
 
 .membershipEmpty {
@@ -802,360 +695,346 @@
 .membershipEmpty p {
   font-size: 13px;
   margin: 0;
-  font-family: inherit;
 }
 
 /* =====================================================
-   WEEKLY ACTIVITY CHART — ĐẸP HƠN
+   WEEKLY CHART SVG
    ===================================================== */
-.weeklyChart {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 6px;
-  height: 220px;
-  padding: 32px 0 8px;
-}
-
-.weeklyBarWrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  height: 100%;
-  position: relative;
-}
-
-.weeklyBarValueTop {
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 11.5px;
-  font-weight: 800;
-  color: #0d9488;
-  background: #ffffff;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid #ccfbf1;
-  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.12);
-  min-height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  font-family: inherit;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.weeklyBarTrack {
-  flex: 1;
+.weeklyChartSvgWrapper {
   width: 100%;
-  max-width: 38px;
-  background: #f1f5f9;
-  border-radius: 10px 10px 6px 6px;
-  display: flex;
-  align-items: flex-end;
-  overflow: hidden;
-  position: relative;
-  margin-top: 18px;
+  padding: 4px 0;
 }
 
-.weeklyBarFill {
+.weeklyChartSvg {
   width: 100%;
-  background: linear-gradient(180deg, #14b8a6 0%, #0ea792 50%, #0d9488 100%);
-  border-radius: 10px 10px 0 0;
-  transition: height 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-  min-height: 6px;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  height: auto;
+  overflow: visible;
 }
 
-.weeklyBarFill::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
-  border-radius: 10px 10px 0 0;
-  pointer-events: none;
+.svgText {
+  font-size: 9px;
+  fill: #94a3b8;
 }
 
-.weeklyBarLabel {
-  font-size: 11.5px;
-  font-weight: 800;
-  color: #334155;
-  font-family: inherit;
-  margin-top: 2px;
-}
-
-.weeklyBarDate {
-  font-size: 9.5px;
-  font-weight: 500;
-  color: #94a3b8;
-  font-family: inherit;
-  margin-top: -2px;
-}
-
-/* =====================================================
-   LISTENING STATS
-   ===================================================== */
-.listeningStats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.listeningItem {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #f1f5f9;
-  text-align: center;
-}
-
-.listeningLabel {
+.svgTextBold {
   font-size: 11px;
+  fill: #334155;
   font-weight: 600;
-  color: #64748b;
-  font-family: inherit;
 }
 
-.listeningValue {
-  font-size: 20px;
-  font-weight: 800;
-  color: #1e293b;
-  font-family: inherit;
+.svgTextSmall {
+  font-size: 9px;
+  fill: #94a3b8;
 }
 
-.listeningValueGreen {
-  font-size: 20px;
-  font-weight: 800;
-  color: #16a34a;
-  font-family: inherit;
+.chartPoint {
+  cursor: pointer;
+  transition: r 0.15s ease;
 }
 
-.listeningValueHighlight {
-  font-size: 20px;
-  font-weight: 800;
-  color: #0891b2;
-  font-family: inherit;
+.chartPoint:hover {
+  r: 7;
 }
 
 /* =====================================================
-   AI STATS GRID
+   AI STATS — 2x2 grid
    ===================================================== */
-.aiStatsGrid {
+.aiStatsGridNew {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 
-.aiStatItem {
+.aiStatNew {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 18px;
-  border-radius: 14px;
-  transition: all 0.2s ease;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
 }
 
-.aiStatItem:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+.aiStatNew:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
 }
 
-.aiStatTeal {
-  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+.aiStatNewTeal,
+.aiStatNewBlue,
+.aiStatNewOrange,
+.aiStatNewGreen {
+  background: #ffffff;
 }
 
-.aiStatBlue {
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
-}
-
-.aiStatOrange {
-  background: linear-gradient(135deg, #fffbeb, #fef3c7);
-}
-
-.aiStatGreen {
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-}
-
-.aiStatIcon {
+.aiStatNewIcon {
   width: 40px;
   height: 40px;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 15px;
   flex-shrink: 0;
   color: #ffffff;
 }
 
-.aiStatTeal .aiStatIcon {
-  background: linear-gradient(135deg, #0ea792, #0d9488);
+.aiStatNewTeal .aiStatNewIcon {
+  background: #0ea792;
 }
 
-.aiStatBlue .aiStatIcon {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+.aiStatNewBlue .aiStatNewIcon {
+  background: #3b82f6;
 }
 
-.aiStatOrange .aiStatIcon {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+.aiStatNewOrange .aiStatNewIcon {
+  background: #f59e0b;
 }
 
-.aiStatGreen .aiStatIcon {
-  background: linear-gradient(135deg, #16a34a, #15803d);
+.aiStatNewGreen .aiStatNewIcon {
+  background: #16a34a;
 }
 
-.aiStatValue {
-  display: block;
+.aiStatNewInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.aiStatNewValue {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.1;
   color: #1e293b;
-  font-family: inherit;
 }
 
-.aiStatLabel {
-  display: block;
+.aiStatNewLabel {
   font-size: 11px;
   font-weight: 500;
   color: #64748b;
   margin-top: 2px;
-  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Divider */
+.aiStatsDivider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 4px 0;
 }
 
 /* =====================================================
-   TOP ERRORS / WEAKNESSES
+   LISTENING COMPACT
+   ===================================================== */
+.listeningCompact {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.listeningCompactHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.listeningCompactHeader svg {
+  font-size: 12px;
+  color: #0891b2;
+}
+
+.listeningCompactRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.listeningCompactItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.listeningCompactLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+}
+
+.listeningCompactValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.listeningCompactValueGreen {
+  font-size: 16px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.listeningCompactValueHighlight {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0891b2;
+}
+
+/* =====================================================
+   TOP ERRORS — LIST WITH NUMBERED ORDER
+   ===================================================== */
+.errorListNumbered {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.errorListNumbered::-webkit-scrollbar {
+  width: 6px;
+}
+
+.errorListNumbered::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.errorListNumbered::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.errorListNumbered::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.errorRowNumbered {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid var(--item-color, #64748b);
+  border-radius: 8px;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.errorRowNumbered:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  border-left-color: var(--item-color, #64748b);
+}
+
+.errorRowIndex {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f1f5f9;
+  color: #64748b;
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+
+  flex-shrink: 0;
+}
+
+.errorRowNumbered:hover .errorRowIndex {
+  background: var(--item-color, #64748b);
+  color: #ffffff;
+}
+
+.errorRowIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.errorRowName {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e293b;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.errorRowCount {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  flex-shrink: 0;
+
+  padding: 3px 10px;
+
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.errorRowCount strong {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.errorRowCount span {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* =====================================================
+   COUNT BADGE
    ===================================================== */
 .countBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 10px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
   background: #fee2e2;
   color: #dc2626;
-  border-radius: 14px;
-  font-size: 12.5px;
-  font-weight: 700;
-  font-family: inherit;
-}
-
-.weaknessList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 320px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.weaknessList::-webkit-scrollbar {
-  width: 6px;
-}
-
-.weaknessList::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 10px;
-}
-
-.weaknessList::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-
-.weaknessList::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-.weaknessItemSimple {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  background: #f8fafc;
-  border-radius: 10px;
-  border-left: 3px solid;
-  transition: all 0.2s ease;
-}
-
-.weaknessItemSimple:hover {
-  background: #f1f5f9;
-  transform: translateX(2px);
-}
-
-.weaknessItemSimple .weaknessIcon {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.weaknessItemSimple .weaknessTitle {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.weaknessItemSimple .weaknessName {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #1e293b;
-  font-family: inherit;
-}
-
-.weaknessItemSimple .weaknessCount {
-  font-size: 11.5px;
-  font-weight: 500;
-  color: #64748b;
-  font-family: inherit;
-}
-
-.weaknessBadge {
-  display: inline-flex;
-  padding: 3px 10px;
   border-radius: 12px;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
-  white-space: nowrap;
-  font-family: inherit;
-  flex-shrink: 0;
-}
-
-/* =====================================================
-   VOCAB PROGRESS (dùng cho listening)
-   ===================================================== */
-.vocabProgressTrack {
-  width: 100%;
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.vocabProgressFill {
-  height: 100%;
-  background: linear-gradient(90deg, #16a34a, #22c55e);
-  border-radius: 10px;
-  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* =====================================================
@@ -1171,13 +1050,13 @@
 }
 
 .emptyIconGreen {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 22px;
   background: #dcfce7;
   color: #059669;
 }
@@ -1187,7 +1066,6 @@
   font-weight: 700;
   color: #1e293b;
   margin: 0;
-  font-family: inherit;
 }
 
 .emptyText {
@@ -1196,7 +1074,6 @@
   line-height: 1.5;
   margin: 0;
   max-width: 280px;
-  font-family: inherit;
 }
 
 /* =====================================================
@@ -1205,8 +1082,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1226,25 +1102,25 @@
 
 .modal {
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 16px;
   width: 100%;
   max-width: 560px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.25s ease;
   overflow: hidden;
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(30px) scale(0.95);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -1252,9 +1128,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 22px 26px;
+  padding: 20px 24px;
   border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #f8fafc, #ffffff);
 }
 
 .modalHeaderLeft {
@@ -1264,53 +1139,50 @@
 }
 
 .modalIconBox {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #0ea792, #0d9488);
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #0ea792;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font-size: 20px;
-  box-shadow: 0 6px 16px rgba(14, 167, 146, 0.25);
+  font-size: 18px;
   flex-shrink: 0;
 }
 
 .modalIconBoxPurple {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: var(--color-primary, #7c3aed);
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #7c3aed;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  font-size: 20px;
-  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.25);
+  font-size: 18px;
   flex-shrink: 0;
 }
 
 .modalTitle {
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 17px;
+  font-weight: 700;
   color: #1e293b;
   margin: 0;
-  letter-spacing: -0.3px;
-  font-family: inherit;
+  letter-spacing: -0.2px;
 }
 
 .modalSubtitle {
   font-size: 12.5px;
   color: #64748b;
   margin: 2px 0 0 0;
-  font-family: inherit;
+  font-weight: 400;
 }
 
 .modalCloseBtn {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   border: none;
   background: #f1f5f9;
   color: #64748b;
@@ -1318,15 +1190,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  font-size: 13px;
+  transition: background 0.2s ease;
   flex-shrink: 0;
 }
 
 .modalCloseBtn:hover:not(:disabled) {
-  background: #fee2e2;
-  color: #dc2626;
-  transform: rotate(90deg);
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 .modalCloseBtn:disabled {
@@ -1335,10 +1206,10 @@
 }
 
 .modalBody {
-  padding: 24px 26px;
+  padding: 22px 24px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   overflow-y: auto;
   flex: 1;
 }
@@ -1354,9 +1225,8 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1e293b;
-  font-family: inherit;
 }
 
 .formLabel svg {
@@ -1370,22 +1240,21 @@
 
 .formInput {
   width: 100%;
-  height: 46px;
+  height: 44px;
   padding: 10px 14px;
   border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 10px;
   font-size: 14px;
   color: #1e293b;
   background: #ffffff;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease;
   font-family: inherit;
   box-sizing: border-box;
 }
 
 .formInput:focus {
   border-color: #0ea792;
-  box-shadow: 0 0 0 4px rgba(14, 167, 146, 0.1);
 }
 
 .formInput::placeholder {
@@ -1400,31 +1269,27 @@
 
 .inputError {
   border-color: #ef4444;
-  background: #fef2f2;
 }
 
 .inputError:focus {
   border-color: #ef4444;
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
 }
 
 .errorText {
   font-size: 12px;
   color: #dc2626;
   font-weight: 500;
-  font-family: inherit;
 }
 
 .formHint {
   font-size: 11.5px;
   color: #94a3b8;
   font-style: italic;
-  font-family: inherit;
 }
 
 .radioGroup {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -1489,7 +1354,6 @@
   font-weight: 600;
   color: #475569;
   transition: all 0.2s ease;
-  font-family: inherit;
 }
 
 .inputWrapper {
@@ -1516,12 +1380,14 @@
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  transition: all 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .eyeBtn:hover {
-  background: #f3e8ff;
-  color: #8b5cf6;
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .strengthWrapper {
@@ -1547,10 +1413,9 @@
 
 .strengthLabel {
   font-size: 11.5px;
-  font-weight: 800;
+  font-weight: 700;
   min-width: 70px;
   text-align: right;
-  font-family: inherit;
 }
 
 .checklist {
@@ -1560,7 +1425,7 @@
   margin-top: 4px;
   padding: 12px 14px;
   background: #f8fafc;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid #e2e8f0;
 }
 
@@ -1571,8 +1436,7 @@
   font-size: 12px;
   color: #94a3b8;
   font-weight: 500;
-  transition: all 0.2s ease;
-  font-family: inherit;
+  transition: color 0.2s ease;
 }
 
 .checkItem svg {
@@ -1593,23 +1457,23 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 18px 26px;
+  gap: 10px;
+  padding: 16px 24px;
   border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
 }
 
 .cancelBtn {
-  padding: 11px 22px;
+  padding: 10px 20px;
   background: #ffffff;
   color: #64748b;
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   font-size: 13.5px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .cancelBtn:hover:not(:disabled) {
@@ -1627,28 +1491,25 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 26px;
-  background: var(--color-primary, #0ea792);
+  padding: 10px 24px;
+  background: #0ea792;
   color: #ffffff;
   border: none;
   border-radius: 10px;
   font-size: 13.5px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.25);
-  font-family: inherit;
+  transition: background 0.2s ease;
 }
 
 .submitBtn span {
   font-size: 13.5px;
-  font-weight: 700;
+  font-weight: 600;
   color: #ffffff;
 }
 
 .submitBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(14, 167, 146, 0.35);
+  background: #0d9488;
 }
 
 .submitBtn:disabled {
@@ -1660,28 +1521,25 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 26px;
-  background: var(--color-primary, #7c3aed);
+  padding: 10px 24px;
+  background: #7c3aed;
   color: #ffffff;
   border: none;
   border-radius: 10px;
   font-size: 13.5px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
-  font-family: inherit;
+  transition: background 0.2s ease;
 }
 
 .submitBtnPurple span {
   font-size: 13.5px;
-  font-weight: 700;
+  font-weight: 600;
   color: #ffffff;
 }
 
 .submitBtnPurple:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+  background: #6d28d9;
 }
 
 .submitBtnPurple:disabled {
@@ -1704,7 +1562,7 @@
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .aiStatsGrid {
+  .aiStatsGridNew {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -1717,7 +1575,7 @@
 
   .heroSection {
     padding: 24px 20px;
-    border-radius: 16px;
+    border-radius: 14px;
     flex-direction: column;
     align-items: stretch;
     gap: 20px;
@@ -1748,13 +1606,13 @@
   }
 
   .statCard {
-    padding: 16px 18px;
+    padding: 16px;
   }
 
   .statIconBox {
-    width: 44px;
-    height: 44px;
-    font-size: 17px;
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
   }
 
   .statValue {
@@ -1762,8 +1620,8 @@
   }
 
   .card {
-    padding: 20px;
-    border-radius: 14px;
+    padding: 18px;
+    border-radius: 12px;
     gap: 14px;
   }
 
@@ -1771,25 +1629,21 @@
     font-size: 14px;
   }
 
-  .listeningStats {
+  .aiStatsGridNew {
     grid-template-columns: 1fr;
   }
 
-  .aiStatsGrid {
+  .listeningCompactRow {
     grid-template-columns: 1fr;
   }
 
-  .weeklyChart {
-    height: 200px;
-  }
-
-  .weaknessList {
+  .errorListNumbered {
     max-height: none;
     overflow-y: visible;
   }
 
   .modalFooter {
-    padding: 16px 20px;
+    padding: 14px 20px;
     flex-direction: column-reverse;
   }
 
@@ -1825,14 +1679,10 @@
     padding: 4px 10px;
   }
 
-  .levelBoxHeader {
-    gap: 10px;
-  }
-
   .levelIconSmall {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
   }
 
   .card {
@@ -1841,19 +1691,12 @@
 
   .statusBadge {
     font-size: 10px;
-    padding: 4px 10px;
+    padding: 3px 8px;
   }
 
-  .weeklyChart {
-    height: 180px;
-  }
-
-  .weeklyBarValueTop {
-    font-size: 10.5px;
-    padding: 1px 5px;
-  }
-
-  .weeklyBarDate {
-    font-size: 9px;
+  .errorRowIndex {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
   }
 }
