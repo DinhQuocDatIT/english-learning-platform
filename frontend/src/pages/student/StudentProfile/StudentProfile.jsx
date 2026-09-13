@@ -7,15 +7,15 @@ import {
   faCrown,
   faCalendarAlt,
   faArrowUp,
+  faArrowDown,
+  faMinus,
   faLock,
   faLightbulb,
   faSpellCheck,
-  faTag,
-  faLocationDot,
-  faStopwatch,
-  faList,
-  faStar,
-  faTriangleExclamation,
+  faChartLine,
+  faRobot,
+  faBookmark,
+  faChevronDown,
   faCheckCircle,
   faPen,
   faEnvelope,
@@ -30,10 +30,11 @@ import {
   faKey,
   faUser,
   faGraduationCap,
-  faChartLine,
   faHeadphones,
-  faRobot,
-  faBookmark,
+  faTriangleExclamation,
+  faPlay,
+  faClock,
+  faBookOpen,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -51,12 +52,8 @@ function StudentProfile() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-  // ===== Tooltip cho chart =====
   const [activeChartTooltip, setActiveChartTooltip] = useState(null);
 
-  // =====================================================
-  // FETCH
-  // =====================================================
   const fetchAll = async () => {
     try {
       setLoading(true);
@@ -131,9 +128,6 @@ function StudentProfile() {
     };
   }, []);
 
-  // =====================================================
-  // HELPERS
-  // =====================================================
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     return new Date(dateStr).toLocaleDateString("vi-VN", {
@@ -141,40 +135,6 @@ function StudentProfile() {
       month: "2-digit",
       year: "numeric",
     });
-  };
-
-  const getErrorIcon = (errorType) => {
-    const map = {
-      GRAMMAR: faSpellCheck,
-      VOCABULARY: faLightbulb,
-      ARTICLE: faTag,
-      PREPOSITION: faLocationDot,
-      TENSE: faStopwatch,
-      WORD_ORDER: faList,
-      SPELLING: faSpellCheck,
-      WORD_CHOICE: faLightbulb,
-      NATURALNESS: faStar,
-      MISSING_WORD: faTriangleExclamation,
-      EXTRA_WORD: faTriangleExclamation,
-      PUNCTUATION: faSpellCheck,
-      CAPITALIZATION: faSpellCheck,
-    };
-    return map[errorType] || faTriangleExclamation;
-  };
-
-  const getErrorColor = (errorType) => {
-    const map = {
-      GRAMMAR: "#3b82f6",
-      VOCABULARY: "#a855f7",
-      ARTICLE: "#f59e0b",
-      PREPOSITION: "#06b6d4",
-      TENSE: "#ef4444",
-      WORD_ORDER: "#8b5cf6",
-      SPELLING: "#10b981",
-      WORD_CHOICE: "#f97316",
-      NATURALNESS: "#ec4899",
-    };
-    return map[errorType] || "#64748b";
   };
 
   const getDayLabel = (dateStr) => {
@@ -188,7 +148,6 @@ function StudentProfile() {
     return `${d.getDate()}/${d.getMonth() + 1}`;
   };
 
-  // ===== BUILD CHART POINTS cho weekly activity =====
   const buildWeeklyChartPoints = (weeklyActivity) => {
     if (!weeklyActivity || weeklyActivity.length === 0) return [];
 
@@ -253,9 +212,6 @@ function StudentProfile() {
     return { linePath, areaPath };
   };
 
-  // =====================================================
-  // LOADING / EMPTY
-  // =====================================================
   if (loading) {
     return (
       <div className={styles.loadingWrapper}>
@@ -276,10 +232,8 @@ function StudentProfile() {
     );
   }
 
-  // ====== DATA TỪ PROFILE ======
   const { user, membership } = profile;
 
-  // ====== DATA TỪ STATISTICS ======
   const overview = statistics?.overview || {};
   const levelRanking = statistics?.levelRanking || {};
   const practice = statistics?.practice || {};
@@ -288,7 +242,6 @@ function StudentProfile() {
   const weeklyActivity = statistics?.weeklyActivity || [];
   const aiUsageStats = statistics?.aiUsage || {};
 
-  // ===== Stats items — 3 ô =====
   const statItems = [
     {
       id: "xp",
@@ -320,7 +273,6 @@ function StudentProfile() {
     },
   ];
 
-  // ===== AI Usage =====
   const aiUsage = membership?.aiUsage;
   const aiLimit = aiUsage?.limit || 0;
   const aiRemaining = aiUsage?.remaining || 0;
@@ -329,7 +281,6 @@ function StudentProfile() {
   const isAiWarning = !isUnlimited && aiPercent >= 70;
   const isAiDanger = !isUnlimited && aiRemaining === 0;
 
-  // ===== Weekly chart data =====
   const weeklyChartPoints = buildWeeklyChartPoints(weeklyActivity);
   const { linePath: weeklyLinePath, areaPath: weeklyAreaPath } =
     buildWeeklyChartPaths(weeklyChartPoints);
@@ -348,9 +299,7 @@ function StudentProfile() {
 
   return (
     <div className={styles.wrapper}>
-      {/* =====================================================
-          HERO BANNER
-          ===================================================== */}
+      {/* HERO BANNER */}
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
           <div className={styles.heroTag}>
@@ -443,9 +392,7 @@ function StudentProfile() {
         </div>
       </section>
 
-      {/* =====================================================
-          STATS GRID — 3 ô
-          ===================================================== */}
+      {/* STATS GRID */}
       <section className={styles.statsGrid}>
         {statItems.map((item) => (
           <div key={item.id} className={styles.statCard}>
@@ -477,11 +424,9 @@ function StudentProfile() {
         ))}
       </section>
 
-      {/* =====================================================
-          GRID 2x2
-          ===================================================== */}
+      {/* GRID 2x2 */}
       <section className={styles.dashboardGrid}>
-        {/* 1. Membership - Top Left */}
+        {/* 1. Membership */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -578,7 +523,7 @@ function StudentProfile() {
           )}
         </div>
 
-        {/* 2. Weekly Activity - Top Right */}
+        {/* 2. Weekly Activity */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -739,7 +684,7 @@ function StudentProfile() {
           )}
         </div>
 
-        {/* 3. AI Stats - Bottom Left */}
+        {/* 3. AI Stats */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -753,7 +698,6 @@ function StudentProfile() {
             </div>
           </div>
 
-          {/* AI Stats Grid 2x2 */}
           <div className={styles.aiStatsGridNew}>
             <div className={`${styles.aiStatNew} ${styles.aiStatNewTeal}`}>
               <div className={styles.aiStatNewIcon}>
@@ -804,10 +748,8 @@ function StudentProfile() {
             </div>
           </div>
 
-          {/* Divider */}
           <div className={styles.aiStatsDivider} />
 
-          {/* Listening compact stats */}
           <div className={styles.listeningCompact}>
             <div className={styles.listeningCompactHeader}>
               <FontAwesomeIcon icon={faHeadphones} />
@@ -836,16 +778,20 @@ function StudentProfile() {
           </div>
         </div>
 
-        {/* 4. Top Errors - Bottom Right — List với số thứ tự */}
+        {/* 4. ✅ ERROR IMPROVE - CARD MỚI */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
               <div className={styles.iconBoxRed}>
-                <FontAwesomeIcon icon={faBullseye} />
+                <FontAwesomeIcon icon={faTriangleExclamation} />
               </div>
               <div>
-                <h3 className={styles.cardTitle}>Lỗi thường gặp</h3>
-                <p className={styles.cardSubtitle}>Tất cả lỗi cần cải thiện</p>
+                <h3 className={styles.cardTitle}>Cần Cải Thiện</h3>
+                <p className={styles.cardSubtitle}>
+                  {topErrors.length > 0
+                    ? `${topErrors.length} lỗi cần tập trung`
+                    : "Lỗi ngữ pháp cần chú ý"}
+                </p>
               </div>
             </div>
             {topErrors.length > 0 && (
@@ -858,53 +804,22 @@ function StudentProfile() {
               <div className={styles.emptyIconGreen}>
                 <FontAwesomeIcon icon={faCheckCircle} />
               </div>
-              <h4 className={styles.emptyTitle}>Chưa có dữ liệu</h4>
+              <h4 className={styles.emptyTitle}>Tuyệt vời! 🎉</h4>
               <p className={styles.emptyText}>
-                Luyện tập với AI để nhận phân tích chi tiết!
+                Bạn chưa có lỗi nào cần cải thiện. Tiếp tục luyện tập nhé!
               </p>
             </div>
           ) : (
-            <div className={styles.errorListNumbered}>
-              {topErrors.map((error, index) => {
-                const icon = getErrorIcon(error.errorType);
-                const color = getErrorColor(error.errorType);
-
-                return (
-                  <div
-                    key={index}
-                    className={styles.errorRowNumbered}
-                    style={{ "--item-color": color }}
-                  >
-                    <span className={styles.errorRowIndex}>
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-
-                    <div
-                      className={styles.errorRowIcon}
-                      style={{ background: `${color}15`, color }}
-                    >
-                      <FontAwesomeIcon icon={icon} />
-                    </div>
-
-                    <span className={styles.errorRowName}>
-                      {error.displayName}
-                    </span>
-
-                    <span className={styles.errorRowCount}>
-                      <strong>{error.count}</strong>
-                      <span>lần</span>
-                    </span>
-                  </div>
-                );
-              })}
+            <div className={styles.errorImproveList}>
+              {topErrors.map((error, index) => (
+                <ErrorImproveCard key={index} error={error} index={index + 1} />
+              ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* =====================================================
-          MODALS
-          ===================================================== */}
+      {/* MODALS */}
       <EditProfileModal
         isOpen={showEditModal}
         user={user}
@@ -920,6 +835,180 @@ function StudentProfile() {
         onClose={() => setShowPasswordModal(false)}
         onSuccess={() => setShowPasswordModal(false)}
       />
+    </div>
+  );
+}
+
+// =====================================================
+// ERROR IMPROVE CARD
+// =====================================================
+function ErrorImproveCard({ error, index }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const getSeverityConfig = (severity) => {
+    const map = {
+      HIGH: {
+        bg: "#fef2f2",
+        border: "#fecaca",
+        text: "#dc2626",
+        label: "Cần sửa gấp",
+      },
+      MEDIUM: {
+        bg: "#fffbeb",
+        border: "#fde68a",
+        text: "#d97706",
+        label: "Nên cải thiện",
+      },
+      LOW: {
+        bg: "#f0fdf4",
+        border: "#bbf7d0",
+        text: "#16a34a",
+        label: "Đang tiến bộ",
+      },
+    };
+    return map[severity] || map.MEDIUM;
+  };
+
+  const getMasteryColor = (score) => {
+    if (score < 20) return "#dc2626";
+    if (score < 50) return "#f59e0b";
+    if (score < 80) return "#3b82f6";
+    return "#16a34a";
+  };
+
+  const getTrendConfig = (trend) => {
+    const map = {
+      UP: { icon: faArrowUp, color: "#dc2626", label: "Đang tăng" },
+      DOWN: { icon: faArrowDown, color: "#16a34a", label: "Đang giảm" },
+      STABLE: { icon: faMinus, color: "#64748b", label: "Ổn định" },
+    };
+    return map[trend] || map.STABLE;
+  };
+
+  const severityConfig = getSeverityConfig(error.severity);
+  const masteryColor = getMasteryColor(error.masteryScore || 0);
+  const trendConfig = getTrendConfig(error.trend);
+
+  const handlePractice = () => {
+    window.location.href = `/dashboard/student/ai-practice?focusError=${error.errorSubtype}`;
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    return new Date(dateStr).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const formatTimeAgo = (dateStr) => {
+    if (!dateStr) return "";
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "vừa xong";
+    if (diffMins < 60) return `${diffMins} phút trước`;
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    if (diffDays < 7) return `${diffDays} ngày trước`;
+    return new Date(dateStr).toLocaleDateString("vi-VN");
+  };
+
+  return (
+    <div
+      className={styles.errorImproveCard}
+      style={{ "--severity-color": severityConfig.text }}
+    >
+      {/* HEADER */}
+      <div
+        className={styles.errorImproveHeader}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className={styles.errorImproveMain}>
+          <div className={styles.errorImproveTopRow}>
+            <span className={styles.errorImproveName}>{error.displayName}</span>
+            <span
+              className={styles.errorImproveSeverity}
+              style={{
+                background: severityConfig.bg,
+                borderColor: severityConfig.border,
+                color: severityConfig.text,
+              }}
+            >
+              {severityConfig.label}
+            </span>
+          </div>
+
+          <div className={styles.errorImproveMeta}>
+            <span className={styles.errorImproveCount}>
+              <strong>{error.count}</strong> lần mắc lỗi
+            </span>
+            <span className={styles.errorImproveDot}>•</span>
+            <span
+              className={styles.errorImproveTrend}
+              style={{ color: trendConfig.color }}
+            >
+              <FontAwesomeIcon icon={trendConfig.icon} />
+              {trendConfig.label}
+            </span>
+          </div>
+        </div>
+
+        <button
+          className={styles.errorImproveExpandBtn}
+          aria-label="Xem chi tiết"
+          type="button"
+        >
+          <FontAwesomeIcon
+            icon={faChevronDown}
+            className={isExpanded ? "rotated" : ""}
+          />
+        </button>
+      </div>
+
+      {/* MASTERY PROGRESS BAR */}
+
+      {/* EXPANDED CONTENT */}
+      {isExpanded && (
+        <div className={styles.errorImproveExpanded}>
+          {error.description && (
+            <div className={styles.errorImproveSection}>
+              <span className={styles.errorImproveSectionLabel}>
+                Giải thích
+              </span>
+              <p className={styles.errorImproveSectionText}>
+                {error.description}
+              </p>
+            </div>
+          )}
+
+          {error.example && (
+            <div className={styles.errorImproveSection}>
+              <span className={styles.errorImproveSectionLabel}>Ví dụ</span>
+              <div className={styles.errorImproveExample}>{error.example}</div>
+            </div>
+          )}
+
+          <div className={styles.errorImproveFooterMeta}>
+            {error.firstOccurredAt && (
+              <span>
+                <FontAwesomeIcon icon={faCalendarAlt} />
+                Lần đầu: {formatDate(error.firstOccurredAt)}
+              </span>
+            )}
+            {error.lastOccurredAt && (
+              <span>
+                <FontAwesomeIcon icon={faClock} />
+                Lần cuối: {formatTimeAgo(error.lastOccurredAt)}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

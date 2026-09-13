@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -102,8 +103,14 @@ public class StudentStatisticsResponse {
     }
 
     /**
-     * ErrorStat gọn: chỉ tên + số lần + mức độ
-     * KHÔNG có example, suggestion, explanation
+     * ErrorStat — MỞ RỘNG để giúp học sinh CẢI THIỆN
+     *
+     * Giữ nguyên các field cũ + thêm:
+     * - Phân loại chi tiết: errorCategory, errorSubtype, errorKey
+     * - Giải thích: description, example, suggestion
+     * - Tiến bộ: masteryScore, masteryLevel
+     * - Xu hướng: trend, severity
+     * - Thời gian: firstOccurredAt, lastOccurredAt
      */
     @Getter
     @Setter
@@ -111,12 +118,35 @@ public class StudentStatisticsResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ErrorStat {
+        // ============ CŨ — GIỮ NGUYÊN ============
         private String errorType;
         private String displayName;
         private Long count;
         private Long highSeverity;
         private Long mediumSeverity;
         private Long lowSeverity;
+
+        // ============ MỚI — PHÂN LOẠI CHI TIẾT ============
+        private String errorCategory;
+        private String errorSubtype;
+        private String errorKey;
+
+        // ============ MỚI — GIẢI THÍCH ============
+        private String description;
+        private String example;
+        private String suggestion;
+
+        // ============ MỚI — TIẾN BỘ ============
+        private Integer masteryScore;
+        private String masteryLevel;
+
+        // ============ MỚI — XU HƯỚNG ============
+        private String trend;
+        private String severity;
+
+        // ============ MỚI — THỜI GIAN ============
+        private LocalDateTime firstOccurredAt;
+        private LocalDateTime lastOccurredAt;
     }
 
     @Getter

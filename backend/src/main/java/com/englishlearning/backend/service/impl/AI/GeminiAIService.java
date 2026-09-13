@@ -116,8 +116,9 @@ public class GeminiAIService implements AIService {
         try {
             String vocabularyStr = request.getVocabularyWords() != null ?
                     String.join(", ", request.getVocabularyWords()) : null;
-            String weaknessesStr = request.getWeaknesses() != null ?
-                    String.join(", ", request.getWeaknesses()) : null;
+
+            // ✅ Format weaknesses đẹp + đánh số ưu tiên
+            String weaknessesStr = formatWeaknesses(request.getWeaknesses());
 
             String prompt = PromptConstants.formatEvaluateAndGeneratePrompt(
                     request.getVietnameseSentence(),
@@ -126,8 +127,12 @@ public class GeminiAIService implements AIService {
                     request.getLevel(),
                     request.getTopic(),
                     vocabularyStr,
-                    weaknessesStr
+                    weaknessesStr,
+                    request.getSentenceType()   // ← THÊM MỚI
             );
+
+// ✅ Log để debug
+            log.info("📤 [EVALUATE_AND_GENERATE] sentenceType: {}", request.getSentenceType());
 
             String response = callGeminiWithRetry(prompt, 3);
             return parseEvaluateAndGenerateResponse(response);
@@ -151,7 +156,7 @@ public class GeminiAIService implements AIService {
                                 .build()
                 ))
                 .generationConfig(GenerationConfig.builder()
-                        .temperature(0.1)
+                        .temperature(0.7)
                         .maxOutputTokens(4096)
                         .responseMimeType("application/json")
                         .build())
@@ -265,7 +270,7 @@ public class GeminiAIService implements AIService {
 
                 // ✅ Fallback nếu Gemini quên category
                 if (errorCategory == null || errorCategory.isEmpty()) {
-                    errorCategory = errorType; // dùng errorType làm category
+                    errorCategory = errorType;
                 }
                 // ✅ Fallback nếu Gemini quên subtype
                 if (errorSubtype == null || errorSubtype.isEmpty()) {
@@ -275,8 +280,8 @@ public class GeminiAIService implements AIService {
 
                 errors.add(AIErrorResponse.builder()
                         .errorType(errorType)
-                        .errorCategory(errorCategory)     // ← MỚI
-                        .errorSubtype(errorSubtype)       // ← MỚI
+                        .errorCategory(errorCategory)
+                        .errorSubtype(errorSubtype)
                         .userText(userText != null ? userText : "")
                         .correctText(correctText != null ? correctText : "")
                         .explanation(explanation)
@@ -346,6 +351,32 @@ public class GeminiAIService implements AIService {
 
         log.error("❌ All {} retry attempts failed. Last error: {}", maxRetries, lastError);
         throw new BusinessException(ErrorCode.AI_SERVICE_ERROR, "AI service failed after " + maxRetries + " retries: " + lastError);
+    }
+
+    /**
+     * ✅ Format danh sách weaknesses cho prompt AI
+     *
+     * Input:  ["TENSE_SUBJECT_VERB_AGREEMENT (4 lần)", "ARTICLE_THE (3 lần)"]
+     * Output:
+     *   1. TENSE_SUBJECT_VERB_AGREEMENT (4 lần) ← ƯU TIÊN
+     *   2. ARTICLE_THE (3 lần)
+     */
+    private String formatWeaknesses(List<String> weaknesses) {
+        if (weaknesses == null || weaknesses.isEmpty()) {
+            return "Không có";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < weaknesses.size(); i++) {
+            sb.append(i + 1).append(". ").append(weaknesses.get(i));
+            if (i == 0) {
+                sb.append(" ← ƯU TIÊN");
+            }
+            if (i < weaknesses.size() - 1) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 
     private AIEvaluateResponse createSafeFallbackResponse(AIEvaluateRequest request) {

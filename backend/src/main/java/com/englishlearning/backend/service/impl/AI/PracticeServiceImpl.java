@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -79,7 +80,8 @@ public class PracticeServiceImpl implements PracticeService {
         Long studentId = student.getId();
         log.info("Found student: {}, id: {}", student.getUser().getFullName(), studentId);
 
-        List<String> weaknesses = getStudentWeaknesses(studentId);
+        // ✅ Chat mới → chưa có lỗi → không cần weaknesses
+        List<String> weaknesses = new ArrayList<>();
 
         AIGenerateRequest aiRequest = AIGenerateRequest.builder()
                 .level(request.getLevel())
@@ -168,7 +170,8 @@ public class PracticeServiceImpl implements PracticeService {
         answer.setAnsweredAt(LocalDateTime.now());
         answerRepository.save(answer);
 
-        List<String> weaknesses = getStudentWeaknesses(studentId);
+        // ✅ Lấy lỗi từ CHÍNH cuộc chat hiện tại (không phải toàn bộ lịch sử)
+        List<String> weaknesses = getWeaknessesInChat(chat.getId());
 
         AIEvaluateRequest aiRequest = AIEvaluateRequest.builder()
                 .vietnameseSentence(turn.getVietnameseSentence())
@@ -178,6 +181,8 @@ public class PracticeServiceImpl implements PracticeService {
                 .topic(chat.getTopic())
                 .vocabularyWords(chat.getVocabularyWords())
                 .weaknesses(weaknesses)
+                // ✅ THÊM MỚI: Truyền sentenceType của chat để AI sinh câu tiếp cùng loại
+                .sentenceType(chat.getSentenceType().name())
                 .build();
 
         long startTime = System.currentTimeMillis();
@@ -502,15 +507,34 @@ public class PracticeServiceImpl implements PracticeService {
         }
     }
 
-    private List<String> getStudentWeaknesses(Long studentId) {
-        List<StudentAIError> weaknesses = studentAIErrorRepository
-                .findByStudentIdOrderByMasteryScoreAsc(studentId);
+    // ============ ✅ Lấy điểm yếu từ CHÍNH cuộc chat hiện tại ============
+    private List<String> getWeaknessesInChat(Long chatId) {
+        // Query tất cả lỗi trong chat này
+        List<AIError> errorsInChat = errorRepository.findByChatId(chatId);
 
-        return weaknesses.stream()
-                .filter(e -> e.getMasteryScore() < PracticeConstants.WEAKNESS_THRESHOLD)
-                .limit(PracticeConstants.MAX_WEAKNESSES)
-                .map(StudentAIError::getErrorType)
+        if (errorsInChat.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Đếm số lần mỗi errorKey
+        Map<String, Long> errorCountMap = errorsInChat.stream()
+                .filter(e -> e.getErrorKey() != null && !e.getErrorKey().isEmpty())
+                .collect(Collectors.groupingBy(
+                        AIError::getErrorKey,
+                        Collectors.counting()
+                ));
+
+        // ✅ Filter: Bỏ lỗi mắc < 2 lần, sort giảm dần, lấy TOP 3
+        // ✅ Format: "ERROR_KEY (N lần)"
+        List<String> result = errorCountMap.entrySet().stream()
+                .filter(entry -> entry.getValue() >= 2)              // Bỏ lỗi mắc 1 lần
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(3)                                            // TOP 3
+                .map(entry -> entry.getKey() + " (" + entry.getValue() + " lần)")
                 .collect(Collectors.toList());
+
+        log.info("✅ Weaknesses in chat {}: {}", chatId, result);
+        return result;
     }
 
     // ============ UPDATE WEAKNESS ============
@@ -601,7 +625,7 @@ public class PracticeServiceImpl implements PracticeService {
         }
     }
 
-    // ===== ✅ HELPER MỚI: Safe category =====
+    // ===== ✅ HELPER: Safe category =====
     private String safeCategory(String raw) {
         if (raw == null || raw.isBlank()) {
             return "TENSE";
@@ -616,7 +640,7 @@ public class PracticeServiceImpl implements PracticeService {
         }
     }
 
-    // ===== ✅ HELPER MỚI: Safe subtype =====
+    // ===== ✅ HELPER: Safe subtype =====
     private String safeSubtype(String raw) {
         if (raw == null || raw.isBlank()) {
             return "MIXED_TENSE";

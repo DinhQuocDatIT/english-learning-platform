@@ -22,4 +22,5 @@ public class AIEvaluateRequest {
     private String topic;
     private List<String> vocabularyWords;
     private List<String> weaknesses;
+    private String sentenceType;
 }

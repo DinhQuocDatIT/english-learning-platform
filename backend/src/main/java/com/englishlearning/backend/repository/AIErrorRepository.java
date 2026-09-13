@@ -40,4 +40,11 @@ public interface AIErrorRepository extends JpaRepository<AIError, Long> {
         ORDER BY e.createdAt DESC
     """)
     List<AIError> findAllByPracticeChatId(@Param("practiceChatId") Long practiceChatId);
+
+    @Query("""
+        SELECT ae FROM AIError ae
+        WHERE ae.evaluation.answer.turn.practiceChat.id = :chatId
+        ORDER BY ae.createdAt ASC
+    """)
+    List<AIError> findByChatId(@Param("chatId") Long chatId);
 }

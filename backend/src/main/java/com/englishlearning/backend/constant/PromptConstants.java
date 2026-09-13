@@ -5,7 +5,7 @@ import java.util.Map;
 public class PromptConstants {
 
     // ========================================
-    // 1. LEVEL DESCRIPTIONS (Mô tả trình độ)
+    // 1. LEVEL DESCRIPTIONS
     // ========================================
     public static final Map<String, String> LEVEL = Map.of(
             "A1", """
@@ -15,7 +15,6 @@ public class PromptConstants {
             - Từ vựng: Gia đình, thức ăn, trường học
             - Độ dài: 5-8 từ
             """,
-
             "A2", """
             TRÌNH ĐỘ A2 (Sơ cấp+):
             - Thì: Hiện tại tiếp diễn, Quá khứ đơn
@@ -23,7 +22,6 @@ public class PromptConstants {
             - Từ vựng: Du lịch, mua sắm, thói quen
             - Độ dài: 8-12 từ
             """,
-
             "B1", """
             TRÌNH ĐỘ B1 (Trung cấp):
             - Thì: Hiện tại hoàn thành, Quá khứ hoàn thành
@@ -31,7 +29,6 @@ public class PromptConstants {
             - Từ vựng: Công việc, sức khỏe, giáo dục
             - Độ dài: 12-15 từ
             """,
-
             "B2", """
             TRÌNH ĐỘ B2 (Trung cấp+):
             - Thì: Tương lai hoàn thành, Quá khứ tiếp diễn
@@ -39,7 +36,6 @@ public class PromptConstants {
             - Từ vựng: Học thuật, môi trường, xã hội
             - Độ dài: 15-18 từ
             """,
-
             "C1", """
             TRÌNH ĐỘ C1 (Cao cấp):
             - Thì: Đảo ngữ, câu chẻ
@@ -47,7 +43,6 @@ public class PromptConstants {
             - Từ vựng: Thành ngữ, collocations
             - Độ dài: 18-20 từ
             """,
-
             "C2", """
             TRÌNH ĐỘ C2 (Thành thạo):
             - Thì: Subjunctive, inversion
@@ -58,7 +53,7 @@ public class PromptConstants {
     );
 
     // ========================================
-    // 2. TOPIC DESCRIPTIONS (Mô tả chủ đề)
+    // 2. TOPIC DESCRIPTIONS
     // ========================================
     public static final Map<String, String> TOPIC = Map.ofEntries(
             Map.entry("FAMILY", """
@@ -67,91 +62,78 @@ public class PromptConstants {
             Cấu trúc: describe family members, family activities
             Ví dụ: "My family has 4 members."
             """),
-
             Map.entry("WORK", """
             CHỦ ĐỀ: CÔNG VIỆC
             Từ vựng: job, career, office, colleague, boss, salary
             Cấu trúc: describe daily work, job responsibilities
             Ví dụ: "I work as a software engineer."
             """),
-
             Map.entry("TRAVEL", """
             CHỦ ĐỀ: DU LỊCH
             Từ vựng: hotel, flight, ticket, reservation, airport, luggage
             Cấu trúc: make reservations, ask for directions
             Ví dụ: "I have booked a room at the hotel."
             """),
-
             Map.entry("SHOPPING", """
             CHỦ ĐỀ: MUA SẮM
             Từ vựng: supermarket, price, discount, receipt, cash
             Cấu trúc: ask for prices, describe products
             Ví dụ: "How much does this cost?"
             """),
-
             Map.entry("FOOD", """
             CHỦ ĐỀ: ĐỒ ĂN
             Từ vựng: restaurant, menu, delicious, cook, ingredients
             Cấu trúc: order food, describe cooking
             Ví dụ: "I would like to order a pizza."
             """),
-
             Map.entry("HEALTH", """
             CHỦ ĐỀ: SỨC KHỎE
             Từ vựng: doctor, hospital, medicine, exercise, healthy
             Cấu trúc: describe symptoms, give advice
             Ví dụ: "I have a headache."
             """),
-
             Map.entry("EDUCATION", """
             CHỦ ĐỀ: GIÁO DỤC
             Từ vựng: school, university, teacher, student, exam
             Cấu trúc: talk about studies, describe school life
             Ví dụ: "I am studying English."
             """),
-
             Map.entry("TECHNOLOGY", """
             CHỦ ĐỀ: CÔNG NGHỆ
             Từ vựng: computer, smartphone, internet, software, app
             Cấu trúc: describe using technology, talk about gadgets
             Ví dụ: "I use my smartphone every day."
             """),
-
             Map.entry("HOBBIES", """
             CHỦ ĐỀ: SỞ THÍCH
             Từ vựng: hobby, sport, music, reading, painting
             Cấu trúc: describe free time activities
             Ví dụ: "I enjoy reading books."
             """),
-
             Map.entry("DAILY_ROUTINE", """
             CHỦ ĐỀ: THÓI QUEN HÀNG NGÀY
             Từ vựng: morning, afternoon, evening, breakfast, work
             Cấu trúc: describe daily schedule
             Ví dụ: "I wake up at 6 AM."
             """),
-
             Map.entry("DAILY_CONVERSATION", """
             CHỦ ĐỀ: HỘI THOẠI HÀNG NGÀY
             Từ vựng: hello, goodbye, thank you, sorry, please, excuse me
             Cấu trúc: greetings, introductions, basic conversations
             Ví dụ: "How are you today?"
             """),
-
             Map.entry("RESTAURANT", """
             CHỦ ĐỀ: NHÀ HÀNG
             Từ vựng: menu, order, bill, waiter, table, reservation, dish, drink
             Cấu trúc: ordering food, asking about menu, paying bill
             Ví dụ: "I would like to order a steak."
             """),
-
             Map.entry("SCHOOL", """
             CHỦ ĐỀ: TRƯỜNG HỌC
             Từ vựng: classroom, teacher, student, homework, exam, lesson, subject
             Cấu trúc: talking about school subjects, daily school routine
             Ví dụ: "I have Math class at 8 AM."
             """),
-
             Map.entry("FRIENDS", """
             CHỦ ĐỀ: BẠN BÈ
             Từ vựng: friend, friendship, hang out, chat, socialize, trust, share
@@ -161,7 +143,7 @@ public class PromptConstants {
     );
 
     // ========================================
-    // 3. ERROR TAXONOMY (Phân loại lỗi chi tiết)
+    // 3. ERROR TAXONOMY
     // ========================================
     public static final String ERROR_TAXONOMY = """
         
@@ -268,6 +250,20 @@ public class PromptConstants {
         - Từ vựng: %s
         - Điểm yếu: %s
         
+        === GIẢI THÍCH LOẠI CÂU (QUAN TRỌNG) ===
+        - QUESTION : Câu HỎI — PHẢI có dấu "?" ở cuối và có từ để hỏi
+          VD: "Bạn ăn sáng lúc mấy giờ?", "Cô ấy tên là gì?"
+        
+        - ANSWER   : Câu KHẲNG ĐỊNH (câu trả lời) — KHÔNG có dấu "?", KHÔNG có từ để hỏi
+          VD: "Tôi ăn sáng lúc 7 giờ sáng.", "Cô ấy tên là Lan."
+        
+        - RANDOM   : Ngẫu nhiên — chọn QUESTION hoặc ANSWER tùy ý
+        
+        ⚠️ BẮT BUỘC PHẢI TUÂN THỦ:
+        - Nếu loại câu = "QUESTION" → câu tiếng Việt PHẢI có dấu "?" và từ để hỏi
+        - Nếu loại câu = "ANSWER" → câu tiếng Việt KHÔNG được có dấu "?", KHÔNG có từ để hỏi
+        - Nếu loại câu = "RANDOM" → chọn ngẫu nhiên 1 trong 2
+        
         === HƯỚNG DẪN ===
         %s
         %s
@@ -276,7 +272,7 @@ public class PromptConstants {
         {
           "vietnameseSentence": "câu tiếng Việt",
           "expectedAnswer": "câu tiếng Anh đúng",
-          "sentenceType": "QUESTION|ANSWER"
+          "sentenceType": "QUESTION|ANSWER|RANDOM"
         }
         """;
 
@@ -342,6 +338,24 @@ public class PromptConstants {
         - Chủ đề: %s
         - Từ vựng yêu cầu: %s
         - Điểm yếu cần tập trung: %s
+        - Loại câu của bài luyện tập: %s
+        
+        === GIẢI THÍCH LOẠI CÂU (BẮT BUỘC TUÂN THỦ) ===
+        "Loại câu của bài luyện tập" ở phần NGỮ CẢNH ĐÁNH GIÁ có thể là:
+        
+        - QUESTION : Câu HỎI — PHẢI có dấu "?" ở cuối và có từ để hỏi
+          VD: "Bạn ăn sáng lúc mấy giờ?", "Cô ấy tên là gì?"
+        
+        - ANSWER   : Câu KHẲNG ĐỊNH (câu trả lời) — KHÔNG có dấu "?", KHÔNG có từ để hỏi
+          VD: "Tôi ăn sáng lúc 7 giờ sáng.", "Cô ấy tên là Lan."
+        
+        - RANDOM   : Ngẫu nhiên — chọn QUESTION hoặc ANSWER tùy ý
+        
+        ⚠️ BẮT BUỘC:
+        - Câu tiếp theo PHẢI CÙNG LOẠI với "Loại câu của bài luyện tập"
+        - Nếu loại câu = "QUESTION" → câu tiếp theo PHẢI có dấu "?" và từ để hỏi
+        - Nếu loại câu = "ANSWER" → câu tiếp theo KHÔNG được có dấu "?", KHÔNG có từ để hỏi
+        - Nếu loại câu = "RANDOM" → chọn ngẫu nhiên 1 trong 2
         
         === HƯỚNG DẪN THEO TRÌNH ĐỘ ===
         %s
@@ -373,7 +387,18 @@ public class PromptConstants {
         3. Luôn sử dụng từ vựng đã chỉ định (nếu có)
         4. Câu tiếp theo PHẢI khác hoàn toàn với câu trước
         5. Độ dài câu phù hợp với level
-        6. Nếu học viên có điểm yếu: ưu tiên tạo câu sửa lỗi đó
+        6. Câu tiếp theo PHẢI CÙNG LOẠI với "Loại câu của bài luyện tập"
+        
+        === HƯỚNG DẪN ƯU TIÊN LỖI ===
+        Danh sách "Điểm yếu cần tập trung" đã được SẮP XẾP theo mức độ yếu:
+        - #1 = lỗi yếu NHẤT → sinh 2-3 câu về lỗi này
+        - #2, #3 = lỗi ít hơn → sinh 1-2 câu mỗi lỗi
+        - Nếu chỉ có 1 lỗi → tất cả câu tiếp theo đều về lỗi đó
+        
+        ⚠️ LƯU Ý QUAN TRỌNG:
+        - Ưu tiên lỗi có số lần mắc CAO NHẤT
+        - Nếu danh sách rỗng → sinh câu random theo level + topic
+        - KHÔNG sinh câu về lỗi không có trong danh sách
         
         %s
         
@@ -440,7 +465,7 @@ public class PromptConstants {
           "nextQuestion": {
             "vietnameseSentence": "câu tiếp theo (TIẾNG VIỆT)",
             "expectedAnswer": "đáp án (TIẾNG ANH)",
-            "sentenceType": "QUESTION|ANSWER"
+            "sentenceType": "QUESTION|ANSWER|RANDOM"
           }
         }
         """;
@@ -484,14 +509,19 @@ public class PromptConstants {
                 expectedAnswer,
                 level,
                 getLevelDescription(level),
-                ERROR_TAXONOMY   // ← ✅ THÊM TAXONOMY
+                ERROR_TAXONOMY
         );
     }
 
+    /**
+     * ✅ Format prompt cho evaluate + generate
+     * ĐÃ THÊM parameter sentenceType để AI sinh câu tiếp cùng loại
+     */
     public static String formatEvaluateAndGeneratePrompt(
             String vietnameseSentence, String studentAnswer,
             String expectedAnswer, String level, String topic,
-            String vocabularyWords, String weaknesses) {
+            String vocabularyWords, String weaknesses,
+            String sentenceType) {
 
         return String.format(
                 EVALUATE_AND_GENERATE_PROMPT_TEMPLATE,
@@ -502,9 +532,10 @@ public class PromptConstants {
                 topic,
                 vocabularyWords != null && !vocabularyWords.isEmpty() ? vocabularyWords : "Không có",
                 weaknesses != null && !weaknesses.isEmpty() ? weaknesses : "Không có",
+                sentenceType != null && !sentenceType.isEmpty() ? sentenceType : "RANDOM",
                 getLevelDescription(level),
                 getTopicDescription(topic),
-                ERROR_TAXONOMY   // ← ✅ THÊM TAXONOMY
+                ERROR_TAXONOMY
         );
     }
 }

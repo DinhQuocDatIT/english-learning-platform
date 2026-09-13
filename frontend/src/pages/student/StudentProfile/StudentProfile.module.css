@@ -1700,3 +1700,445 @@
     font-size: 10px;
   }
 }
+/* =====================================================
+   ERROR IMPROVE CARD — FINAL
+   ===================================================== */
+
+/* ===== CONTAINER ===== */
+.errorImproveList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.errorImproveList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.errorImproveList::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.errorImproveList::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.errorImproveList::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ===== CARD ===== */
+.errorImproveCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid var(--color-primary);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.errorImproveCard * {
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.errorImproveCard:hover {
+  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.08);
+  border-color: #cbd5e1;
+}
+
+/* ===== HEADER ===== */
+.errorImproveHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveIndex {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  background: #f1f5f9;
+  color: #64748b !important;
+  border-radius: 6px;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  font-family: "Courier New", monospace !important;
+  line-height: 1 !important;
+  letter-spacing: -0.5px;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveMain {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveTopRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 4px 0;
+  padding: 0;
+}
+
+.errorImproveName {
+  flex: 1;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  line-height: 1.4 !important;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveSeverity {
+  display: inline-flex !important;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid;
+  border-radius: 20px;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+  line-height: 1.3 !important;
+  margin: 0;
+}
+
+.errorImproveMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  line-height: 1.4 !important;
+}
+
+.errorImproveMeta span {
+  font-size: 11px !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveCount {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.errorImproveCount strong {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+}
+
+.errorImproveDot {
+  color: #cbd5e1 !important;
+  font-size: 11px !important;
+}
+
+.errorImproveTrend {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 3px;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+}
+
+.errorImproveTrend svg {
+  font-size: 9px !important;
+}
+
+.errorImproveExpandBtn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  background: #f1f5f9;
+  color: #64748b !important;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveExpandBtn:hover {
+  background: #e9f8f5;
+  color: #0ea792 !important;
+}
+
+.errorImproveExpandBtn svg {
+  transition: transform 0.2s ease;
+  font-size: 11px !important;
+}
+
+.errorImproveExpandBtn svg.rotated {
+  transform: rotate(180deg);
+}
+
+/* ===== MASTERY PROGRESS ===== */
+.errorImproveMastery {
+  margin: 10px 0 0 0;
+  padding: 0;
+}
+
+.errorImproveMasteryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 6px 0;
+  padding: 0;
+  line-height: 1.4 !important;
+}
+
+.errorImproveMasteryHeader span {
+  color: #64748b !important;
+  font-weight: 500 !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveMasteryHeader strong {
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveMasteryTrack {
+  width: 100%;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 0 0 4px 0;
+  padding: 0;
+}
+
+.errorImproveMasteryFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveMasteryLabel {
+  display: inline-block !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: #94a3b8 !important;
+  letter-spacing: 0.3px;
+  line-height: 1.3 !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== EXPANDED ===== */
+.errorImproveExpanded {
+  margin: 12px 0 0 0;
+  padding: 12px 0 0 0;
+  border-top: 1px dashed #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: errorImproveFadeIn 0.25s ease;
+}
+
+@keyframes errorImproveFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.errorImproveSection {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveSectionLabel {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #0ea792 !important;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1.3 !important;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveSectionLabel svg {
+  font-size: 10px !important;
+}
+
+.errorImproveSectionText {
+  margin: 0 !important;
+  padding: 8px 12px !important;
+  background: white;
+
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  color: #475569 !important;
+  font-weight: 400 !important;
+}
+
+.errorImproveExample {
+  padding: 8px 12px;
+  background: #f0fdf9;
+  border-left: 3px solid #0ea792;
+
+  font-family: "Courier New", monospace !important;
+  font-size: 12px !important;
+  color: #0d9488 !important;
+  font-weight: 500 !important;
+  word-break: break-word;
+  line-height: 1.5 !important;
+  margin: 0;
+}
+
+/* ===== FOOTER META ===== */
+.errorImproveFooterMeta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  margin: 0;
+  line-height: 1.3 !important;
+}
+
+.errorImproveFooterMeta span {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px !important;
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  margin: 0;
+  padding: 0;
+}
+
+.errorImproveFooterMeta svg {
+  font-size: 10px !important;
+}
+
+/* ===== ACTIONS ===== */
+.errorImproveActions {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 0 0;
+  padding: 0;
+}
+
+.errorImprovePracticeBtn,
+.errorImproveTheoryBtn {
+  flex: 1;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  line-height: 1.3 !important;
+  margin: 0;
+}
+
+.errorImprovePracticeBtn {
+  background: #0ea792;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(14, 167, 146, 0.25);
+}
+
+.errorImprovePracticeBtn:hover {
+  background: #0d9488;
+  box-shadow: 0 4px 10px rgba(14, 167, 146, 0.35);
+  transform: translateY(-1px);
+}
+
+.errorImproveTheoryBtn {
+  background: #f1f5f9;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0;
+}
+
+.errorImproveTheoryBtn:hover {
+  background: #e9f8f5;
+  color: #0ea792 !important;
+  border-color: #a9ddd5;
+}
+
+.errorImproveActions svg {
+  font-size: 10px !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .errorImproveList {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .errorImproveCard {
+    padding: 10px 12px;
+  }
+
+  .errorImproveActions {
+    flex-direction: column;
+  }
+
+  .errorImproveExpandBtn {
+    width: 24px;
+    height: 24px;
+  }
+}
