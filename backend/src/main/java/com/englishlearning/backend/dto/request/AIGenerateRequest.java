@@ -20,4 +20,5 @@ public class AIGenerateRequest {
     private String topic;
     private List<String> vocabularyWords;
     private List<String> weaknesses;
+    List<String> previousSentences;
 }

@@ -1,6 +1,7 @@
 package com.englishlearning.backend.service.impl.AI;
 
 import com.englishlearning.backend.constant.PracticeConstants;
+import com.englishlearning.backend.constant.PromptConstants;
 import com.englishlearning.backend.dto.request.AIEvaluateRequest;
 import com.englishlearning.backend.dto.request.AIGenerateRequest;
 import com.englishlearning.backend.dto.request.CreatePracticeRequest;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -55,7 +57,6 @@ public class PracticeServiceImpl implements PracticeService {
     private final PricingService pricingService;
     private final StudentMembershipService studentMembershipService;
     private final ObjectMapper objectMapper;
-
 
     // ===== CREATE PRACTICE =====
     @Override
@@ -83,12 +84,16 @@ public class PracticeServiceImpl implements PracticeService {
         // ✅ Chat mới → chưa có lỗi → không cần weaknesses
         List<String> weaknesses = new ArrayList<>();
 
+        // ✅ Chat mới → chưa có câu cũ → previousSentences rỗng
+        List<String> previousSentences = new ArrayList<>();
+
         AIGenerateRequest aiRequest = AIGenerateRequest.builder()
                 .level(request.getLevel())
                 .sentenceType(request.getSentenceType())
                 .topic(request.getTopic())
                 .vocabularyWords(request.getVocabularyWords())
                 .weaknesses(weaknesses)
+                .previousSentences(previousSentences)   // ✅ THÊM MỚI
                 .build();
 
         AIGenerateResponse aiResponse = aiService.generateSentence(aiRequest);
@@ -173,6 +178,12 @@ public class PracticeServiceImpl implements PracticeService {
         // ✅ Lấy lỗi từ CHÍNH cuộc chat hiện tại (không phải toàn bộ lịch sử)
         List<String> weaknesses = getWeaknessesInChat(chat.getId());
 
+        // ✅ Lấy 10 câu GẦN NHẤT để AI tránh lặp lại
+        List<String> previousSentences = getPreviousSentences(chat.getId());
+
+        log.info("📤 Submitting - weaknesses: {}, previousSentences: {}",
+                weaknesses.size(), previousSentences.size());
+
         AIEvaluateRequest aiRequest = AIEvaluateRequest.builder()
                 .vietnameseSentence(turn.getVietnameseSentence())
                 .expectedAnswer(turn.getExpectedAnswer())
@@ -181,14 +192,13 @@ public class PracticeServiceImpl implements PracticeService {
                 .topic(chat.getTopic())
                 .vocabularyWords(chat.getVocabularyWords())
                 .weaknesses(weaknesses)
-                // ✅ THÊM MỚI: Truyền sentenceType của chat để AI sinh câu tiếp cùng loại
                 .sentenceType(chat.getSentenceType().name())
+                .previousSentences(previousSentences)   // ✅ THÊM MỚI
                 .build();
 
         long startTime = System.currentTimeMillis();
         AIEvaluateResponse aiResponse = aiService.evaluateAndGenerate(aiRequest);
         long responseTime = System.currentTimeMillis() - startTime;
-
 
         GeminiUsageMetadata usage = null;
         String modelName = "gemini-3.5-flash-lite";
@@ -534,6 +544,28 @@ public class PracticeServiceImpl implements PracticeService {
                 .collect(Collectors.toList());
 
         log.info("✅ Weaknesses in chat {}: {}", chatId, result);
+        return result;
+    }
+
+    // ============ ✅ Lấy N câu GẦN NHẤT để AI tránh lặp ============
+    private List<String> getPreviousSentences(Long chatId) {
+        List<AIPracticeTurn> allTurns = turnRepository
+                .findByPracticeChatIdOrderByQuestionOrderAsc(chatId);
+
+        if (allTurns.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        int fromIndex = Math.max(0, allTurns.size() - PromptConstants.MAX_PREVIOUS_SENTENCES);
+
+        List<String> result = allTurns.subList(fromIndex, allTurns.size())
+                .stream()
+                .map(AIPracticeTurn::getVietnameseSentence)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        log.info("✅ Previous sentences ({} câu gần nhất) in chat {}: {}",
+                result.size(), chatId, result);
         return result;
     }
 

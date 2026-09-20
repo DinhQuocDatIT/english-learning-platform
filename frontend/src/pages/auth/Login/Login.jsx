@@ -207,7 +207,7 @@ function Login() {
           <div className={styles.formGroup}>
             <div className={styles.row}>
               <label>Mật khẩu</label>
-              <a href="/forgot-password">Quên mật khẩu?</a>
+              {/* <a href="/forgot-password">Quên mật khẩu?</a> */}
             </div>
             <input
               name="password"
@@ -225,10 +225,10 @@ function Login() {
             )}
           </div>
 
-          <div className={styles.remember}>
+          {/* <div className={styles.remember}>
             <input type="checkbox" id="remember" />
             <label htmlFor="remember">Ghi nhớ đăng nhập</label>
-          </div>
+          </div> */}
 
           <button type="submit" className={styles.loginBtn}>
             Đăng nhập <FontAwesomeIcon icon={faArrowRight} />

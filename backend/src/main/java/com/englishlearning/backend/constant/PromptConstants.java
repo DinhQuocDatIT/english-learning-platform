@@ -1,8 +1,18 @@
 package com.englishlearning.backend.constant;
 
+import java.util.List;
 import java.util.Map;
 
 public class PromptConstants {
+
+    // ========================================
+    // 0. CONSTANTS
+    // ========================================
+    /**
+     * ✅ Số câu gần nhất truyền vào prompt để chống trùng lặp
+     * Trade-off: token tăng ~250 tokens/câu (~8% input) nhưng chống trùng ~97%
+     */
+    public static final int MAX_PREVIOUS_SENTENCES = 10;
 
     // ========================================
     // 1. LEVEL DESCRIPTIONS
@@ -143,7 +153,87 @@ public class PromptConstants {
     );
 
     // ========================================
-    // 3. ERROR TAXONOMY
+    // 3. SENTENCE TYPE DESCRIPTIONS (TIẾNG VIỆT)
+    // ========================================
+    /**
+     * ✅ Mô tả chi tiết sentenceType bằng TIẾNG VIỆT
+     * Giúp AI hiểu rõ "ANSWER" = KHÔNG PHẢI CÂU HỎI (trần thuật + cầu khiến + cảm thán)
+     */
+    public static final Map<String, String> SENTENCE_TYPE_DESC = Map.of(
+            "QUESTION", """
+                ═══════════════════════════════════════
+                LOẠI CÂU: NGHI VẤN (CÂU HỎI)
+                ═══════════════════════════════════════
+                ✅ BẮT BUỘC:
+                   - PHẢI có dấu "?" ở cuối câu
+                   - PHẢI có từ để hỏi: ai, gì, nào, đâu, khi nào, tại sao,
+                     như thế nào, bao nhiêu, mấy, có...không, chưa
+                
+                ✅ VÍ DỤ ĐÚNG:
+                   - "Bạn ăn cơm chưa?"
+                   - "Cô ấy tên là gì?"
+                   - "Bạn đi đâu đấy?"
+                   - "Hôm nay trời có mưa không?"
+                
+                ❌ VÍ DỤ SAI (không phải câu hỏi):
+                   - "Mình ăn cơm rồi."        (đây là trần thuật)
+                   - "Hãy ăn cơm đi."           (đây là cầu khiến)
+                   - "Ôi cơm ngon quá!"         (đây là cảm thán)
+                """,
+            "ANSWER", """
+                ═══════════════════════════════════════
+                LOẠI CÂU: KHÔNG PHẢI CÂU HỎI
+                ═══════════════════════════════════════
+                ⚠️ ĐÂY LÀ LOẠI CÂU BAO GỒM 3 DẠNG SAU:
+                
+                ┌─────────────────────────────────────┐
+                │ 1. TRẦN THUẬT (câu kể/thông báo)   │
+                │    - Mục đích: Kể, thông báo, mô tả │
+                │    - Dấu hiệu: KHÔNG có "?"         │
+                │    - VD: "Mình đã ăn cơm rồi."      │
+                │         "Cô ấy tên là Lan."          │
+                ├─────────────────────────────────────┤
+                │ 2. CẦU KHIẾN (yêu cầu/ra lệnh)     │
+                │    - Mục đích: Yêu cầu, đề nghị     │
+                │    - Dấu hiệu: có "hãy", "đừng",    │
+                │      "xin", "vui lòng"              │
+                │    - VD: "Hãy ăn cơm đi."           │
+                │         "Đừng nói chuyện nữa."       │
+                ├─────────────────────────────────────┤
+                │ 3. CẢM THÁN (bộc lộ cảm xúc)       │
+                │    - Mục đích: Bộc lộ cảm xúc       │
+                │    - Dấu hiệu: có "!" + từ cảm thán │
+                │      (ôi, chao ôi, quá, lắm, thật,  │
+                │       ghê, tuyệt)                    │
+                │    - VD: "Ôi, cơm ngon quá!"        │
+                │         "Trời ơi, đẹp thật!"         │
+                └─────────────────────────────────────┘
+                
+                ✅ BẮT BUỘC:
+                   - KHÔNG được có dấu "?" ở cuối câu
+                   - KHÔNG được có từ để hỏi (ai, gì, nào, đâu, khi nào,
+                     tại sao, như thế nào, bao nhiêu, mấy)
+                
+                ❌ VÍ DỤ SAI (đây là câu hỏi, KHÔNG được sinh):
+                   - "Bạn ăn cơm chưa?"         (có "?" + "chưa")
+                   - "Cô ấy tên là gì?"          (có "?" + "gì")
+                """,
+            "RANDOM", """
+                ═══════════════════════════════════════
+                LOẠI CÂU: NGẪU NHIÊN
+                ═══════════════════════════════════════
+                Chọn ngẫu nhiên 1 trong 2 loại:
+                - NGHI VẤN (câu hỏi)
+                - KHÔNG PHẢI CÂU HỎI (trần thuật/cầu khiến/cảm thán)
+                
+                💡 ƯU TIÊN ĐA DẠNG:
+                - Nếu câu trước là NGHI VẤN → chọn KHÔNG PHẢI CÂU HỎI
+                - Nếu câu trước là KHÔNG PHẢI CÂU HỎI → chọn NGHI VẤN
+                """
+    );
+
+    // ========================================
+    // 4. ERROR TAXONOMY
     // ========================================
     public static final String ERROR_TAXONOMY = """
         
@@ -229,7 +319,7 @@ public class PromptConstants {
         """;
 
     // ========================================
-    // 4. PROMPT TEMPLATES
+    // 5. PROMPT TEMPLATES
     // ========================================
 
     public static final String GENERATE_PROMPT_TEMPLATE = """
@@ -250,23 +340,36 @@ public class PromptConstants {
         - Từ vựng: %s
         - Điểm yếu: %s
         
-        === GIẢI THÍCH LOẠI CÂU (QUAN TRỌNG) ===
-        - QUESTION : Câu HỎI — PHẢI có dấu "?" ở cuối và có từ để hỏi
-          VD: "Bạn ăn sáng lúc mấy giờ?", "Cô ấy tên là gì?"
+        === GIẢI THÍCH LOẠI CÂU (BẮT BUỘC TUÂN THỦ) ===
+        Loại câu được chọn: %s
         
-        - ANSWER   : Câu KHẲNG ĐỊNH (câu trả lời) — KHÔNG có dấu "?", KHÔNG có từ để hỏi
-          VD: "Tôi ăn sáng lúc 7 giờ sáng.", "Cô ấy tên là Lan."
+        %s
         
-        - RANDOM   : Ngẫu nhiên — chọn QUESTION hoặc ANSWER tùy ý
-        
-        ⚠️ BẮT BUỘC PHẢI TUÂN THỦ:
-        - Nếu loại câu = "QUESTION" → câu tiếng Việt PHẢI có dấu "?" và từ để hỏi
-        - Nếu loại câu = "ANSWER" → câu tiếng Việt KHÔNG được có dấu "?", KHÔNG có từ để hỏi
-        - Nếu loại câu = "RANDOM" → chọn ngẫu nhiên 1 trong 2
+        ⚠️ BẮT BUỘC:
+        - Câu tiếng Việt PHẢI ĐÚNG loại câu ở trên
+        - Nếu là NGHI VẤN → PHẢI có "?" + từ để hỏi
+        - Nếu là KHÔNG PHẢI CÂU HỎI → TUYỆT ĐỐI KHÔNG có "?", KHÔNG có từ để hỏi
+        - Nếu là RANDOM → chọn ngẫu nhiên 1 trong 2
         
         === HƯỚNG DẪN ===
         %s
         %s
+        
+        === CÁC CÂU ĐÃ HỎI TRƯỚC ĐÓ (TUYỆT ĐỐI KHÔNG ĐƯỢC LẶP LẠI) ===
+        %s
+        
+        === QUY TẮC CHỐNG TRÙNG LẶP (BẮT BUỘC) ===
+        1. Câu tiếp theo KHÔNG được giống hoặc na ná các câu trên
+        2. KHÔNG được dùng lại CÙNG chủ ngữ + CÙNG động từ + CÙNG trạng ngữ
+           ❌ SAI: đã có "Tôi ăn sáng lúc 7 giờ" → sinh "Tôi ăn trưa lúc 12 giờ"
+           ✅ ĐÚNG: đã có "Tôi ăn sáng lúc 7 giờ" → sinh "Bố tôi thường uống cà phê"
+        3. PHẢI thay đổi ÍT NHẤT 2 yếu tố:
+           - Chủ ngữ: I → She / They / My brother / The teacher...
+           - Động từ: eat → cook / buy / enjoy / prepare...
+           - Trạng ngữ: lúc 7 giờ → ở nhà / hôm qua / mỗi sáng...
+           - Cấu trúc: khẳng định → phủ định / câu hỏi...
+        4. Nếu đã hỏi 2 câu cùng topic → PHẢI đổi góc tiếp cận
+           VD FAMILY: "nhà có mấy người" → "bố làm nghề gì" → "cuối tuần cả nhà làm gì"
         
         === JSON OUTPUT ===
         {
@@ -340,22 +443,14 @@ public class PromptConstants {
         - Điểm yếu cần tập trung: %s
         - Loại câu của bài luyện tập: %s
         
-        === GIẢI THÍCH LOẠI CÂU (BẮT BUỘC TUÂN THỦ) ===
-        "Loại câu của bài luyện tập" ở phần NGỮ CẢNH ĐÁNH GIÁ có thể là:
-        
-        - QUESTION : Câu HỎI — PHẢI có dấu "?" ở cuối và có từ để hỏi
-          VD: "Bạn ăn sáng lúc mấy giờ?", "Cô ấy tên là gì?"
-        
-        - ANSWER   : Câu KHẲNG ĐỊNH (câu trả lời) — KHÔNG có dấu "?", KHÔNG có từ để hỏi
-          VD: "Tôi ăn sáng lúc 7 giờ sáng.", "Cô ấy tên là Lan."
-        
-        - RANDOM   : Ngẫu nhiên — chọn QUESTION hoặc ANSWER tùy ý
+        === LOẠI CÂU CỦA BÀI LUYỆN TẬP (BẮT BUỘC TUÂN THỦ) ===
+        %s
         
         ⚠️ BẮT BUỘC:
-        - Câu tiếp theo PHẢI CÙNG LOẠI với "Loại câu của bài luyện tập"
-        - Nếu loại câu = "QUESTION" → câu tiếp theo PHẢI có dấu "?" và từ để hỏi
-        - Nếu loại câu = "ANSWER" → câu tiếp theo KHÔNG được có dấu "?", KHÔNG có từ để hỏi
-        - Nếu loại câu = "RANDOM" → chọn ngẫu nhiên 1 trong 2
+        - Câu tiếp theo PHẢI ĐÚNG loại câu ở trên
+        - Nếu là NGHI VẤN → PHẢI có "?" + từ để hỏi
+        - Nếu là KHÔNG PHẢI CÂU HỎI → TUYỆT ĐỐI KHÔNG có "?", KHÔNG có từ để hỏi
+        - Nếu là RANDOM → chọn ngẫu nhiên 1 trong 2, ưu tiên đa dạng
         
         === HƯỚNG DẪN THEO TRÌNH ĐỘ ===
         %s
@@ -399,6 +494,22 @@ public class PromptConstants {
         - Ưu tiên lỗi có số lần mắc CAO NHẤT
         - Nếu danh sách rỗng → sinh câu random theo level + topic
         - KHÔNG sinh câu về lỗi không có trong danh sách
+        
+        === CÁC CÂU ĐÃ HỎI TRƯỚC ĐÓ (TUYỆT ĐỐI KHÔNG ĐƯỢC LẶP LẠI) ===
+        %s
+        
+        === QUY TẮC CHỐNG TRÙNG LẶP (BẮT BUỘC) ===
+        1. Câu tiếp theo KHÔNG được giống hoặc na ná các câu trên
+        2. KHÔNG được dùng lại CÙNG chủ ngữ + CÙNG động từ + CÙNG trạng ngữ
+           ❌ SAI: đã có "Tôi ăn sáng lúc 7 giờ" → sinh "Tôi ăn trưa lúc 12 giờ"
+           ✅ ĐÚNG: đã có "Tôi ăn sáng lúc 7 giờ" → sinh "Bố tôi thường uống cà phê"
+        3. PHẢI thay đổi ÍT NHẤT 2 yếu tố:
+           - Chủ ngữ: I → She / They / My brother / The teacher...
+           - Động từ: eat → cook / buy / enjoy / prepare...
+           - Trạng ngữ: lúc 7 giờ → ở nhà / hôm qua / mỗi sáng...
+           - Cấu trúc: khẳng định → phủ định / câu hỏi...
+        4. Nếu đã hỏi 2 câu cùng topic → PHẢI đổi góc tiếp cận
+           VD FAMILY: "nhà có mấy người" → "bố làm nghề gì" → "cuối tuần cả nhà làm gì"
         
         %s
         
@@ -471,7 +582,7 @@ public class PromptConstants {
         """;
 
     // ========================================
-    // 5. HELPER METHODS
+    // 6. HELPER METHODS
     // ========================================
 
     public static String getLevelDescription(String level) {
@@ -482,19 +593,58 @@ public class PromptConstants {
         return TOPIC.getOrDefault(topic, "Chủ đề: " + topic + " - Tạo câu liên quan.");
     }
 
+    /**
+     * ✅ Lấy mô tả sentenceType bằng tiếng Việt
+     */
+    public static String getSentenceTypeDescription(String sentenceType) {
+        if (sentenceType == null || sentenceType.isEmpty()) {
+            return SENTENCE_TYPE_DESC.get("RANDOM");
+        }
+        return SENTENCE_TYPE_DESC.getOrDefault(
+                sentenceType.toUpperCase(),
+                SENTENCE_TYPE_DESC.get("RANDOM")
+        );
+    }
+
+    /**
+     * ✅ Format danh sách câu đã hỏi (để AI tránh lặp)
+     */
+    private static String formatPreviousSentences(List<String> previousSentences) {
+        if (previousSentences == null || previousSentences.isEmpty()) {
+            return "(Chưa có câu nào — đây là câu đầu tiên)";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < previousSentences.size(); i++) {
+            sb.append(i + 1).append(". ").append(previousSentences.get(i)).append("\n");
+        }
+        return sb.toString();
+    }
+
+    // ========================================
+    // 7. FORMAT METHODS
+    // ========================================
+
     public static String formatGeneratePrompt(
             String level, String topic, String sentenceType,
-            String vocabularyWords, String weaknesses) {
+            String vocabularyWords, String weaknesses,
+            List<String> previousSentences) {
+
+        String normalizedType = (sentenceType != null && !sentenceType.isEmpty())
+                ? sentenceType.toUpperCase()
+                : "RANDOM";
 
         return String.format(
                 GENERATE_PROMPT_TEMPLATE,
-                level,
-                topic,
-                sentenceType,
-                vocabularyWords != null && !vocabularyWords.isEmpty() ? vocabularyWords : "Không có",
-                weaknesses != null && !weaknesses.isEmpty() ? weaknesses : "Không có",
-                getLevelDescription(level),
-                getTopicDescription(topic)
+                level,                                                          // %s 1
+                topic,                                                          // %s 2
+                normalizedType,                                                 // %s 3
+                vocabularyWords != null && !vocabularyWords.isEmpty() ? vocabularyWords : "Không có",  // %s 4
+                weaknesses != null && !weaknesses.isEmpty() ? weaknesses : "Không có",                 // %s 5
+                normalizedType,                                                 // %s 6 (Loại câu được chọn)
+                getSentenceTypeDescription(normalizedType),                     // %s 7 (Mô tả chi tiết)
+                getLevelDescription(level),                                     // %s 8
+                getTopicDescription(topic),                                     // %s 9
+                formatPreviousSentences(previousSentences)                      // %s 10
         );
     }
 
@@ -515,27 +665,33 @@ public class PromptConstants {
 
     /**
      * ✅ Format prompt cho evaluate + generate
-     * ĐÃ THÊM parameter sentenceType để AI sinh câu tiếp cùng loại
+     * ĐÃ THÊM: sentenceType description + previousSentences
      */
     public static String formatEvaluateAndGeneratePrompt(
             String vietnameseSentence, String studentAnswer,
             String expectedAnswer, String level, String topic,
             String vocabularyWords, String weaknesses,
-            String sentenceType) {
+            String sentenceType, List<String> previousSentences) {
+
+        String normalizedType = (sentenceType != null && !sentenceType.isEmpty())
+                ? sentenceType.toUpperCase()
+                : "RANDOM";
 
         return String.format(
                 EVALUATE_AND_GENERATE_PROMPT_TEMPLATE,
-                vietnameseSentence,
-                studentAnswer,
-                expectedAnswer,
-                level,
-                topic,
-                vocabularyWords != null && !vocabularyWords.isEmpty() ? vocabularyWords : "Không có",
-                weaknesses != null && !weaknesses.isEmpty() ? weaknesses : "Không có",
-                sentenceType != null && !sentenceType.isEmpty() ? sentenceType : "RANDOM",
-                getLevelDescription(level),
-                getTopicDescription(topic),
-                ERROR_TAXONOMY
+                vietnameseSentence,                                             // %s 1
+                studentAnswer,                                                  // %s 2
+                expectedAnswer,                                                 // %s 3
+                level,                                                          // %s 4
+                topic,                                                          // %s 5
+                vocabularyWords != null && !vocabularyWords.isEmpty() ? vocabularyWords : "Không có",  // %s 6
+                weaknesses != null && !weaknesses.isEmpty() ? weaknesses : "Không có",                 // %s 7
+                normalizedType,                                                 // %s 8 (Loại câu)
+                getSentenceTypeDescription(normalizedType),                     // %s 9 (Mô tả chi tiết)
+                getLevelDescription(level),                                     // %s 10
+                getTopicDescription(topic),                                     // %s 11
+                formatPreviousSentences(previousSentences),                     // %s 12
+                ERROR_TAXONOMY                                                  // %s 13
         );
     }
 }
