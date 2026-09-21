@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -18,4 +19,6 @@ public class AIGenerateResponse {
     private String vietnameseSentence;
     private String expectedAnswer;
     private String sentenceType; // QUESTION or ANSWER
+    @Builder.Default
+    private List<String> usedVocabulary = new ArrayList<>();
 }

@@ -43,4 +43,6 @@ public class PracticeConstants {
     public static final int MAX_ANSWER_LENGTH = 1000;
     public static final int WEAKNESS_THRESHOLD = 50;
     public static final int MAX_WEAKNESSES = 5;
+    public static final int MAX_VOCABULARY_WORDS = 5;
+    public static final int MAX_VOCAB_PER_SENTENCE = 3;
 }

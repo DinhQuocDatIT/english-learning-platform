@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -20,5 +21,8 @@ public class AIGenerateRequest {
     private String topic;
     private List<String> vocabularyWords;
     private List<String> weaknesses;
-    List<String> previousSentences;
+    private List<String> previousSentences;
+
+    @Builder.Default
+    private List<String> forcedWords = new ArrayList<>();
 }

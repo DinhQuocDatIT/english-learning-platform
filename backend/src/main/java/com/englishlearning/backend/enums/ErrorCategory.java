@@ -27,7 +27,19 @@ public enum ErrorCategory {
             "Các dạng động từ, bị động, tường thuật, điều kiện..."),
 
     NATURALNESS("Độ tự nhiên",
-            "Cách diễn đạt thiếu tự nhiên so với người bản xứ");
+            "Cách diễn đạt thiếu tự nhiên so với người bản xứ"),
+
+    SPELLING("Chính tả",
+            "Lỗi viết sai chính tả, viết hoa, dấu câu"),
+
+    WORD_CHOICE("Chọn từ",
+            "Chọn từ không phù hợp ngữ cảnh, sai collocation"),
+
+    MEANING("Ngữ nghĩa",
+            "Dịch sai nghĩa, thiếu ý hoặc thêm ý so với câu gốc"),
+
+    PUNCTUATION("Dấu câu",
+            "Thiếu hoặc sai dấu chấm, phẩy, hỏi, cảm thán");
 
     private final String displayName;
     private final String description;

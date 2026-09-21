@@ -37,6 +37,9 @@ public class AIPracticeTurn {
     @Column(columnDefinition = "TEXT")
     private String betterAnswers;
 
+    @Column(name = "used_vocabulary", length = 500)
+    private String usedVocabulary;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

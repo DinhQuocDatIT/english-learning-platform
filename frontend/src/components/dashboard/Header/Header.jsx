@@ -11,11 +11,24 @@ import {
 import styles from "./Header.module.css";
 import AuthStorage from "../../../services/AuthStorage";
 import VocabularySearchDropdown from "../../vocabulary/VocabularySearchDropdown/VocabularySearchDropdown";
+const roleLabels = {
+  ADMIN: "Quản trị viên",
+  TEACHER: "Giáo viên",
+  STUDENT: "Học sinh",
+};
 const Header = ({ onToggleSidebar, isSidebarOpen }) => {
+  const user = AuthStorage.getUser();
   const [isOpen, setIsOpen] = useState(false);
   const [showVocabularySearch, setShowVocabularySearch] = useState(false);
-
+  const userName = user?.fullName || user?.name || "Người dùng";
+  const userRole = roleLabels[user?.role?.toUpperCase()] || "Người dùng";
   const searchContainerRef = useRef(null);
+
+  // Lấy role của user hiện tại
+  const role = AuthStorage.getRole();
+
+  // Chỉ STUDENT mới được hiện thanh tìm kiếm
+  const isStudent = role?.toUpperCase() === "STUDENT";
 
   const handleLogout = () => {
     AuthStorage.removeAuth();
@@ -55,31 +68,33 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
         </button>
       </div>
 
-      {/* SEARCH */}
-      <div className={styles.searchContainer} ref={searchContainerRef}>
-        <div
-          className={styles.searchBar}
-          onClick={() => setShowVocabularySearch(true)}
-        >
-          <FontAwesomeIcon
-            icon={faMagnifyingGlass}
-            className={styles.searchIcon}
-          />
+      {/* SEARCH - Chỉ STUDENT mới hiện */}
+      {isStudent && (
+        <div className={styles.searchContainer} ref={searchContainerRef}>
+          <div
+            className={styles.searchBar}
+            onClick={() => setShowVocabularySearch(true)}
+          >
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              className={styles.searchIcon}
+            />
 
-          <input
-            type="text"
-            placeholder="Tìm bài học, từ vựng..."
-            onFocus={() => setShowVocabularySearch(true)}
-            readOnly
-          />
-        </div>
-
-        {showVocabularySearch && (
-          <div className={styles.vocabularyDropdown}>
-            <VocabularySearchDropdown />
+            <input
+              type="text"
+              placeholder="Tìm bài học, từ vựng..."
+              onFocus={() => setShowVocabularySearch(true)}
+              readOnly
+            />
           </div>
-        )}
-      </div>
+
+          {showVocabularySearch && (
+            <div className={styles.vocabularyDropdown}>
+              <VocabularySearchDropdown />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* RIGHT */}
       <div className={styles.right}>
@@ -100,9 +115,9 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
           </div>
 
           <div className={styles.userInfo}>
-            <span className={styles.userName}>Duy Đạt</span>
-
-            <span className={styles.userRole}>Học viên</span>
+            {" "}
+            <span className={styles.userName}> {userName} </span>{" "}
+            <span className={styles.userRole}> {userRole} </span>{" "}
           </div>
 
           <FontAwesomeIcon

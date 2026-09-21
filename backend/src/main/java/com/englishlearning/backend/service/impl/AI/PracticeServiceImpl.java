@@ -33,10 +33,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -79,13 +83,13 @@ public class PracticeServiceImpl implements PracticeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin học viên"));
 
         Long studentId = student.getId();
-        log.info("Found student: {}, id: {}", student.getUser().getFullName(), studentId);
 
-        // ✅ Chat mới → chưa có lỗi → không cần weaknesses
         List<String> weaknesses = new ArrayList<>();
-
-        // ✅ Chat mới → chưa có câu cũ → previousSentences rỗng
         List<String> previousSentences = new ArrayList<>();
+
+        // ✅ Câu 1: chưa có turn → pick 1-2 từ đầu tiên
+        List<String> forcedWords = pickInitialForcedWords(request.getVocabularyWords());
+        log.info("📌 Câu 1 forcedWords: {}", forcedWords);
 
         AIGenerateRequest aiRequest = AIGenerateRequest.builder()
                 .level(request.getLevel())
@@ -93,10 +97,27 @@ public class PracticeServiceImpl implements PracticeService {
                 .topic(request.getTopic())
                 .vocabularyWords(request.getVocabularyWords())
                 .weaknesses(weaknesses)
-                .previousSentences(previousSentences)   // ✅ THÊM MỚI
+                .previousSentences(previousSentences)
+                .forcedWords(forcedWords)
                 .build();
 
         AIGenerateResponse aiResponse = aiService.generateSentence(aiRequest);
+
+        // ✅ Validate + retry 3 lần
+        int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            if (isForcedWordsPresent(aiResponse, forcedWords)) {
+                break;
+            }
+            log.warn("⚠️ Attempt {}/{}: Câu không chứa forcedWords {}. Retry...",
+                    attempt, maxAttempts, forcedWords);
+            if (attempt < maxAttempts) {
+                aiResponse = aiService.generateSentence(aiRequest);
+            } else {
+                log.error("❌ Hết retry. Chấp nhận câu hiện tại: {}",
+                        aiResponse.getVietnameseSentence());
+            }
+        }
 
         AIPracticeChat chat = new AIPracticeChat();
         chat.setStudent(student);
@@ -108,7 +129,8 @@ public class PracticeServiceImpl implements PracticeService {
         chat.setCorrectCount(0);
         chat.setStatus(PracticeStatus.IN_PROGRESS);
         chat.setStartedAt(LocalDateTime.now());
-        chat.setVocabularyWords(request.getVocabularyWords() != null ? request.getVocabularyWords() : new ArrayList<>());
+        chat.setVocabularyWords(request.getVocabularyWords() != null
+                ? request.getVocabularyWords() : new ArrayList<>());
         practiceChatRepository.save(chat);
 
         AIPracticeTurn turn = new AIPracticeTurn();
@@ -117,12 +139,17 @@ public class PracticeServiceImpl implements PracticeService {
         turn.setVietnameseSentence(aiResponse.getVietnameseSentence());
         turn.setExpectedAnswer(aiResponse.getExpectedAnswer());
         turn.setBetterAnswers(null);
+        // ✅ Chỉ lưu từ vựng nếu user có nạp + chỉ giữ từ trong danh sách
+        turn.setUsedVocabulary(toJsonArray(
+                sanitizeUsedVocabulary(aiResponse.getUsedVocabulary(), request.getVocabularyWords())
+        ));
         turnRepository.save(turn);
 
         chat.setQuestionCount(1);
         practiceChatRepository.save(chat);
         studentMembershipService.incrementAIRequestCount(userId);
-        log.info("Practice created successfully. Chat ID: {}, Turn ID: {}", chat.getId(), turn.getId());
+        log.info("Practice created. Chat ID: {}, Turn ID: {}, usedVocab: {}",
+                chat.getId(), turn.getId(), parseUsedVocabulary(turn.getUsedVocabulary()));
 
         return buildPracticeChatResponse(chat, turn);
     }
@@ -134,13 +161,11 @@ public class PracticeServiceImpl implements PracticeService {
         log.info("Submitting answer for user: {}, turn: {}", userId, request.getTurnId());
         if (!studentMembershipService.hasActiveMembership(userId)) {
             throw new BusinessException(
-                    "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!"
-            );
+                    "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!");
         }
         if (!studentMembershipService.canMakeAIRequest(userId)) {
             throw new BusinessException(
-                    "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai hoặc nâng cấp gói!"
-            );
+                    "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai!");
         }
         Student student = studentRepository
                 .findByUserId(userId)
@@ -155,15 +180,12 @@ public class PracticeServiceImpl implements PracticeService {
         if (!chat.getStudent().getId().equals(studentId)) {
             throw new BusinessException(ErrorCode.TURN_NOT_BELONG_TO_CHAT);
         }
-
         if (chat.getStatus() != PracticeStatus.IN_PROGRESS) {
             throw new BusinessException(ErrorCode.PRACTICE_NOT_IN_PROGRESS);
         }
-
         if (answerRepository.existsByTurnId(turn.getId())) {
             throw new BusinessException(ErrorCode.TURN_ALREADY_ANSWERED);
         }
-
         if (request.getStudentAnswer().length() > PracticeConstants.MAX_ANSWER_LENGTH) {
             throw new BusinessException("Answer too long. Max: " + PracticeConstants.MAX_ANSWER_LENGTH);
         }
@@ -175,14 +197,12 @@ public class PracticeServiceImpl implements PracticeService {
         answer.setAnsweredAt(LocalDateTime.now());
         answerRepository.save(answer);
 
-        // ✅ Lấy lỗi từ CHÍNH cuộc chat hiện tại (không phải toàn bộ lịch sử)
+        // ✅ Pick forcedWords cho câu tiếp theo
+        List<String> forcedWords = pickForcedWords(chat.getId(), chat.getVocabularyWords());
+        log.info("📌 Câu tiếp theo forcedWords: {}", forcedWords);
+
         List<String> weaknesses = getWeaknessesInChat(chat.getId());
-
-        // ✅ Lấy 10 câu GẦN NHẤT để AI tránh lặp lại
         List<String> previousSentences = getPreviousSentences(chat.getId());
-
-        log.info("📤 Submitting - weaknesses: {}, previousSentences: {}",
-                weaknesses.size(), previousSentences.size());
 
         AIEvaluateRequest aiRequest = AIEvaluateRequest.builder()
                 .vietnameseSentence(turn.getVietnameseSentence())
@@ -193,12 +213,16 @@ public class PracticeServiceImpl implements PracticeService {
                 .vocabularyWords(chat.getVocabularyWords())
                 .weaknesses(weaknesses)
                 .sentenceType(chat.getSentenceType().name())
-                .previousSentences(previousSentences)   // ✅ THÊM MỚI
+                .previousSentences(previousSentences)
+                .forcedWords(forcedWords)
                 .build();
 
         long startTime = System.currentTimeMillis();
         AIEvaluateResponse aiResponse = aiService.evaluateAndGenerate(aiRequest);
         long responseTime = System.currentTimeMillis() - startTime;
+
+        // Sanitize errors
+        sanitizeErrors(aiResponse);
 
         GeminiUsageMetadata usage = null;
         String modelName = "gemini-3.5-flash-lite";
@@ -212,14 +236,12 @@ public class PracticeServiceImpl implements PracticeService {
         }
         studentMembershipService.incrementAIRequestCount(userId);
 
-        // Lưu betterAnswers - Dùng separator "|||"
         if (aiResponse.getBetterAnswers() != null && !aiResponse.getBetterAnswers().isEmpty()) {
             String betterAnswersStr = String.join("|||", aiResponse.getBetterAnswers());
             turn.setBetterAnswers(betterAnswersStr);
             turnRepository.save(turn);
         }
 
-        // Save evaluation
         AIEvaluation evaluation = new AIEvaluation();
         evaluation.setAnswer(answer);
         evaluation.setCorrectness(aiResponse.getIsCorrect() ? "CORRECT" : "INCORRECT");
@@ -228,7 +250,6 @@ public class PracticeServiceImpl implements PracticeService {
         evaluation.setFeedback(aiResponse.getFeedback());
         evaluationRepository.save(evaluation);
 
-        // ============ SAVE ERRORS — CÓ VALIDATE ============
         List<AIError> errors = new ArrayList<>();
         if (aiResponse.getErrors() != null) {
             for (AIErrorResponse errorResp : aiResponse.getErrors()) {
@@ -239,9 +260,8 @@ public class PracticeServiceImpl implements PracticeService {
                 error.setCorrectText(errorResp.getCorrectText());
                 error.setExplanation(errorResp.getExplanation());
 
-                // ✅ VALIDATE + FALLBACK category/subtype
                 String safeCategory = safeCategory(errorResp.getErrorCategory());
-                String safeSubtype = safeSubtype(errorResp.getErrorSubtype());
+                String safeSubtype = safeSubtype(errorResp.getErrorSubtype(), safeCategory);
 
                 error.setErrorCategory(safeCategory);
                 error.setErrorSubtype(safeSubtype);
@@ -251,7 +271,6 @@ public class PracticeServiceImpl implements PracticeService {
                 try {
                     severity = SeverityLevel.valueOf(errorResp.getSeverity());
                 } catch (IllegalArgumentException e) {
-                    log.warn("Unknown severity: {}, using MEDIUM as fallback", errorResp.getSeverity());
                     severity = SeverityLevel.MEDIUM;
                 }
                 error.setSeverity(severity);
@@ -260,15 +279,11 @@ public class PracticeServiceImpl implements PracticeService {
             errorRepository.saveAll(errors);
         }
 
-        // Update StudentAIError
         updateStudentAIErrors(studentId, errors);
 
-        // Update chat progress
         boolean isCorrect = aiResponse.getIsCorrect() != null && aiResponse.getIsCorrect();
         chat.setQuestionCount(chat.getQuestionCount() + 1);
-        if (isCorrect) {
-            chat.setCorrectCount(chat.getCorrectCount() + 1);
-        }
+        if (isCorrect) chat.setCorrectCount(chat.getCorrectCount() + 1);
 
         boolean isCompleted = chat.getQuestionCount() >= chat.getQuestionLimit();
         if (isCompleted) {
@@ -277,27 +292,29 @@ public class PracticeServiceImpl implements PracticeService {
         }
         practiceChatRepository.save(chat);
 
-        // Update answer
         answer.setScore(aiResponse.getScore());
         answer.setIsCorrect(isCorrect);
         answerRepository.save(answer);
 
-        // Save AI Usage
         saveAIUsageWithTokens(studentId, chat, RequestType.GENERATE_AND_EVALUATE,
-                provider, modelName,
-                responseTime, true, null, usage);
+                provider, modelName, responseTime, true, null, usage);
 
-        // Build response
         EvaluationResponse response = buildEvaluationResponse(aiResponse, chat, isCompleted);
 
-        // Create next question if not completed
         if (!isCompleted && aiResponse.getNextQuestion() != null) {
+            // ✅ Sanitize usedVocabulary trước khi lưu + trả về
+            List<String> sanitizedVocab = sanitizeUsedVocabulary(
+                    aiResponse.getNextQuestion().getUsedVocabulary(),
+                    chat.getVocabularyWords()
+            );
+
             AIPracticeTurn nextTurn = new AIPracticeTurn();
             nextTurn.setPracticeChat(chat);
             nextTurn.setQuestionOrder(chat.getQuestionCount() + 1);
             nextTurn.setVietnameseSentence(aiResponse.getNextQuestion().getVietnameseSentence());
             nextTurn.setExpectedAnswer(aiResponse.getNextQuestion().getExpectedAnswer());
             nextTurn.setBetterAnswers(null);
+            nextTurn.setUsedVocabulary(toJsonArray(sanitizedVocab));
             turnRepository.save(nextTurn);
 
             response.setNextQuestion(TurnResponse.builder()
@@ -305,10 +322,11 @@ public class PracticeServiceImpl implements PracticeService {
                     .questionOrder(nextTurn.getQuestionOrder())
                     .vietnameseSentence(nextTurn.getVietnameseSentence())
                     .createdAt(nextTurn.getCreatedAt())
+                    .usedVocabulary(sanitizedVocab)
                     .build());
         }
 
-        log.info("Answer submitted successfully. Turn: {}, Correct: {}, Score: {}",
+        log.info("Answer submitted. Turn: {}, Correct: {}, Score: {}",
                 turn.getId(), isCorrect, aiResponse.getScore());
 
         return response;
@@ -320,7 +338,6 @@ public class PracticeServiceImpl implements PracticeService {
         Student student = studentRepository
                 .findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin học viên"));
-
         Long studentId = student.getId();
 
         AIPracticeChat chat = practiceChatRepository.findById(practiceId)
@@ -377,17 +394,15 @@ public class PracticeServiceImpl implements PracticeService {
                 .collect(Collectors.toList());
 
         response.setTurnHistory(turnHistory);
-
         return response;
     }
 
-    // ===== GET PRACTICE HISTORY =====
+    // ===== GET HISTORY =====
     @Override
     public List<PracticeChatResponse> getPracticeHistory(Long userId) {
         Student student = studentRepository
                 .findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin học viên"));
-
         Long studentId = student.getId();
 
         List<AIPracticeChat> chats = practiceChatRepository
@@ -398,13 +413,12 @@ public class PracticeServiceImpl implements PracticeService {
                 .collect(Collectors.toList());
     }
 
-    // ===== GET PRACTICE RESULT =====
+    // ===== GET RESULT =====
     @Override
     public PracticeResultResponse getPracticeResult(Long practiceId, Long userId) {
         Student student = studentRepository
                 .findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin học viên"));
-
         Long studentId = student.getId();
 
         AIPracticeChat chat = practiceChatRepository.findById(practiceId)
@@ -413,7 +427,6 @@ public class PracticeServiceImpl implements PracticeService {
         if (!chat.getStudent().getId().equals(studentId)) {
             throw new BusinessException("Practice does not belong to student");
         }
-
         if (chat.getStatus() != PracticeStatus.COMPLETED) {
             throw new BusinessException("Practice is not completed yet");
         }
@@ -428,23 +441,17 @@ public class PracticeServiceImpl implements PracticeService {
         for (AIPracticeTurn turn : turns) {
             if (turn.getAnswer() != null) {
                 AIAnswer answer = turn.getAnswer();
-                if (answer.getIsCorrect() != null && answer.getIsCorrect()) {
-                    correct++;
-                }
-                if (answer.getScore() != null) {
-                    totalScore += answer.getScore();
-                }
+                if (answer.getIsCorrect() != null && answer.getIsCorrect()) correct++;
+                if (answer.getScore() != null) totalScore += answer.getScore();
 
                 if (answer.getEvaluation() != null && answer.getEvaluation().getErrors() != null) {
                     for (AIError error : answer.getEvaluation().getErrors()) {
-                        // ✅ Dùng errorKey để group chi tiết (KHÔNG dùng errorType)
                         String errorKey = error.getErrorKey();
                         if (errorKey == null || errorKey.isEmpty()) {
                             errorKey = (error.getErrorCategory() != null && error.getErrorSubtype() != null)
                                     ? error.getErrorCategory() + "_" + error.getErrorSubtype()
                                     : error.getErrorType();
                         }
-
                         final String finalErrorKey = errorKey;
 
                         ErrorSummary summary = commonErrors.stream()
@@ -453,7 +460,6 @@ public class PracticeServiceImpl implements PracticeService {
                                 .orElse(null);
 
                         if (summary == null) {
-                            // ✅ Lấy displayName tiếng Việt
                             String displayName = null;
                             try {
                                 ErrorSubtype subtypeEnum = ErrorSubtype.fromString(error.getErrorSubtype());
@@ -477,9 +483,7 @@ public class PracticeServiceImpl implements PracticeService {
         }
 
         commonErrors.sort((a, b) -> b.getCount().compareTo(a.getCount()));
-        if (commonErrors.size() > 5) {
-            commonErrors = commonErrors.subList(0, 5);
-        }
+        if (commonErrors.size() > 5) commonErrors = commonErrors.subList(0, 5);
 
         double accuracy = total > 0 ? (correct * 100.0 / total) : 0;
         double avgScore = total > 0 ? (totalScore * 1.0 / total) : 0;
@@ -515,69 +519,244 @@ public class PracticeServiceImpl implements PracticeService {
         if (!PracticeConstants.VALID_QUESTION_LIMITS.contains(request.getQuestionLimit())) {
             throw new BusinessException(ErrorCode.INVALID_QUESTION_LIMIT);
         }
+
+        if (request.getVocabularyWords() != null
+                && request.getVocabularyWords().size() > PracticeConstants.MAX_VOCABULARY_WORDS) {
+            throw new BusinessException(
+                    "Chỉ được nhập tối đa " + PracticeConstants.MAX_VOCABULARY_WORDS + " từ vựng");
+        }
+
+        if (request.getVocabularyWords() != null) {
+            List<String> cleaned = request.getVocabularyWords().stream()
+                    .filter(Objects::nonNull)
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(String::toLowerCase)
+                    .distinct()
+                    .collect(Collectors.toList());
+            request.setVocabularyWords(cleaned);
+        }
     }
 
-    // ============ ✅ Lấy điểm yếu từ CHÍNH cuộc chat hiện tại ============
-    private List<String> getWeaknessesInChat(Long chatId) {
-        // Query tất cả lỗi trong chat này
-        List<AIError> errorsInChat = errorRepository.findByChatId(chatId);
-
-        if (errorsInChat.isEmpty()) {
+    // ============ ✅ SANITIZE USED VOCABULARY ============
+    /**
+     * Lọc usedVocabulary:
+     * - Nếu chat KHÔNG có vocabularyWords → trả về [] (không có ý nghĩa)
+     * - Nếu chat CÓ vocabularyWords → chỉ giữ các từ AI khai báo NẰM TRONG danh sách user nạp
+     */
+    private List<String> sanitizeUsedVocabulary(List<String> aiUsed, List<String> userVocab) {
+        if (userVocab == null || userVocab.isEmpty()) {
+            return new ArrayList<>();
+        }
+        if (aiUsed == null || aiUsed.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // Đếm số lần mỗi errorKey
-        Map<String, Long> errorCountMap = errorsInChat.stream()
-                .filter(e -> e.getErrorKey() != null && !e.getErrorKey().isEmpty())
-                .collect(Collectors.groupingBy(
-                        AIError::getErrorKey,
-                        Collectors.counting()
-                ));
+        Set<String> allowed = userVocab.stream()
+                .filter(Objects::nonNull)
+                .map(v -> v.toLowerCase().trim())
+                .collect(Collectors.toSet());
 
-        // ✅ Filter: Bỏ lỗi mắc < 2 lần, sort giảm dần, lấy TOP 3
-        // ✅ Format: "ERROR_KEY (N lần)"
-        List<String> result = errorCountMap.entrySet().stream()
-                .filter(entry -> entry.getValue() >= 2)              // Bỏ lỗi mắc 1 lần
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(3)                                            // TOP 3
-                .map(entry -> entry.getKey() + " (" + entry.getValue() + " lần)")
+        return aiUsed.stream()
+                .filter(Objects::nonNull)
+                .map(v -> v.toLowerCase().trim())
+                .filter(allowed::contains)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    // ============ ✅ PICK FORCED WORDS CHO CÂU 1 ============
+    private List<String> pickInitialForcedWords(List<String> vocabularyWords) {
+        if (vocabularyWords == null || vocabularyWords.isEmpty()) {
+            return new ArrayList<>();
+        }
+        int count = vocabularyWords.size() <= 2 ? 1 : 2;
+        count = Math.min(count, vocabularyWords.size());
+        return new ArrayList<>(vocabularyWords.subList(0, count));
+    }
+
+    // ============ ✅ PICK FORCED WORDS THEO TẦN SUẤT ============
+    private List<String> pickForcedWords(Long chatId, List<String> vocabularyWords) {
+        if (vocabularyWords == null || vocabularyWords.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Map<String, Long> freq = getVocabularyFrequency(chatId, vocabularyWords);
+
+        List<String> sorted = vocabularyWords.stream()
+                .sorted(Comparator
+                        .comparingLong((String w) -> freq.getOrDefault(w.toLowerCase(), 0L))
+                        .thenComparingInt(vocabularyWords::indexOf))
                 .collect(Collectors.toList());
 
-        log.info("✅ Weaknesses in chat {}: {}", chatId, result);
+        int count = vocabularyWords.size() <= 2 ? 1 : 2;
+        count = Math.min(count, sorted.size());
+
+        List<String> result = new ArrayList<>(sorted.subList(0, count));
+        Collections.shuffle(result);
+
+        log.info("📌 Force: {} (tần suất: {})", result, freq);
         return result;
     }
 
-    // ============ ✅ Lấy N câu GẦN NHẤT để AI tránh lặp ============
+    // ============ ✅ TÍNH TẦN SUẤT TỪ VỰNG ============
+    private Map<String, Long> getVocabularyFrequency(Long chatId, List<String> vocabularyWords) {
+        Map<String, Long> frequency = new HashMap<>();
+        for (String v : vocabularyWords) {
+            frequency.put(v.toLowerCase().trim(), 0L);
+        }
+
+        List<String> rawUsed = turnRepository.findUsedVocabularyByChatId(chatId);
+        for (String json : rawUsed) {
+            if (json == null || json.isBlank() || json.equals("[]")) continue;
+            try {
+                List<String> arr = objectMapper.readValue(
+                        json,
+                        objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
+                );
+                for (String v : arr) {
+                    String key = v.toLowerCase().trim();
+                    if (frequency.containsKey(key)) {
+                        frequency.merge(key, 1L, Long::sum);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Lỗi parse usedVocabulary: {}", json);
+            }
+        }
+        return frequency;
+    }
+
+    // ============ ✅ CHECK FORCED WORDS ============
+    private boolean isForcedWordsPresent(AIGenerateResponse response, List<String> forcedWords) {
+        if (forcedWords == null || forcedWords.isEmpty()) {
+            return true;
+        }
+        if (response == null) return false;
+
+        String expected = response.getExpectedAnswer();
+        String expectedLower = expected != null ? expected.toLowerCase() : "";
+
+        List<String> used = response.getUsedVocabulary();
+        Set<String> usedSet = used != null
+                ? used.stream().map(String::toLowerCase).collect(Collectors.toSet())
+                : new HashSet<>();
+
+        for (String w : forcedWords) {
+            if (w == null || w.isBlank()) continue;
+            String lower = w.toLowerCase().trim();
+
+            if (usedSet.contains(lower)) continue;
+
+            String pattern = ".*\\b" + java.util.regex.Pattern.quote(lower) + "\\b.*";
+            if (expectedLower.matches(pattern)) continue;
+
+            return false;
+        }
+        return true;
+    }
+
+    // ============ ✅ TO JSON ============
+    private String toJsonArray(List<String> items) {
+        if (items == null || items.isEmpty()) return "[]";
+        try {
+            return objectMapper.writeValueAsString(items);
+        } catch (Exception e) {
+            return "[]";
+        }
+    }
+
+    // ============ ✅ SANITIZE ERRORS ============
+    private void sanitizeErrors(AIEvaluateResponse response) {
+        if (response == null || response.getErrors() == null) return;
+
+        List<AIErrorResponse> cleaned = new ArrayList<>();
+        Set<String> seenKeys = new HashSet<>();
+
+        for (AIErrorResponse e : response.getErrors()) {
+            if (e == null) continue;
+
+            String userText = e.getUserText() != null ? e.getUserText().trim() : "";
+            String correctText = e.getCorrectText() != null ? e.getCorrectText().trim() : "";
+
+            // Bỏ lỗi rác
+            if (!userText.isEmpty() && userText.equalsIgnoreCase(correctText)) {
+                continue;
+            }
+
+            // Dedup — cùng userText + cùng correctText
+            String dedupKey = userText.toLowerCase() + "|" + correctText.toLowerCase();
+            if (!userText.isEmpty() && seenKeys.contains(dedupKey)) {
+                continue;
+            }
+            if (!userText.isEmpty()) seenKeys.add(dedupKey);
+
+            // Fix MISSING_VERB giả
+            if ("MISSING_VERB".equals(e.getErrorSubtype())) {
+                String ut = userText.toLowerCase();
+                boolean hasVerb = ut.matches(".*\\b(is|am|are|was|were|be|been|being|have|has|had|do|does|did|can|could|will|would|shall|should|may|might|must)\\b.*")
+                        || ut.matches(".*\\b\\w+(s|es|ed|ing)\\b.*");
+                if (hasVerb) {
+                    log.info("🔧 [sanitize] MISSING_VERB giả: {} → WORD_CHOICE/WRONG_WORD", ut);
+                    e.setErrorCategory("WORD_CHOICE");
+                    e.setErrorSubtype("WRONG_WORD");
+                    e.setErrorType("WORD_CHOICE");
+                }
+            }
+
+            cleaned.add(e);
+        }
+
+        response.setErrors(cleaned);
+
+        // Tất cả lỗi LOW → isCorrect = true
+        if (Boolean.FALSE.equals(response.getIsCorrect()) && !cleaned.isEmpty()) {
+            boolean allLow = cleaned.stream()
+                    .allMatch(e -> "LOW".equalsIgnoreCase(e.getSeverity()));
+            if (allLow) {
+                log.info("🔧 [sanitize] Tất cả lỗi LOW → isCorrect = true");
+                response.setIsCorrect(true);
+            }
+        }
+    }
+
+    // ============ WEAKNESSES ============
+    private List<String> getWeaknessesInChat(Long chatId) {
+        List<AIError> errorsInChat = errorRepository.findByChatId(chatId);
+        if (errorsInChat.isEmpty()) return new ArrayList<>();
+
+        Map<String, Long> errorCountMap = errorsInChat.stream()
+                .filter(e -> e.getErrorKey() != null && !e.getErrorKey().isEmpty())
+                .collect(Collectors.groupingBy(AIError::getErrorKey, Collectors.counting()));
+
+        List<String> result = errorCountMap.entrySet().stream()
+                .filter(entry -> entry.getValue() >= 2)
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(3)
+                .map(entry -> entry.getKey() + " (" + entry.getValue() + " lần)")
+                .collect(Collectors.toList());
+
+        return result;
+    }
+
     private List<String> getPreviousSentences(Long chatId) {
         List<AIPracticeTurn> allTurns = turnRepository
                 .findByPracticeChatIdOrderByQuestionOrderAsc(chatId);
-
-        if (allTurns.isEmpty()) {
-            return new ArrayList<>();
-        }
+        if (allTurns.isEmpty()) return new ArrayList<>();
 
         int fromIndex = Math.max(0, allTurns.size() - PromptConstants.MAX_PREVIOUS_SENTENCES);
-
-        List<String> result = allTurns.subList(fromIndex, allTurns.size())
+        return allTurns.subList(fromIndex, allTurns.size())
                 .stream()
                 .map(AIPracticeTurn::getVietnameseSentence)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-
-        log.info("✅ Previous sentences ({} câu gần nhất) in chat {}: {}",
-                result.size(), chatId, result);
-        return result;
     }
 
-    // ============ UPDATE WEAKNESS ============
     private void updateStudentAIErrors(Long studentId, List<AIError> errors) {
         for (AIError error : errors) {
             String errorKey = error.getErrorKey();
             if (errorKey == null || errorKey.isEmpty()) {
-                errorKey = ErrorSubtype.buildErrorKey(
-                        error.getErrorCategory(),
-                        error.getErrorSubtype()
-                );
+                errorKey = ErrorSubtype.buildErrorKey(error.getErrorCategory(), error.getErrorSubtype());
             }
 
             StudentAIError studentError = studentAIErrorRepository
@@ -585,7 +764,6 @@ public class PracticeServiceImpl implements PracticeService {
                     .orElse(null);
 
             if (studentError == null) {
-                // ✅ Tạo mới
                 studentError = new StudentAIError();
                 studentError.setStudent(studentRepository.getReferenceById(studentId));
                 studentError.setErrorCategory(error.getErrorCategory());
@@ -597,104 +775,82 @@ public class PracticeServiceImpl implements PracticeService {
                 studentError.setMasteryScore(0);
                 studentError.setFirstOccurredAt(LocalDateTime.now());
                 studentError.setLastOccurredAt(LocalDateTime.now());
-
-                String exampleJson = toJsonArray(List.of(
-                        error.getUserText() != null ? error.getUserText() : ""
-                ));
-                studentError.setExamples(exampleJson);
-
-                log.info("✅ Tạo weakness mới: studentId={}, errorKey={}", studentId, errorKey);
+                studentError.setExamples(toJsonArray(List.of(
+                        error.getUserText() != null ? error.getUserText() : "")));
             } else {
-                // ✅ Cập nhật
                 studentError.setOccurrenceCount(studentError.getOccurrenceCount() + 1);
                 studentError.setLastOccurredAt(LocalDateTime.now());
-
                 int newMastery = Math.max(0, studentError.getMasteryScore() - 10);
                 studentError.setMasteryScore(newMastery);
-
-                studentError.setExamples(addExample(
-                        studentError.getExamples(),
-                        error.getUserText()
-                ));
-
-                log.info("✅ Cập nhật weakness: studentId={}, errorKey={}, count={}",
-                        studentId, errorKey, studentError.getOccurrenceCount());
+                studentError.setExamples(addExample(studentError.getExamples(), error.getUserText()));
             }
             studentAIErrorRepository.save(studentError);
         }
     }
 
-    // ===== HELPER: Convert list to JSON =====
-    private String toJsonArray(List<String> items) {
-        try {
-            return objectMapper.writeValueAsString(items);
-        } catch (Exception e) {
-            log.warn("Lỗi convert to JSON: {}", e.getMessage());
-            return "[]";
-        }
-    }
-
-    // ===== HELPER: Thêm example mới, giữ max 5 =====
     private String addExample(String currentJson, String newExample) {
         try {
             List<String> examples = new ArrayList<>();
             if (currentJson != null && !currentJson.isEmpty() && !currentJson.equals("[]")) {
                 examples = objectMapper.readValue(
                         currentJson,
-                        objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
-                );
+                        objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
             }
-            if (newExample != null && !newExample.isEmpty()) {
-                examples.add(newExample);
-            }
-            if (examples.size() > 5) {
-                examples = examples.subList(examples.size() - 5, examples.size());
-            }
+            if (newExample != null && !newExample.isEmpty()) examples.add(newExample);
+            if (examples.size() > 5) examples = examples.subList(examples.size() - 5, examples.size());
             return objectMapper.writeValueAsString(examples);
         } catch (Exception e) {
-            log.warn("Lỗi xử lý examples: {}", e.getMessage());
             return "[]";
         }
     }
 
-    // ===== ✅ HELPER: Safe category =====
     private String safeCategory(String raw) {
-        if (raw == null || raw.isBlank()) {
-            return "TENSE";
-        }
+        if (raw == null || raw.isBlank()) return ErrorCategory.TENSE.name();
         String upper = raw.toUpperCase().trim();
         try {
-            ErrorCategory.valueOf(upper);
-            return upper;
+            return ErrorCategory.valueOf(upper).name();
         } catch (IllegalArgumentException e) {
-            log.warn("⚠️ Category lạ: {} → fallback TENSE", raw);
-            return "TENSE";
+            return ErrorCategory.TENSE.name();
         }
     }
 
-    // ===== ✅ HELPER: Safe subtype =====
-    private String safeSubtype(String raw) {
-        if (raw == null || raw.isBlank()) {
-            return "MIXED_TENSE";
-        }
+    private String safeSubtype(String raw, String safeCategory) {
+        if (raw == null || raw.isBlank()) return fallbackSubtypeForCategory(safeCategory);
         String upper = raw.toUpperCase().trim();
         try {
-            ErrorSubtype.valueOf(upper);
-            return upper;
-        } catch (IllegalArgumentException e) {
-            // Fuzzy match: subtype bắt đầu bằng subtype hợp lệ
+            ErrorSubtype subtype = ErrorSubtype.valueOf(upper);
+            if (subtype.getCategory().name().equals(safeCategory)) return subtype.name();
+            return fallbackSubtypeForCategory(safeCategory);
+        } catch (IllegalArgumentException ignored) {
             for (ErrorSubtype valid : ErrorSubtype.values()) {
-                if (upper.startsWith(valid.name())) {
-                    log.info("✅ Fuzzy match: {} → {}", raw, valid.name());
+                if (upper.startsWith(valid.name())
+                        && valid.getCategory().name().equals(safeCategory)) {
                     return valid.name();
                 }
             }
-            log.warn("⚠️ Subtype lạ: {} → fallback MIXED_TENSE", raw);
-            return "MIXED_TENSE";
+            return fallbackSubtypeForCategory(safeCategory);
         }
     }
 
-    // Lưu AI Usage với chi phí và giá TẠI THỜI ĐIỂM - CHỈ DÙNG DATABASE
+    private String fallbackSubtypeForCategory(String category) {
+        if (category == null) return ErrorSubtype.MIXED_TENSE.name();
+        switch (category) {
+            case "TENSE":       return ErrorSubtype.MIXED_TENSE.name();
+            case "ARTICLE":     return ErrorSubtype.A_AN.name();
+            case "PREPOSITION": return ErrorSubtype.TIME_IN.name();
+            case "CONJUNCTION": return ErrorSubtype.WRONG_CONJUNCTION.name();
+            case "STRUCTURE":   return ErrorSubtype.WORD_ORDER.name();
+            case "POS":         return ErrorSubtype.ADJECTIVE_ADVERB.name();
+            case "VERB":        return ErrorSubtype.GERUND_INFINITIVE.name();
+            case "NATURALNESS": return ErrorSubtype.AWKWARD_PHRASING.name();
+            case "SPELLING":    return ErrorSubtype.TYPO.name();
+            case "WORD_CHOICE": return ErrorSubtype.WRONG_WORD.name();
+            case "MEANING":     return ErrorSubtype.MISTRANSLATION.name();
+            case "PUNCTUATION": return ErrorSubtype.MISSING_PUNCTUATION.name();
+            default:            return ErrorSubtype.MIXED_TENSE.name();
+        }
+    }
+
     private void saveAIUsageWithTokens(Long studentId, AIPracticeChat chat, RequestType requestType,
                                        String provider, String model, long responseTime,
                                        boolean success, String errorMessage,
@@ -726,10 +882,6 @@ public class PracticeServiceImpl implements PracticeService {
                 aiUsage.setInputPricePerMillion(0.0);
                 aiUsage.setOutputPricePerMillion(0.0);
             }
-
-            log.info("✅ Saved AI Usage - Model: {}, Input: {}, Output: {}, Total: {}, Cost: {} VND",
-                    model, inputTokens, outputTokens, totalTokens,
-                    String.format("%,.0f", cost));
         } else {
             aiUsage.setInputTokens(0);
             aiUsage.setOutputTokens(0);
@@ -737,7 +889,6 @@ public class PracticeServiceImpl implements PracticeService {
             aiUsage.setInputPricePerMillion(0.0);
             aiUsage.setOutputPricePerMillion(0.0);
             aiUsage.setEstimatedCost(BigDecimal.ZERO);
-            log.warn("⚠️ No token usage available for this request");
         }
 
         aiUsage.setResponseTimeMs((int) responseTime);
@@ -749,11 +900,18 @@ public class PracticeServiceImpl implements PracticeService {
     private PracticeChatResponse buildPracticeChatResponse(AIPracticeChat chat, AIPracticeTurn currentTurn) {
         TurnResponse turnResponse = null;
         if (currentTurn != null) {
+            // ✅ Sanitize lại lần nữa (đề phòng data cũ trong DB)
+            List<String> usedVocab = sanitizeUsedVocabulary(
+                    parseUsedVocabulary(currentTurn.getUsedVocabulary()),
+                    chat.getVocabularyWords()
+            );
+
             turnResponse = TurnResponse.builder()
                     .id(currentTurn.getId())
                     .questionOrder(currentTurn.getQuestionOrder())
                     .vietnameseSentence(currentTurn.getVietnameseSentence())
                     .createdAt(currentTurn.getCreatedAt())
+                    .usedVocabulary(usedVocab)
                     .build();
         }
 
@@ -771,6 +929,17 @@ public class PracticeServiceImpl implements PracticeService {
                 .vocabularyWords(chat.getVocabularyWords())
                 .currentTurn(turnResponse)
                 .build();
+    }
+
+    private List<String> parseUsedVocabulary(String json) {
+        if (json == null || json.isBlank() || json.equals("[]")) return new ArrayList<>();
+        try {
+            return objectMapper.readValue(
+                    json,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     private EvaluationResponse buildEvaluationResponse(AIEvaluateResponse aiResponse,
@@ -815,9 +984,7 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     private List<String> convertBetterAnswersToList(String betterAnswersStr) {
-        if (betterAnswersStr == null || betterAnswersStr.isEmpty()) {
-            return new ArrayList<>();
-        }
+        if (betterAnswersStr == null || betterAnswersStr.isEmpty()) return new ArrayList<>();
         return Arrays.stream(betterAnswersStr.split("\\|\\|\\|"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
@@ -827,21 +994,15 @@ public class PracticeServiceImpl implements PracticeService {
     // ============ GET WEAKNESSES ============
     @Override
     public List<StudentWeaknessResponse> getStudentWeaknessesWithDetails(Long userId) {
-        log.info("Getting student weaknesses with details for user: {}", userId);
-
         Student student = studentRepository
                 .findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin học viên"));
-
         Long studentId = student.getId();
 
         List<StudentAIError> weaknesses = studentAIErrorRepository
                 .findByStudentIdOrderByMasteryScoreAsc(studentId);
 
-        if (weaknesses.isEmpty()) {
-            log.info("No weaknesses found for student: {}", studentId);
-            return new ArrayList<>();
-        }
+        if (weaknesses.isEmpty()) return new ArrayList<>();
 
         return weaknesses.stream()
                 .filter(e -> e.getMasteryScore() < 80)

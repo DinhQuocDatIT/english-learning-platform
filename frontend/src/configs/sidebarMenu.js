@@ -23,11 +23,7 @@ import { ROLES } from "../constants/roles";
 
 export const sidebarMenus = {
   [ROLES.STUDENT]: [
-    {
-      path: "/dashboard/courses",
-      name: "Khóa học của tôi",
-      icon: faBookOpen,
-    },
+    
     {
       path: "/dashboard/student/myvocabulary",
       name: "Từ vựng",

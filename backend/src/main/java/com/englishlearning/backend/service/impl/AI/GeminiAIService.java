@@ -35,7 +35,6 @@ public class GeminiAIService implements AIService {
     private final String geminiApiUrl;
     private final GeminiConfig geminiConfig;
 
-    // ✅ ThreadLocal để tránh race condition khi nhiều request đồng thời
     private final ThreadLocal<GeminiUsageMetadata> currentUsage = new ThreadLocal<>();
 
     public GeminiAIService(RestTemplate restTemplate,
@@ -48,7 +47,6 @@ public class GeminiAIService implements AIService {
         this.geminiConfig = geminiConfig;
     }
 
-    // ✅ Getter để lấy token usage (thread-safe)
     public GeminiUsageMetadata getCurrentUsage() {
         return currentUsage.get();
     }
@@ -66,23 +64,21 @@ public class GeminiAIService implements AIService {
     // ========================================
     @Override
     public AIGenerateResponse generateSentence(AIGenerateRequest request) {
-        log.info("Đang tạo câu cho level: {}, topic: {}, sentenceType: {}",
-                request.getLevel(), request.getTopic(), request.getSentenceType());
+        log.info("Đang tạo câu. level: {}, topic: {}, sentenceType: {}, forcedWords: {}",
+                request.getLevel(), request.getTopic(), request.getSentenceType(),
+                request.getForcedWords());
 
         try {
-            String vocabularyStr = request.getVocabularyWords() != null ?
-                    String.join(", ", request.getVocabularyWords()) : null;
             String weaknessesStr = request.getWeaknesses() != null ?
                     String.join(", ", request.getWeaknesses()) : null;
 
-            // ✅ Truyền thêm previousSentences
             String prompt = PromptConstants.formatGeneratePrompt(
                     request.getLevel(),
                     request.getTopic(),
                     request.getSentenceType(),
-                    vocabularyStr,
                     weaknessesStr,
-                    request.getPreviousSentences()
+                    request.getPreviousSentences(),
+                    request.getForcedWords()   // ✅ forcedWords (List)
             );
 
             String response = callGeminiWithRetry(prompt, 3);
@@ -90,9 +86,6 @@ public class GeminiAIService implements AIService {
         } catch (Exception e) {
             log.error("Lỗi tạo câu: {}", e.getMessage());
             throw new BusinessException(ErrorCode.AI_SERVICE_ERROR);
-        } finally {
-            // ✅ Clean up ThreadLocal để tránh memory leak
-            // (đã lấy usage xong ở tầng trên rồi)
         }
     }
 
@@ -124,33 +117,26 @@ public class GeminiAIService implements AIService {
     // ========================================
     @Override
     public AIEvaluateResponse evaluateAndGenerate(AIEvaluateRequest request) {
-        log.info("Đang đánh giá và tạo câu hỏi tiếp theo. sentenceType: {}, previousSentences: {}",
-                request.getSentenceType(),
-                request.getPreviousSentences() != null ? request.getPreviousSentences().size() : 0);
+        log.info("Đang đánh giá và tạo câu tiếp theo. forcedWords: {}",
+                request.getForcedWords());
 
         try {
-            String vocabularyStr = request.getVocabularyWords() != null ?
-                    String.join(", ", request.getVocabularyWords()) : null;
-
-            // ✅ Format weaknesses đẹp + đánh số ưu tiên
             String weaknessesStr = formatWeaknesses(request.getWeaknesses());
 
-            // ✅ Truyền thêm previousSentences
             String prompt = PromptConstants.formatEvaluateAndGeneratePrompt(
                     request.getVietnameseSentence(),
                     request.getStudentAnswer(),
                     request.getExpectedAnswer(),
                     request.getLevel(),
                     request.getTopic(),
-                    vocabularyStr,
                     weaknessesStr,
                     request.getSentenceType(),
-                    request.getPreviousSentences()
+                    request.getPreviousSentences(),
+                    request.getForcedWords()   // ✅ forcedWords (List)
             );
 
-            log.info("📤 [EVALUATE_AND_GENERATE] sentenceType: {}, previousSentences: {}",
-                    request.getSentenceType(),
-                    request.getPreviousSentences() != null ? request.getPreviousSentences().size() : 0);
+            log.info("📤 [EVALUATE_AND_GENERATE] forcedWords: {}",
+                    request.getForcedWords());
 
             String response = callGeminiWithRetry(prompt, 3);
             return parseEvaluateAndGenerateResponse(response);
@@ -192,7 +178,6 @@ public class GeminiAIService implements AIService {
 
             String text = response.getCandidates().get(0).getContent().getParts().get(0).getText();
 
-            // ✅ Lưu usage metadata vào ThreadLocal
             GeminiUsageMetadata usage = response.getUsageMetadata();
             if (usage != null) {
                 this.currentUsage.set(usage);
@@ -217,10 +202,23 @@ public class GeminiAIService implements AIService {
     private AIGenerateResponse parseGenerateResponse(String response) {
         try {
             JsonNode root = objectMapper.readTree(response);
+
+            List<String> usedVocab = new ArrayList<>();
+            JsonNode usedNode = root.path("usedVocabulary");
+            if (usedNode.isArray()) {
+                for (JsonNode n : usedNode) {
+                    String v = n.asText();
+                    if (v != null && !v.isEmpty()) {
+                        usedVocab.add(v.toLowerCase().trim());
+                    }
+                }
+            }
+
             return AIGenerateResponse.builder()
                     .vietnameseSentence(root.path("vietnameseSentence").asText())
                     .expectedAnswer(root.path("expectedAnswer").asText())
                     .sentenceType(root.path("sentenceType").asText())
+                    .usedVocabulary(usedVocab)
                     .build();
         } catch (Exception e) {
             log.error("Lỗi parse phản hồi generate: {}", e.getMessage());
@@ -245,12 +243,27 @@ public class GeminiAIService implements AIService {
 
             JsonNode nextQuestion = root.path("nextQuestion");
             if (!nextQuestion.isMissingNode() && !nextQuestion.isNull()) {
+
+                List<String> usedVocab = new ArrayList<>();
+                JsonNode usedNode = nextQuestion.path("usedVocabulary");
+                if (usedNode.isArray()) {
+                    for (JsonNode n : usedNode) {
+                        String v = n.asText();
+                        if (v != null && !v.isEmpty()) {
+                            usedVocab.add(v.toLowerCase().trim());
+                        }
+                    }
+                }
+
                 AIGenerateResponse next = AIGenerateResponse.builder()
                         .vietnameseSentence(nextQuestion.path("vietnameseSentence").asText())
                         .expectedAnswer(nextQuestion.path("expectedAnswer").asText())
                         .sentenceType(nextQuestion.path("sentenceType").asText())
+                        .usedVocabulary(usedVocab)
                         .build();
                 evaluateResponse.setNextQuestion(next);
+
+                log.info("✅ Next question parsed. usedVocabulary: {}", usedVocab);
             }
 
             return evaluateResponse;
@@ -269,10 +282,6 @@ public class GeminiAIService implements AIService {
         score = Math.max(0, Math.min(100, score));
         naturalnessScore = Math.max(0, Math.min(100, naturalnessScore));
 
-        if (!feedback.isEmpty() && !feedback.matches(".*[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ].*")) {
-            log.warn("⚠️ Feedback có thể không phải tiếng Việt: {}", feedback);
-        }
-
         List<AIErrorResponse> errors = new ArrayList<>();
         JsonNode errorsNode = root.path("errors");
         if (errorsNode.isArray()) {
@@ -290,14 +299,11 @@ public class GeminiAIService implements AIService {
                     continue;
                 }
 
-                // ✅ Fallback nếu Gemini quên category
                 if (errorCategory == null || errorCategory.isEmpty()) {
                     errorCategory = errorType;
                 }
-                // ✅ Fallback nếu Gemini quên subtype
                 if (errorSubtype == null || errorSubtype.isEmpty()) {
                     errorSubtype = "MIXED_TENSE";
-                    log.warn("⚠️ Gemini không trả errorSubtype cho lỗi: {}", errorType);
                 }
 
                 errors.add(AIErrorResponse.builder()
@@ -378,14 +384,6 @@ public class GeminiAIService implements AIService {
                 "AI service failed after " + maxRetries + " retries: " + lastError);
     }
 
-    /**
-     * ✅ Format danh sách weaknesses cho prompt AI
-     *
-     * Input:  ["TENSE_SUBJECT_VERB_AGREEMENT (4 lần)", "ARTICLE_THE (3 lần)"]
-     * Output:
-     *   1. TENSE_SUBJECT_VERB_AGREEMENT (4 lần) ← ƯU TIÊN
-     *   2. ARTICLE_THE (3 lần)
-     */
     private String formatWeaknesses(List<String> weaknesses) {
         if (weaknesses == null || weaknesses.isEmpty()) {
             return "Không có";
