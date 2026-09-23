@@ -26,9 +26,15 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UnauthorizedException("Email or password incorrect"));
-      if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-          throw new UnauthorizedException("Email or password incorrect");
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UnauthorizedException("Email hoặc mật khẩu không đúng"));
+        if (user.getDeletedAt() != null) {
+            throw new UnauthorizedException("Tài khoản đã bị khóa");
+        }
+
+
+
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+          throw new UnauthorizedException("Email hoặc mật khẩu không đúng");
       }
       String token = jwtUtil.generateToken(user);
 

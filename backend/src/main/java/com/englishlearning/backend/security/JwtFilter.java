@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -23,32 +24,34 @@ public class JwtFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-           String token = authHeader.substring(7);
-            if(SecurityContextHolder.getContext().getAuthentication() == null) {
+            String token = authHeader.substring(7);
 
-                if(jwtUtil.isValid(token)) {
+            if (SecurityContextHolder.getContext().getAuthentication() == null
+                    && jwtUtil.isValid(token)) {
 
-                    String email = jwtUtil.extractEmail(token);
+                String email = jwtUtil.extractEmail(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
+                // ✅ Chỉ set authentication nếu account còn enabled
+                if (userDetails.isEnabled()) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
-
-                    SecurityContextHolder
-                            .getContext()
-                            .setAuthentication(authToken);}
+                                    userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+                // Nếu isEnabled() == false → KHÔNG set → request bị coi là chưa xác thực
+                // → Spring Security trả 401/403 tùy cấu hình
             }
-
         }
+
         filterChain.doFilter(request, response);
     }
 }
