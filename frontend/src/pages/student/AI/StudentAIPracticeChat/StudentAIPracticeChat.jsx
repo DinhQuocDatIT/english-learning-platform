@@ -312,7 +312,6 @@ function StudentAIPracticeChat() {
   };
 
   const handleHistoryClick = (turn) => {
-    // ✅ Dùng questionOrder làm displayIndex (số câu thực tế)
     setSelectedHistoryTurn({
       ...turn,
       displayIndex: turn.questionOrder,
@@ -346,11 +345,20 @@ function StudentAIPracticeChat() {
   const accuracy =
     completedTurns > 0 ? Math.round((correctTurns / completedTurns) * 100) : 0;
 
+  const aiPercent = (() => {
+    if (!aiUsage) return 0;
+    const total =
+      aiUsage.totalRequests || aiUsage.maxRequests || aiUsage.dailyLimit || 100;
+    if (total <= 0) return 0;
+    const used = total - aiUsage.remainingRequests;
+    // ✅ Càng dùng nhiều → thanh càng dài
+    return Math.max(0, Math.min((used / total) * 100, 100));
+  })();
+
   // Render feedback for a turn
   const renderTurnFeedback = (turn) => {
     if (!turn) return null;
 
-    // ✅ Dùng questionOrder (số câu thực tế)
     const displayNumber = turn.questionOrder || turn.displayIndex;
 
     return (
@@ -459,28 +467,6 @@ function StudentAIPracticeChat() {
   return (
     <div className={styles.container}>
       <main className={styles.mainContent}>
-        {/* USAGE BANNER */}
-        {aiUsage && hasMembership && !isCompleted && (
-          <div
-            className={`${styles.usageBanner} ${
-              aiUsage.remainingRequests <= 3 ? styles.usageBannerWarning : ""
-            } ${
-              aiUsage.remainingRequests === 0 ? styles.usageBannerDanger : ""
-            }`}
-          >
-            <FontAwesomeIcon icon={faBolt} />
-            <span>
-              Còn <strong>{aiUsage.remainingRequests}</strong> lượt sử dụng AI
-              hôm nay
-              {aiUsage.remainingRequests <= 3 &&
-                aiUsage.remainingRequests > 0 &&
-                " - Sắp hết, hãy tiết kiệm nhé!"}
-              {aiUsage.remainingRequests === 0 &&
-                " - Đã hết lượt, quay lại vào ngày mai!"}
-            </span>
-          </div>
-        )}
-
         {/* Progress Section */}
         <div className={styles.progressSection}>
           <div className={styles.progressHeader}>
@@ -674,10 +660,9 @@ function StudentAIPracticeChat() {
         <div className={styles.sidebarProfile}>
           <div className={styles.avatarPlaceholder}>
             <span style={{ fontSize: "28px" }}>
-              {getTopicIcon(practice.topic)}
+              <FontAwesomeIcon icon={faRobot} />
             </span>
           </div>
-          {/* ✅ Hiển thị tên TOPIC thay vì "Tiến độ luyện tập" */}
           <h3>{getTopicDisplayName(practice.topic)}</h3>
           <p className={styles.levelText}>
             Cấp độ {practice.level || "B1"}
@@ -722,6 +707,45 @@ function StudentAIPracticeChat() {
               style={{ width: `${accuracy}%` }}
             />
           </div>
+
+          {/* ✅ MINI BAR — LƯỢT AI CÒN LẠI */}
+          {aiUsage && hasMembership && (
+            <>
+              <div className={styles.sessionDivider} />
+              <div className={styles.accuracyBarContainer}>
+                <span className={styles.accuracyLabelText}>
+                  <FontAwesomeIcon
+                    icon={faBolt}
+                    className={styles.inlineIconBolt}
+                  />
+                  Lượt AI còn lại
+                </span>
+                <span
+                  className={`${styles.accuracyPercent} ${
+                    aiUsage.remainingRequests === 0
+                      ? styles.aiCountDanger
+                      : aiUsage.remainingRequests <= 3
+                        ? styles.aiCountWarning
+                        : ""
+                  }`}
+                >
+                  {aiUsage.remainingRequests}
+                </span>
+              </div>
+              <div className={styles.smallProgressBarBg}>
+                <div
+                  className={`${styles.smallProgressBarFill} ${
+                    aiUsage.remainingRequests === 0
+                      ? styles.aiBarDanger
+                      : aiUsage.remainingRequests <= 3
+                        ? styles.aiBarWarning
+                        : ""
+                  }`}
+                  style={{ width: `${aiPercent}%` }}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* History */}
@@ -737,7 +761,6 @@ function StudentAIPracticeChat() {
                 className={`${styles.historyItemRow} ${styles.historyItemDoing}`}
               >
                 <span className={styles.historyItemName}>
-                  {/* ✅ Dùng questionOrder */}
                   <span>Câu {currentTurn.questionOrder}</span>
                   <span className={styles.badgeDoing}>
                     {isSubmitting ? "Đang chấm..." : "Đang làm"}
@@ -760,7 +783,6 @@ function StudentAIPracticeChat() {
                 onClick={() => handleHistoryClick(turn)}
               >
                 <span className={styles.historyItemName}>
-                  {/* ✅ Dùng questionOrder thay vì index + 1 */}
                   <span>Câu {turn.questionOrder}</span>
                   {turn.isCorrect ? (
                     <span className={styles.iconCheck}>
@@ -801,7 +823,7 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* ✅ FOCUS AREAS với DROPDOWN */}
+        {/* FOCUS AREAS với DROPDOWN */}
         <div className={styles.focusSection}>
           <div className={styles.sectionTitle}>
             <FontAwesomeIcon icon={faBullseye} />
@@ -836,15 +858,8 @@ function StudentAIPracticeChat() {
                       <span className={styles.errorCountBadge}>
                         {item.count} lần
                       </span>
-                      <FontAwesomeIcon
-                        icon={faChevronDown}
-                        className={`${styles.focusChevron} ${
-                          isExpanded ? styles.focusChevronRotated : ""
-                        }`}
-                      />
                     </div>
 
-                    {/* DROPDOWN MÔ TẢ */}
                     {isExpanded && (description || example) && (
                       <div className={styles.focusDropdown}>
                         {description && (
@@ -950,7 +965,6 @@ function StudentAIPracticeChat() {
                 <h4>Lỗi thường gặp</h4>
                 <div className={styles.resultErrorList}>
                   {(() => {
-                    // Lấy danh sách errors (ưu tiên result.commonErrors)
                     let errors = [];
                     if (
                       result?.commonErrors &&
@@ -1002,17 +1016,9 @@ function StudentAIPracticeChat() {
                             <span className={styles.errorTypeCount}>
                               {error.count} lần
                             </span>
-                            <FontAwesomeIcon
-                              icon={faChevronDown}
-                              className={`${styles.resultErrorChevron} ${
-                                isExpanded
-                                  ? styles.resultErrorChevronRotated
-                                  : ""
-                              }`}
-                            />
+                           
                           </div>
 
-                          {/* DROPDOWN */}
                           {isExpanded && (description || example) && (
                             <div className={styles.resultErrorDropdown}>
                               {description && (
