@@ -33,6 +33,10 @@ import {
   getExample,
   buildErrorKey,
 } from "../../../../constants/errorTypeConstants";
+import {
+  getTopicDisplayName,
+  getTopicIcon,
+} from "../../../../constants/topicConstants";
 import styles from "./StudentAIPracticeChat.module.css";
 
 function StudentAIPracticeChat() {
@@ -117,7 +121,7 @@ function StudentAIPracticeChat() {
             errorMap[key] = {
               errorKey: key,
               errorCategory: err.errorCategory || err.errorType,
-              errorSubtype: err.errorSubtype,
+              errorType: err.errorType,
               count: 0,
             };
           }
@@ -307,8 +311,12 @@ function StudentAIPracticeChat() {
     setShowHistory(!showHistory);
   };
 
-  const handleHistoryClick = (turn, displayIndex) => {
-    setSelectedHistoryTurn({ ...turn, displayIndex });
+  const handleHistoryClick = (turn) => {
+    // ✅ Dùng questionOrder làm displayIndex (số câu thực tế)
+    setSelectedHistoryTurn({
+      ...turn,
+      displayIndex: turn.questionOrder,
+    });
     setActiveTurn(turn.questionOrder);
     setTimeout(() => {
       feedbackRef.current?.scrollIntoView({
@@ -342,7 +350,8 @@ function StudentAIPracticeChat() {
   const renderTurnFeedback = (turn) => {
     if (!turn) return null;
 
-    const displayNumber = turn.displayIndex || turn.questionOrder;
+    // ✅ Dùng questionOrder (số câu thực tế)
+    const displayNumber = turn.questionOrder || turn.displayIndex;
 
     return (
       <div className={styles.feedbackCard} ref={feedbackRef}>
@@ -664,12 +673,15 @@ function StudentAIPracticeChat() {
       <aside className={styles.sidebar}>
         <div className={styles.sidebarProfile}>
           <div className={styles.avatarPlaceholder}>
-            <FontAwesomeIcon icon={faUser} />
+            <span style={{ fontSize: "28px" }}>
+              {getTopicIcon(practice.topic)}
+            </span>
           </div>
-          <h3>Tiến độ luyện tập</h3>
+          {/* ✅ Hiển thị tên TOPIC thay vì "Tiến độ luyện tập" */}
+          <h3>{getTopicDisplayName(practice.topic)}</h3>
           <p className={styles.levelText}>
-            Cấp độ {practice.level || "B1"}{" "}
-            {practice.level === "B1" ? "Intermediate" : ""}
+            Cấp độ {practice.level || "B1"}
+            {practice.level === "B1" ? " - Intermediate" : ""}
           </p>
           {turnHistory.length > 0 && (
             <button className={styles.historyLink} onClick={toggleHistory}>
@@ -725,7 +737,8 @@ function StudentAIPracticeChat() {
                 className={`${styles.historyItemRow} ${styles.historyItemDoing}`}
               >
                 <span className={styles.historyItemName}>
-                  <span>Câu {completedTurns + 1}</span>
+                  {/* ✅ Dùng questionOrder */}
+                  <span>Câu {currentTurn.questionOrder}</span>
                   <span className={styles.badgeDoing}>
                     {isSubmitting ? "Đang chấm..." : "Đang làm"}
                   </span>
@@ -736,7 +749,7 @@ function StudentAIPracticeChat() {
               </div>
             )}
 
-            {turnHistory.map((turn, index) => (
+            {turnHistory.map((turn) => (
               <div
                 key={turn.id || turn.questionOrder}
                 className={`${styles.historyItemRow} ${
@@ -744,10 +757,11 @@ function StudentAIPracticeChat() {
                     ? styles.activeHistoryRow
                     : ""
                 }`}
-                onClick={() => handleHistoryClick(turn, index + 1)}
+                onClick={() => handleHistoryClick(turn)}
               >
                 <span className={styles.historyItemName}>
-                  <span>Câu {index + 1}</span>
+                  {/* ✅ Dùng questionOrder thay vì index + 1 */}
+                  <span>Câu {turn.questionOrder}</span>
                   {turn.isCorrect ? (
                     <span className={styles.iconCheck}>
                       <FontAwesomeIcon icon={faCheckCircle} />
@@ -952,7 +966,7 @@ function StudentAIPracticeChat() {
                             errorMap[key] = {
                               errorKey: key,
                               errorCategory: err.errorCategory || err.errorType,
-                              errorSubtype: err.errorSubtype,
+                              errorType: err.errorType,
                               count: 0,
                             };
                           }
