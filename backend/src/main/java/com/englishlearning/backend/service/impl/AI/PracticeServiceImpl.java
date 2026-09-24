@@ -10,7 +10,6 @@ import com.englishlearning.backend.dto.response.*;
 import com.englishlearning.backend.dto.response.gemini.GeminiUsageMetadata;
 import com.englishlearning.backend.entity.*;
 import com.englishlearning.backend.enums.ErrorCategory;
-import com.englishlearning.backend.enums.ErrorSubtype;
 import com.englishlearning.backend.enums.PracticeStatus;
 import com.englishlearning.backend.enums.RequestType;
 import com.englishlearning.backend.enums.SeverityLevel;
@@ -125,6 +124,7 @@ public class PracticeServiceImpl implements PracticeService {
         chat.setSentenceType(SentenceType.valueOf(request.getSentenceType()));
         chat.setTopic(request.getTopic());
         chat.setQuestionLimit(request.getQuestionLimit());
+        // ✅ questionCount = số câu ĐÃ TRẢ LỜI (chưa trả lời câu nào → 0)
         chat.setQuestionCount(0);
         chat.setCorrectCount(0);
         chat.setStatus(PracticeStatus.IN_PROGRESS);
@@ -135,21 +135,20 @@ public class PracticeServiceImpl implements PracticeService {
 
         AIPracticeTurn turn = new AIPracticeTurn();
         turn.setPracticeChat(chat);
-        turn.setQuestionOrder(1);
+        turn.setQuestionOrder(1);   // ✅ Câu đầu tiên luôn là 1
         turn.setVietnameseSentence(aiResponse.getVietnameseSentence());
         turn.setExpectedAnswer(aiResponse.getExpectedAnswer());
         turn.setBetterAnswers(null);
-        // ✅ Chỉ lưu từ vựng nếu user có nạp + chỉ giữ từ trong danh sách
         turn.setUsedVocabulary(toJsonArray(
                 sanitizeUsedVocabulary(aiResponse.getUsedVocabulary(), request.getVocabularyWords())
         ));
         turnRepository.save(turn);
 
-        chat.setQuestionCount(1);
         practiceChatRepository.save(chat);
         studentMembershipService.incrementAIRequestCount(userId);
-        log.info("Practice created. Chat ID: {}, Turn ID: {}, usedVocab: {}",
-                chat.getId(), turn.getId(), parseUsedVocabulary(turn.getUsedVocabulary()));
+        log.info("Practice created. Chat ID: {}, Turn ID: {}, questionCount: {}, usedVocab: {}",
+                chat.getId(), turn.getId(), chat.getQuestionCount(),
+                parseUsedVocabulary(turn.getUsedVocabulary()));
 
         return buildPracticeChatResponse(chat, turn);
     }
@@ -255,22 +254,16 @@ public class PracticeServiceImpl implements PracticeService {
             for (AIErrorResponse errorResp : aiResponse.getErrors()) {
                 AIError error = new AIError();
                 error.setEvaluation(evaluation);
-                error.setErrorType(errorResp.getErrorType());
+                error.setErrorType(safeErrorType(errorResp.getErrorType(), errorResp.getErrorCategory()));
+                error.setErrorCategory(safeCategory(errorResp.getErrorCategory()));
                 error.setUserText(errorResp.getUserText());
                 error.setCorrectText(errorResp.getCorrectText());
                 error.setExplanation(errorResp.getExplanation());
 
-                String safeCategory = safeCategory(errorResp.getErrorCategory());
-                String safeSubtype = safeSubtype(errorResp.getErrorSubtype(), safeCategory);
-
-                error.setErrorCategory(safeCategory);
-                error.setErrorSubtype(safeSubtype);
-                error.setErrorKey(safeCategory + "_" + safeSubtype);
-
                 SeverityLevel severity;
                 try {
                     severity = SeverityLevel.valueOf(errorResp.getSeverity());
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException | NullPointerException e) {
                     severity = SeverityLevel.MEDIUM;
                 }
                 error.setSeverity(severity);
@@ -282,6 +275,8 @@ public class PracticeServiceImpl implements PracticeService {
         updateStudentAIErrors(studentId, errors);
 
         boolean isCorrect = aiResponse.getIsCorrect() != null && aiResponse.getIsCorrect();
+
+        // ✅ Tăng questionCount (đã trả lời thêm 1 câu) — dùng cho progress bar
         chat.setQuestionCount(chat.getQuestionCount() + 1);
         if (isCorrect) chat.setCorrectCount(chat.getCorrectCount() + 1);
 
@@ -302,6 +297,12 @@ public class PracticeServiceImpl implements PracticeService {
         EvaluationResponse response = buildEvaluationResponse(aiResponse, chat, isCompleted);
 
         if (!isCompleted && aiResponse.getNextQuestion() != null) {
+            // ✅ ĐẾM SỐ TURN THỰC TẾ TRONG DB → tính order tiếp theo
+            long turnCount = turnRepository.countByPracticeChatId(chat.getId());
+            int nextOrder = (int) turnCount + 1;
+
+            log.info("🔢 Turn count trong chat = {}, nextOrder = {}", turnCount, nextOrder);
+
             // ✅ Sanitize usedVocabulary trước khi lưu + trả về
             List<String> sanitizedVocab = sanitizeUsedVocabulary(
                     aiResponse.getNextQuestion().getUsedVocabulary(),
@@ -310,7 +311,7 @@ public class PracticeServiceImpl implements PracticeService {
 
             AIPracticeTurn nextTurn = new AIPracticeTurn();
             nextTurn.setPracticeChat(chat);
-            nextTurn.setQuestionOrder(chat.getQuestionCount() + 1);
+            nextTurn.setQuestionOrder(nextOrder);
             nextTurn.setVietnameseSentence(aiResponse.getNextQuestion().getVietnameseSentence());
             nextTurn.setExpectedAnswer(aiResponse.getNextQuestion().getExpectedAnswer());
             nextTurn.setBetterAnswers(null);
@@ -324,10 +325,13 @@ public class PracticeServiceImpl implements PracticeService {
                     .createdAt(nextTurn.getCreatedAt())
                     .usedVocabulary(sanitizedVocab)
                     .build());
+
+            log.info("✅ Next turn created. questionOrder = {}, questionCount = {}",
+                    nextTurn.getQuestionOrder(), chat.getQuestionCount());
         }
 
-        log.info("Answer submitted. Turn: {}, Correct: {}, Score: {}",
-                turn.getId(), isCorrect, aiResponse.getScore());
+        log.info("Answer submitted. Turn: {} (order={}), Correct: {}, Score: {}",
+                turn.getId(), turn.getQuestionOrder(), isCorrect, aiResponse.getScore());
 
         return response;
     }
@@ -373,7 +377,6 @@ public class PracticeServiceImpl implements PracticeService {
                                     .explanation(error.getExplanation())
                                     .severity(error.getSeverity().name())
                                     .errorCategory(error.getErrorCategory())
-                                    .errorSubtype(error.getErrorSubtype())
                                     .build());
                         }
                     }
@@ -446,31 +449,23 @@ public class PracticeServiceImpl implements PracticeService {
 
                 if (answer.getEvaluation() != null && answer.getEvaluation().getErrors() != null) {
                     for (AIError error : answer.getEvaluation().getErrors()) {
-                        String errorKey = error.getErrorKey();
-                        if (errorKey == null || errorKey.isEmpty()) {
-                            errorKey = (error.getErrorCategory() != null && error.getErrorSubtype() != null)
-                                    ? error.getErrorCategory() + "_" + error.getErrorSubtype()
-                                    : error.getErrorType();
-                        }
-                        final String finalErrorKey = errorKey;
+                        String key = error.buildWeaknessKey();
 
                         ErrorSummary summary = commonErrors.stream()
-                                .filter(e -> e.getErrorType().equals(finalErrorKey))
+                                .filter(e -> key.equals(e.getErrorType()))
                                 .findFirst()
                                 .orElse(null);
 
                         if (summary == null) {
-                            String displayName = null;
+                            ErrorCategory cat = null;
                             try {
-                                ErrorSubtype subtypeEnum = ErrorSubtype.fromString(error.getErrorSubtype());
-                                displayName = subtypeEnum.getDisplayName();
+                                cat = ErrorCategory.valueOf(error.getErrorCategory());
                             } catch (Exception ignored) {}
 
                             summary = ErrorSummary.builder()
-                                    .errorType(errorKey)
+                                    .errorType(key)
                                     .errorCategory(error.getErrorCategory())
-                                    .errorSubtype(error.getErrorSubtype())
-                                    .displayName(displayName)
+                                    .displayName(cat != null ? cat.getDisplayName() : error.getErrorType())
                                     .count(0)
                                     .example(error.getUserText())
                                     .build();
@@ -539,11 +534,6 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     // ============ ✅ SANITIZE USED VOCABULARY ============
-    /**
-     * Lọc usedVocabulary:
-     * - Nếu chat KHÔNG có vocabularyWords → trả về [] (không có ý nghĩa)
-     * - Nếu chat CÓ vocabularyWords → chỉ giữ các từ AI khai báo NẰM TRONG danh sách user nạp
-     */
     private List<String> sanitizeUsedVocabulary(List<String> aiUsed, List<String> userVocab) {
         if (userVocab == null || userVocab.isEmpty()) {
             return new ArrayList<>();
@@ -679,30 +669,17 @@ public class PracticeServiceImpl implements PracticeService {
             String userText = e.getUserText() != null ? e.getUserText().trim() : "";
             String correctText = e.getCorrectText() != null ? e.getCorrectText().trim() : "";
 
-            // Bỏ lỗi rác
+            // Bỏ lỗi rác: userText == correctText
             if (!userText.isEmpty() && userText.equalsIgnoreCase(correctText)) {
                 continue;
             }
 
-            // Dedup — cùng userText + cùng correctText
+            // Dedup theo userText + correctText
             String dedupKey = userText.toLowerCase() + "|" + correctText.toLowerCase();
             if (!userText.isEmpty() && seenKeys.contains(dedupKey)) {
                 continue;
             }
             if (!userText.isEmpty()) seenKeys.add(dedupKey);
-
-            // Fix MISSING_VERB giả
-            if ("MISSING_VERB".equals(e.getErrorSubtype())) {
-                String ut = userText.toLowerCase();
-                boolean hasVerb = ut.matches(".*\\b(is|am|are|was|were|be|been|being|have|has|had|do|does|did|can|could|will|would|shall|should|may|might|must)\\b.*")
-                        || ut.matches(".*\\b\\w+(s|es|ed|ing)\\b.*");
-                if (hasVerb) {
-                    log.info("🔧 [sanitize] MISSING_VERB giả: {} → WORD_CHOICE/WRONG_WORD", ut);
-                    e.setErrorCategory("WORD_CHOICE");
-                    e.setErrorSubtype("WRONG_WORD");
-                    e.setErrorType("WORD_CHOICE");
-                }
-            }
 
             cleaned.add(e);
         }
@@ -726,17 +703,15 @@ public class PracticeServiceImpl implements PracticeService {
         if (errorsInChat.isEmpty()) return new ArrayList<>();
 
         Map<String, Long> errorCountMap = errorsInChat.stream()
-                .filter(e -> e.getErrorKey() != null && !e.getErrorKey().isEmpty())
-                .collect(Collectors.groupingBy(AIError::getErrorKey, Collectors.counting()));
+                .filter(e -> e.getErrorCategory() != null && !e.getErrorCategory().isEmpty())
+                .collect(Collectors.groupingBy(AIError::getErrorCategory, Collectors.counting()));
 
-        List<String> result = errorCountMap.entrySet().stream()
+        return errorCountMap.entrySet().stream()
                 .filter(entry -> entry.getValue() >= 2)
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                 .limit(3)
                 .map(entry -> entry.getKey() + " (" + entry.getValue() + " lần)")
                 .collect(Collectors.toList());
-
-        return result;
     }
 
     private List<String> getPreviousSentences(Long chatId) {
@@ -754,22 +729,18 @@ public class PracticeServiceImpl implements PracticeService {
 
     private void updateStudentAIErrors(Long studentId, List<AIError> errors) {
         for (AIError error : errors) {
-            String errorKey = error.getErrorKey();
-            if (errorKey == null || errorKey.isEmpty()) {
-                errorKey = ErrorSubtype.buildErrorKey(error.getErrorCategory(), error.getErrorSubtype());
-            }
+            String weaknessKey = error.buildWeaknessKey();
 
             StudentAIError studentError = studentAIErrorRepository
-                    .findByStudentIdAndErrorKey(studentId, errorKey)
+                    .findByStudentIdAndWeaknessKey(studentId, weaknessKey)
                     .orElse(null);
 
             if (studentError == null) {
                 studentError = new StudentAIError();
                 studentError.setStudent(studentRepository.getReferenceById(studentId));
                 studentError.setErrorCategory(error.getErrorCategory());
-                studentError.setErrorSubtype(error.getErrorSubtype());
-                studentError.setErrorKey(errorKey);
                 studentError.setErrorType(error.getErrorType());
+                studentError.setWeaknessKey(weaknessKey);
                 studentError.setOccurrenceCount(1);
                 studentError.setCorrectedCount(0);
                 studentError.setMasteryScore(0);
@@ -780,8 +751,8 @@ public class PracticeServiceImpl implements PracticeService {
             } else {
                 studentError.setOccurrenceCount(studentError.getOccurrenceCount() + 1);
                 studentError.setLastOccurredAt(LocalDateTime.now());
-                int newMastery = Math.max(0, studentError.getMasteryScore() - 10);
-                studentError.setMasteryScore(newMastery);
+                studentError.setMasteryScore(Math.max(0, studentError.getMasteryScore() - 10));
+                studentError.setErrorType(error.getErrorType());
                 studentError.setExamples(addExample(studentError.getExamples(), error.getUserText()));
             }
             studentAIErrorRepository.save(studentError);
@@ -804,6 +775,37 @@ public class PracticeServiceImpl implements PracticeService {
         }
     }
 
+    // ============ ✅ SAFE ERROR TYPE (FALLBACK TIẾNG VIỆT) ============
+    private String safeErrorType(String rawType, String category) {
+        if (rawType == null || rawType.isBlank()) {
+            return mapCategoryToVietnamese(category);
+        }
+        String trimmed = rawType.trim();
+        if (trimmed.matches(".*[àáảãạăâđêôơưÀÁẢÃẠĂÂĐÊÔƠƯèéẻẽẹêềếểễệìíỉĩịòóỏõọồốổỗộùúủũụỳýỷỹỵ].*")) {
+            return trimmed.length() > 100 ? trimmed.substring(0, 100) : trimmed;
+        }
+        return mapCategoryToVietnamese(category);
+    }
+
+    private String mapCategoryToVietnamese(String category) {
+        if (category == null || category.isBlank()) return "Lỗi không xác định";
+        switch (category.toUpperCase().trim()) {
+            case "TENSE":       return "Lỗi thì";
+            case "ARTICLE":     return "Lỗi mạo từ";
+            case "PREPOSITION": return "Lỗi giới từ";
+            case "CONJUNCTION": return "Lỗi liên từ";
+            case "STRUCTURE":   return "Lỗi cấu trúc câu";
+            case "POS":         return "Lỗi từ loại";
+            case "VERB":        return "Lỗi động từ";
+            case "NATURALNESS": return "Diễn đạt thiếu tự nhiên";
+            case "SPELLING":    return "Lỗi chính tả";
+            case "WORD_CHOICE": return "Chọn từ sai";
+            case "MEANING":     return "Sai nghĩa";
+            case "PUNCTUATION": return "Lỗi dấu câu";
+            default:            return "Lỗi không xác định";
+        }
+    }
+
     private String safeCategory(String raw) {
         if (raw == null || raw.isBlank()) return ErrorCategory.TENSE.name();
         String upper = raw.toUpperCase().trim();
@@ -811,43 +813,6 @@ public class PracticeServiceImpl implements PracticeService {
             return ErrorCategory.valueOf(upper).name();
         } catch (IllegalArgumentException e) {
             return ErrorCategory.TENSE.name();
-        }
-    }
-
-    private String safeSubtype(String raw, String safeCategory) {
-        if (raw == null || raw.isBlank()) return fallbackSubtypeForCategory(safeCategory);
-        String upper = raw.toUpperCase().trim();
-        try {
-            ErrorSubtype subtype = ErrorSubtype.valueOf(upper);
-            if (subtype.getCategory().name().equals(safeCategory)) return subtype.name();
-            return fallbackSubtypeForCategory(safeCategory);
-        } catch (IllegalArgumentException ignored) {
-            for (ErrorSubtype valid : ErrorSubtype.values()) {
-                if (upper.startsWith(valid.name())
-                        && valid.getCategory().name().equals(safeCategory)) {
-                    return valid.name();
-                }
-            }
-            return fallbackSubtypeForCategory(safeCategory);
-        }
-    }
-
-    private String fallbackSubtypeForCategory(String category) {
-        if (category == null) return ErrorSubtype.MIXED_TENSE.name();
-        switch (category) {
-            case "TENSE":       return ErrorSubtype.MIXED_TENSE.name();
-            case "ARTICLE":     return ErrorSubtype.A_AN.name();
-            case "PREPOSITION": return ErrorSubtype.TIME_IN.name();
-            case "CONJUNCTION": return ErrorSubtype.WRONG_CONJUNCTION.name();
-            case "STRUCTURE":   return ErrorSubtype.WORD_ORDER.name();
-            case "POS":         return ErrorSubtype.ADJECTIVE_ADVERB.name();
-            case "VERB":        return ErrorSubtype.GERUND_INFINITIVE.name();
-            case "NATURALNESS": return ErrorSubtype.AWKWARD_PHRASING.name();
-            case "SPELLING":    return ErrorSubtype.TYPO.name();
-            case "WORD_CHOICE": return ErrorSubtype.WRONG_WORD.name();
-            case "MEANING":     return ErrorSubtype.MISTRANSLATION.name();
-            case "PUNCTUATION": return ErrorSubtype.MISSING_PUNCTUATION.name();
-            default:            return ErrorSubtype.MIXED_TENSE.name();
         }
     }
 
@@ -900,7 +865,6 @@ public class PracticeServiceImpl implements PracticeService {
     private PracticeChatResponse buildPracticeChatResponse(AIPracticeChat chat, AIPracticeTurn currentTurn) {
         TurnResponse turnResponse = null;
         if (currentTurn != null) {
-            // ✅ Sanitize lại lần nữa (đề phòng data cũ trong DB)
             List<String> usedVocab = sanitizeUsedVocabulary(
                     parseUsedVocabulary(currentTurn.getUsedVocabulary()),
                     chat.getVocabularyWords()
@@ -965,7 +929,6 @@ public class PracticeServiceImpl implements PracticeService {
                         .explanation(error.getExplanation())
                         .severity(error.getSeverity())
                         .errorCategory(error.getErrorCategory())
-                        .errorSubtype(error.getErrorSubtype())
                         .build());
             }
         }
@@ -1008,20 +971,17 @@ public class PracticeServiceImpl implements PracticeService {
                 .filter(e -> e.getMasteryScore() < 80)
                 .sorted(Comparator.comparing(StudentAIError::getOccurrenceCount).reversed())
                 .map(error -> {
-                    ErrorSubtype subtype = ErrorSubtype.fromString(error.getErrorSubtype());
                     ErrorCategory category = null;
                     try {
                         category = ErrorCategory.valueOf(error.getErrorCategory());
                     } catch (Exception ignored) {}
 
                     return StudentWeaknessResponse.builder()
-                            .errorKey(error.getErrorKey())
+                            .weaknessKey(error.getWeaknessKey())
                             .category(error.getErrorCategory())
-                            .subtype(error.getErrorSubtype())
                             .categoryDisplayName(category != null ? category.getDisplayName() : null)
-                            .subtypeDescription(subtype.getDescription())
-                            .displayName(subtype.getDisplayName())
-                            .suggestion(subtype.getDescription())
+                            .displayName(error.getErrorType())
+                            .suggestion(category != null ? category.getDescription() : null)
                             .count(error.getOccurrenceCount())
                             .masteryScore(error.getMasteryScore())
                             .firstOccurredAt(error.getFirstOccurredAt())

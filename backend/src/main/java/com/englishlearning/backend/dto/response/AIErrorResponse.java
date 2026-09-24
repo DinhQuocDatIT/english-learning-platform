@@ -8,16 +8,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AIErrorResponse {
-
-    private String errorType;    // GRAMMAR, VOCABULARY, ARTICLE, etc.
+    private String errorType;
+    private String errorCategory;
     private String userText;
     private String correctText;
     private String explanation;
-    private String severity;     // HIGH, MEDIUM, LOW
-    private String errorCategory;
-    private String errorSubtype;
+    private String severity;
 }

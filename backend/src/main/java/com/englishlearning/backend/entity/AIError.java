@@ -1,6 +1,5 @@
 package com.englishlearning.backend.entity;
 
-import com.englishlearning.backend.enums.ErrorType;
 import com.englishlearning.backend.enums.SeverityLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,11 +26,12 @@ public class AIError {
     @JoinColumn(name = "evaluation_id", nullable = false)
     private AIEvaluation evaluation;
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(nullable = false)
-
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 100)
     private String errorType;
+
+    @Column(length = 50)
+    private String errorCategory;
+
     @Column(columnDefinition = "TEXT")
     private String userText;
 
@@ -49,12 +49,9 @@ public class AIError {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(length = 50)
-    private String errorCategory;
-
-    @Column(length = 100)
-    private String errorSubtype;
-
-    @Column(length = 150)
-    private String errorKey;
+    public String buildWeaknessKey() {
+        return (errorCategory != null && !errorCategory.isBlank())
+                ? errorCategory.toUpperCase().trim()
+                : "UNKNOWN";
+    }
 }

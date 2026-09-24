@@ -2,6 +2,12 @@ package com.englishlearning.backend.enums;
 
 import lombok.Getter;
 
+/**
+ * @deprecated KHÔNG còn dùng trong luồng chấm điểm.
+ * AI trả errorType tự do (tiếng Việt), chỉ giữ ErrorCategory để thống kê weakness.
+ * File này giữ lại để tránh vỡ import cũ, sẽ xóa ở version sau.
+ */
+@Deprecated
 @Getter
 public enum ErrorSubtype {
 
