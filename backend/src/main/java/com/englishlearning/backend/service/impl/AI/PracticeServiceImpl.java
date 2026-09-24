@@ -22,6 +22,7 @@ import com.englishlearning.backend.service.AI.AIService;
 import com.englishlearning.backend.service.PracticeService;
 import com.englishlearning.backend.service.PricingService;
 import com.englishlearning.backend.service.StudentMembershipService;
+import com.englishlearning.backend.util.XpCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -276,7 +277,18 @@ public class PracticeServiceImpl implements PracticeService {
 
         boolean isCorrect = aiResponse.getIsCorrect() != null && aiResponse.getIsCorrect();
 
-        // ✅ Tăng questionCount (đã trả lời thêm 1 câu) — dùng cho progress bar
+        // ✅ Tính XP dựa vào level + kết quả
+        int xpEarned = XpCalculator.calculateAiPracticeXp(chat.getLevel(), isCorrect);
+        if (xpEarned > 0) {
+            student.addExperience(xpEarned);
+            studentRepository.save(student);
+            log.info("✅ Cộng {} XP cho student {} (level {}, isCorrect={})",
+                    xpEarned, studentId, chat.getLevel(), isCorrect);
+        } else {
+            log.info("ℹ️ Không cộng XP (isCorrect=false), student {}", studentId);
+        }
+
+        // ✅ Tăng questionCount (đã trả lời thêm 1 câu)
         chat.setQuestionCount(chat.getQuestionCount() + 1);
         if (isCorrect) chat.setCorrectCount(chat.getCorrectCount() + 1);
 
@@ -294,7 +306,7 @@ public class PracticeServiceImpl implements PracticeService {
         saveAIUsageWithTokens(studentId, chat, RequestType.GENERATE_AND_EVALUATE,
                 provider, modelName, responseTime, true, null, usage);
 
-        EvaluationResponse response = buildEvaluationResponse(aiResponse, chat, isCompleted);
+        EvaluationResponse response = buildEvaluationResponse(aiResponse, chat, isCompleted, xpEarned);
 
         if (!isCompleted && aiResponse.getNextQuestion() != null) {
             // ✅ ĐẾM SỐ TURN THỰC TẾ TRONG DB → tính order tiếp theo
@@ -330,8 +342,8 @@ public class PracticeServiceImpl implements PracticeService {
                     nextTurn.getQuestionOrder(), chat.getQuestionCount());
         }
 
-        log.info("Answer submitted. Turn: {} (order={}), Correct: {}, Score: {}",
-                turn.getId(), turn.getQuestionOrder(), isCorrect, aiResponse.getScore());
+        log.info("Answer submitted. Turn: {} (order={}), Correct: {}, Score: {}, XP: {}",
+                turn.getId(), turn.getQuestionOrder(), isCorrect, aiResponse.getScore(), xpEarned);
 
         return response;
     }
@@ -439,12 +451,19 @@ public class PracticeServiceImpl implements PracticeService {
         int total = turns.size();
         int correct = 0;
         int totalScore = 0;
+        int totalXpEarned = 0;
         List<ErrorSummary> commonErrors = new ArrayList<>();
+
+        // ✅ XP mỗi câu đúng dựa vào level của chat
+        int xpPerCorrect = XpCalculator.getXpForAiPractice(chat.getLevel());
 
         for (AIPracticeTurn turn : turns) {
             if (turn.getAnswer() != null) {
                 AIAnswer answer = turn.getAnswer();
-                if (answer.getIsCorrect() != null && answer.getIsCorrect()) correct++;
+                if (answer.getIsCorrect() != null && answer.getIsCorrect()) {
+                    correct++;
+                    totalXpEarned += xpPerCorrect;
+                }
                 if (answer.getScore() != null) totalScore += answer.getScore();
 
                 if (answer.getEvaluation() != null && answer.getEvaluation().getErrors() != null) {
@@ -493,6 +512,7 @@ public class PracticeServiceImpl implements PracticeService {
                 .averageScore(Math.round(avgScore * 100.0) / 100.0)
                 .completedAt(chat.getCompletedAt())
                 .commonErrors(commonErrors)
+                .totalXpEarned(totalXpEarned)
                 .build();
     }
 
@@ -908,7 +928,8 @@ public class PracticeServiceImpl implements PracticeService {
 
     private EvaluationResponse buildEvaluationResponse(AIEvaluateResponse aiResponse,
                                                        AIPracticeChat chat,
-                                                       boolean isCompleted) {
+                                                       boolean isCompleted,
+                                                       int xpEarned) {
         List<BetterAnswer> betterAnswers = new ArrayList<>();
         if (aiResponse.getBetterAnswers() != null) {
             for (String answer : aiResponse.getBetterAnswers()) {
@@ -943,6 +964,7 @@ public class PracticeServiceImpl implements PracticeService {
                 .questionCount(chat.getQuestionCount())
                 .totalQuestions(chat.getQuestionLimit())
                 .isCompleted(isCompleted)
+                .experienceEarned(xpEarned)
                 .build();
     }
 

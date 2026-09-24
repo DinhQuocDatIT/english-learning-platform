@@ -32,6 +32,8 @@ public class EvaluationResponse {
     private Integer questionCount;
     private Integer totalQuestions;
     private Boolean isCompleted;
+    private Integer experienceEarned;
+
 }
 
 

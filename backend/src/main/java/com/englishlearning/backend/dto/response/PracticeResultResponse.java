@@ -25,5 +25,6 @@ public class PracticeResultResponse {
     private Double averageScore;
     private LocalDateTime completedAt;
     private List<ErrorSummary> commonErrors;
+    private Integer totalXpEarned;
 }
 

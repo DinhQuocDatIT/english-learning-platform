@@ -1,0 +1,59 @@
+/* frontend/src/components/XpToast/XpToast.module.css */
+
+.toast {
+  position: fixed;
+  top: 88px;
+  right: 24px;
+  z-index: 9999;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  cursor: pointer;
+  user-select: none;
+
+  /* ✅ Text đen, không màu mè */
+  color: #0f172a;
+  background: transparent;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  /* ✅ Trượt từ phải vào */
+  animation: slideIn 0.3s ease;
+}
+
+.icon {
+  font-size: 18px;
+  color: #0f172a; /* Đen luôn */
+}
+
+.xpText {
+  font-size: 12px;
+  color: #0f172a;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .toast {
+    top: 80px;
+    right: 12px;
+    font-size: 14px;
+  }
+  .icon {
+    font-size: 16px;
+  }
+}

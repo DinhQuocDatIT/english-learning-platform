@@ -4,6 +4,7 @@ import LandingPage from "./layouts/LandingPage/LandingPage";
 import Login from "./pages/auth/Login/Login";
 import Register from "./pages/auth/Register/Register";
 import AppRoutes from "./routes/AppRoutes";
+import { XpProvider } from "./contexts/XpContext";
 
 function App() {
   return (
@@ -20,7 +21,9 @@ function App() {
         pauseOnHover
         theme="light"
       />
-      <AppRoutes />
+      <XpProvider>
+        <AppRoutes />
+      </XpProvider>
     </>
   );
 }
