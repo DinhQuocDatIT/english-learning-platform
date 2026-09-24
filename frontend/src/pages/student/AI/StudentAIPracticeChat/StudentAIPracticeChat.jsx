@@ -6,7 +6,6 @@ import {
   faPaperPlane,
   faCheckCircle,
   faLightbulb,
-  faStar,
   faSpinner,
   faChartBar,
   faHistory,
@@ -14,13 +13,11 @@ import {
   faTriangleExclamation,
   faBolt,
   faMicrophone,
-  faUser,
   faBullseye,
   faLanguage,
   faCircleXmark,
   faLock,
   faCrown,
-  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
@@ -38,11 +35,13 @@ import {
   getTopicIcon,
 } from "../../../../constants/topicConstants";
 import styles from "./StudentAIPracticeChat.module.css";
+import { useXp } from "../../../../contexts/XpContext";
 
 function StudentAIPracticeChat() {
   const navigate = useNavigate();
   const { chatId } = useParams();
   const { showLoading, hideLoading } = useLoading();
+  const { showXpToast } = useXp();
 
   // State
   const [practice, setPractice] = useState(null);
@@ -217,6 +216,11 @@ function StudentAIPracticeChat() {
 
       const data = response?.data?.data;
 
+      // ✅ Hiển thị toast XP nếu nhận được XP
+      if (data?.experienceEarned && data.experienceEarned > 0) {
+        showXpToast(data.experienceEarned);
+      }
+
       // Cập nhật số lượt còn lại
       try {
         const usageResponse = await studentMembershipService.getAIUsage();
@@ -273,8 +277,6 @@ function StudentAIPracticeChat() {
         fetchResult(chatId);
         setShowResult(true);
       }
-
-      toast.success("Đã nộp câu trả lời!");
 
       setTimeout(() => {
         feedbackRef.current?.scrollIntoView({
@@ -1016,7 +1018,6 @@ function StudentAIPracticeChat() {
                             <span className={styles.errorTypeCount}>
                               {error.count} lần
                             </span>
-                           
                           </div>
 
                           {isExpanded && (description || example) && (
