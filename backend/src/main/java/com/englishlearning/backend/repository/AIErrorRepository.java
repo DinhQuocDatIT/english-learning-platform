@@ -47,4 +47,5 @@ public interface AIErrorRepository extends JpaRepository<AIError, Long> {
         ORDER BY ae.createdAt ASC
     """)
     List<AIError> findByChatId(@Param("chatId") Long chatId);
+
 }

@@ -4,7 +4,7 @@ import com.englishlearning.backend.dto.response.StudentStatisticsResponse;
 import com.englishlearning.backend.dto.response.StudentStatisticsResponse.*;
 import com.englishlearning.backend.entity.Student;
 import com.englishlearning.backend.entity.StudentAIError;
-import com.englishlearning.backend.enums.ErrorSubtype;
+import com.englishlearning.backend.enums.ErrorCategory;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.StudentAIErrorRepository;
 import com.englishlearning.backend.repository.StudentRepository;
@@ -233,38 +233,46 @@ public class StudentStatisticsServiceImpl implements StudentStatisticsService {
     }
 
     /**
-     * Build ErrorStat từ StudentAIError
+     * Build ErrorStat từ StudentAIError (thiết kế mới: bỏ subtype/key,
+     * weakness gom theo category, errorType là text tiếng Việt AI mô tả)
      */
     private ErrorStat buildErrorStat(StudentAIError error) {
-        // ✅ Lấy thông tin từ enum ErrorSubtype
-        ErrorSubtype subtype = ErrorSubtype.fromString(error.getErrorSubtype());
-
         int count = error.getOccurrenceCount() != null ? error.getOccurrenceCount() : 0;
         int mastery = error.getMasteryScore() != null ? error.getMasteryScore() : 0;
 
+        // Lấy display name + description từ ErrorCategory
+        ErrorCategory category = null;
+        try {
+            category = ErrorCategory.valueOf(error.getErrorCategory());
+        } catch (Exception ignored) {}
+
+        String displayName = category != null
+                ? category.getDisplayName()
+                : (error.getErrorType() != null ? error.getErrorType() : "Lỗi không xác định");
+
+        String description = category != null ? category.getDescription() : null;
+
         return ErrorStat.builder()
-                // ============ CŨ ============
-                .errorType(error.getErrorKey())
-                .displayName(subtype.getDisplayName())
+                // ============ PHÂN LOẠI ============
+                .errorType(error.getErrorType())        // text AI mô tả (tiếng Việt)
+                .errorCategory(error.getErrorCategory())// 12 nhóm lớn
+                .errorKey(error.getWeaknessKey())       // = category (để FE dùng như key)
+                // ============ HIỂN THỊ ============
+                .displayName(displayName)
+                .description(description)
+                .suggestion(description)
+                .example(getExample(error.getErrorType(), error.getErrorCategory()))
+                // ============ THỐNG KÊ ============
                 .count((long) count)
                 .highSeverity(0L)
                 .mediumSeverity(0L)
                 .lowSeverity(0L)
-                // ============ MỚI — PHÂN LOẠI ============
-                .errorCategory(error.getErrorCategory())
-                .errorSubtype(error.getErrorSubtype())
-                .errorKey(error.getErrorKey())
-                // ============ MỚI — GIẢI THÍCH ============
-                .description(subtype.getDescription())
-                .example(getExample(error.getErrorSubtype()))
-                .suggestion(subtype.getDescription())
-                // ============ MỚI — TIẾN BỘ ============
+                // ============ TIẾN BỘ ============
                 .masteryScore(mastery)
                 .masteryLevel(calculateMasteryLevel(mastery))
-                // ============ MỚI — XU HƯỚNG ============
                 .trend(calculateTrend(error.getLastOccurredAt()))
                 .severity(calculateSeverity(count, mastery))
-                // ============ MỚI — THỜI GIAN ============
+                // ============ THỜI GIAN ============
                 .firstOccurredAt(error.getFirstOccurredAt())
                 .lastOccurredAt(error.getLastOccurredAt())
                 .build();
@@ -297,94 +305,30 @@ public class StudentStatisticsServiceImpl implements StudentStatisticsService {
         return "DOWN";
     }
 
-    // ===== HELPER: EXAMPLE =====
-    private String getExample(String subtype) {
-        if (subtype == null) return "";
-        return switch (subtype) {
-            // ===== TENSE =====
-            case "PRESENT_SIMPLE" -> "She go → She goes";
-            case "PRESENT_CONTINUOUS" -> "She is go → She is going";
-            case "PRESENT_PERFECT" -> "I live here since 2020 → I have lived here since 2020";
-            case "PRESENT_PERFECT_CONTINUOUS" -> "I have waited → I have been waiting";
-            case "PAST_SIMPLE" -> "I go yesterday → I went yesterday";
-            case "PAST_CONTINUOUS" -> "I was watch TV → I was watching TV";
-            case "PAST_PERFECT" -> "When I arrived, he left → he had left";
-            case "PAST_PERFECT_CONTINUOUS" -> "He had waited → He had been waiting";
-            case "FUTURE_SIMPLE" -> "I go tomorrow → I will go tomorrow";
-            case "FUTURE_CONTINUOUS" -> "At 8pm I will study → I will be studying";
-            case "FUTURE_PERFECT" -> "By 2030, I finish → I will have finished";
-            case "FUTURE_PERFECT_CONTINUOUS" -> "By 2030, I will work → will have been working";
-            case "NEAR_FUTURE_GOING_TO" -> "I am going to visit (đã hẹn trước)";
-            case "MIXED_TENSE" -> "Yesterday I go → Yesterday I went";
-
-            // ===== ARTICLE =====
-            case "A_AN" -> "a apple → an apple";
-            case "THE" -> "I like the music → I like music";
-            case "ZERO_ARTICLE" -> "I go to the school → I go to school";
-            case "A_AN_VS_THE" -> "I saw a cat. The cat was black";
-
-            // ===== PREPOSITION =====
-            case "TIME_IN" -> "in Monday → on Monday";
-            case "TIME_ON" -> "on 2024 → in 2024";
-            case "TIME_AT" -> "at morning → in the morning";
-            case "PLACE_IN" -> "at class → in the classroom";
-            case "PLACE_ON" -> "on the room → in the room";
-            case "PLACE_AT" -> "in home → at home";
-            case "DIRECTION_TO" -> "I go in school → I go to school";
-            case "MOVEMENT_INTO" -> "go in the room → go into the room";
-            case "AGENT_BY" -> "written from him → written by him";
-            case "INSTRUMENT_WITH" -> "cut by knife → cut with a knife";
-            case "PHRASAL_VERB" -> "look after ≠ look for";
-            case "ADJECTIVE_PREP" -> "interested on → interested in";
-            case "VERB_PREP" -> "depend in → depend on";
-
-            // ===== CONJUNCTION =====
-            case "COORDINATING" -> "I like tea and coffee";
-            case "SUBORDINATING" -> "Because it rains, I stay home";
-            case "CORRELATIVE" -> "Both my mom and my dad...";
-            case "CONNECTING_ADVERB" -> "I was tired. However, I kept working";
-            case "WRONG_CONJUNCTION" -> "Because it rains, so I stay home → bỏ 'so'";
-
-            // ===== STRUCTURE =====
-            case "WORD_ORDER" -> "I very like it → I like it very much";
-            case "SUBJECT_VERB_AGREEMENT" -> "She go → She goes, He play → He plays";
-            case "MISSING_SUBJECT" -> "Is raining → It is raining";
-            case "MISSING_VERB" -> "She happy → She is happy";
-            case "MISSING_OBJECT" -> "I like → I like it";
-            case "DOUBLE_NEGATIVE" -> "I don't know nothing → I don't know anything";
-            case "DOUBLE_VERB" -> "She is go → She goes";
-            case "REDUNDANCY" -> "return back → return";
-            case "FRAGMENT" -> "Because I'm tired. → Because I'm tired, I go to bed";
-            case "RUN_ON" -> "I like tea, I like coffee → I like tea and coffee";
-
-            // ===== POS =====
-            case "NOUN_ADJECTIVE" -> "a success man → a successful man";
-            case "ADJECTIVE_ADVERB" -> "run quick → run quickly";
-            case "VERB_NOUN" -> "make a decide → make a decision";
-            case "PRONOUN" -> "Me go to school → I go to school";
-            case "REFLEXIVE_PRONOUN" -> "I hurt me → I hurt myself";
-            case "POSSESSIVE" -> "Its raining → It's raining";
-            case "DEMONSTRATIVE" -> "this books → these books";
-            case "QUANTIFIER" -> "much books → many books";
-            case "DETERMINER" -> "a few money → a little money";
-
-            // ===== VERB =====
-            case "IRREGULAR_PAST" -> "goed → went, seed → saw";
-            case "IRREGULAR_PAST_PARTICIPLE" -> "goed → gone, seed → seen";
-            case "MODAL_VERB" -> "can to go → can go";
-            case "GERUND_INFINITIVE" -> "want going → want to go";
-            case "PASSIVE_VOICE" -> "is wrote → is written";
-            case "CAUSATIVE" -> "make him to go → make him go";
-            case "REPORTED_SPEECH" -> "He said 'I am tired' → He said he was tired";
-            case "CONDITIONAL" -> "If I have time, I will learn → If I had time, I would learn";
-            case "WISH_CLAUSE" -> "I wish I am rich → I wish I were rich";
-
-            // ===== NATURALNESS =====
-            case "VIETLISH" -> "I very like it → I really like it";
-            case "LITERAL_TRANSLATION" -> "Thank you many much → Thank you very much";
-            case "FORMALITY" -> "gonna → going to (trong email)";
-            case "AWKWARD_PHRASING" -> "I have a question to ask you about → I have a question for you";
-
+    /**
+     * Gợi ý ví dụ dựa trên errorType (text AI mô tả, tiếng Việt)
+     * hoặc fallback theo errorCategory.
+     */
+    private String getExample(String errorType, String errorCategory) {
+        // Nếu AI mô tả lỗi dạng text, trả về chính text đó làm ví dụ gợi ý
+        if (errorType != null && !errorType.isBlank()) {
+            return errorType;
+        }
+        // Fallback theo category
+        if (errorCategory == null) return "";
+        return switch (errorCategory) {
+            case "TENSE" -> "VD: She go → She goes";
+            case "ARTICLE" -> "VD: a apple → an apple";
+            case "PREPOSITION" -> "VD: in Monday → on Monday";
+            case "CONJUNCTION" -> "VD: Because... so... → bỏ 'so'";
+            case "STRUCTURE" -> "VD: She go → She goes";
+            case "POS" -> "VD: run quick → run quickly";
+            case "VERB" -> "VD: goed → went";
+            case "NATURALNESS" -> "VD: I very like it → I really like it";
+            case "SPELLING" -> "VD: offten → often";
+            case "WORD_CHOICE" -> "VD: have traffic → encounter traffic";
+            case "MEANING" -> "VD: Dịch sát nghĩa tiếng Việt";
+            case "PUNCTUATION" -> "VD: Thiếu dấu '?' cuối câu hỏi";
             default -> "";
         };
     }

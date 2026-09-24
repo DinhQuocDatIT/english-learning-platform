@@ -12,12 +12,16 @@ import {
   faLightbulb,
   faPlus,
   faTimes,
-  faBolt,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
 import studentMembershipService from "../../../../services/studentMembershipService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import {
+  TOPIC_DISPLAY,
+  getTopicIcon,
+} from "../../../../constants/topicConstants";
+import { getRandomVocabSuggestions } from "../../../../constants/vocabularySuggestions";
 import styles from "./StudentAIPracticeCreate.module.css";
 
 function StudentAIPracticeCreate() {
@@ -37,10 +41,18 @@ function StudentAIPracticeCreate() {
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [aiUsage, setAiUsage] = useState(null);
 
-  // ===== KIỂM TRA MEMBERSHIP VÀ LƯỢT AI KHI VÀO TRANG =====
+  // ✅ suggestions giờ là mảng object { en, vi }
+  const [suggestions, setSuggestions] = useState([]);
+
   useEffect(() => {
     checkMembershipAndLoad();
   }, []);
+
+  useEffect(() => {
+    const list = getRandomVocabSuggestions(formData.topic, formData.level, 20);
+    setSuggestions(list);
+    setVocabInputs([""]);
+  }, [formData.topic, formData.level]);
 
   const checkMembershipAndLoad = async () => {
     try {
@@ -58,10 +70,7 @@ function StudentAIPracticeCreate() {
       if (!membershipInfo) {
         toast.warning(
           "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!",
-          {
-            position: "top-center",
-            autoClose: 5000,
-          },
+          { position: "top-center", autoClose: 5000 },
         );
         navigate("/dashboard/student/ai-practice");
         return;
@@ -70,10 +79,7 @@ function StudentAIPracticeCreate() {
       if (usageInfo && !usageInfo.canMakeRequest) {
         toast.warning(
           "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai!",
-          {
-            position: "top-center",
-            autoClose: 5000,
-          },
+          { position: "top-center", autoClose: 5000 },
         );
         navigate("/dashboard/student/ai-practice");
         return;
@@ -105,22 +111,10 @@ function StudentAIPracticeCreate() {
     { value: "RANDOM", label: "Ngẫu nhiên" },
   ];
 
-  const TOPICS = [
-    { value: "DAILY_CONVERSATION", label: "💬 Đời sống hàng ngày" },
-    { value: "SHOPPING", label: "🛍️ Mua sắm" },
-    { value: "RESTAURANT", label: "🍽️ Nhà hàng" },
-    { value: "TRAVEL", label: "✈️ Du lịch" },
-    { value: "WORK", label: "💼 Công việc" },
-    { value: "SCHOOL", label: "🏫 Trường học" },
-    { value: "FAMILY", label: "👨‍👩‍👧‍👦 Gia đình" },
-    { value: "FRIENDS", label: "🤝 Bạn bè" },
-    { value: "FOOD", label: "🍕 Đồ ăn" },
-    { value: "HEALTH", label: "🏥 Sức khỏe" },
-    { value: "EDUCATION", label: "📚 Giáo dục" },
-    { value: "TECHNOLOGY", label: "💻 Công nghệ" },
-    { value: "HOBBIES", label: "🎨 Sở thích" },
-    { value: "DAILY_ROUTINE", label: "🌅 Thói quen hàng ngày" },
-  ];
+  const TOPICS = Object.entries(TOPIC_DISPLAY).map(([value, label]) => ({
+    value,
+    label: `${getTopicIcon(value)} ${label}`,
+  }));
 
   const QUESTION_LIMITS = [
     { value: 10, label: "10 câu" },
@@ -130,6 +124,14 @@ function StudentAIPracticeCreate() {
   ];
 
   const MAX_VOCAB_WORDS = 5;
+
+  const getValidVocabWords = () => {
+    return vocabInputs
+      .map((word) => word.trim())
+      .filter((word) => word.length > 0);
+  };
+
+  const getFilledCount = () => getValidVocabWords().length;
 
   const handleVocabChange = (index, value) => {
     const newInputs = [...vocabInputs];
@@ -154,10 +156,42 @@ function StudentAIPracticeCreate() {
     setVocabInputs(newInputs);
   };
 
-  const getValidVocabWords = () => {
-    return vocabInputs
-      .map((word) => word.trim())
-      .filter((word) => word.length > 0);
+  // ✅ Chọn chip → thêm từ EN vào ô input
+  const handleSelectSuggestion = (wordObj) => {
+    const wordEn = wordObj.en;
+    const currentWords = getValidVocabWords();
+
+    if (currentWords.includes(wordEn)) {
+      return;
+    }
+
+    if (currentWords.length >= MAX_VOCAB_WORDS) {
+      toast.warning(`Chỉ được chọn tối đa ${MAX_VOCAB_WORDS} từ vựng`);
+      return;
+    }
+
+    const emptyIndex = vocabInputs.findIndex((w) => !w.trim());
+    if (emptyIndex !== -1) {
+      const newInputs = [...vocabInputs];
+      newInputs[emptyIndex] = wordEn;
+      setVocabInputs(newInputs);
+    } else {
+      if (vocabInputs.length < MAX_VOCAB_WORDS) {
+        setVocabInputs([...vocabInputs, wordEn]);
+      } else {
+        toast.warning(`Chỉ được chọn tối đa ${MAX_VOCAB_WORDS} từ vựng`);
+      }
+    }
+  };
+
+  const handleRemoveSuggestion = (wordObj) => {
+    const wordEn = wordObj.en;
+    const newInputs = vocabInputs.filter((w) => w.trim() !== wordEn);
+    setVocabInputs(newInputs.length > 0 ? newInputs : [""]);
+  };
+
+  const isSuggestionSelected = (wordObj) => {
+    return getValidVocabWords().includes(wordObj.en);
   };
 
   const handleSubmit = async (e) => {
@@ -168,7 +202,6 @@ function StudentAIPracticeCreate() {
       return;
     }
 
-    // ✅ Kiểm tra lại lượt trước khi submit
     if (aiUsage && !aiUsage.canMakeRequest) {
       toast.warning(
         "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai!",
@@ -222,7 +255,6 @@ function StudentAIPracticeCreate() {
 
   const isFormValid = formData.level && formData.topic && formData.sentenceType;
 
-  // ===== LOADING KHI ĐANG KIỂM TRA =====
   if (isCheckingAccess) {
     return (
       <div className={styles.wrapper}>
@@ -236,7 +268,6 @@ function StudentAIPracticeCreate() {
 
   return (
     <div className={styles.wrapper}>
-      {/* Header */}
       <div className={styles.header}>
         <button className={styles.backBtn} onClick={handleBack}>
           <FontAwesomeIcon icon={faArrowLeft} />
@@ -248,23 +279,6 @@ function StudentAIPracticeCreate() {
         </h1>
       </div>
 
-      {/* ✅ HIỂN THỊ LƯỢT AI CÒN LẠI */}
-      {aiUsage && (
-        <div
-          className={`${styles.usageBanner} ${
-            aiUsage.remainingRequests <= 3 ? styles.usageBannerWarning : ""
-          }`}
-        >
-          <FontAwesomeIcon icon={faBolt} />
-          <span>
-            Bạn còn <strong>{aiUsage.remainingRequests}</strong> lượt sử dụng AI
-            hôm nay.
-            {aiUsage.remainingRequests <= 3 && " Hãy sử dụng tiết kiệm nhé!"}
-          </span>
-        </div>
-      )}
-
-      {/* Form */}
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.formGrid}>
           {/* Level */}
@@ -383,10 +397,49 @@ function StudentAIPracticeCreate() {
               Từ vựng (không bắt buộc)
             </label>
             <p className={styles.formHint}>
-              Nhập từ vựng bạn muốn AI sử dụng trong câu hỏi (tối đa{" "}
-              {MAX_VOCAB_WORDS} từ)
+              Chọn từ gợi ý bên dưới hoặc nhập tay (tối đa {MAX_VOCAB_WORDS} từ)
             </p>
 
+            {/* ✅ GỢI Ý TỪ VỰNG với TOOLTIP */}
+            {suggestions.length > 0 && (
+              <div className={styles.suggestionSection}>
+                <div className={styles.suggestionLabel}>
+                  Gợi ý cho chủ đề & trình độ này:
+                </div>
+                <div className={styles.suggestionChips}>
+                  {suggestions.map((wordObj, idx) => {
+                    const isSelected = isSuggestionSelected(wordObj);
+                    return (
+                      <div
+                        key={`${wordObj.en}-${idx}`}
+                        className={styles.chipWrapper}
+                      >
+                        <button
+                          type="button"
+                          className={`${styles.suggestionChip} ${
+                            isSelected ? styles.suggestionChipActive : ""
+                          }`}
+                          onClick={() =>
+                            isSelected
+                              ? handleRemoveSuggestion(wordObj)
+                              : handleSelectSuggestion(wordObj)
+                          }
+                          disabled={
+                            !isSelected && getFilledCount() >= MAX_VOCAB_WORDS
+                          }
+                        >
+                          {isSelected && "✓ "}
+                          {wordObj.en}
+                        </button>
+                        <span className={styles.tooltip}>{wordObj.vi}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* NHẬP TAY */}
             <div className={styles.vocabInputContainer}>
               {vocabInputs.map((word, index) => (
                 <div key={index} className={styles.vocabInputWrapper}>
@@ -425,9 +478,9 @@ function StudentAIPracticeCreate() {
 
             <div className={styles.vocabCounter}>
               <span>
-                Đã nhập: {getValidVocabWords().length} / {MAX_VOCAB_WORDS} từ
+                Đã nhập: {getFilledCount()} / {MAX_VOCAB_WORDS} từ
               </span>
-              {getValidVocabWords().length > 0 && (
+              {getFilledCount() > 0 && (
                 <span className={styles.vocabPreview}>
                   ({getValidVocabWords().join(", ")})
                 </span>

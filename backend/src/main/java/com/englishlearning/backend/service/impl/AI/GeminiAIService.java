@@ -78,7 +78,7 @@ public class GeminiAIService implements AIService {
                     request.getSentenceType(),
                     weaknessesStr,
                     request.getPreviousSentences(),
-                    request.getForcedWords()   // ✅ forcedWords (List)
+                    request.getForcedWords()
             );
 
             String response = callGeminiWithRetry(prompt, 3);
@@ -132,7 +132,7 @@ public class GeminiAIService implements AIService {
                     weaknessesStr,
                     request.getSentenceType(),
                     request.getPreviousSentences(),
-                    request.getForcedWords()   // ✅ forcedWords (List)
+                    request.getForcedWords()
             );
 
             log.info("📤 [EVALUATE_AND_GENERATE] forcedWords: {}",
@@ -288,28 +288,25 @@ public class GeminiAIService implements AIService {
             for (JsonNode errorNode : errorsNode) {
                 String errorType = errorNode.path("errorType").asText();
                 String errorCategory = errorNode.path("errorCategory").asText();
-                String errorSubtype = errorNode.path("errorSubtype").asText();
                 String userText = errorNode.path("userText").asText();
                 String correctText = errorNode.path("correctText").asText();
                 String explanation = errorNode.path("explanation").asText();
                 String severity = errorNode.path("severity").asText("MEDIUM");
 
-                if (errorType == null || errorType.isEmpty() || explanation == null || explanation.isEmpty()) {
-                    log.warn("⚠️ Bỏ qua error không hợp lệ: type={}, explanation={}", errorType, explanation);
+                if (errorType == null || errorType.isEmpty()
+                        || explanation == null || explanation.isEmpty()) {
+                    log.warn("⚠️ Bỏ qua error không hợp lệ: type={}, explanation={}",
+                            errorType, explanation);
                     continue;
                 }
 
                 if (errorCategory == null || errorCategory.isEmpty()) {
-                    errorCategory = errorType;
-                }
-                if (errorSubtype == null || errorSubtype.isEmpty()) {
-                    errorSubtype = "MIXED_TENSE";
+                    errorCategory = "UNKNOWN";
                 }
 
                 errors.add(AIErrorResponse.builder()
                         .errorType(errorType)
                         .errorCategory(errorCategory)
-                        .errorSubtype(errorSubtype)
                         .userText(userText != null ? userText : "")
                         .correctText(correctText != null ? correctText : "")
                         .explanation(explanation)

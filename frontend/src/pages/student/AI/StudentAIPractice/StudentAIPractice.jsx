@@ -14,31 +14,17 @@ import {
   faArrowRight,
   faBolt,
   faBullseye,
-  faComments,
-  faShoppingBag,
-  faUtensils,
-  faPlane,
-  faBriefcase,
-  faGraduationCap,
-  faUsers,
   faStar,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
 import studentMembershipService from "../../../../services/studentMembershipService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import {
+  getTopicFullLabel,
+  getTopicFaIcon,
+} from "../../../../constants/topicConstants";
 import styles from "./StudentAIPractice.module.css";
-
-const TOPIC_CONFIG = {
-  DAILY_CONVERSATION: { label: "Đời sống hàng ngày", icon: faComments },
-  SHOPPING: { label: "Mua sắm", icon: faShoppingBag },
-  RESTAURANT: { label: "Nhà hàng & Ẩm thực", icon: faUtensils },
-  TRAVEL: { label: "Du lịch & Khám phá", icon: faPlane },
-  WORK: { label: "Công việc & Sự nghiệp", icon: faBriefcase },
-  SCHOOL: { label: "Trường học & Giáo dục", icon: faGraduationCap },
-  FAMILY: { label: "Gia đình", icon: faUsers },
-  FRIENDS: { label: "Bạn bè & Xã hội", icon: faUsers },
-};
 
 const LEVEL_CONFIG = {
   A1: {
@@ -80,12 +66,10 @@ const LEVEL_CONFIG = {
 };
 
 const getTopicInfo = (topicKey) => {
-  return (
-    TOPIC_CONFIG[topicKey] || {
-      label: topicKey ? topicKey.replace(/_/g, " ") : "Chủ đề tổng hợp",
-      icon: faBookOpen,
-    }
-  );
+  return {
+    label: getTopicFullLabel(topicKey),
+    icon: getTopicFaIcon(topicKey),
+  };
 };
 
 const getLevelBadge = (level) => {
@@ -142,13 +126,11 @@ function StudentAIPractice() {
       setLoading(true);
       showLoading();
 
-      // ✅ Kiểm tra membership (không chặn vào trang)
       const membershipResponse =
         await studentMembershipService.getCurrentMembership();
       const membershipInfo = membershipResponse?.data?.data;
       setHasMembership(!!membershipInfo);
 
-      // Load lịch sử (luôn được xem)
       const historyResponse = await practiceService.getPracticeHistory();
       setHistory(historyResponse?.data?.data || []);
     } catch (error) {
@@ -162,7 +144,6 @@ function StudentAIPractice() {
     }
   };
 
-  // ===== KIỂM TRA MEMBERSHIP TRƯỚC KHI TẠO =====
   const handleCreatePractice = async () => {
     if (!hasMembership) {
       toast.warning(
@@ -178,7 +159,6 @@ function StudentAIPractice() {
     navigate("/dashboard/student/ai-practice/create");
   };
 
-  // ===== VÀO CHAT (không cần kiểm tra membership) =====
   const handleViewPractice = (chatId) => {
     navigate(`/dashboard/student/ai-practice/chat/${chatId}`);
   };

@@ -33,6 +33,10 @@ import {
   getExample,
   buildErrorKey,
 } from "../../../../constants/errorTypeConstants";
+import {
+  getTopicDisplayName,
+  getTopicIcon,
+} from "../../../../constants/topicConstants";
 import styles from "./StudentAIPracticeChat.module.css";
 
 function StudentAIPracticeChat() {
@@ -117,7 +121,7 @@ function StudentAIPracticeChat() {
             errorMap[key] = {
               errorKey: key,
               errorCategory: err.errorCategory || err.errorType,
-              errorSubtype: err.errorSubtype,
+              errorType: err.errorType,
               count: 0,
             };
           }
@@ -307,8 +311,11 @@ function StudentAIPracticeChat() {
     setShowHistory(!showHistory);
   };
 
-  const handleHistoryClick = (turn, displayIndex) => {
-    setSelectedHistoryTurn({ ...turn, displayIndex });
+  const handleHistoryClick = (turn) => {
+    setSelectedHistoryTurn({
+      ...turn,
+      displayIndex: turn.questionOrder,
+    });
     setActiveTurn(turn.questionOrder);
     setTimeout(() => {
       feedbackRef.current?.scrollIntoView({
@@ -338,11 +345,21 @@ function StudentAIPracticeChat() {
   const accuracy =
     completedTurns > 0 ? Math.round((correctTurns / completedTurns) * 100) : 0;
 
+  const aiPercent = (() => {
+    if (!aiUsage) return 0;
+    const total =
+      aiUsage.totalRequests || aiUsage.maxRequests || aiUsage.dailyLimit || 100;
+    if (total <= 0) return 0;
+    const used = total - aiUsage.remainingRequests;
+    // ✅ Càng dùng nhiều → thanh càng dài
+    return Math.max(0, Math.min((used / total) * 100, 100));
+  })();
+
   // Render feedback for a turn
   const renderTurnFeedback = (turn) => {
     if (!turn) return null;
 
-    const displayNumber = turn.displayIndex || turn.questionOrder;
+    const displayNumber = turn.questionOrder || turn.displayIndex;
 
     return (
       <div className={styles.feedbackCard} ref={feedbackRef}>
@@ -450,28 +467,6 @@ function StudentAIPracticeChat() {
   return (
     <div className={styles.container}>
       <main className={styles.mainContent}>
-        {/* USAGE BANNER */}
-        {aiUsage && hasMembership && !isCompleted && (
-          <div
-            className={`${styles.usageBanner} ${
-              aiUsage.remainingRequests <= 3 ? styles.usageBannerWarning : ""
-            } ${
-              aiUsage.remainingRequests === 0 ? styles.usageBannerDanger : ""
-            }`}
-          >
-            <FontAwesomeIcon icon={faBolt} />
-            <span>
-              Còn <strong>{aiUsage.remainingRequests}</strong> lượt sử dụng AI
-              hôm nay
-              {aiUsage.remainingRequests <= 3 &&
-                aiUsage.remainingRequests > 0 &&
-                " - Sắp hết, hãy tiết kiệm nhé!"}
-              {aiUsage.remainingRequests === 0 &&
-                " - Đã hết lượt, quay lại vào ngày mai!"}
-            </span>
-          </div>
-        )}
-
         {/* Progress Section */}
         <div className={styles.progressSection}>
           <div className={styles.progressHeader}>
@@ -664,12 +659,14 @@ function StudentAIPracticeChat() {
       <aside className={styles.sidebar}>
         <div className={styles.sidebarProfile}>
           <div className={styles.avatarPlaceholder}>
-            <FontAwesomeIcon icon={faUser} />
+            <span style={{ fontSize: "28px" }}>
+              <FontAwesomeIcon icon={faRobot} />
+            </span>
           </div>
-          <h3>Tiến độ luyện tập</h3>
+          <h3>{getTopicDisplayName(practice.topic)}</h3>
           <p className={styles.levelText}>
-            Cấp độ {practice.level || "B1"}{" "}
-            {practice.level === "B1" ? "Intermediate" : ""}
+            Cấp độ {practice.level || "B1"}
+            {practice.level === "B1" ? " - Intermediate" : ""}
           </p>
           {turnHistory.length > 0 && (
             <button className={styles.historyLink} onClick={toggleHistory}>
@@ -710,6 +707,45 @@ function StudentAIPracticeChat() {
               style={{ width: `${accuracy}%` }}
             />
           </div>
+
+          {/* ✅ MINI BAR — LƯỢT AI CÒN LẠI */}
+          {aiUsage && hasMembership && (
+            <>
+              <div className={styles.sessionDivider} />
+              <div className={styles.accuracyBarContainer}>
+                <span className={styles.accuracyLabelText}>
+                  <FontAwesomeIcon
+                    icon={faBolt}
+                    className={styles.inlineIconBolt}
+                  />
+                  Lượt AI còn lại
+                </span>
+                <span
+                  className={`${styles.accuracyPercent} ${
+                    aiUsage.remainingRequests === 0
+                      ? styles.aiCountDanger
+                      : aiUsage.remainingRequests <= 3
+                        ? styles.aiCountWarning
+                        : ""
+                  }`}
+                >
+                  {aiUsage.remainingRequests}
+                </span>
+              </div>
+              <div className={styles.smallProgressBarBg}>
+                <div
+                  className={`${styles.smallProgressBarFill} ${
+                    aiUsage.remainingRequests === 0
+                      ? styles.aiBarDanger
+                      : aiUsage.remainingRequests <= 3
+                        ? styles.aiBarWarning
+                        : ""
+                  }`}
+                  style={{ width: `${aiPercent}%` }}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* History */}
@@ -725,7 +761,7 @@ function StudentAIPracticeChat() {
                 className={`${styles.historyItemRow} ${styles.historyItemDoing}`}
               >
                 <span className={styles.historyItemName}>
-                  <span>Câu {completedTurns + 1}</span>
+                  <span>Câu {currentTurn.questionOrder}</span>
                   <span className={styles.badgeDoing}>
                     {isSubmitting ? "Đang chấm..." : "Đang làm"}
                   </span>
@@ -736,7 +772,7 @@ function StudentAIPracticeChat() {
               </div>
             )}
 
-            {turnHistory.map((turn, index) => (
+            {turnHistory.map((turn) => (
               <div
                 key={turn.id || turn.questionOrder}
                 className={`${styles.historyItemRow} ${
@@ -744,10 +780,10 @@ function StudentAIPracticeChat() {
                     ? styles.activeHistoryRow
                     : ""
                 }`}
-                onClick={() => handleHistoryClick(turn, index + 1)}
+                onClick={() => handleHistoryClick(turn)}
               >
                 <span className={styles.historyItemName}>
-                  <span>Câu {index + 1}</span>
+                  <span>Câu {turn.questionOrder}</span>
                   {turn.isCorrect ? (
                     <span className={styles.iconCheck}>
                       <FontAwesomeIcon icon={faCheckCircle} />
@@ -787,7 +823,7 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* ✅ FOCUS AREAS với DROPDOWN */}
+        {/* FOCUS AREAS với DROPDOWN */}
         <div className={styles.focusSection}>
           <div className={styles.sectionTitle}>
             <FontAwesomeIcon icon={faBullseye} />
@@ -822,15 +858,8 @@ function StudentAIPracticeChat() {
                       <span className={styles.errorCountBadge}>
                         {item.count} lần
                       </span>
-                      <FontAwesomeIcon
-                        icon={faChevronDown}
-                        className={`${styles.focusChevron} ${
-                          isExpanded ? styles.focusChevronRotated : ""
-                        }`}
-                      />
                     </div>
 
-                    {/* DROPDOWN MÔ TẢ */}
                     {isExpanded && (description || example) && (
                       <div className={styles.focusDropdown}>
                         {description && (
@@ -936,7 +965,6 @@ function StudentAIPracticeChat() {
                 <h4>Lỗi thường gặp</h4>
                 <div className={styles.resultErrorList}>
                   {(() => {
-                    // Lấy danh sách errors (ưu tiên result.commonErrors)
                     let errors = [];
                     if (
                       result?.commonErrors &&
@@ -952,7 +980,7 @@ function StudentAIPracticeChat() {
                             errorMap[key] = {
                               errorKey: key,
                               errorCategory: err.errorCategory || err.errorType,
-                              errorSubtype: err.errorSubtype,
+                              errorType: err.errorType,
                               count: 0,
                             };
                           }
@@ -988,17 +1016,9 @@ function StudentAIPracticeChat() {
                             <span className={styles.errorTypeCount}>
                               {error.count} lần
                             </span>
-                            <FontAwesomeIcon
-                              icon={faChevronDown}
-                              className={`${styles.resultErrorChevron} ${
-                                isExpanded
-                                  ? styles.resultErrorChevronRotated
-                                  : ""
-                              }`}
-                            />
+                           
                           </div>
 
-                          {/* DROPDOWN */}
                           {isExpanded && (description || example) && (
                             <div className={styles.resultErrorDropdown}>
                               {description && (

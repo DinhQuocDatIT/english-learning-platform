@@ -25,10 +25,10 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  border: 2px solid var(--color-border, #e2e8f0);
+  border: 2px solid var(--color-border);
   border-radius: 10px;
   background: transparent;
-  color: var(--color-text, #0f172a);
+  color: var(--color-text);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -36,14 +36,14 @@
 }
 
 .backBtn:hover {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-tertiary, #f0fdfa);
+  border-color: var(--color-primary);
+  background: var(--color-tertiary);
 }
 
 .headerTitle {
   font-size: 24px;
   font-weight: 700;
-  color: var(--color-secondary, #0f172a);
+  color: var(--color-secondary);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -51,14 +51,14 @@
 }
 
 .headerIcon {
-  color: var(--color-primary, #0ea792);
+  color: var(--color-primary);
 }
 
 /* ====== FORM ====== */
 .form {
-  background: var(--color-background, #ffffff);
+  background: var(--color-background);
   border-radius: 16px;
-  border: 1px solid var(--color-border, #e2e8f0);
+  border: 1px solid var(--color-border);
   padding: 32px;
 }
 
@@ -84,19 +84,19 @@
 .formLabel {
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-secondary, #0f172a);
+  color: var(--color-secondary);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .formLabel svg {
-  color: var(--color-primary, #0ea792);
+  color: var(--color-primary);
 }
 
 .formHint {
   font-size: 13px;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--color-text-muted);
   margin: -4px 0 0 0;
 }
 
@@ -112,10 +112,10 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  border: 2px solid var(--color-border, #e2e8f0);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   background: transparent;
-  color: var(--color-text, #0f172a);
+  color: var(--color-text);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -123,13 +123,13 @@
 }
 
 .levelOption:hover {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-tertiary, #f0fdfa);
+  border-color: var(--color-primary);
+  background: var(--color-tertiary);
 }
 
 .levelOption.active {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-tertiary, #f0fdfa);
+  border-color: var(--color-primary);
+  background: var(--color-tertiary);
 }
 
 .levelDot {
@@ -147,10 +147,10 @@
 
 .typeOption {
   padding: 8px 20px;
-  border: 2px solid var(--color-border, #e2e8f0);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   background: transparent;
-  color: var(--color-text, #0f172a);
+  color: var(--color-text);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -158,14 +158,14 @@
 }
 
 .typeOption:hover {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-tertiary, #f0fdfa);
+  border-color: var(--color-primary);
+  background: var(--color-tertiary);
 }
 
 .typeOption.active {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-primary, #0ea792);
-  color: #ffffff;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-white);
 }
 
 /* ====== TOPIC OPTIONS ====== */
@@ -177,10 +177,10 @@
 
 .topicOption {
   padding: 8px 16px;
-  border: 2px solid var(--color-border, #e2e8f0);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   background: transparent;
-  color: var(--color-text, #0f172a);
+  color: var(--color-text);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -188,14 +188,14 @@
 }
 
 .topicOption:hover {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-tertiary, #f0fdfa);
+  border-color: var(--color-primary);
+  background: var(--color-tertiary);
 }
 
 .topicOption.active {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-primary, #0ea792);
-  color: #ffffff;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-white);
 }
 
 /* ====== LIMIT OPTIONS ====== */
@@ -207,10 +207,10 @@
 
 .limitOption {
   padding: 8px 20px;
-  border: 2px solid var(--color-border, #e2e8f0);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   background: transparent;
-  color: var(--color-text, #0f172a);
+  color: var(--color-text);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -218,14 +218,14 @@
 }
 
 .limitOption:hover {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-tertiary, #f0fdfa);
+  border-color: var(--color-primary);
+  background: var(--color-tertiary);
 }
 
 .limitOption.active {
-  border-color: var(--color-primary, #0ea792);
-  background: var(--color-primary, #0ea792);
-  color: #ffffff;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-white);
 }
 
 /* ============================================
@@ -249,22 +249,22 @@
 .vocabInput {
   width: 180px;
   padding: 10px 14px;
-  border: 2px solid var(--color-border, #e2e8f0);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   font-size: 14px;
-  color: var(--color-text, #0f172a);
-  background: var(--color-background, #ffffff);
+  color: var(--color-text);
+  background: var(--color-background);
   outline: none;
   transition: all 0.2s;
 }
 
 .vocabInput:focus {
-  border-color: var(--color-primary, #0ea792);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(14, 167, 146, 0.1);
 }
 
 .vocabInput::placeholder {
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 
@@ -293,10 +293,10 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border: 2px dashed var(--color-primary, #0ea792);
+  border: 2px dashed var(--color-primary);
   border-radius: 8px;
   background: transparent;
-  color: var(--color-primary, #0ea792);
+  color: var(--color-primary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -304,8 +304,8 @@
 }
 
 .vocabAddBtn:hover {
-  background: var(--color-tertiary, #f0fdfa);
-  border-color: var(--color-primary-hover, #0d9488);
+  background: var(--color-tertiary);
+  border-color: var(--color-primary-hover);
 }
 
 .vocabAddBtn:disabled {
@@ -318,18 +318,84 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--color-text-muted);
 }
 
 .vocabCounter .vocabPreview {
-  color: var(--color-primary, #0ea792);
+  color: var(--color-primary);
   font-weight: 500;
 }
+
 .vocabCounter span {
   font-size: 13px;
   font-weight: 400;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--color-text-muted);
 }
+
+/* ============================================
+   ✅ SUGGESTION CHIPS - GỢI Ý TỪ VỰNG
+   ============================================ */
+
+.suggestionSection {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: var(--color-tertiary);
+  border-radius: 12px;
+  border: 1px solid var(--color-primary);
+}
+
+.suggestionLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: 10px;
+}
+
+.suggestionChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.suggestionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--color-primary);
+  background: var(--color-background);
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.suggestionChip:hover:not(:disabled) {
+  background: var(--color-tertiary);
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.suggestionChipActive {
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  border-color: var(--color-accent);
+}
+
+.suggestionChipActive:hover {
+  background: var(--color-accent);
+}
+
+.suggestionChip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #9ca3af;
+}
+
 /* ====== FORM ACTIONS ====== */
 .formActions {
   display: flex;
@@ -337,15 +403,15 @@
   gap: 12px;
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid var(--color-border, #f1f5f9);
+  border-top: 1px solid var(--color-border);
 }
 
 .cancelBtn {
   padding: 10px 24px;
-  border: 2px solid var(--color-border, #e2e8f0);
+  border: 2px solid var(--color-border);
   border-radius: 10px;
   background: transparent;
-  color: var(--color-text, #0f172a);
+  color: var(--color-text);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -364,8 +430,8 @@
   padding: 10px 28px;
   border: none;
   border-radius: 10px;
-  background: var(--color-primary, #0ea792);
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-text-white);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -373,7 +439,7 @@
 }
 
 .submitBtn:hover:not(:disabled) {
-  background: var(--color-primary-hover, #0d9488);
+  background: var(--color-primary-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(14, 167, 146, 0.3);
 }
@@ -381,6 +447,52 @@
 .submitBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ====== USAGE BANNER ====== */
+.usageBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--color-tertiary);
+  border: 1px solid var(--color-primary);
+  border-radius: 12px;
+  color: var(--color-accent);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.usageBanner span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.usageBanner strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.usageBanner svg {
+  color: var(--color-primary);
+  font-size: 16px;
+}
+
+.usageBannerWarning {
+  background: #fffbeb;
+  border-color: #fbbf24;
+  color: #92400e;
+}
+
+.usageBannerWarning strong {
+  color: #d97706;
+}
+
+.usageBannerWarning svg {
+  color: #f59e0b;
 }
 
 /* ====== RESPONSIVE ====== */
@@ -458,47 +570,86 @@
     width: 100%;
     justify-content: center;
   }
+
+  /* ✅ Suggestion chips responsive */
+  .suggestionChips {
+    gap: 6px;
+  }
+
+  .suggestionChip {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
 }
-/* ====== USAGE BANNER ====== */
-.usageBanner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #e9f8f5, #d4f3ef);
-  border: 1px solid #0ea792;
-  border-radius: 12px;
-  color: #0d9488;
-  font-size: 14px;
+/* ============================================
+   ✅ TOOLTIP CHO CHIP GỢI Ý TỪ VỰNG
+   ============================================ */
+
+.chipWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip - ẩn mặc định, hiện khi hover */
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+
+  padding: 6px 12px;
+  background: #1e293b;
+  color: #ffffff;
+
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 500;
-  margin-bottom: 20px;
-}
-.usageBanner span {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-primary);
-}
-.usageBanner strong {
-  font-size: 18px;
-  font-weight: 800;
-  color: #0ea792;
+  white-space: nowrap;
+
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s;
+
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
 }
 
-.usageBanner svg {
-  color: #0ea792;
-  font-size: 16px;
+/* Mũi tên chỉ xuống */
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1e293b;
+  margin-top: -1px;
 }
 
-.usageBannerWarning {
-  background: linear-gradient(135deg, #fffbeb, #fef3c7);
-  border-color: #fbbf24;
-  color: #92400e;
+/* Hiện tooltip khi hover chipWrapper */
+.chipWrapper:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-8px);
 }
 
-.usageBannerWarning strong {
-  color: #d97706;
+/* Chip được chọn - tooltip đổi màu nhẹ */
+.chipWrapper:has(.suggestionChipActive) .tooltip {
+  background: #0d9488;
 }
 
-.usageBannerWarning svg {
-  color: #f59e0b;
+.chipWrapper:has(.suggestionChipActive) .tooltip::after {
+  border-top-color: #0d9488;
+}
+
+/* Mobile - tap vào chip vẫn hiện tooltip nhờ :focus-within */
+.chipWrapper:focus-within .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-8px);
 }

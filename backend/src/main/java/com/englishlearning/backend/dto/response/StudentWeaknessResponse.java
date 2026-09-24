@@ -2,22 +2,21 @@ package com.englishlearning.backend.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class StudentWeaknessResponse {
-
-    private String errorKey;
+    private String weaknessKey;
     private String category;
-    private String subtype;
     private String categoryDisplayName;
-    private String subtypeDescription;
     private String displayName;
     private String suggestion;
     private Integer count;

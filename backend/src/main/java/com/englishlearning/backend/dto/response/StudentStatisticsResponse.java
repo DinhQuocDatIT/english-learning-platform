@@ -103,14 +103,13 @@ public class StudentStatisticsResponse {
     }
 
     /**
-     * ErrorStat — MỞ RỘNG để giúp học sinh CẢI THIỆN
+     * ErrorStat — thống kê lỗi để giúp học sinh CẢI THIỆN.
      *
-     * Giữ nguyên các field cũ + thêm:
-     * - Phân loại chi tiết: errorCategory, errorSubtype, errorKey
-     * - Giải thích: description, example, suggestion
-     * - Tiến bộ: masteryScore, masteryLevel
-     * - Xu hướng: trend, severity
-     * - Thời gian: firstOccurredAt, lastOccurredAt
+     * Thiết kế mới (2026-09):
+     * - errorType: AI mô tả lỗi — TIẾNG VIỆT, text tự do
+     * - errorCategory: 12 nhóm lớn (STRUCTURE, SPELLING...)
+     * - errorKey: = weaknessKey = category (để FE dùng làm key)
+     * - BỎ errorSubtype
      */
     @Getter
     @Setter
@@ -119,32 +118,31 @@ public class StudentStatisticsResponse {
     @AllArgsConstructor
     public static class ErrorStat {
         // ============ CŨ — GIỮ NGUYÊN ============
-        private String errorType;
-        private String displayName;
+        private String errorType;       // text AI mô tả (tiếng Việt)
+        private String displayName;     // tên hiển thị (từ ErrorCategory)
         private Long count;
         private Long highSeverity;
         private Long mediumSeverity;
         private Long lowSeverity;
 
-        // ============ MỚI — PHÂN LOẠI CHI TIẾT ============
-        private String errorCategory;
-        private String errorSubtype;
-        private String errorKey;
+        // ============ PHÂN LOẠI ============
+        private String errorCategory;   // 12 nhóm lớn
+        private String errorKey;        // = weaknessKey = category
 
-        // ============ MỚI — GIẢI THÍCH ============
+        // ============ GIẢI THÍCH ============
         private String description;
         private String example;
         private String suggestion;
 
-        // ============ MỚI — TIẾN BỘ ============
+        // ============ TIẾN BỘ ============
         private Integer masteryScore;
         private String masteryLevel;
 
-        // ============ MỚI — XU HƯỚNG ============
+        // ============ XU HƯỚNG ============
         private String trend;
         private String severity;
 
-        // ============ MỚI — THỜI GIAN ============
+        // ============ THỜI GIAN ============
         private LocalDateTime firstOccurredAt;
         private LocalDateTime lastOccurredAt;
     }
