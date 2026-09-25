@@ -17,6 +17,7 @@ public class UserMapper {
         response.setDateOfBirth(user.getDateOfBirth());
         response.setRole(user.getRole().getName());
         response.setDeletedAt(user.getDeletedAt());
+        response.setAvatarUrl(user.getAvatarUrl());
         return response;
     }
 }

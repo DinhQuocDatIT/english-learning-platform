@@ -24,5 +24,5 @@ public class StudentResponse {
     private Integer totalLearningSeconds;
     private Integer totalCompletedTopic;
     private LocalDateTime createdAt;
-
+    private String avatarUrl;
 }
