@@ -17,13 +17,13 @@ import {
   faRobot,
   faHexagonNodesBolt,
   faUser,
+  faTrophy,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
 
 export const sidebarMenus = {
   [ROLES.STUDENT]: [
-    
     {
       path: "/dashboard/student/myvocabulary",
       name: "Từ vựng",
@@ -38,6 +38,11 @@ export const sidebarMenus = {
       path: "/dashboard/student/ai-practice",
       name: "Luyện tập với AI",
       icon: faRobot,
+    },
+    {
+      path: "/dashboard/student/leaderboard",
+      name: "Bảng xếp hạng",
+      icon: faTrophy,
     },
     {
       path: "/dashboard/student/profile",

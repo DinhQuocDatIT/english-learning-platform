@@ -57,6 +57,8 @@ import StudentAIPracticeChat from "../pages/student/AI/StudentAIPracticeChat/Stu
 import AdminAIUsage from "../pages/admin/AIUsage/AdminAIUsage";
 import StudentProfile from "../pages/student/StudentProfile/StudentProfile";
 import PaymentHistoryPage from "../pages/admin/membershipPackage/PaymentHistoryPage/PaymentHistoryPage";
+
+import Leaderboard from "../pages/student/Leaderboard/Leaderboard";
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
   return (
@@ -113,6 +115,7 @@ function AppRoutes() {
               path="ai-practice/:chatId/result"
               element={<StudentAIPractice />}
             /> */}
+            <Route path="leaderboard" element={<Leaderboard />} />
           </Route>
 
           <Route
