@@ -13,6 +13,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import teacherService from "../../../services/teacherService";
+import getImageUrl from "../../../utils/imageUrl";
 
 import {
   isValidEmail,
@@ -20,6 +21,8 @@ import {
   isValidGender,
   isValidBirthday,
 } from "../../../utils/validators";
+
+const DEFAULT_AVATAR = "/uploads/avatars/default-avatar.png";
 
 function TeacherDetail() {
   const { id } = useParams();
@@ -38,6 +41,7 @@ function TeacherDetail() {
     email: "",
     gender: "",
     dateOfBirth: "",
+    avatarUrl: DEFAULT_AVATAR,
   });
 
   const [errors, setErrors] = useState({
@@ -82,6 +86,7 @@ function TeacherDetail() {
           email: teacher.email || "",
           gender: teacher.gender || "",
           dateOfBirth: teacher.dateOfBirth || "",
+          avatarUrl: teacher.avatarUrl || DEFAULT_AVATAR,
         });
       } catch (error) {
         console.error("Lỗi khi lấy thông tin giáo viên:", error);
@@ -113,22 +118,6 @@ function TeacherDetail() {
     today.setFullYear(today.getFullYear() - 18);
 
     return today.toISOString().split("T")[0];
-  };
-
-  // =========================
-  // AVATAR
-  // =========================
-
-  const getInitials = (name) => {
-    if (!name) return "GV";
-
-    const parts = name.trim().split(/\s+/);
-
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-
-    return name.substring(0, 2).toUpperCase();
   };
 
   // =========================
@@ -293,6 +282,7 @@ function TeacherDetail() {
           email: teacher.email || "",
           gender: teacher.gender || "",
           dateOfBirth: teacher.dateOfBirth || "",
+          avatarUrl: teacher.avatarUrl || DEFAULT_AVATAR,
         });
       }
     } catch (error) {
@@ -315,7 +305,6 @@ function TeacherDetail() {
     try {
       setSavingProfile(true);
 
-      // ĐÚNG với UpdateUserProfileRequest bên Backend
       const requestData = {
         fullName: formData.fullName.trim(),
         email: formData.email.trim(),
@@ -337,7 +326,6 @@ function TeacherDetail() {
 
       alert("Cập nhật thông tin giáo viên thành công!");
 
-      // Load lại dữ liệu sau khi update
       const response = await teacherService.getTeacherById(id);
       const teacher = response?.data?.data || response?.data;
 
@@ -347,6 +335,7 @@ function TeacherDetail() {
           email: teacher.email || "",
           gender: teacher.gender || "",
           dateOfBirth: teacher.dateOfBirth || "",
+          avatarUrl: teacher.avatarUrl || DEFAULT_AVATAR,
         });
       }
     } catch (error) {
@@ -418,7 +407,14 @@ function TeacherDetail() {
         <div className={styles.card}>
           <div className={styles.profileHeader}>
             <div className={styles.avatarCircle}>
-              {getInitials(formData.fullName)}
+              <img
+                src={getImageUrl(formData.avatarUrl || DEFAULT_AVATAR)}
+                alt={formData.fullName}
+                className={styles.avatarImg}
+                onError={(e) => {
+                  e.target.src = getImageUrl(DEFAULT_AVATAR);
+                }}
+              />
             </div>
 
             <div className={styles.profileInfo}>

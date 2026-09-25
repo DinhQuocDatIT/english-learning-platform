@@ -20,6 +20,7 @@ import styles from "./StudentDetail.module.css";
 import { toast } from "react-toastify";
 import studentService from "../../../../services/studentService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import getImageUrl from "../../../../utils/imageUrl";
 
 import {
   isValidEmail,
@@ -27,6 +28,8 @@ import {
   isValidGender,
   isValidBirthday,
 } from "../../../../utils/validators";
+
+const DEFAULT_AVATAR = "/uploads/avatars/default-avatar.png";
 
 const formatLearningHours = (seconds) => {
   if (seconds === null || seconds === undefined) return "0";
@@ -267,9 +270,14 @@ function StudentDetail() {
         <div className={styles.leftProfileCard}>
           <div className={styles.avatarWrapper}>
             <div className={styles.avatar}>
-              {student.fullName
-                ? student.fullName.charAt(0).toUpperCase()
-                : "S"}
+              <img
+                src={getImageUrl(student.avatarUrl || DEFAULT_AVATAR)}
+                alt={student.fullName}
+                className={styles.avatarImg}
+                onError={(e) => {
+                  e.target.src = getImageUrl(DEFAULT_AVATAR);
+                }}
+              />
             </div>
           </div>
 
