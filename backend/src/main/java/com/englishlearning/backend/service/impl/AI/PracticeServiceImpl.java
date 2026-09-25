@@ -21,6 +21,7 @@ import com.englishlearning.backend.repository.*;
 import com.englishlearning.backend.service.AI.AIService;
 import com.englishlearning.backend.service.PracticeService;
 import com.englishlearning.backend.service.PricingService;
+import com.englishlearning.backend.service.StreakService;
 import com.englishlearning.backend.service.StudentMembershipService;
 import com.englishlearning.backend.util.XpCalculator;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +62,7 @@ public class PracticeServiceImpl implements PracticeService {
     private final PricingService pricingService;
     private final StudentMembershipService studentMembershipService;
     private final ObjectMapper objectMapper;
+    private final StreakService streakService;
 
     // ===== CREATE PRACTICE =====
     @Override
@@ -281,6 +283,7 @@ public class PracticeServiceImpl implements PracticeService {
         int xpEarned = XpCalculator.calculateAiPracticeXp(chat.getLevel(), isCorrect);
         if (xpEarned > 0) {
             student.addExperience(xpEarned);
+            streakService.recordActivity(student);
             studentRepository.save(student);
             log.info("✅ Cộng {} XP cho student {} (level {}, isCorrect={})",
                     xpEarned, studentId, chat.getLevel(), isCorrect);
@@ -306,7 +309,7 @@ public class PracticeServiceImpl implements PracticeService {
         saveAIUsageWithTokens(studentId, chat, RequestType.GENERATE_AND_EVALUATE,
                 provider, modelName, responseTime, true, null, usage);
 
-        EvaluationResponse response = buildEvaluationResponse(aiResponse, chat, isCompleted, xpEarned);
+        EvaluationResponse response = buildEvaluationResponse(aiResponse, chat, isCompleted, xpEarned,student);
 
         if (!isCompleted && aiResponse.getNextQuestion() != null) {
             // ✅ ĐẾM SỐ TURN THỰC TẾ TRONG DB → tính order tiếp theo
@@ -899,6 +902,13 @@ public class PracticeServiceImpl implements PracticeService {
                     .build();
         }
 
+        Student student = chat.getStudent();
+        StreakResponse streakResponse = StreakResponse.builder()
+                .currentStreak(streakService.getDisplayStreak(student))
+                .longestStreak(streakService.getLongestStreak(student))
+                .lastActiveDate(student.getLastActiveDate())
+                .build();
+
         return PracticeChatResponse.builder()
                 .id(chat.getId())
                 .level(chat.getLevel())
@@ -912,6 +922,7 @@ public class PracticeServiceImpl implements PracticeService {
                 .completedAt(chat.getCompletedAt())
                 .vocabularyWords(chat.getVocabularyWords())
                 .currentTurn(turnResponse)
+                .streak(streakResponse)
                 .build();
     }
 
@@ -929,7 +940,8 @@ public class PracticeServiceImpl implements PracticeService {
     private EvaluationResponse buildEvaluationResponse(AIEvaluateResponse aiResponse,
                                                        AIPracticeChat chat,
                                                        boolean isCompleted,
-                                                       int xpEarned) {
+                                                       int xpEarned,
+                                                       Student student) {
         List<BetterAnswer> betterAnswers = new ArrayList<>();
         if (aiResponse.getBetterAnswers() != null) {
             for (String answer : aiResponse.getBetterAnswers()) {
@@ -954,6 +966,13 @@ public class PracticeServiceImpl implements PracticeService {
             }
         }
 
+        // ✅ Build StreakResponse
+        StreakResponse streakResponse = StreakResponse.builder()
+                .currentStreak(streakService.getDisplayStreak(student))
+                .longestStreak(streakService.getLongestStreak(student))
+                .lastActiveDate(student.getLastActiveDate())
+                .build();
+
         return EvaluationResponse.builder()
                 .isCorrect(aiResponse.getIsCorrect())
                 .score(aiResponse.getScore())
@@ -965,6 +984,7 @@ public class PracticeServiceImpl implements PracticeService {
                 .totalQuestions(chat.getQuestionLimit())
                 .isCompleted(isCompleted)
                 .experienceEarned(xpEarned)
+                .streak(streakResponse)
                 .build();
     }
 
