@@ -11,11 +11,15 @@ import {
 import styles from "./Header.module.css";
 import AuthStorage from "../../../services/AuthStorage";
 import VocabularySearchDropdown from "../../vocabulary/VocabularySearchDropdown/VocabularySearchDropdown";
+import StreakBadge from "../../StreakBadge/StreakBadge";
+import streakService from "../../../services/streakService"; // ✅
+
 const roleLabels = {
   ADMIN: "Quản trị viên",
   TEACHER: "Giáo viên",
   STUDENT: "Học sinh",
 };
+
 const Header = ({ onToggleSidebar, isSidebarOpen }) => {
   const user = AuthStorage.getUser();
   const [isOpen, setIsOpen] = useState(false);
@@ -24,10 +28,10 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
   const userRole = roleLabels[user?.role?.toUpperCase()] || "Người dùng";
   const searchContainerRef = useRef(null);
 
-  // Lấy role của user hiện tại
-  const role = AuthStorage.getRole();
+  // ✅ Streak state
+  const [currentStreak, setCurrentStreak] = useState(0);
 
-  // Chỉ STUDENT mới được hiện thanh tìm kiếm
+  const role = AuthStorage.getRole();
   const isStudent = role?.toUpperCase() === "STUDENT";
 
   const handleLogout = () => {
@@ -35,7 +39,36 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
     window.location.href = "/";
   };
 
-  // Đóng tìm kiếm khi click ra ngoài
+  // ✅ Load streak khi mount
+  useEffect(() => {
+    if (!isStudent) return;
+
+    const fetchStreak = async () => {
+      try {
+        const res = await streakService.getMyStreak();
+        const data = res?.data?.data;
+        setCurrentStreak(data?.currentStreak || 0);
+      } catch (err) {
+        console.error("Lỗi lấy streak:", err);
+      }
+    };
+
+    fetchStreak();
+
+    // ✅ Listen event khi submit
+    const handleStreakUpdate = (e) => {
+      if (e.detail?.streak != null) {
+        setCurrentStreak(e.detail.streak);
+      }
+    };
+
+    window.addEventListener("streak-updated", handleStreakUpdate);
+
+    return () => {
+      window.removeEventListener("streak-updated", handleStreakUpdate);
+    };
+  }, [isStudent]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -68,7 +101,7 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
         </button>
       </div>
 
-      {/* SEARCH - Chỉ STUDENT mới hiện */}
+      {/* SEARCH */}
       {isStudent && (
         <div className={styles.searchContainer} ref={searchContainerRef}>
           <div
@@ -79,7 +112,6 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
               icon={faMagnifyingGlass}
               className={styles.searchIcon}
             />
-
             <input
               type="text"
               placeholder="Tìm bài học, từ vựng..."
@@ -98,14 +130,13 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
 
       {/* RIGHT */}
       <div className={styles.right}>
-        {/* Notifications */}
+        {isStudent && <StreakBadge streak={currentStreak} />}
+
         <div className={styles.notificationBtn} aria-label="Thông báo">
           <FontAwesomeIcon icon={faBell} className={styles.bellIcon} />
-
           <span className={styles.badge}></span>
         </div>
 
-        {/* User Profile */}
         <div className={styles.userProfile} onClick={() => setIsOpen(!isOpen)}>
           <div className={styles.avatar}>
             <img
@@ -115,9 +146,8 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
           </div>
 
           <div className={styles.userInfo}>
-            {" "}
-            <span className={styles.userName}> {userName} </span>{" "}
-            <span className={styles.userRole}> {userRole} </span>{" "}
+            <span className={styles.userName}>{userName}</span>
+            <span className={styles.userRole}>{userRole}</span>
           </div>
 
           <FontAwesomeIcon

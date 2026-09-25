@@ -358,6 +358,13 @@ function StudentListeningPractice() {
         } else {
           toast.info("🎉 Bạn đã hoàn thành câu này rồi!");
         }
+        if (answerData?.streak) {
+          window.dispatchEvent(
+            new CustomEvent("streak-updated", {
+              detail: { streak: answerData.streak.currentStreak },
+            }),
+          );
+        }
       } else {
         setCompletedSentences((prev) => {
           const next = { ...prev };

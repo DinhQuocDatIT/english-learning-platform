@@ -1,0 +1,208 @@
+/* =========================================================
+   STREAK BADGE — 5 tiers, cùng hiệu ứng, chỉ đổi màu
+   ========================================================= */
+
+.streakBadge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 4px 6px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: default;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.streakBadge:hover {
+  transform: scale(1.08);
+}
+
+.streakIcon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.streakCount {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-secondary); /* số luôn đen */
+}
+
+/* =========================================================
+   TIER 0 — ZERO
+   ========================================================= */
+
+.tierZero .streakIcon,
+.tierZero .streakCount {
+  color: var(--color-text-muted);
+}
+
+/* =========================================================
+   TIER 1 — NORMAL (1-6): Lửa đỏ, không hiệu ứng
+   ========================================================= */
+
+.tierNormal .streakIcon {
+  color: #dc2626;
+}
+
+/* =========================================================
+   TIER 2 — HOT (7-29): Lửa đỏ + tia sét tím
+   ========================================================= */
+
+.tierHot .streakIcon {
+  color: #dc2626;
+  filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.9));
+  animation: flamePulse 1.2s ease-in-out infinite;
+}
+
+.tierHot .lightning {
+  color: #a78bfa;
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 1));
+}
+
+/* =========================================================
+   TIER 3 — MASTER (30-59): Lửa cam + tia sét vàng
+   ========================================================= */
+
+.tierMaster .streakIcon {
+  color: #f59e0b;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.9));
+  animation: flamePulse 1.2s ease-in-out infinite;
+}
+
+.tierMaster .lightning {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 1));
+}
+
+/* =========================================================
+   TIER 4 — GRANDMASTER (60-99): Lửa tím + tia sét tím sáng
+   ========================================================= */
+
+.tierGrandmaster .streakIcon {
+  color: #a855f7;
+  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.9));
+  animation: flamePulse 1.2s ease-in-out infinite;
+}
+
+.tierGrandmaster .lightning {
+  color: #c084fc;
+  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 1));
+}
+
+/* =========================================================
+   TIER 5 — LEGENDARY (100+): Lửa xanh + tia sét cyan
+   ========================================================= */
+
+.tierLegendary .streakIcon {
+  color: #3b82f6;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.9));
+  animation: flamePulse 1.2s ease-in-out infinite;
+}
+
+.tierLegendary .lightning {
+  color: #38bdf8;
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 1));
+}
+
+/* =========================================================
+   LIGHTNING — tia sét (giống hệt tier bá khí)
+   ========================================================= */
+
+.lightning {
+  position: absolute;
+  pointer-events: none;
+  animation: lightning1 1.8s ease-in-out infinite;
+}
+
+.lightning1 {
+  top: -8px;
+  left: -6px;
+  font-size: 12px;
+}
+
+.lightning2 {
+  bottom: -6px;
+  right: -4px;
+  font-size: 10px;
+  animation-delay: 0.9s;
+  animation-name: lightning2;
+}
+
+/* =========================================================
+   KEYFRAMES — giữ nguyên 3 cái cũ
+   ========================================================= */
+
+@keyframes flamePulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes lightning1 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-2px, -4px) scale(1.15);
+  }
+  40% {
+    opacity: 0.85;
+    transform: translate(-4px, -8px) scale(0.95);
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: translate(-4px, -12px) scale(0.5);
+  }
+}
+
+@keyframes lightning2 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(2px, 4px) scale(1.15);
+  }
+  40% {
+    opacity: 0.85;
+    transform: translate(4px, 8px) scale(0.95);
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: translate(4px, 12px) scale(0.5);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 576px) {
+  .streakBadge {
+    font-size: 13px;
+  }
+  .streakIcon {
+    font-size: 14px;
+  }
+  .streakCount {
+    font-size: 13px;
+  }
+}

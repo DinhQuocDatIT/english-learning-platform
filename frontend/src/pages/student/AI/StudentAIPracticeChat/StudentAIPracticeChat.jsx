@@ -220,7 +220,13 @@ function StudentAIPracticeChat() {
       if (data?.experienceEarned && data.experienceEarned > 0) {
         showXpToast(data.experienceEarned);
       }
-
+      if (data?.streak) {
+        window.dispatchEvent(
+          new CustomEvent("streak-updated", {
+            detail: { streak: data.streak.currentStreak },
+          }),
+        );
+      }
       // Cập nhật số lượt còn lại
       try {
         const usageResponse = await studentMembershipService.getAIUsage();

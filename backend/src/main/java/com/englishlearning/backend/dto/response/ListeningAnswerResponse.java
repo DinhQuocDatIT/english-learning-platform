@@ -20,4 +20,5 @@ public class ListeningAnswerResponse {
     private LocalDateTime createdAt;
     private LocalDateTime completedAt;
     private Integer experienceEarned;
+    private StreakResponse streak;
 }

@@ -2,6 +2,7 @@ package com.englishlearning.backend.service.impl;
 
 import com.englishlearning.backend.dto.request.ListeningAnswerRequest;
 import com.englishlearning.backend.dto.response.ListeningAnswerResponse;
+import com.englishlearning.backend.dto.response.StreakResponse;
 import com.englishlearning.backend.entity.ListeningAnswer;
 import com.englishlearning.backend.entity.ListeningSentence;
 import com.englishlearning.backend.entity.Student;
@@ -10,6 +11,7 @@ import com.englishlearning.backend.repository.ListeningAnswerRepository;
 import com.englishlearning.backend.repository.ListeningSentenceRepository;
 import com.englishlearning.backend.repository.StudentRepository;
 import com.englishlearning.backend.service.ListeningAnswerService;
+import com.englishlearning.backend.service.StreakService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ public class ListeningAnswerServiceImpl implements ListeningAnswerService {
     private final ListeningAnswerRepository listeningAnswerRepository;
     private final ListeningSentenceRepository listeningSentenceRepository;
     private final StudentRepository studentRepository;
+    private final StreakService streakService;
 
     @Override
     public ListeningAnswerResponse answerQuestion(
@@ -35,34 +38,43 @@ public class ListeningAnswerServiceImpl implements ListeningAnswerService {
             ListeningAnswerRequest request
     ) {
         Student student = getStudentByUserId(userId);
-        ListeningSentence sentence = getSentence(
-                request.getListeningSentenceId()
-        );
+        ListeningSentence sentence = getSentence(request.getListeningSentenceId());
+
         String normalizedUserText = normalizeText(request.getUserText());
         String normalizedCorrectText = normalizeText(sentence.getEnglishText());
         boolean isCorrect = normalizedUserText.equals(normalizedCorrectText);
+
         ListeningAnswer answer = listeningAnswerRepository
                 .findByStudentIdAndListeningSentenceId(
                         student.getId(),
                         sentence.getId()
                 )
                 .orElse(null);
+
         boolean hasEverBeenCorrect = answer != null && answer.getCompletedAt() != null;
 
         int experienceEarned = 0;
+        boolean needsSave = false;
 
-
+        // ✅ XP: chỉ cộng nếu câu chưa từng đúng + hôm nay đúng
         if (!hasEverBeenCorrect && isCorrect) {
-
             student.addExperience(XP_PER_CORRECT_ANSWER);
-            studentRepository.save(student);
             experienceEarned = XP_PER_CORRECT_ANSWER;
-        } else if (hasEverBeenCorrect) {
-
-            experienceEarned = 0;
+            needsSave = true;
         }
 
+        // ✅ Streak: chỉ cần hôm nay đúng (recordActivity tự chống spam theo ngày)
+        if (isCorrect) {
+            streakService.recordActivity(student);
+            needsSave = true;
+        }
 
+        // Save 1 lần duy nhất
+        if (needsSave) {
+            studentRepository.save(student);
+        }
+
+        // Tạo answer mới nếu chưa có
         if (answer == null) {
             answer = new ListeningAnswer();
             answer.setListeningSentence(sentence);
@@ -70,15 +82,14 @@ public class ListeningAnswerServiceImpl implements ListeningAnswerService {
             answer.setCreatedAt(LocalDateTime.now());
         }
 
-
         answer.setUserText(request.getUserText());
         answer.setCorrectText(sentence.getEnglishText());
         answer.setIsCorrect(isCorrect);
 
-
         if (answer.getCompletedAt() == null && isCorrect) {
             answer.setCompletedAt(LocalDateTime.now());
         }
+
         ListeningAnswer saved = listeningAnswerRepository.save(answer);
 
         return toResponse(saved, experienceEarned);
@@ -240,7 +251,12 @@ public class ListeningAnswerServiceImpl implements ListeningAnswerService {
     }
 
     private ListeningAnswerResponse toResponse(ListeningAnswer answer, int experienceEarned) {
-
+        Student student = answer.getStudent();
+        StreakResponse streakResponse = StreakResponse.builder()
+                .currentStreak(streakService.getDisplayStreak(student))
+                .longestStreak(streakService.getLongestStreak(student))
+                .lastActiveDate(student.getLastActiveDate())
+                .build();
         return ListeningAnswerResponse.builder()
                 .id(answer.getId())
                 .listeningSentenceId(answer.getListeningSentence().getId())
@@ -253,6 +269,7 @@ public class ListeningAnswerServiceImpl implements ListeningAnswerService {
                 .createdAt(answer.getCreatedAt())
                 .completedAt(answer.getCompletedAt())
                 .experienceEarned(experienceEarned)
+                .streak(streakResponse)
                 .build();
     }
 }

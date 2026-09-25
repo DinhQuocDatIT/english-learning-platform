@@ -33,6 +33,7 @@ public class EvaluationResponse {
     private Integer totalQuestions;
     private Boolean isCompleted;
     private Integer experienceEarned;
+    private StreakResponse streak;
 
 }
 

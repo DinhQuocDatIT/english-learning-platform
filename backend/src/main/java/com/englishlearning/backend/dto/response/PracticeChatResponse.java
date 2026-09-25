@@ -31,4 +31,5 @@ public class PracticeChatResponse {
     // Câu hỏi đầu tiên (khi tạo mới)
     private TurnResponse currentTurn;
     private List<TurnHistoryResponse> turnHistory;
+    private StreakResponse streak;
 }

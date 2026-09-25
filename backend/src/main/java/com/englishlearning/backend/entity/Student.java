@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,15 @@ public class Student {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Column(name = "current_streak", nullable = false)
+    private Integer currentStreak = 0;
+
+    @Column(name = "longest_streak", nullable = false)
+    private Integer longestStreak = 0;
+
+    @Column(name = "last_active_date")
+    private LocalDate lastActiveDate;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
