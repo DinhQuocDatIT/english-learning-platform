@@ -60,6 +60,7 @@ public class AdminServiceImpl implements AdminService {
         user.setGender(registerUserRequest.getGender());
         user.setDateOfBirth(registerUserRequest.getDateOfBirth());
         user.setRole(role);
+        user.setAvatarUrl(User.DEFAULT_AVATAR_URL);
         User userSave =  userRepository.save(user);
 
         return userMapper.toResponse(userSave);

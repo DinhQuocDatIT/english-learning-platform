@@ -56,6 +56,7 @@ public class StudentServiceImpl implements StudentService {
         user.setGender(request.getRegisterUserRequest().getGender());
         user.setDateOfBirth(request.getRegisterUserRequest().getDateOfBirth());
         user.setRole(role);
+        user.setAvatarUrl(User.DEFAULT_AVATAR_URL);
         student.setUser(user);
         user.setStudent(student);
         User userSave =  userRepository.save(user);

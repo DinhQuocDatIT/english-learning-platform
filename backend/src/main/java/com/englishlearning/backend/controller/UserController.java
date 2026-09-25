@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -55,6 +56,22 @@ public class UserController {
                         result
                 )
         );
+    }
+    @PostMapping(value = "/me/avatar", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<UserResponse>> uploadAvatar(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("file") MultipartFile file
+    ) {
+        UserResponse response = userService.updateAvatar(userDetails.getUser().getId(), file);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Cập nhật ảnh đại diện thành công", response));
+    }
+
+    @DeleteMapping("/me/avatar")
+    public ResponseEntity<ApiResponse<UserResponse>> removeAvatar(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        UserResponse response = userService.removeAvatar(userDetails.getUser().getId());
+        return ResponseEntity.ok(new ApiResponse<>(200, "Xóa ảnh đại diện thành công", response));
     }
 }
 

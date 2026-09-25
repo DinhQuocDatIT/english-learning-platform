@@ -12,13 +12,16 @@ import styles from "./Header.module.css";
 import AuthStorage from "../../../services/AuthStorage";
 import VocabularySearchDropdown from "../../vocabulary/VocabularySearchDropdown/VocabularySearchDropdown";
 import StreakBadge from "../../StreakBadge/StreakBadge";
-import streakService from "../../../services/streakService"; // ✅
+import streakService from "../../../services/streakService";
+import getImageUrl from "../../../utils/imageUrl";
 
 const roleLabels = {
   ADMIN: "Quản trị viên",
   TEACHER: "Giáo viên",
   STUDENT: "Học sinh",
 };
+
+const DEFAULT_AVATAR = "/uploads/avatars/default-avatar.png";
 
 const Header = ({ onToggleSidebar, isSidebarOpen }) => {
   const user = AuthStorage.getUser();
@@ -33,6 +36,9 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
 
   const role = AuthStorage.getRole();
   const isStudent = role?.toUpperCase() === "STUDENT";
+
+  // ✅ Avatar URL — dùng từ user, fallback default
+  const avatarUrl = user?.avatarUrl || DEFAULT_AVATAR;
 
   const handleLogout = () => {
     AuthStorage.removeAuth();
@@ -55,7 +61,6 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
 
     fetchStreak();
 
-    // ✅ Listen event khi submit
     const handleStreakUpdate = (e) => {
       if (e.detail?.streak != null) {
         setCurrentStreak(e.detail.streak);
@@ -140,8 +145,11 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
         <div className={styles.userProfile} onClick={() => setIsOpen(!isOpen)}>
           <div className={styles.avatar}>
             <img
-              src="https://api.dicebear.com/7.x/adventurer/svg?seed=DuyDat"
+              src={getImageUrl(avatarUrl)}
               alt="Avatar"
+              onError={(e) => {
+                e.target.src = getImageUrl(DEFAULT_AVATAR);
+              }}
             />
           </div>
 

@@ -20,6 +20,7 @@ public class StudentMapper {
         response.setDateOfBirth(user.getDateOfBirth());
         response.setRole(user.getRole().getName());
         response.setCreatedAt(user.getCreatedAt());
+        response.setAvatarUrl(user.getAvatarUrl());
         if(user.getStudent() != null){
             response.setExperience(user.getStudent().getExperience());
             response.setTotalLearningSeconds(user.getStudent().getTotalLearningSeconds());

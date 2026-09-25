@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 public class User {
+    public static final String DEFAULT_AVATAR_URL = "/uploads/avatars/default-avatar.png";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,7 +28,8 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
-
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl = DEFAULT_AVATAR_URL;
 
     @ManyToOne
     @JoinColumn(name = "role_id",
@@ -53,7 +55,8 @@ public class User {
         this.role = role;
         this.student = student;
     }
-
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     public Long getId() {
         return id;
     }
