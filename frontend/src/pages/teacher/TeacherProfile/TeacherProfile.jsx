@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styles from "./TeacherProfile.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTimes,
+  faSave,
+  faSpinner,
+  faCamera,
+  faTrashCan,
+} from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 import UserService from "../../../services/UserService";
 import { useLoading } from "../../../contexts/LoadingContext";
 import { ROLE_LABELS } from "../../../constants/roles";
+import getImageUrl from "../../../utils/imageUrl";
 import {
   isValidBirthday,
   isValidGender,
@@ -12,38 +21,52 @@ import {
   isValidFullName,
   isValidPassword,
 } from "../../../utils/validators";
+
+const DEFAULT_AVATAR = "/uploads/avatars/default-avatar.png";
+
 function TeacherProfile() {
-  const [isEditing, setIsEditing] = useState(false);
   const { showLoading, hideLoading } = useLoading();
+  const [isEditing, setIsEditing] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     gender: "",
     dateOfBirth: "",
     role: "",
+    avatarUrl: DEFAULT_AVATAR,
   });
+
+  // ✅ lưu bản gốc để khôi phục khi Hủy
+  const [originalData, setOriginalData] = useState(null);
+
   const [errors, setErrors] = useState({
     fullName: "",
     email: "",
     gender: "",
     dateOfBirth: "",
   });
+
   const [touched, setTouched] = useState({
     fullName: false,
     email: false,
     gender: false,
     dateOfBirth: false,
   });
+
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+
   const [passwordErrors, setPasswordErrors] = useState({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -52,29 +75,33 @@ function TeacherProfile() {
         const userData = response.data.data;
 
         if (userData) {
-          setFormData({
+          const normalized = {
             fullName: userData.fullName || userData.name || "",
             email: userData.email || "",
             gender: userData.gender || "",
             dateOfBirth: userData.dateOfBirth || "",
             role: userData.role || "",
-          });
+            avatarUrl: userData.avatarUrl || DEFAULT_AVATAR,
+          };
+          setFormData(normalized);
+          setOriginalData(normalized);
         }
       } catch (error) {
         console.error("Lỗi khi tải thông tin cá nhân:", error);
+        toast.error("Không thể tải thông tin cá nhân");
       } finally {
         hideLoading();
       }
     };
 
     fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Xóa lỗi ngay khi người dùng gõ/chọn lại
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -111,7 +138,6 @@ function TeacherProfile() {
     return error === "";
   };
 
-  // Hàm xử lý thay đổi input đổi mật khẩu
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData((prev) => ({ ...prev, [name]: value }));
@@ -123,7 +149,6 @@ function TeacherProfile() {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    // Đánh dấu tất cả là đã chạm để hiện lỗi nếu để trống
     setTouched({
       fullName: true,
       email: true,
@@ -144,17 +169,32 @@ function TeacherProfile() {
     });
 
     if (nameErr || emailErr || genderErr || dobErr) {
+      toast.error("Vui lòng kiểm tra lại thông tin");
       return;
     }
 
     try {
       showLoading();
-      await UserService.updateProfile(formData);
-      alert("Cập nhật thông tin thành công!");
+      await UserService.updateProfile({
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        gender: formData.gender,
+        dateOfBirth: formData.dateOfBirth,
+      });
+
+      const saved = {
+        ...formData,
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+      };
+      setFormData(saved);
+      setOriginalData(saved);
+
+      toast.success("Cập nhật thông tin thành công!");
       setIsEditing(false);
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
-      alert(
+      toast.error(
         error.response?.data?.message || "Cập nhật thất bại, vui lòng thử lại.",
       );
     } finally {
@@ -162,7 +202,24 @@ function TeacherProfile() {
     }
   };
 
-  // Hàm xử lý gửi yêu cầu đổi mật khẩu
+  // ✅ Khôi phục dữ liệu gốc khi hủy
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    if (originalData) setFormData(originalData);
+    setErrors({
+      fullName: "",
+      email: "",
+      gender: "",
+      dateOfBirth: "",
+    });
+    setTouched({
+      fullName: false,
+      email: false,
+      gender: false,
+      dateOfBirth: false,
+    });
+  };
+
   const handleChangePasswordSubmit = async (e) => {
     e.preventDefault();
 
@@ -195,7 +252,7 @@ function TeacherProfile() {
         newPassword: passwordData.newPassword,
       });
 
-      alert("Đổi mật khẩu thành công!");
+      toast.success("Đổi mật khẩu thành công!");
       setPasswordData({
         oldPassword: "",
         newPassword: "",
@@ -208,7 +265,7 @@ function TeacherProfile() {
       });
     } catch (error) {
       console.error("Lỗi khi đổi mật khẩu:", error);
-      alert(
+      toast.error(
         error.response?.data?.message ||
           "Đổi mật khẩu thất bại, vui lòng kiểm tra lại mật khẩu cũ.",
       );
@@ -219,27 +276,39 @@ function TeacherProfile() {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Thông tin Cá nhân</h1>
-        <p className={styles.subtitle}>
-          Quản lý hồ sơ và bảo mật tài khoản của bạn.
-        </p>
-      </div>
+      
 
       <div className={styles.container}>
         {/* Cột trái: Thông tin cá nhân */}
         <div className={styles.card}>
           <div className={styles.profileHeader}>
-            <div className={styles.avatarContainer}>
-              <img
-                src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${formData.fullName || "DuyDat"}`}
-                alt="Avatar"
-                className={styles.avatar}
-              />
+            {/* ✅ AVATAR với nút camera */}
+            <div className={styles.avatarWrapper}>
+              <div className={styles.avatarContainer}>
+                <img
+                  src={getImageUrl(formData.avatarUrl || DEFAULT_AVATAR)}
+                  alt="Avatar"
+                  className={styles.avatar}
+                  onError={(e) => {
+                    e.target.src = getImageUrl(DEFAULT_AVATAR);
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                className={styles.avatarEditBtn}
+                onClick={() => setShowAvatarModal(true)}
+                title="Đổi ảnh đại diện"
+              >
+                <FontAwesomeIcon icon={faCamera} />
+              </button>
             </div>
+
             <div className={styles.profileInfo}>
               <h2 className={styles.name}>{formData.fullName}</h2>
-              <span className={styles.badge}>{ROLE_LABELS[formData.role]}</span>
+              <span className={styles.badge}>
+                {ROLE_LABELS[formData.role] || formData.role}
+              </span>
             </div>
             {!isEditing && (
               <button
@@ -256,19 +325,21 @@ function TeacherProfile() {
             <div className={styles.gridInfo}>
               <div className={styles.infoGroup}>
                 <span className={styles.label}>HỌ VÀ TÊN</span>
-                <span className={styles.value}>{formData.fullName}</span>
+                <span className={styles.value}>{formData.fullName || "—"}</span>
               </div>
               <div className={styles.infoGroup}>
                 <span className={styles.label}>EMAIL</span>
-                <span className={styles.value}>{formData.email}</span>
+                <span className={styles.value}>{formData.email || "—"}</span>
               </div>
               <div className={styles.infoGroup}>
                 <span className={styles.label}>GIỚI TÍNH</span>
-                <span className={styles.value}>{formData.gender}</span>
+                <span className={styles.value}>{formData.gender || "—"}</span>
               </div>
               <div className={styles.infoGroup}>
                 <span className={styles.label}>NGÀY SINH</span>
-                <span className={styles.value}>{formData.dateOfBirth}</span>
+                <span className={styles.value}>
+                  {formData.dateOfBirth || "—"}
+                </span>
               </div>
             </div>
           ) : (
@@ -345,6 +416,7 @@ function TeacherProfile() {
                     value={formData.dateOfBirth}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    max={new Date().toISOString().split("T")[0]}
                   />
                   {touched.dateOfBirth && errors.dateOfBirth && (
                     <span className={styles.errorMessage}>
@@ -357,11 +429,13 @@ function TeacherProfile() {
                 <button
                   type="button"
                   className={styles.cancelButton}
-                  onClick={() => setIsEditing(false)}
+                  onClick={handleCancelEdit}
                 >
+                  <FontAwesomeIcon icon={faTimes} />
                   Hủy
                 </button>
                 <button type="submit" className={styles.submitButton}>
+                  <FontAwesomeIcon icon={faSave} />
                   Lưu thay đổi
                 </button>
               </div>
@@ -400,6 +474,7 @@ function TeacherProfile() {
                 placeholder="••••••••"
                 value={passwordData.oldPassword}
                 onChange={handlePasswordChange}
+                autoComplete="current-password"
               />
               {passwordErrors.oldPassword && (
                 <span className={styles.errorMessage}>
@@ -419,6 +494,7 @@ function TeacherProfile() {
                 placeholder="••••••••"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
+                autoComplete="new-password"
               />
               {passwordErrors.newPassword && (
                 <span className={styles.errorMessage}>
@@ -438,6 +514,7 @@ function TeacherProfile() {
                 placeholder="••••••••"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
+                autoComplete="new-password"
               />
               {passwordErrors.confirmPassword && (
                 <span className={styles.errorMessage}>
@@ -452,7 +529,227 @@ function TeacherProfile() {
           </form>
         </div>
       </div>
+
+      {/* ✅ Avatar Modal */}
+      <AvatarUploadModal
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+        currentAvatar={formData.avatarUrl}
+        onSuccess={(data) => {
+          if (data?.avatarUrl) {
+            setFormData((prev) => ({ ...prev, avatarUrl: data.avatarUrl }));
+            setOriginalData((prev) =>
+              prev ? { ...prev, avatarUrl: data.avatarUrl } : prev,
+            );
+            window.dispatchEvent(
+              new CustomEvent("avatar-updated", {
+                detail: { avatarUrl: data.avatarUrl },
+              }),
+            );
+          }
+        }}
+      />
     </div>
   );
 }
+
+// =====================================================
+// AVATAR UPLOAD MODAL
+// =====================================================
+function AvatarUploadModal({ isOpen, onClose, currentAvatar, onSuccess }) {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setIsUploading(false);
+      setIsRemoving(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  if (!isOpen) return null;
+
+  const handleSelectFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Ảnh không được vượt quá 2MB");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+    try {
+      setIsUploading(true);
+      const res = await UserService.uploadAvatar(selectedFile);
+      const data = res?.data?.data;
+      toast.success("Cập nhật ảnh đại diện thành công!");
+      onSuccess?.(data);
+      onClose();
+    } catch (error) {
+      console.error("Lỗi upload avatar:", error);
+      toast.error(
+        error.response?.data?.message || "Không thể cập nhật ảnh đại diện.",
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!window.confirm("Bạn có chắc muốn xóa ảnh đại diện?")) return;
+    try {
+      setIsRemoving(true);
+      const res = await UserService.removeAvatar();
+      const data = res?.data?.data;
+      toast.success("Đã xóa ảnh đại diện!");
+      onSuccess?.(data);
+      onClose();
+    } catch (error) {
+      console.error("Lỗi xóa avatar:", error);
+      toast.error(error.response?.data?.message || "Không thể xóa ảnh.");
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
+  const displayAvatar =
+    previewUrl || getImageUrl(currentAvatar || DEFAULT_AVATAR);
+
+  return (
+    <div className={styles.backdrop} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <div className={styles.modalHeaderLeft}>
+            <div className={styles.modalIconBox}>
+              <FontAwesomeIcon icon={faCamera} />
+            </div>
+            <div>
+              <h2 className={styles.modalTitle}>Ảnh đại diện</h2>
+              <p className={styles.modalSubtitle}>Cập nhật ảnh của bạn</p>
+            </div>
+          </div>
+          <button className={styles.modalCloseBtn} onClick={onClose}>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+        </div>
+
+        <div className={styles.modalBody}>
+          <div className={styles.avatarUploadPreview}>
+            <div className={styles.avatarPreviewCircle}>
+              <img
+                src={displayAvatar}
+                alt="Avatar"
+                onError={(e) => {
+                  e.target.src = getImageUrl(DEFAULT_AVATAR);
+                }}
+              />
+              {selectedFile && (
+                <div className={styles.newAvatarBadge}>Ảnh mới</div>
+              )}
+            </div>
+            <p className={styles.avatarHint}>
+              {selectedFile
+                ? selectedFile.name
+                : "Chọn ảnh để thay đổi (tối đa 2MB)"}
+            </p>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            onChange={handleSelectFile}
+            style={{ display: "none" }}
+          />
+
+          <div className={styles.avatarActions}>
+            <button
+              className={styles.avatarSelectBtn}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading || isRemoving}
+            >
+              <FontAwesomeIcon icon={faCamera} />
+              {selectedFile ? "Chọn ảnh khác" : "Chọn ảnh"}
+            </button>
+            <button
+              className={styles.avatarRemoveBtn}
+              onClick={handleRemove}
+              disabled={isUploading || isRemoving}
+            >
+              {isRemoving ? (
+                <FontAwesomeIcon icon={faSpinner} spin />
+              ) : (
+                <FontAwesomeIcon icon={faTrashCan} />
+              )}
+              Xóa ảnh
+            </button>
+          </div>
+        </div>
+
+        {selectedFile && (
+          <div className={styles.modalFooter}>
+            <button
+              className={styles.cancelBtn}
+              onClick={() => {
+                if (previewUrl) URL.revokeObjectURL(previewUrl);
+                setSelectedFile(null);
+                setPreviewUrl(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }}
+              disabled={isUploading}
+            >
+              Hủy
+            </button>
+            <button
+              className={styles.submitBtn}
+              onClick={handleUpload}
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <>
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                  <span>Đang lưu...</span>
+                </>
+              ) : (
+                <>
+                  <FontAwesomeIcon icon={faSave} />
+                  <span>Lưu ảnh</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default TeacherProfile;
