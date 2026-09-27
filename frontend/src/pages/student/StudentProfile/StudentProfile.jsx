@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBolt,
@@ -10,8 +10,6 @@ import {
   faArrowDown,
   faMinus,
   faLock,
-  faLightbulb,
-  faSpellCheck,
   faChartLine,
   faRobot,
   faBookmark,
@@ -32,102 +30,93 @@ import {
   faGraduationCap,
   faHeadphones,
   faTriangleExclamation,
-  faPlay,
   faClock,
-  faBookOpen,
+  faCamera,
+  faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 import studentProfileService from "../../../services/studentProfileService";
-import studentStatisticsService from "../../../services/studentStatisticsService";
-import userService from "../../../services/userService";
+import UserService from "../../../services/UserService";
+import getImageUrl from "../../../utils/imageUrl";
 
 import styles from "./StudentProfile.module.css";
 
+const DEFAULT_AVATAR = "/uploads/avatars/default-avatar.png";
+
 function StudentProfile() {
-  const [profile, setProfile] = useState(null);
-  const [statistics, setStatistics] = useState(null);
+  const [user, setUser] = useState(null);
+  const [level, setLevel] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [membership, setMembership] = useState(null);
+  const [weaknesses, setWeaknesses] = useState([]);
+  const [vocabulary, setVocabulary] = useState(null);
+  const [weeklyActivity, setWeeklyActivity] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   const [activeChartTooltip, setActiveChartTooltip] = useState(null);
 
+  // ============================================
+  // FETCH ALL
+  // ============================================
   const fetchAll = async () => {
     try {
       setLoading(true);
 
-      const [profileRes, statsRes] = await Promise.allSettled([
-        studentProfileService.getMyProfile(),
-        studentStatisticsService.getMyStatistics(),
+      const [
+        userRes,
+        levelRes,
+        statsRes,
+        membershipRes,
+        weaknessesRes,
+        vocabRes,
+        weeklyRes,
+      ] = await Promise.allSettled([
+        UserService.getProfile(),
+        studentProfileService.getLevel(),
+        studentProfileService.getStats(),
+        studentProfileService.getMembership(),
+        studentProfileService.getWeaknesses(),
+        studentProfileService.getVocabulary(),
+        studentProfileService.getWeeklyActivity(),
       ]);
 
-      if (profileRes.status === "fulfilled") {
-        setProfile(profileRes.value?.data?.data || null);
+      if (userRes.status === "fulfilled") {
+        setUser(userRes.value?.data?.data || null);
       } else {
-        console.error("Lỗi lấy profile:", profileRes.reason);
-        toast.error(
-          profileRes.reason?.response?.data?.message ||
-            "Không thể tải thông tin cá nhân.",
-        );
-        setProfile(null);
+        console.error("Lỗi user:", userRes.reason);
+        toast.error("Không thể tải thông tin cá nhân.");
       }
 
-      if (statsRes.status === "fulfilled") {
-        setStatistics(statsRes.value?.data?.data || null);
-      } else {
-        console.warn("Lỗi lấy thống kê:", statsRes.reason);
-        setStatistics(null);
-      }
+      if (levelRes.status === "fulfilled")
+        setLevel(levelRes.value?.data?.data || null);
+      if (statsRes.status === "fulfilled")
+        setStats(statsRes.value?.data?.data || null);
+      if (membershipRes.status === "fulfilled")
+        setMembership(membershipRes.value?.data?.data || null);
+      if (weaknessesRes.status === "fulfilled")
+        setWeaknesses(weaknessesRes.value?.data?.data || []);
+      if (vocabRes.status === "fulfilled")
+        setVocabulary(vocabRes.value?.data?.data || null);
+      if (weeklyRes.status === "fulfilled")
+        setWeeklyActivity(weeklyRes.value?.data?.data || []);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    let isMounted = true;
-
-    const load = async () => {
-      try {
-        setLoading(true);
-
-        const [profileRes, statsRes] = await Promise.allSettled([
-          studentProfileService.getMyProfile(),
-          studentStatisticsService.getMyStatistics(),
-        ]);
-
-        if (!isMounted) return;
-
-        if (profileRes.status === "fulfilled") {
-          setProfile(profileRes.value?.data?.data || null);
-        } else {
-          console.error("Lỗi lấy profile:", profileRes.reason);
-          toast.error(
-            profileRes.reason?.response?.data?.message ||
-              "Không thể tải thông tin cá nhân.",
-          );
-          setProfile(null);
-        }
-
-        if (statsRes.status === "fulfilled") {
-          setStatistics(statsRes.value?.data?.data || null);
-        } else {
-          console.warn("Lỗi lấy thống kê:", statsRes.reason);
-          setStatistics(null);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    load();
-
-    return () => {
-      isMounted = false;
-    };
+    fetchAll();
   }, []);
 
+  // ============================================
+  // HELPERS
+  // ============================================
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     return new Date(dateStr).toLocaleDateString("vi-VN", {
@@ -148,34 +137,26 @@ function StudentProfile() {
     return `${d.getDate()}/${d.getMonth() + 1}`;
   };
 
-  const buildWeeklyChartPoints = (weeklyActivity) => {
-    if (!weeklyActivity || weeklyActivity.length === 0) return [];
-
-    const CHART_LEFT = 40;
-    const CHART_RIGHT = 480;
-    const CHART_TOP = 20;
-    const CHART_BOTTOM = 170;
-
+  const buildWeeklyChartPoints = (weeklyData) => {
+    if (!weeklyData || weeklyData.length === 0) return [];
+    const CHART_LEFT = 40,
+      CHART_RIGHT = 480,
+      CHART_TOP = 20,
+      CHART_BOTTOM = 170;
     const chartWidth = CHART_RIGHT - CHART_LEFT;
     const chartHeight = CHART_BOTTOM - CHART_TOP;
-
-    const counts = weeklyActivity.map((d) => d.questionCount || 0);
+    const counts = weeklyData.map((d) => d.questionCount || 0);
     const maxCount = Math.max(...counts, 1);
     const yMax = maxCount * 1.2;
+    const N = weeklyData.length;
 
-    const N = weeklyActivity.length;
-
-    return weeklyActivity.map((day, index) => {
-      let x;
-      if (N === 1) {
-        x = (CHART_LEFT + CHART_RIGHT) / 2;
-      } else {
-        x = CHART_LEFT + (index * chartWidth) / (N - 1);
-      }
-
+    return weeklyData.map((day, index) => {
+      let x =
+        N === 1
+          ? (CHART_LEFT + CHART_RIGHT) / 2
+          : CHART_LEFT + (index * chartWidth) / (N - 1);
       const value = counts[index];
       const y = CHART_BOTTOM - (value / yMax) * chartHeight;
-
       return {
         x,
         y,
@@ -187,10 +168,7 @@ function StudentProfile() {
   };
 
   const buildWeeklyChartPaths = (chartPoints) => {
-    if (chartPoints.length === 0) {
-      return { linePath: "", areaPath: "" };
-    }
-
+    if (chartPoints.length === 0) return { linePath: "", areaPath: "" };
     if (chartPoints.length === 1) {
       const p = chartPoints[0];
       return {
@@ -198,20 +176,19 @@ function StudentProfile() {
         areaPath: `M ${p.x - 5} 170 L ${p.x - 5} ${p.y} L ${p.x + 5} ${p.y} L ${p.x + 5} 170 Z`,
       };
     }
-
     const linePath = "M " + chartPoints.map((p) => `${p.x} ${p.y}`).join(" L ");
-
     const first = chartPoints[0];
     const last = chartPoints[chartPoints.length - 1];
     const areaPath =
-      `M ${first.x} 170 ` +
-      `L ${first.x} ${first.y} ` +
+      `M ${first.x} 170 L ${first.x} ${first.y} ` +
       chartPoints.map((p) => `L ${p.x} ${p.y}`).join(" ") +
       ` L ${last.x} 170 Z`;
-
     return { linePath, areaPath };
   };
 
+  // ============================================
+  // LOADING
+  // ============================================
   if (loading) {
     return (
       <div className={styles.loadingWrapper}>
@@ -221,7 +198,7 @@ function StudentProfile() {
     );
   }
 
-  if (!profile || !profile.user) {
+  if (!user) {
     return (
       <div className={styles.loadingWrapper}>
         <p>Không có dữ liệu người dùng.</p>
@@ -232,51 +209,47 @@ function StudentProfile() {
     );
   }
 
-  const { user, membership } = profile;
-
-  const overview = statistics?.overview || {};
-  const levelRanking = statistics?.levelRanking || {};
-  const practice = statistics?.practice || {};
-  const listening = statistics?.listening || {};
-  const topErrors = statistics?.topErrors || [];
-  const weeklyActivity = statistics?.weeklyActivity || [];
-  const aiUsageStats = statistics?.aiUsage || {};
+  // ============================================
+  // DERIVED DATA
+  // ============================================
+  const levelData = level || {};
+  const statsData = stats || {};
+  const membershipData = membership || { hasMembership: false };
+  const vocabData = vocabulary || {};
+  const avatarUrl = user.avatarUrl || DEFAULT_AVATAR;
 
   const statItems = [
     {
       id: "xp",
       icon: faBolt,
       label: "Tổng XP",
-      value: (overview.totalXp || 0).toLocaleString("vi-VN"),
+      value: (statsData.totalXp || 0).toLocaleString("vi-VN"),
       color: "#0ea792",
       gradient: "linear-gradient(135deg, #0ea792, #0d9488)",
-      bg: "linear-gradient(135deg, #e9f8f5, #d4f3ef)",
     },
     {
       id: "accuracy",
       icon: faBullseye,
       label: "Độ chính xác",
-      value: `${practice.accuracyRate || 0}%`,
+      value: `${statsData.accuracyRate || 0}%`,
       color: "#f59e0b",
       gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
-      bg: "linear-gradient(135deg, #fffbeb, #fef3c7)",
     },
     {
       id: "ranking",
       icon: faTrophy,
       label: "Xếp hạng",
-      value: levelRanking.ranking ? `#${levelRanking.ranking}` : "N/A",
-      suffix: null,
+      value: statsData.ranking ? `#${statsData.ranking}` : "N/A",
+      sub: statsData.totalStudents ? `/ ${statsData.totalStudents}` : "",
       color: "#a855f7",
       gradient: "linear-gradient(135deg, #a855f7, #9333ea)",
-      bg: "linear-gradient(135deg, #faf5ff, #f3e8ff)",
     },
   ];
 
-  const aiUsage = membership?.aiUsage;
-  const aiLimit = aiUsage?.limit || 0;
-  const aiRemaining = aiUsage?.remaining || 0;
-  const aiPercent = aiUsage?.percent || 0;
+  const aiUsage = membershipData.aiUsage || {};
+  const aiLimit = aiUsage.limit || 0;
+  const aiRemaining = aiUsage.remaining || 0;
+  const aiPercent = aiUsage.percent || 0;
   const isUnlimited = aiLimit === 0;
   const isAiWarning = !isUnlimited && aiPercent >= 70;
   const isAiDanger = !isUnlimited && aiRemaining === 0;
@@ -299,54 +272,78 @@ function StudentProfile() {
 
   return (
     <div className={styles.wrapper}>
-      {/* HERO BANNER */}
+      {/* ============================================
+          HERO BANNER
+          ============================================ */}
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
-          <div className={styles.heroTag}>
-            <FontAwesomeIcon icon={faGraduationCap} />
-            <span>Hồ sơ học tập</span>
+          {/* Avatar */}
+          <div className={styles.heroAvatarWrapper}>
+            <div className={styles.heroAvatar}>
+              <img
+                src={getImageUrl(avatarUrl)}
+                alt={user.fullName}
+                onError={(e) => {
+                  e.target.src = getImageUrl(DEFAULT_AVATAR);
+                }}
+              />
+            </div>
+            <button
+              className={styles.avatarEditBtn}
+              onClick={() => setShowAvatarModal(true)}
+              title="Đổi ảnh đại diện"
+            >
+              <FontAwesomeIcon icon={faCamera} />
+            </button>
           </div>
 
-          <h1 className={styles.heroTitle}>{user.fullName}</h1>
+          <div className={styles.heroInfo}>
+            <div className={styles.heroTag}>
+              <FontAwesomeIcon icon={faGraduationCap} />
+              <span>Hồ sơ học tập</span>
+            </div>
 
-          <div className={styles.heroMeta}>
-            <span className={styles.heroMetaItem}>
-              <FontAwesomeIcon icon={faEnvelope} />
-              {user.email}
-            </span>
-            {user.gender && (
-              <span className={styles.heroMetaItem}>
-                <FontAwesomeIcon icon={faVenusMars} />
-                {user.gender}
-              </span>
-            )}
-            {user.dateOfBirth && (
-              <span className={styles.heroMetaItem}>
-                <FontAwesomeIcon icon={faCakeCandles} />
-                {formatDate(user.dateOfBirth)}
-              </span>
-            )}
-            <span className={styles.heroMetaItem}>
-              <FontAwesomeIcon icon={faCalendarAlt} />
-              Tham gia {formatDate(user.joinDate)}
-            </span>
-          </div>
+            <h1 className={styles.heroTitle}>{user.fullName}</h1>
 
-          <div className={styles.heroActions}>
-            <button
-              className={styles.heroBtnPrimary}
-              onClick={() => setShowEditModal(true)}
-            >
-              <FontAwesomeIcon icon={faPen} />
-              <span>Chỉnh sửa</span>
-            </button>
-            <button
-              className={styles.heroBtnGhost}
-              onClick={() => setShowPasswordModal(true)}
-            >
-              <FontAwesomeIcon icon={faLock} />
-              <span>Đổi mật khẩu</span>
-            </button>
+            <div className={styles.heroMeta}>
+              <span className={styles.heroMetaItem}>
+                <FontAwesomeIcon icon={faEnvelope} />
+                {user.email}
+              </span>
+              {user.gender && (
+                <span className={styles.heroMetaItem}>
+                  <FontAwesomeIcon icon={faVenusMars} />
+                  {user.gender}
+                </span>
+              )}
+              {user.dateOfBirth && (
+                <span className={styles.heroMetaItem}>
+                  <FontAwesomeIcon icon={faCakeCandles} />
+                  {formatDate(user.dateOfBirth)}
+                </span>
+              )}
+              <span className={styles.heroMetaItem}>
+                <FontAwesomeIcon icon={faCalendarAlt} />
+                Tham gia {formatDate(user.createdAt)}
+              </span>
+            </div>
+
+            <div className={styles.heroActions}>
+              <button
+                className={styles.heroBtnPrimary}
+                onClick={() => setShowEditModal(true)}
+              >
+                <FontAwesomeIcon icon={faPen} />
+                <span>Chỉnh sửa</span>
+              </button>
+              <button
+                className={styles.heroBtnGhost}
+                onClick={() => setShowPasswordModal(true)}
+              >
+                <FontAwesomeIcon icon={faLock} />
+                <span>Đổi mật khẩu</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -354,37 +351,35 @@ function StudentProfile() {
         <div className={styles.heroLevelBox}>
           <div className={styles.levelBoxHeader}>
             <div className={styles.levelIconSmall}>
-              <span>{levelRanking.level || 1}</span>
+              <span>{levelData.level || 1}</span>
             </div>
             <div>
               <span className={styles.levelBoxLabel}>
-                LEVEL {levelRanking.level || 1}
+                LEVEL {levelData.level || 1}
               </span>
               <span className={styles.levelBoxTitle}>
-                {levelRanking.titleEmoji} {levelRanking.title}
+                {levelData.titleEmoji} {levelData.title}
               </span>
             </div>
           </div>
 
           <div className={styles.levelBoxProgress}>
             <div className={styles.levelBoxProgressHeader}>
-              <span>Tiến độ lên Level {(levelRanking.level || 1) + 1}</span>
-              <strong>{levelRanking.progressPercent || 0}%</strong>
+              <span>Tiến độ lên Level {(levelData.level || 1) + 1}</span>
+              <strong>{levelData.progressPercent || 0}%</strong>
             </div>
             <div className={styles.levelBoxTrack}>
               <div
                 className={styles.levelBoxFill}
-                style={{ width: `${levelRanking.progressPercent || 0}%` }}
-              >
-                <div className={styles.shimmer} />
-              </div>
+                style={{ width: `${levelData.progressPercent || 0}%` }}
+              />
             </div>
             <div className={styles.levelBoxFooter}>
               <FontAwesomeIcon icon={faArrowUp} />
               <span>
                 Còn{" "}
                 <strong>
-                  {(levelRanking.xpRemaining || 0).toLocaleString("vi-VN")} XP
+                  {(levelData.xpRemaining || 0).toLocaleString("vi-VN")} XP
                 </strong>
               </span>
             </div>
@@ -392,7 +387,9 @@ function StudentProfile() {
         </div>
       </section>
 
-      {/* STATS GRID */}
+      {/* ============================================
+          STATS GRID
+          ============================================ */}
       <section className={styles.statsGrid}>
         {statItems.map((item) => (
           <div key={item.id} className={styles.statCard}>
@@ -411,22 +408,20 @@ function StudentProfile() {
                 >
                   {item.value}
                 </span>
-                {item.suffix && (
-                  <span className={styles.statSuffix}>{item.suffix}</span>
+                {item.sub && (
+                  <span className={styles.statSuffix}>{item.sub}</span>
                 )}
               </div>
             </div>
-            <div
-              className={styles.statDecorCircle}
-              style={{ background: item.bg }}
-            />
           </div>
         ))}
       </section>
 
-      {/* GRID 2x2 */}
+      {/* ============================================
+          DASHBOARD GRID
+          ============================================ */}
       <section className={styles.dashboardGrid}>
-        {/* 1. Membership */}
+        {/* 1. Membership — GIỮ NGUYÊN */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -442,18 +437,20 @@ function StudentProfile() {
             </div>
           </div>
 
-          {membership.hasMembership ? (
+          {membershipData.hasMembership ? (
             <div className={styles.membershipContent}>
               <div className={styles.membershipTop}>
-                <h4 className={styles.packageName}>{membership.packageName}</h4>
+                <h4 className={styles.packageName}>
+                  {membershipData.packageName}
+                </h4>
                 <span
                   className={`${styles.statusBadge} ${
-                    membership.remainingDays <= 7
+                    membershipData.remainingDays <= 7
                       ? styles.statusWarning
                       : styles.statusActive
                   }`}
                 >
-                  {membership.remainingDays <= 7
+                  {membershipData.remainingDays <= 7
                     ? "Sắp hết hạn"
                     : "Đang hoạt động"}
                 </span>
@@ -463,13 +460,13 @@ function StudentProfile() {
                 <div className={styles.membershipInfoItem}>
                   <span className={styles.membershipInfoLabel}>Hết hạn</span>
                   <span className={styles.membershipInfoValue}>
-                    {formatDate(membership.endDate)}
+                    {formatDate(membershipData.endDate)}
                   </span>
                 </div>
                 <div className={styles.membershipInfoItem}>
                   <span className={styles.membershipInfoLabel}>Còn lại</span>
                   <span className={styles.membershipInfoValueHighlight}>
-                    {membership.remainingDays} ngày
+                    {membershipData.remainingDays} ngày
                   </span>
                 </div>
               </div>
@@ -523,7 +520,7 @@ function StudentProfile() {
           )}
         </div>
 
-        {/* 2. Weekly Activity */}
+        {/* 2. Weekly Activity — GIỮ NGUYÊN */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -684,7 +681,7 @@ function StudentProfile() {
           )}
         </div>
 
-        {/* 3. AI Stats */}
+        {/* 3. AI Stats — CẢI TIẾN */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -705,7 +702,7 @@ function StudentProfile() {
               </div>
               <div className={styles.aiStatNewInfo}>
                 <span className={styles.aiStatNewValue}>
-                  {practice.completedSessions || 0}
+                  {statsData.completedSessions || 0}
                 </span>
                 <span className={styles.aiStatNewLabel}>Buổi hoàn thành</span>
               </div>
@@ -717,7 +714,7 @@ function StudentProfile() {
               </div>
               <div className={styles.aiStatNewInfo}>
                 <span className={styles.aiStatNewValue}>
-                  {practice.totalQuestions || 0}
+                  {statsData.totalAiAnswers || 0}
                 </span>
                 <span className={styles.aiStatNewLabel}>Câu hỏi đã làm</span>
               </div>
@@ -729,7 +726,7 @@ function StudentProfile() {
               </div>
               <div className={styles.aiStatNewInfo}>
                 <span className={styles.aiStatNewValue}>
-                  {practice.averageScore || 0}
+                  {statsData.avgAiScore || 0}
                 </span>
                 <span className={styles.aiStatNewLabel}>Điểm trung bình</span>
               </div>
@@ -741,9 +738,11 @@ function StudentProfile() {
               </div>
               <div className={styles.aiStatNewInfo}>
                 <span className={styles.aiStatNewValue}>
-                  {aiUsageStats.totalRequests || 0}
+                  {aiUsage.used || 0}
                 </span>
-                <span className={styles.aiStatNewLabel}>Lượt gọi AI</span>
+                <span className={styles.aiStatNewLabel}>
+                  Lượt gọi AI hôm nay
+                </span>
               </div>
             </div>
           </div>
@@ -759,26 +758,32 @@ function StudentProfile() {
               <div className={styles.listeningCompactItem}>
                 <span className={styles.listeningCompactLabel}>Tổng câu</span>
                 <span className={styles.listeningCompactValue}>
-                  {listening.totalAnswers || 0}
+                  {statsData.totalListeningAnswers || 0}
                 </span>
               </div>
               <div className={styles.listeningCompactItem}>
                 <span className={styles.listeningCompactLabel}>Đúng</span>
                 <span className={styles.listeningCompactValueGreen}>
-                  {listening.correctAnswers || 0}
+                  {statsData.totalListeningCorrect || 0}
                 </span>
               </div>
               <div className={styles.listeningCompactItem}>
                 <span className={styles.listeningCompactLabel}>Chính xác</span>
                 <span className={styles.listeningCompactValueHighlight}>
-                  {listening.accuracyRate || 0}%
+                  {statsData.totalListeningAnswers > 0
+                    ? Math.round(
+                        (statsData.totalListeningCorrect * 100) /
+                          statsData.totalListeningAnswers,
+                      )
+                    : 0}
+                  %
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 4. ✅ ERROR IMPROVE - CARD MỚI */}
+        {/* 4. Error Improve — CẢI TIẾN */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -788,18 +793,18 @@ function StudentProfile() {
               <div>
                 <h3 className={styles.cardTitle}>Cần Cải Thiện</h3>
                 <p className={styles.cardSubtitle}>
-                  {topErrors.length > 0
-                    ? `${topErrors.length} lỗi cần tập trung`
+                  {weaknesses.length > 0
+                    ? `${weaknesses.length} lỗi cần tập trung`
                     : "Lỗi ngữ pháp cần chú ý"}
                 </p>
               </div>
             </div>
-            {topErrors.length > 0 && (
-              <span className={styles.countBadge}>{topErrors.length}</span>
+            {weaknesses.length > 0 && (
+              <span className={styles.countBadge}>{weaknesses.length}</span>
             )}
           </div>
 
-          {topErrors.length === 0 ? (
+          {weaknesses.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyIconGreen}>
                 <FontAwesomeIcon icon={faCheckCircle} />
@@ -811,7 +816,7 @@ function StudentProfile() {
             </div>
           ) : (
             <div className={styles.errorImproveList}>
-              {topErrors.map((error, index) => (
+              {weaknesses.map((error, index) => (
                 <ErrorImproveCard key={index} error={error} index={index + 1} />
               ))}
             </div>
@@ -834,6 +839,22 @@ function StudentProfile() {
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
         onSuccess={() => setShowPasswordModal(false)}
+      />
+
+      <AvatarUploadModal
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+        currentAvatar={avatarUrl}
+        onSuccess={(data) => {
+          if (data?.avatarUrl) {
+            setUser({ ...user, avatarUrl: data.avatarUrl });
+            window.dispatchEvent(
+              new CustomEvent("avatar-updated", {
+                detail: { avatarUrl: data.avatarUrl },
+              }),
+            );
+          }
+        }}
       />
     </div>
   );
@@ -869,13 +890,6 @@ function ErrorImproveCard({ error, index }) {
     return map[severity] || map.MEDIUM;
   };
 
-  const getMasteryColor = (score) => {
-    if (score < 20) return "#dc2626";
-    if (score < 50) return "#f59e0b";
-    if (score < 80) return "#3b82f6";
-    return "#16a34a";
-  };
-
   const getTrendConfig = (trend) => {
     const map = {
       UP: { icon: faArrowUp, color: "#dc2626", label: "Đang tăng" },
@@ -886,12 +900,7 @@ function ErrorImproveCard({ error, index }) {
   };
 
   const severityConfig = getSeverityConfig(error.severity);
-  const masteryColor = getMasteryColor(error.masteryScore || 0);
   const trendConfig = getTrendConfig(error.trend);
-
-  const handlePractice = () => {
-    window.location.href = `/dashboard/student/ai-practice?focusError=${error.errorSubtype}`;
-  };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
@@ -910,7 +919,6 @@ function ErrorImproveCard({ error, index }) {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-
     if (diffMins < 1) return "vừa xong";
     if (diffMins < 60) return `${diffMins} phút trước`;
     if (diffHours < 24) return `${diffHours} giờ trước`;
@@ -923,7 +931,6 @@ function ErrorImproveCard({ error, index }) {
       className={styles.errorImproveCard}
       style={{ "--severity-color": severityConfig.text }}
     >
-      {/* HEADER */}
       <div
         className={styles.errorImproveHeader}
         onClick={() => setIsExpanded(!isExpanded)}
@@ -945,7 +952,7 @@ function ErrorImproveCard({ error, index }) {
 
           <div className={styles.errorImproveMeta}>
             <span className={styles.errorImproveCount}>
-              <strong>{error.count}</strong> lần mắc lỗi
+              <strong>{error.occurrenceCount}</strong> lần mắc lỗi
             </span>
             <span className={styles.errorImproveDot}>•</span>
             <span
@@ -970,26 +977,25 @@ function ErrorImproveCard({ error, index }) {
         </button>
       </div>
 
-      {/* MASTERY PROGRESS BAR */}
-
-      {/* EXPANDED CONTENT */}
       {isExpanded && (
         <div className={styles.errorImproveExpanded}>
-          {error.description && (
+          {error.explanation && (
             <div className={styles.errorImproveSection}>
               <span className={styles.errorImproveSectionLabel}>
                 Giải thích
               </span>
               <p className={styles.errorImproveSectionText}>
-                {error.description}
+                {error.explanation}
               </p>
             </div>
           )}
 
-          {error.example && (
+          {error.exampleWrong && error.exampleCorrect && (
             <div className={styles.errorImproveSection}>
               <span className={styles.errorImproveSectionLabel}>Ví dụ</span>
-              <div className={styles.errorImproveExample}>{error.example}</div>
+              <div className={styles.errorImproveExample}>
+                ❌ {error.exampleWrong} → ✅ {error.exampleCorrect}
+              </div>
             </div>
           )}
 
@@ -1014,7 +1020,199 @@ function ErrorImproveCard({ error, index }) {
 }
 
 // =====================================================
-// EDIT PROFILE MODAL
+// AVATAR UPLOAD MODAL (TẠO MỚI)
+// =====================================================
+function AvatarUploadModal({ isOpen, onClose, currentAvatar, onSuccess }) {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setIsUploading(false);
+      setIsRemoving(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  if (!isOpen) return null;
+
+  const handleSelectFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Ảnh không được vượt quá 2MB");
+      return;
+    }
+
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP");
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+    try {
+      setIsUploading(true);
+      const res = await UserService.uploadAvatar(selectedFile);
+      const data = res?.data?.data;
+      toast.success("Cập nhật ảnh đại diện thành công!");
+      onSuccess?.(data);
+      onClose();
+    } catch (error) {
+      console.error("Lỗi upload avatar:", error);
+      toast.error(
+        error.response?.data?.message || "Không thể cập nhật ảnh đại diện.",
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!window.confirm("Bạn có chắc muốn xóa ảnh đại diện?")) return;
+    try {
+      setIsRemoving(true);
+      const res = await UserService.removeAvatar();
+      const data = res?.data?.data;
+      toast.success("Đã xóa ảnh đại diện!");
+      onSuccess?.(data);
+      onClose();
+    } catch (error) {
+      console.error("Lỗi xóa avatar:", error);
+      toast.error(error.response?.data?.message || "Không thể xóa ảnh.");
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
+  const displayAvatar = previewUrl || getImageUrl(currentAvatar);
+
+  return (
+    <div className={styles.backdrop} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <div className={styles.modalHeaderLeft}>
+            <div className={styles.modalIconBox}>
+              <FontAwesomeIcon icon={faCamera} />
+            </div>
+            <div>
+              <h2 className={styles.modalTitle}>Ảnh đại diện</h2>
+              <p className={styles.modalSubtitle}>Cập nhật ảnh của bạn</p>
+            </div>
+          </div>
+          <button className={styles.modalCloseBtn} onClick={onClose}>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+        </div>
+
+        <div className={styles.modalBody}>
+          <div className={styles.avatarUploadPreview}>
+            <div className={styles.avatarPreviewCircle}>
+              <img
+                src={displayAvatar}
+                alt="Avatar"
+                onError={(e) => {
+                  e.target.src = getImageUrl(DEFAULT_AVATAR);
+                }}
+              />
+              {selectedFile && (
+                <div className={styles.newAvatarBadge}>Ảnh mới</div>
+              )}
+            </div>
+            <p className={styles.avatarHint}>
+              {selectedFile
+                ? selectedFile.name
+                : "Chọn ảnh để thay đổi (tối đa 2MB)"}
+            </p>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            onChange={handleSelectFile}
+            style={{ display: "none" }}
+          />
+
+          <div className={styles.avatarActions}>
+            <button
+              className={styles.avatarSelectBtn}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading || isRemoving}
+            >
+              <FontAwesomeIcon icon={faCamera} />
+              {selectedFile ? "Chọn ảnh khác" : "Chọn ảnh"}
+            </button>
+            <button
+              className={styles.avatarRemoveBtn}
+              onClick={handleRemove}
+              disabled={isUploading || isRemoving}
+            >
+              {isRemoving ? (
+                <FontAwesomeIcon icon={faSpinner} spin />
+              ) : (
+                <FontAwesomeIcon icon={faTrashCan} />
+              )}
+              Xóa ảnh
+            </button>
+          </div>
+        </div>
+
+        {selectedFile && (
+          <div className={styles.modalFooter}>
+            <button
+              className={styles.cancelBtn}
+              onClick={() => {
+                setSelectedFile(null);
+                setPreviewUrl(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }}
+              disabled={isUploading}
+            >
+              Hủy
+            </button>
+            <button
+              className={styles.submitBtn}
+              onClick={handleUpload}
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <>
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                  <span>Đang lưu...</span>
+                </>
+              ) : (
+                <>
+                  <FontAwesomeIcon icon={faSave} />
+                  <span>Lưu ảnh</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// =====================================================
+// EDIT PROFILE MODAL (giữ nguyên)
 // =====================================================
 function EditProfileModal({ isOpen, user, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -1046,7 +1244,6 @@ function EditProfileModal({ isOpen, user, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const newErrors = {};
     if (!formData.fullName.trim()) newErrors.fullName = "Vui lòng nhập họ tên";
     setErrors(newErrors);
@@ -1054,7 +1251,7 @@ function EditProfileModal({ isOpen, user, onClose, onSuccess }) {
 
     try {
       setIsSubmitting(true);
-      await userService.updateProfile({
+      await UserService.updateProfile({
         fullName: formData.fullName.trim(),
         gender: formData.gender || null,
         dateOfBirth: formData.dateOfBirth || null,
@@ -1120,9 +1317,7 @@ function EditProfileModal({ isOpen, user, onClose, onSuccess }) {
             <input
               type="text"
               name="fullName"
-              className={`${styles.formInput} ${
-                errors.fullName ? styles.inputError : ""
-              }`}
+              className={`${styles.formInput} ${errors.fullName ? styles.inputError : ""}`}
               value={formData.fullName}
               onChange={handleChange}
               placeholder="Nhập họ và tên"
@@ -1210,7 +1405,7 @@ function EditProfileModal({ isOpen, user, onClose, onSuccess }) {
 }
 
 // =====================================================
-// CHANGE PASSWORD MODAL
+// CHANGE PASSWORD MODAL (giữ nguyên)
 // =====================================================
 function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -1248,7 +1443,6 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const newErrors = {};
     if (!formData.oldPassword)
       newErrors.oldPassword = "Vui lòng nhập mật khẩu hiện tại";
@@ -1277,16 +1471,12 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
 
     try {
       setIsSubmitting(true);
-      await userService.changePassword({
+      await UserService.changePassword({
         oldPassword: formData.oldPassword,
         newPassword: formData.newPassword,
       });
       toast.success("Đổi mật khẩu thành công!");
-      setFormData({
-        oldPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      setFormData({ oldPassword: "", newPassword: "", confirmPassword: "" });
       onSuccess?.();
     } catch (error) {
       toast.error(error.response?.data?.message || "Không thể đổi mật khẩu.");
@@ -1346,9 +1536,7 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
               <input
                 type={showPasswords.old ? "text" : "password"}
                 name="oldPassword"
-                className={`${styles.formInput} ${
-                  errors.oldPassword ? styles.inputError : ""
-                }`}
+                className={`${styles.formInput} ${errors.oldPassword ? styles.inputError : ""}`}
                 value={formData.oldPassword}
                 onChange={handleChange}
                 placeholder="Nhập mật khẩu hiện tại"
@@ -1379,9 +1567,7 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
               <input
                 type={showPasswords.new ? "text" : "password"}
                 name="newPassword"
-                className={`${styles.formInput} ${
-                  errors.newPassword ? styles.inputError : ""
-                }`}
+                className={`${styles.formInput} ${errors.newPassword ? styles.inputError : ""}`}
                 value={formData.newPassword}
                 onChange={handleChange}
                 placeholder="Nhập mật khẩu mới"
@@ -1428,9 +1614,7 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
                   ].map((item) => (
                     <div
                       key={item.key}
-                      className={`${styles.checkItem} ${
-                        checks[item.key] ? styles.checkPassed : ""
-                      }`}
+                      className={`${styles.checkItem} ${checks[item.key] ? styles.checkPassed : ""}`}
                     >
                       <FontAwesomeIcon icon={faCheckCircle} />
                       <span>{item.label}</span>
@@ -1454,9 +1638,7 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
               <input
                 type={showPasswords.confirm ? "text" : "password"}
                 name="confirmPassword"
-                className={`${styles.formInput} ${
-                  errors.confirmPassword ? styles.inputError : ""
-                }`}
+                className={`${styles.formInput} ${errors.confirmPassword ? styles.inputError : ""}`}
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Nhập lại mật khẩu mới"

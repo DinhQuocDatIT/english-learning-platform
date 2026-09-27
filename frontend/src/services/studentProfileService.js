@@ -1,18 +1,34 @@
 import axiosClient from "../api/axiosClient";
 
 const studentProfileService = {
-  getMyProfile() {
-    return axiosClient.get("/v1/student-profile/me");
+  // Level info
+  getLevel() {
+    return axiosClient.get("/v1/student-profile/me/level");
   },
 
-  // Cập nhật thông tin
-  updateProfile(data) {
-    return axiosClient.put("/v1/users/me", data);
+  // Stats tổng hợp
+  getStats() {
+    return axiosClient.get("/v1/student-profile/me/stats");
   },
 
-  // Đổi mật khẩu
-  changePassword(data) {
-    return axiosClient.put("/v1/users/me/change-password", data);
+  // Membership
+  getMembership() {
+    return axiosClient.get("/v1/student-profile/me/membership");
+  },
+
+  // Weaknesses
+  getWeaknesses() {
+    return axiosClient.get("/v1/student-profile/me/weaknesses");
+  },
+
+  // Vocabulary
+  getVocabulary() {
+    return axiosClient.get("/v1/student-profile/me/vocabulary");
+  },
+
+  // Weekly activity
+  getWeeklyActivity() {
+    return axiosClient.get("/v1/student-profile/me/weekly-activity");
   },
 };
 

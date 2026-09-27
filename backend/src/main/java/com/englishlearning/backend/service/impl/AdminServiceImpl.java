@@ -126,12 +126,12 @@ public class AdminServiceImpl implements AdminService {
         );
         return PageResponse.<UserResponse>builder()
                 .content(
-                users
-                        .getContent()
-                        .stream()
-                        .map(userMapper::toResponse)
-                        .toList()
-        )
+                        users
+                                .getContent()
+                                .stream()
+                                .map(userMapper::toResponse)
+                                .toList()
+                )
                 .currentPage(users.getNumber())
                 .pageSize(users.getSize())
                 .totalElements(users.getTotalElements())

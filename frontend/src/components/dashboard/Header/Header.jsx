@@ -13,6 +13,7 @@ import AuthStorage from "../../../services/AuthStorage";
 import VocabularySearchDropdown from "../../vocabulary/VocabularySearchDropdown/VocabularySearchDropdown";
 import StreakBadge from "../../StreakBadge/StreakBadge";
 import streakService from "../../../services/streakService";
+import UserService from "../../../services/UserService";
 import getImageUrl from "../../../utils/imageUrl";
 
 const roleLabels = {
@@ -34,16 +35,48 @@ const Header = ({ onToggleSidebar, isSidebarOpen }) => {
   // ✅ Streak state
   const [currentStreak, setCurrentStreak] = useState(0);
 
+  // ✅ Avatar state
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || DEFAULT_AVATAR);
+
   const role = AuthStorage.getRole();
   const isStudent = role?.toUpperCase() === "STUDENT";
-
-  // ✅ Avatar URL — dùng từ user, fallback default
-  const avatarUrl = user?.avatarUrl || DEFAULT_AVATAR;
 
   const handleLogout = () => {
     AuthStorage.removeAuth();
     window.location.href = "/";
   };
+
+  // ✅ Fetch profile để lấy avatarUrl mới nhất
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await UserService.getProfile();
+        const data = res?.data?.data;
+        if (data?.avatarUrl) {
+          setAvatarUrl(data.avatarUrl);
+        }
+      } catch (err) {
+        console.error("Lỗi lấy profile:", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  // ✅ Listen event khi user đổi avatar ở trang Profile
+  useEffect(() => {
+    const handleAvatarUpdate = (e) => {
+      if (e.detail?.avatarUrl) {
+        setAvatarUrl(e.detail.avatarUrl);
+      }
+    };
+
+    window.addEventListener("avatar-updated", handleAvatarUpdate);
+
+    return () => {
+      window.removeEventListener("avatar-updated", handleAvatarUpdate);
+    };
+  }, []);
 
   // ✅ Load streak khi mount
   useEffect(() => {
