@@ -3,6 +3,7 @@ package com.englishlearning.backend.service.grammar;
 import com.englishlearning.backend.dto.grammar.request.GrammarRoadmapRequest;
 import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
+import com.englishlearning.backend.dto.grammar.response.GrammarTopicReviewResponse;
 
 import java.util.List;
 
@@ -18,6 +19,10 @@ public interface GrammarAdminService {
     // Topic
     List<GrammarTopicResponse> getTopicsByRoadmap(Long roadmapId);
     GrammarTopicResponse getTopicById(Long topicId);
-    GrammarTopicResponse publishTopic(Long topicId);
-    GrammarTopicResponse unpublishTopic(Long topicId);
+    GrammarTopicResponse publishTopic(Long adminId, Long topicId);
+    GrammarTopicResponse unpublishTopic(Long adminId, Long topicId);
+    GrammarTopicResponse rejectTopic(Long adminId, Long topicId, String reason);
+
+    // Review history
+    List<GrammarTopicReviewResponse> getTopicHistory(Long topicId);
 }

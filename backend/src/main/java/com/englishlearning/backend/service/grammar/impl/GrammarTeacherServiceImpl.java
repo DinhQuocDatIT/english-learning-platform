@@ -6,9 +6,12 @@ import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTheoryResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicDetailResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
+import com.englishlearning.backend.dto.grammar.response.GrammarTopicReviewResponse;
 import com.englishlearning.backend.entity.GrammarRoadmap;
 import com.englishlearning.backend.entity.GrammarTheory;
 import com.englishlearning.backend.entity.GrammarTopic;
+import com.englishlearning.backend.entity.User;
+import com.englishlearning.backend.enums.GrammarReviewAction;
 import com.englishlearning.backend.enums.GrammarStatus;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
@@ -17,6 +20,7 @@ import com.englishlearning.backend.repository.GrammarTheoryRepository;
 import com.englishlearning.backend.repository.GrammarTopicRepository;
 import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.service.grammar.GrammarTeacherService;
+import com.englishlearning.backend.service.grammar.GrammarTopicReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,6 +42,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     private final GrammarTopicRepository topicRepository;
     private final GrammarTheoryRepository theoryRepository;
     private final UserRepository userRepository;
+    private final GrammarTopicReviewService reviewService;
     private final ObjectMapper objectMapper;
 
     // =====================================================
@@ -205,7 +210,33 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         }
         theoryRepository.saveAll(theories);
 
+        // 📝 Ghi lịch sử duyệt
+        User teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
+        reviewService.log(topic, GrammarReviewAction.SUBMIT, null, teacher);
+
+        log.info("📤 Teacher {} đã gửi duyệt topic id={}", teacherId, topicId);
         return toTopicResponse(topic);
+    }
+
+    // =====================================================
+    // REVIEW HISTORY
+    // =====================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GrammarTopicReviewResponse> getTopicHistory(Long teacherId, Long topicId) {
+        GrammarTopic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
+
+        // Teacher chỉ xem history của topic do mình tạo
+        // (Admin cũng gọi endpoint này qua cùng controller — vẫn phải check vì
+        //  Admin có thể tạo topic nên createdBy = adminId, khớp luôn)
+        if (!topic.getCreatedBy().getId().equals(teacherId)) {
+            throw new BusinessException("Bạn không có quyền xem lịch sử chủ điểm này");
+        }
+
+        return reviewService.getHistory(topicId);
     }
 
     // =====================================================

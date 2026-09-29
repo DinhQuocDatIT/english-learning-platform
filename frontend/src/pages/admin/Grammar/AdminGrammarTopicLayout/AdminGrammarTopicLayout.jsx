@@ -11,6 +11,7 @@ import {
   faCheck,
   faXmark,
   faClock,
+  faHistory,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
@@ -18,14 +19,16 @@ import {
   getStatusLabel,
   getStatusColor,
 } from "../../../../constants/grammarConstants";
+import GrammarRejectForm from "../../../../components/GrammarRejectForm/GrammarRejectForm";
 import styles from "./AdminGrammarTopicLayout.module.css";
 
-// 4 tab cho Admin duyệt
+// 5 tab cho Admin duyệt
 const TABS = [
   { key: "theory", path: "theory", label: "Lý thuyết", icon: faBookOpen },
   { key: "tip", path: "tips", label: "Mẹo", icon: faLightbulb },
   { key: "example", path: "examples", label: "Ví dụ", icon: faStar },
   { key: "quiz", path: "quiz", label: "Trắc nghiệm", icon: faQuestionCircle },
+  { key: "history", path: "history", label: "Lịch sử duyệt", icon: faHistory },
 ];
 
 function AdminGrammarTopicLayout() {
@@ -36,6 +39,8 @@ function AdminGrammarTopicLayout() {
   const [topic, setTopic] = useState(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
 
   useEffect(() => {
     fetchTopic();
@@ -100,14 +105,23 @@ function AdminGrammarTopicLayout() {
     }
   };
 
-  const handleReject = async () => {
-    const reason = window.prompt(
-      `Từ chối chủ điểm "${topic?.name}"?\n\nNhập lý do (không bắt buộc):`,
-      "",
-    );
-    if (reason === null) return;
+  // ===== REJECT =====
+  const handleOpenReject = () => {
+    setRejectModalOpen(true);
+  };
 
-    toast.info("Chức năng Từ chối chưa triển khai.");
+  const handleConfirmReject = async (reason) => {
+    try {
+      setRejecting(true);
+      await grammarService.adminRejectTopic(topicId, reason);
+      toast.success("Đã từ chối chủ điểm!");
+      setRejectModalOpen(false);
+      fetchTopic();
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Không thể từ chối.");
+    } finally {
+      setRejecting(false);
+    }
   };
 
   const handleUnpublish = async () => {
@@ -171,7 +185,7 @@ function AdminGrammarTopicLayout() {
             <>
               <button
                 className={`${styles.actionBtn} ${styles.rejectBtn}`}
-                onClick={handleReject}
+                onClick={handleOpenReject}
               >
                 <FontAwesomeIcon icon={faXmark} />
                 <span>Từ chối</span>
@@ -215,7 +229,7 @@ function AdminGrammarTopicLayout() {
           <FontAwesomeIcon icon={faClock} />
           <span>
             Chủ điểm này đang chờ duyệt. Vui lòng xem kỹ{" "}
-            <strong>4 tab bên dưới</strong> trước khi publish.
+            <strong>4 tab nội dung</strong> trước khi publish.
           </span>
         </div>
       )}
@@ -252,6 +266,15 @@ function AdminGrammarTopicLayout() {
           <Outlet context={{ topic, topicId, onRefresh: fetchTopic }} />
         </div>
       </div>
+
+      {/* REJECT MODAL */}
+      <GrammarRejectForm
+        isOpen={rejectModalOpen}
+        onClose={() => setRejectModalOpen(false)}
+        onSubmit={handleConfirmReject}
+        isLoading={rejecting}
+        title="Từ chối chủ điểm ngữ pháp"
+      />
     </div>
   );
 }

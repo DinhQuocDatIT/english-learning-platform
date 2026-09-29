@@ -2,10 +2,7 @@ package com.englishlearning.backend.service.grammar;
 
 import com.englishlearning.backend.dto.grammar.request.GrammarTheoryCreateRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTopicRequest;
-import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
-import com.englishlearning.backend.dto.grammar.response.GrammarTheoryResponse;
-import com.englishlearning.backend.dto.grammar.response.GrammarTopicDetailResponse;
-import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
+import com.englishlearning.backend.dto.grammar.response.*;
 
 import java.util.List;
 
@@ -31,4 +28,7 @@ public interface GrammarTeacherService {
     GrammarTheoryResponse updateTheory(Long teacherId, Long theoryId,
                                        GrammarTheoryCreateRequest request);
     void deleteTheory(Long teacherId, Long theoryId);
+
+    // Review history (MỚI)
+    List<GrammarTopicReviewResponse> getTopicHistory(Long teacherId, Long topicId);
 }

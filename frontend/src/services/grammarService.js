@@ -51,6 +51,11 @@ const GrammarService = {
     return axiosClient.post(`/v1/teacher/grammar/topics/${topicId}/submit`);
   },
 
+  // ⭐ MỚI — Teacher xem lịch sử duyệt topic của mình
+  teacherGetTopicHistory(topicId) {
+    return axiosClient.get(`/v1/teacher/grammar/topics/${topicId}/history`);
+  },
+
   // =====================================================
   // TEACHER — THEORY
   // =====================================================
@@ -117,6 +122,18 @@ const GrammarService = {
 
   adminUnpublishTopic(topicId) {
     return axiosClient.post(`/v1/admin/grammar/topics/${topicId}/unpublish`);
+  },
+
+  // ⭐ MỚI — Admin từ chối topic (kèm lý do)
+  adminRejectTopic(topicId, reason) {
+    return axiosClient.post(`/v1/admin/grammar/topics/${topicId}/reject`, {
+      reason,
+    });
+  },
+
+  // ⭐ MỚI — Admin xem lịch sử duyệt topic
+  adminGetTopicHistory(topicId) {
+    return axiosClient.get(`/v1/admin/grammar/topics/${topicId}/history`);
   },
 };
 

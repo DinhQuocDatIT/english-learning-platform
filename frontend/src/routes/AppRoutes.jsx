@@ -73,6 +73,7 @@ import AdminGrammarTheory from "../pages/admin/Grammar/AdminGrammarTopicLayout/A
 import AdminGrammarTip from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarTip/AdminGrammarTip";
 import AdminGrammarExample from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarExample/AdminGrammarExample";
 import AdminGrammarQuiz from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarQuiz/AdminGrammarQuiz";
+import AdminGrammarTopicHistory from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarTopicHistory/AdminGrammarTopicLayout";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -282,7 +283,7 @@ function AppRoutes() {
               element={<AdminGrammarTopicList />}
             />
 
-            {/* Nested layout — 4 tab (Lý thuyết / Mẹo / Ví dụ / Trắc nghiệm) */}
+            {/* Nested layout — 5 tab (Lý thuyết / Mẹo / Ví dụ / Trắc nghiệm / Lịch sử duyệt) */}
             <Route
               path="grammar/topics/:topicId"
               element={<AdminGrammarTopicLayout />}
@@ -292,6 +293,7 @@ function AppRoutes() {
               <Route path="tips" element={<AdminGrammarTip />} />
               <Route path="examples" element={<AdminGrammarExample />} />
               <Route path="quiz" element={<AdminGrammarQuiz />} />
+              <Route path="history" element={<AdminGrammarTopicHistory />} />
             </Route>
           </Route>
         </Route>

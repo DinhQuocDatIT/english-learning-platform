@@ -3,16 +3,21 @@ package com.englishlearning.backend.service.grammar.impl;
 import com.englishlearning.backend.dto.grammar.request.GrammarRoadmapRequest;
 import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
+import com.englishlearning.backend.dto.grammar.response.GrammarTopicReviewResponse;
 import com.englishlearning.backend.entity.GrammarRoadmap;
 import com.englishlearning.backend.entity.GrammarTheory;
 import com.englishlearning.backend.entity.GrammarTopic;
+import com.englishlearning.backend.entity.User;
+import com.englishlearning.backend.enums.GrammarReviewAction;
 import com.englishlearning.backend.enums.GrammarStatus;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.GrammarRoadmapRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
 import com.englishlearning.backend.repository.GrammarTopicRepository;
+import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.service.grammar.GrammarAdminService;
+import com.englishlearning.backend.service.grammar.GrammarTopicReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +35,8 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
     private final GrammarRoadmapRepository roadmapRepository;
     private final GrammarTopicRepository topicRepository;
     private final GrammarTheoryRepository theoryRepository;
+    private final UserRepository userRepository;
+    private final GrammarTopicReviewService reviewService;
 
     // =====================================================
     // ROADMAP
@@ -102,15 +109,14 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         if (topicCount > 0) {
             throw new BusinessException(
                     "Không thể xóa vì lộ trình đang có " + topicCount + " chủ điểm. " +
-                            "Vui lòng xóa các chủ điểm trước."
-            );
+                            "Vui lòng xóa các chủ điểm trước.");
         }
 
         roadmapRepository.delete(roadmap);
     }
 
     // =====================================================
-    // TOPIC — Admin thấy tất cả trừ DRAFT
+    // TOPIC
     // =====================================================
 
     @Override
@@ -130,21 +136,19 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         return toTopicResponse(topic);
     }
 
-    /**
-     * ADMIN PUBLISH TOPIC
-     * - Đổi status topic → PUBLISHED
-     * - Publish LUÔN tất cả theory của topic (PENDING/DRAFT → PUBLISHED)
-     */
     @Override
-    public GrammarTopicResponse publishTopic(Long topicId) {
+    public GrammarTopicResponse publishTopic(Long adminId, Long topicId) {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // 1. Đổi status topic
+        if (topic.getStatus() != GrammarStatus.PENDING) {
+            throw new BusinessException("Chỉ có thể publish chủ điểm đang chờ duyệt");
+        }
+
         topic.setStatus(GrammarStatus.PUBLISHED);
         GrammarTopic saved = topicRepository.save(topic);
 
-        // 2. Publish tất cả theory của topic
+        // Publish tất cả theory
         List<GrammarTheory> theories = theoryRepository
                 .findByTopicIdOrderByDisplayOrderAsc(topicId);
         for (GrammarTheory theory : theories) {
@@ -156,26 +160,73 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         }
         theoryRepository.saveAll(theories);
 
-        log.info("✅ Admin đã publish topic id={}, {} theory đã publish",
-                topicId, theories.size());
+        // Ghi history
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
+        reviewService.log(topic, GrammarReviewAction.APPROVE, null, admin);
 
+        log.info("✅ Admin {} đã publish topic id={}", adminId, topicId);
         return toTopicResponse(saved);
     }
 
-    /**
-     * ADMIN UNPUBLISH TOPIC (ẩn)
-     * - Đổi status topic → HIDDEN
-     */
     @Override
-    public GrammarTopicResponse unpublishTopic(Long topicId) {
+    public GrammarTopicResponse unpublishTopic(Long adminId, Long topicId) {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
         topic.setStatus(GrammarStatus.HIDDEN);
         GrammarTopic saved = topicRepository.save(topic);
 
-        log.info("✅ Admin đã ẩn topic id={}", topicId);
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
+        reviewService.log(topic, GrammarReviewAction.UNPUBLISH, null, admin);
+
+        log.info("✅ Admin {} đã ẩn topic id={}", adminId, topicId);
         return toTopicResponse(saved);
+    }
+
+    @Override
+    public GrammarTopicResponse rejectTopic(Long adminId, Long topicId, String reason) {
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new BusinessException("Vui lòng nhập lý do từ chối");
+        }
+
+        GrammarTopic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
+
+        if (topic.getStatus() != GrammarStatus.PENDING) {
+            throw new BusinessException("Chỉ có thể từ chối chủ điểm đang chờ duyệt");
+        }
+
+        topic.setStatus(GrammarStatus.REJECTED);
+        GrammarTopic saved = topicRepository.save(topic);
+
+        // Theory PENDING → REJECTED
+        List<GrammarTheory> theories = theoryRepository
+                .findByTopicIdOrderByDisplayOrderAsc(topicId);
+        for (GrammarTheory theory : theories) {
+            if (theory.getStatus() == GrammarStatus.PENDING) {
+                theory.setStatus(GrammarStatus.REJECTED);
+            }
+        }
+        theoryRepository.saveAll(theories);
+
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
+        reviewService.log(topic, GrammarReviewAction.REJECT, reason.trim(), admin);
+
+        log.info("❌ Admin {} đã từ chối topic id={}, lý do: {}", adminId, topicId, reason);
+        return toTopicResponse(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GrammarTopicReviewResponse> getTopicHistory(Long topicId) {
+        // Check topic tồn tại
+        if (!topicRepository.existsById(topicId)) {
+            throw new ResourceNotFoundException("Không tìm thấy chủ điểm");
+        }
+        return reviewService.getHistory(topicId);
     }
 
     // =====================================================
@@ -183,10 +234,7 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
     // =====================================================
 
     private GrammarRoadmapResponse toRoadmapResponseAdmin(GrammarRoadmap r) {
-        // Tổng số topic không tính DRAFT
         int totalTopics = topicRepository.countForAdmin(r.getId());
-
-        // Số topic đang chờ duyệt
         int pendingTopics = topicRepository.countByRoadmapIdAndStatus(
                 r.getId(), GrammarStatus.PENDING);
 
