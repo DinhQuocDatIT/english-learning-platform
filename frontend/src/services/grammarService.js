@@ -51,7 +51,7 @@ const GrammarService = {
     return axiosClient.post(`/v1/teacher/grammar/topics/${topicId}/submit`);
   },
 
-  // ⭐ MỚI — Teacher xem lịch sử duyệt topic của mình
+  // Teacher xem lịch sử duyệt topic của mình
   teacherGetTopicHistory(topicId) {
     return axiosClient.get(`/v1/teacher/grammar/topics/${topicId}/history`);
   },
@@ -80,6 +80,22 @@ const GrammarService = {
 
   deleteTheory(theoryId) {
     return axiosClient.delete(`/v1/teacher/grammar/theories/${theoryId}`);
+  },
+
+  // =====================================================
+  // TEACHER — EDIT REQUEST (MỚI)
+  // =====================================================
+  requestEditTopic(topicId, reason) {
+    return axiosClient.post(
+      `/v1/teacher/grammar/topics/${topicId}/request-edit`,
+      { reason },
+    );
+  },
+
+  getMyEditRequests(topicId) {
+    return axiosClient.get(
+      `/v1/teacher/grammar/topics/${topicId}/edit-requests`,
+    );
   },
 
   // =====================================================
@@ -124,16 +140,39 @@ const GrammarService = {
     return axiosClient.post(`/v1/admin/grammar/topics/${topicId}/unpublish`);
   },
 
-  // ⭐ MỚI — Admin từ chối topic (kèm lý do)
   adminRejectTopic(topicId, reason) {
     return axiosClient.post(`/v1/admin/grammar/topics/${topicId}/reject`, {
       reason,
     });
   },
 
-  // ⭐ MỚI — Admin xem lịch sử duyệt topic
   adminGetTopicHistory(topicId) {
     return axiosClient.get(`/v1/admin/grammar/topics/${topicId}/history`);
+  },
+
+  // =====================================================
+  // ADMIN — EDIT REQUEST (MỚI)
+  // =====================================================
+  adminGetEditRequests(status) {
+    const params = status ? { status } : {};
+    return axiosClient.get("/v1/admin/grammar/edit-requests", { params });
+  },
+
+  adminCountPendingEditRequests() {
+    return axiosClient.get("/v1/admin/grammar/edit-requests/count-pending");
+  },
+
+  adminApproveEditRequest(requestId) {
+    return axiosClient.post(
+      `/v1/admin/grammar/edit-requests/${requestId}/approve`,
+    );
+  },
+
+  adminRejectEditRequest(requestId, note) {
+    return axiosClient.post(
+      `/v1/admin/grammar/edit-requests/${requestId}/reject`,
+      { note },
+    );
   },
 };
 

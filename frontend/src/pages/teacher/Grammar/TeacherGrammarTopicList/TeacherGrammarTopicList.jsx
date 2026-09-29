@@ -10,6 +10,8 @@ import {
   faPaperPlane,
   faBookOpen,
   faLayerGroup,
+  faPen,
+  faClock,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
@@ -17,6 +19,7 @@ import {
   getStatusLabel,
   getStatusColor,
 } from "../../../../constants/grammarConstants";
+import GrammarEditRequestModal from "../../../../components/GrammarEditRequestModal/GrammarEditRequestModal";
 import styles from "./TeacherGrammarTopicList.module.css";
 
 function TeacherGrammarTopicList() {
@@ -26,6 +29,15 @@ function TeacherGrammarTopicList() {
   const [roadmap, setRoadmap] = useState(null);
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Edit request modal
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+  const [selectedTopicForEdit, setSelectedTopicForEdit] = useState(null);
+
+  // Track các topic đang có yêu cầu PENDING
+  // { [topicId]: true }
+  const [pendingRequestTopics, setPendingRequestTopics] = useState({});
 
   useEffect(() => {
     fetchData();
@@ -39,14 +51,41 @@ function TeacherGrammarTopicList() {
         grammarService.getMyTopics(roadmapId),
       ]);
 
-      setRoadmap(roadmapRes?.data?.data || null);
-      setTopics(topicsRes?.data?.data || []);
+      const roadmapData = roadmapRes?.data?.data || null;
+      const topicsData = topicsRes?.data?.data || [];
+
+      setRoadmap(roadmapData);
+      setTopics(topicsData);
+
+      // ✅ Với mỗi topic PUBLISHED, check xem có yêu cầu PENDING không
+      await checkPendingRequests(topicsData);
     } catch (e) {
       console.error(e);
       toast.error("Không thể tải danh sách chủ điểm.");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Check pending request cho các topic PUBLISHED
+  const checkPendingRequests = async (topicsList) => {
+    const publishedTopics = topicsList.filter((t) => t.status === "PUBLISHED");
+    if (publishedTopics.length === 0) return;
+
+    const results = {};
+    await Promise.all(
+      publishedTopics.map(async (t) => {
+        try {
+          const res = await grammarService.getMyEditRequests(t.id);
+          const requests = res?.data?.data || [];
+          const hasPending = requests.some((r) => r.status === "PENDING");
+          if (hasPending) results[t.id] = true;
+        } catch (e) {
+          // bỏ qua lỗi từng topic
+        }
+      }),
+    );
+    setPendingRequestTopics(results);
   };
 
   const handleDelete = async (topic) => {
@@ -71,11 +110,41 @@ function TeacherGrammarTopicList() {
     }
   };
 
+  // ===== EDIT REQUEST =====
+  const handleOpenEditRequest = (topic) => {
+    setSelectedTopicForEdit(topic);
+    setEditModalOpen(true);
+  };
+
+  const handleSubmitEditRequest = async (reason) => {
+    try {
+      setSubmittingRequest(true);
+      await grammarService.requestEditTopic(selectedTopicForEdit.id, reason);
+      toast.success("Đã gửi yêu cầu chỉnh sửa!");
+
+      // ✅ Refresh badge trên sidebar Admin
+      window.dispatchEvent(new Event("refresh-edit-requests"));
+
+      setEditModalOpen(false);
+      setPendingRequestTopics((prev) => ({
+        ...prev,
+        [selectedTopicForEdit.id]: true,
+      }));
+      setSelectedTopicForEdit(null);
+      fetchData();
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Không thể gửi yêu cầu.");
+    } finally {
+      setSubmittingRequest(false);
+    }
+  };
+
   const renderTopic = (topic, index) => {
     const statusColor = getStatusColor(topic.status);
     const canEdit = topic.status === "DRAFT" || topic.status === "REJECTED";
+    const isPublished = topic.status === "PUBLISHED";
+    const hasPendingRequest = pendingRequestTopics[topic.id];
 
-    // Ưu tiên displayOrder, fallback về index + 1
     const orderNumber =
       topic.displayOrder != null ? topic.displayOrder : index + 1;
 
@@ -85,15 +154,12 @@ function TeacherGrammarTopicList() {
         className={styles.row}
         style={{ "--topic-color": roadmap?.color || "#0ea792" }}
       >
-        {/* STT — lấy từ displayOrder */}
         <span className={styles.orderBadge}>{orderNumber}</span>
 
-        {/* ICON */}
         <span className={styles.iconBox}>
           <FontAwesomeIcon icon={faBookOpen} />
         </span>
 
-        {/* INFO */}
         <div className={styles.info}>
           <div className={styles.nameRow}>
             <span className={styles.name} title={topic.name}>
@@ -109,13 +175,20 @@ function TeacherGrammarTopicList() {
             >
               {getStatusLabel(topic.status)}
             </span>
+
+            {/* Badge "Chờ duyệt yêu cầu" nếu có pending */}
+            {isPublished && hasPendingRequest && (
+              <span className={styles.pendingRequestBadge}>
+                <FontAwesomeIcon icon={faClock} />
+                Chờ duyệt yêu cầu
+              </span>
+            )}
           </div>
           <div className={styles.metaRow}>
             <code className={styles.slug}>{topic.slug}</code>
           </div>
         </div>
 
-        {/* ACTIONS */}
         <div className={styles.actions}>
           <button
             className={`${styles.actionBtn} ${styles.primaryBtn}`}
@@ -128,6 +201,7 @@ function TeacherGrammarTopicList() {
             <span>Lý thuyết</span>
           </button>
 
+          {/* DRAFT / REJECTED → Sửa, Xóa, Gửi duyệt */}
           {canEdit && (
             <>
               <button
@@ -159,6 +233,18 @@ function TeacherGrammarTopicList() {
               </button>
             </>
           )}
+
+          {/* PUBLISHED → nút Yêu cầu sửa (nếu chưa có pending) */}
+          {isPublished && !hasPendingRequest && (
+            <button
+              className={`${styles.actionBtn} ${styles.requestEditBtn}`}
+              onClick={() => handleOpenEditRequest(topic)}
+              title="Yêu cầu chỉnh sửa"
+            >
+              <FontAwesomeIcon icon={faPen} />
+              <span>Yêu cầu sửa</span>
+            </button>
+          )}
         </div>
       </div>
     );
@@ -177,7 +263,6 @@ function TeacherGrammarTopicList() {
 
   return (
     <div className={styles.container}>
-      {/* BACK */}
       <button
         className={styles.backBtn}
         onClick={() => navigate("/dashboard/teacher/grammar")}
@@ -186,7 +271,6 @@ function TeacherGrammarTopicList() {
         <span>Quay lại</span>
       </button>
 
-      {/* HEADER */}
       <div
         className={styles.header}
         style={{ "--topic-color": roadmap?.color || "#0ea792" }}
@@ -213,7 +297,6 @@ function TeacherGrammarTopicList() {
         </button>
       </div>
 
-      {/* LIST */}
       {topics.length === 0 ? (
         <div className={styles.emptyBox}>
           <FontAwesomeIcon icon={faBookOpen} className={styles.emptyIcon} />
@@ -224,6 +307,18 @@ function TeacherGrammarTopicList() {
           {topics.map((t, i) => renderTopic(t, i))}
         </div>
       )}
+
+      {/* EDIT REQUEST MODAL */}
+      <GrammarEditRequestModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedTopicForEdit(null);
+        }}
+        onSubmit={handleSubmitEditRequest}
+        isLoading={submittingRequest}
+        topicName={selectedTopicForEdit?.name}
+      />
     </div>
   );
 }

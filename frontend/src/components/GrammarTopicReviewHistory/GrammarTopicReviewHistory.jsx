@@ -8,6 +8,9 @@ import {
   faEyeSlash,
   faClock,
   faUser,
+  faPen,
+  faCircleCheck,
+  faCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import grammarService from "../../services/grammarService";
 import styles from "./GrammarTopicReviewHistory.module.css";
@@ -28,7 +31,7 @@ const ACTION_CONFIG = {
     border: "#bbf7d0",
   },
   REJECT: {
-    label: "Từ chối",
+    label: "Từ chối chủ điểm",
     icon: faXmark,
     color: "#dc2626",
     bg: "#fef2f2",
@@ -41,13 +44,29 @@ const ACTION_CONFIG = {
     bg: "#fffbeb",
     border: "#fde68a",
   },
+  REQUEST_EDIT: {
+    label: "Yêu cầu chỉnh sửa",
+    icon: faPen,
+    color: "#ea580c",
+    bg: "#fff7ed",
+    border: "#fed7aa",
+  },
+  APPROVE_EDIT: {
+    label: "Đồng ý cho sửa",
+    icon: faCircleCheck,
+    color: "#0891b2",
+    bg: "#ecfeff",
+    border: "#a5f3fc",
+  },
+  REJECT_EDIT: {
+    label: "Từ chối yêu cầu sửa",
+    icon: faCircleXmark,
+    color: "#b91c1c",
+    bg: "#fef2f2",
+    border: "#fecaca",
+  },
 };
 
-/**
- * Tách chuỗi lý do thành mảng.
- * - Ưu tiên dấu "|" (data mới)
- * - Fallback dấu "," (data cũ)
- */
 function splitReasons(reason) {
   if (!reason) return [];
   const delimiter = reason.includes("|") ? "|" : ",";
@@ -57,11 +76,6 @@ function splitReasons(reason) {
     .filter(Boolean);
 }
 
-/**
- * @param {Object} props
- * @param {number} props.topicId
- * @param {"admin" | "teacher"} props.role
- */
 function GrammarTopicReviewHistory({ topicId, role = "admin" }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,10 +141,7 @@ function GrammarTopicReviewHistory({ topicId, role = "admin" }) {
                 <FontAwesomeIcon icon={cfg.icon} />
               </div>
 
-              <div
-                className={styles.card}
-                style={{ "--action-color": cfg.color }}
-              >
+              <div className={styles.card}>
                 <div className={styles.cardHeader}>
                   <span
                     className={styles.actionBadge}
@@ -161,9 +172,20 @@ function GrammarTopicReviewHistory({ topicId, role = "admin" }) {
                 </div>
 
                 {reasons.length > 0 && (
-                  <div className={styles.reasonBox}>
+                  <div
+                    className={`${styles.reasonBox} ${
+                      h.action === "REQUEST_EDIT"
+                        ? styles.reasonBoxRequestEdit
+                        : ""
+                    }`}
+                    style={{
+                      "--reason-color": cfg.color,
+                      "--reason-bg": cfg.bg,
+                      "--reason-border": cfg.border,
+                    }}
+                  >
                     <span className={styles.reasonLabel}>
-                      Lý do ({reasons.length})
+                      {cfg.label} ({reasons.length})
                     </span>
                     <ul className={styles.reasonList}>
                       {reasons.map((r, i) => (

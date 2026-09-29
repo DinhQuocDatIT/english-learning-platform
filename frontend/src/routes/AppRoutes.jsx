@@ -74,6 +74,7 @@ import AdminGrammarTip from "../pages/admin/Grammar/AdminGrammarTopicLayout/Admi
 import AdminGrammarExample from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarExample/AdminGrammarExample";
 import AdminGrammarQuiz from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarQuiz/AdminGrammarQuiz";
 import AdminGrammarTopicHistory from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarTopicHistory/AdminGrammarTopicLayout";
+import AdminGrammarEditRequests from "../pages/admin/Grammar/AdminGrammarEditRequests/AdminGrammarEditRequests";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -93,7 +94,6 @@ function AppRoutes() {
             path="student"
             element={<RoleRoute allowedRoles={[ROLES.STUDENT]} />}
           >
-            {/* Tự vừng của học sinh */}
             <Route path="myvocabulary" element={<MyVocabulary />} />
             <Route
               path="create-study-session"
@@ -101,7 +101,6 @@ function AppRoutes() {
             />
             <Route path="study-flash-card" element={<StudyFlashcard />} />
 
-            {/* gói thành viên */}
             <Route path="student-membership" element={<StudentMembership />} />
 
             <Route path="topics" element={<StudentTopicList />} />
@@ -283,7 +282,13 @@ function AppRoutes() {
               element={<AdminGrammarTopicList />}
             />
 
-            {/* Nested layout — 5 tab (Lý thuyết / Mẹo / Ví dụ / Trắc nghiệm / Lịch sử duyệt) */}
+            {/* ✅ Yêu cầu chỉnh sửa — ĐẶT TRƯỚC nested layout */}
+            <Route
+              path="grammar/edit-requests"
+              element={<AdminGrammarEditRequests />}
+            />
+
+            {/* Nested layout — 5 tab */}
             <Route
               path="grammar/topics/:topicId"
               element={<AdminGrammarTopicLayout />}

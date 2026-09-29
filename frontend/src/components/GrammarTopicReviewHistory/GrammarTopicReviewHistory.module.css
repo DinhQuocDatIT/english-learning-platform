@@ -1,6 +1,5 @@
 /* =========================================================
    GRAMMAR TOPIC REVIEW HISTORY — timeline
-   Ép font tuyệt đối cho từng element cụ thể
    ========================================================= */
 
 .wrapper {
@@ -19,9 +18,7 @@
   box-sizing: border-box;
 }
 
-/* ===== ÉP CỨNG TỪNG CLASS + TỪNG THẺ CON BÊN TRONG ===== */
-
-/* Timeline */
+/* ===== ÉP CỨNG FONT ===== */
 .wrapper .timeline,
 .wrapper .timeline > div,
 .wrapper .item,
@@ -31,7 +28,6 @@
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
-/* Badge — mỏng hơn */
 .wrapper .actionBadge,
 .wrapper .actionBadge span,
 .wrapper .actionBadge * {
@@ -41,7 +37,6 @@
   letter-spacing: 0.2px !important;
 }
 
-/* Time */
 .wrapper .time,
 .wrapper .time span,
 .wrapper .time svg,
@@ -51,7 +46,6 @@
   font-weight: 500 !important;
 }
 
-/* By */
 .wrapper .by,
 .wrapper .by span,
 .wrapper .by strong,
@@ -70,7 +64,6 @@
   font-weight: 700 !important;
 }
 
-/* Reason box */
 .wrapper .reasonBox,
 .wrapper .reasonBox > *,
 .wrapper .reasonLabel,
@@ -97,7 +90,6 @@
   line-height: 1.55 !important;
 }
 
-/* Empty + Loading */
 .wrapper .emptyBox,
 .wrapper .emptyBox *,
 .wrapper .emptyBox p,
@@ -235,14 +227,14 @@
 .wrapper .reasonBox {
   margin-top: 10px;
   padding: 10px 12px;
-  background: #fef2f2;
-  border-left: 3px solid #dc2626;
+  background: var(--reason-bg, #fef2f2);
+  border-left: 3px solid var(--reason-color, #dc2626);
   border-radius: 0 8px 8px 0;
 }
 
 .wrapper .reasonLabel {
   display: block;
-  color: #991b1b;
+  color: var(--reason-color, #991b1b);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 6px;
@@ -252,11 +244,11 @@
   margin: 0;
   padding-left: 20px;
   list-style: disc;
-  color: #7f1d1d;
+  color: var(--reason-color, #7f1d1d);
 }
 
 .wrapper .reasonItem {
-  color: #7f1d1d;
+  color: var(--reason-color, #7f1d1d);
   word-break: break-word;
   margin-bottom: 3px;
 }
@@ -266,8 +258,32 @@
 }
 
 .wrapper .reasonList li::marker {
-  color: #dc2626;
+  color: var(--reason-color, #dc2626);
   font-weight: 700;
+}
+
+/* ================= REASON BOX — REQUEST_EDIT đặc biệt ================= */
+/* Nền trắng, bullet màu xanh chủ đạo web (#0ea792) */
+.wrapper .reasonBoxRequestEdit {
+  background: #ffffff !important;
+  border-left-color: #ea580c !important;
+}
+
+.wrapper .reasonBoxRequestEdit .reasonLabel {
+  color: #ea580c !important;
+}
+
+.wrapper .reasonBoxRequestEdit .reasonList {
+  color: #334155 !important;
+}
+
+.wrapper .reasonBoxRequestEdit .reasonItem {
+  color: #334155 !important;
+}
+
+.wrapper .reasonBoxRequestEdit .reasonList li::marker {
+  color: #0ea792 !important;
+  font-weight: 700 !important;
 }
 
 /* ================= LOADING ================= */

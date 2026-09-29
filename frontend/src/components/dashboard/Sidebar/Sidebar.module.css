@@ -235,3 +235,47 @@
     padding: 12px;
   }
 }
+/* =========================================================
+   MENU BADGE — Badge đỏ cho menu có thông báo
+   ========================================================= */
+
+.menuBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: auto;
+  background: #dc2626;
+  color: #ffffff;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+  animation: pulseBadge 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulseBadge {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Khi sidebar đóng (thu gọn) — ẩn badge hoặc hiển thị dạng chấm đỏ */
+.closed .menuBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 8px;
+  height: 8px;
+  padding: 0;
+  font-size: 0;
+  border-radius: 50%;
+}

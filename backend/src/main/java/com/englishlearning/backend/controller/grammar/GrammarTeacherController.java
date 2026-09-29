@@ -1,10 +1,12 @@
 package com.englishlearning.backend.controller.grammar;
 
+import com.englishlearning.backend.dto.grammar.request.GrammarEditRequestCreateRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTheoryCreateRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTopicRequest;
 import com.englishlearning.backend.dto.grammar.response.*;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.security.CustomUserDetails;
+import com.englishlearning.backend.service.grammar.GrammarEditRequestService;
 import com.englishlearning.backend.service.grammar.GrammarTeacherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import java.util.List;
 public class GrammarTeacherController {
 
     private final GrammarTeacherService grammarTeacherService;
+    private final GrammarEditRequestService editRequestService;
 
     // =====================================================
     // ROADMAP
@@ -109,8 +112,9 @@ public class GrammarTeacherController {
     }
 
     // =====================================================
-    // REVIEW HISTORY (MỚI)
+    // REVIEW HISTORY
     // =====================================================
+
     @GetMapping("/topics/{topicId}/history")
     public ResponseEntity<ApiResponse<List<GrammarTopicReviewResponse>>> getTopicHistory(
             @PathVariable Long topicId,
@@ -120,6 +124,33 @@ public class GrammarTeacherController {
                 grammarTeacherService.getTopicHistory(teacherId, topicId);
         return ResponseEntity.ok(new ApiResponse<>(
                 200, "Lấy lịch sử duyệt thành công", response));
+    }
+
+    // =====================================================
+    // EDIT REQUEST
+    // =====================================================
+
+    @PostMapping("/topics/{topicId}/request-edit")
+    public ResponseEntity<ApiResponse<GrammarEditRequestResponse>> requestEdit(
+            @PathVariable Long topicId,
+            @Valid @RequestBody GrammarEditRequestCreateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        GrammarEditRequestResponse response =
+                editRequestService.createRequest(teacherId, topicId, request.getReason());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
+                201, "Gửi yêu cầu chỉnh sửa thành công", response));
+    }
+
+    @GetMapping("/topics/{topicId}/edit-requests")
+    public ResponseEntity<ApiResponse<List<GrammarEditRequestResponse>>> getEditRequests(
+            @PathVariable Long topicId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        List<GrammarEditRequestResponse> response =
+                editRequestService.getRequestsByTopicForTeacher(teacherId, topicId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy lịch sử yêu cầu thành công", response));
     }
 
     // =====================================================

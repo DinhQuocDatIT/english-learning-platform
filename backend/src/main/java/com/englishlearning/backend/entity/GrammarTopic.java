@@ -61,4 +61,6 @@ public class GrammarTopic {
 
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GrammarTheory> theories = new ArrayList<>();
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GrammarTopicEditRequest> editRequests = new ArrayList<>();
 }

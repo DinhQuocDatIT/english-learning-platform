@@ -18,6 +18,7 @@ import {
   faHexagonNodesBolt,
   faUser,
   faSpellCheck,
+  faClipboardCheck,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -111,6 +112,17 @@ export const sidebarMenus = {
       icon: faBookOpen,
     },
     {
+      path: "/dashboard/admin/grammar",
+      name: "Quản lý ngữ pháp",
+      icon: faSpellCheck,
+    },
+    {
+      path: "/dashboard/admin/grammar/edit-requests",
+      name: "Yêu cầu chỉnh sửa",
+      icon: faClipboardCheck,
+      badge: true,
+    },
+    {
       path: "/dashboard/admin/ai-usage",
       name: "AI usage",
       icon: faHexagonNodesBolt,
@@ -119,11 +131,6 @@ export const sidebarMenus = {
       path: "/dashboard/admin/profile",
       name: "Thông tin cá nhân",
       icon: faCircleUser,
-    },
-    {
-      path: "/dashboard/admin/grammar",
-      name: "Quản lý ngữ pháp",
-      icon: faSpellCheck, 
     },
   ],
 };

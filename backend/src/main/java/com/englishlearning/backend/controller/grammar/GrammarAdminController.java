@@ -1,13 +1,16 @@
 package com.englishlearning.backend.controller.grammar;
 
+import com.englishlearning.backend.dto.grammar.request.GrammarEditRequestReviewRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarRoadmapRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTopicRejectRequest;
+import com.englishlearning.backend.dto.grammar.response.GrammarEditRequestResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicReviewResponse;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.security.CustomUserDetails;
 import com.englishlearning.backend.service.grammar.GrammarAdminService;
+import com.englishlearning.backend.service.grammar.GrammarEditRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,7 @@ import java.util.List;
 public class GrammarAdminController {
 
     private final GrammarAdminService grammarAdminService;
+    private final GrammarEditRequestService editRequestService;
 
     // =====================================================
     // ROADMAP
@@ -113,7 +117,7 @@ public class GrammarAdminController {
     }
 
     // =====================================================
-    // REJECT (MỚI)
+    // REJECT
     // =====================================================
     @PostMapping("/topics/{topicId}/reject")
     public ResponseEntity<ApiResponse<GrammarTopicResponse>> rejectTopic(
@@ -128,7 +132,7 @@ public class GrammarAdminController {
     }
 
     // =====================================================
-    // HISTORY (MỚI)
+    // HISTORY
     // =====================================================
     @GetMapping("/topics/{topicId}/history")
     public ResponseEntity<ApiResponse<List<GrammarTopicReviewResponse>>> getTopicHistory(
@@ -137,5 +141,49 @@ public class GrammarAdminController {
                 grammarAdminService.getTopicHistory(topicId);
         return ResponseEntity.ok(new ApiResponse<>(
                 200, "Lấy lịch sử duyệt thành công", response));
+    }
+
+    // =====================================================
+    // EDIT REQUEST
+    // =====================================================
+
+    // ✅ ENDPOINT BỊ THIẾU — THÊM VÀO ĐÂY
+    @GetMapping("/edit-requests")
+    public ResponseEntity<ApiResponse<List<GrammarEditRequestResponse>>> getEditRequests(
+            @RequestParam(required = false) String status) {
+        List<GrammarEditRequestResponse> response = editRequestService.getAllRequests(status);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy danh sách yêu cầu thành công", response));
+    }
+
+    @GetMapping("/edit-requests/count-pending")
+    public ResponseEntity<ApiResponse<Long>> countPendingRequests() {
+        long count = editRequestService.countPending();
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Đếm yêu cầu chờ duyệt thành công", count));
+    }
+
+    @PostMapping("/edit-requests/{requestId}/approve")
+    public ResponseEntity<ApiResponse<GrammarEditRequestResponse>> approveEditRequest(
+            @PathVariable Long requestId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long adminId = userDetails.getUser().getId();
+        GrammarEditRequestResponse response =
+                editRequestService.approveRequest(adminId, requestId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Duyệt yêu cầu thành công. Chủ điểm đã chuyển về Nháp.", response));
+    }
+
+    @PostMapping("/edit-requests/{requestId}/reject")
+    public ResponseEntity<ApiResponse<GrammarEditRequestResponse>> rejectEditRequest(
+            @PathVariable Long requestId,
+            @RequestBody(required = false) GrammarEditRequestReviewRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long adminId = userDetails.getUser().getId();
+        String note = request != null ? request.getNote() : null;
+        GrammarEditRequestResponse response =
+                editRequestService.rejectRequest(adminId, requestId, note);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Từ chối yêu cầu thành công", response));
     }
 }
