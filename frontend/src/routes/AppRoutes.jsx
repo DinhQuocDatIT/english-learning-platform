@@ -57,6 +57,30 @@ import StudentAIPracticeChat from "../pages/student/AI/StudentAIPracticeChat/Stu
 import AdminAIUsage from "../pages/admin/AIUsage/AdminAIUsage";
 import StudentProfile from "../pages/student/StudentProfile/StudentProfile";
 import PaymentHistoryPage from "../pages/admin/membershipPackage/PaymentHistoryPage/PaymentHistoryPage";
+
+// ===== GRAMMAR — TEACHER =====
+import TeacherGrammarRoadmapList from "../pages/teacher/Grammar/TeacherGrammarRoadmapList/TeacherGrammarRoadmapList";
+import TeacherGrammarTopicList from "../pages/teacher/Grammar/TeacherGrammarTopicList/TeacherGrammarTopicList";
+import TeacherGrammarTopicForm from "../pages/teacher/Grammar/TeacherGrammarTopicForm/TeacherGrammarTopicForm";
+import TeacherGrammarTopicLayout from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTopicLayout";
+import TeacherGrammarTheory from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTheory/TeacherGrammarTheory";
+import TeacherGrammarTip from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTip/TeacherGrammarTip";
+import TeacherGrammarExample from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarExample/TeacherGrammarExample";
+import TeacherGrammarQuiz from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarQuiz/TeacherGrammarQuiz";
+import TeacherGrammarHistory from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarHistory/TeacherGrammarHistory";
+
+// ===== GRAMMAR — ADMIN =====
+import AdminGrammarRoadmapList from "../pages/admin/Grammar/AdminGrammarRoadmapList/AdminGrammarRoadmapList";
+import AdminGrammarRoadmapForm from "../pages/admin/Grammar/AdminGrammarRoadmapForm/AdminGrammarRoadmapForm";
+import AdminGrammarTopicList from "../pages/admin/Grammar/AdminGrammarTopicList/AdminGrammarTopicList";
+import AdminGrammarTopicLayout from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarTopicLayout";
+import AdminGrammarTheory from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarTheory/AdminGrammarTheory";
+import AdminGrammarTip from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarTip/AdminGrammarTip";
+import AdminGrammarExample from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarExample/AdminGrammarExample";
+import AdminGrammarQuiz from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarQuiz/AdminGrammarQuiz";
+import AdminGrammarTopicHistory from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarTopicHistory/AdminGrammarTopicLayout";
+import AdminGrammarEditRequests from "../pages/admin/Grammar/AdminGrammarEditRequests/AdminGrammarEditRequests";
+
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
   return (
@@ -70,11 +94,11 @@ function AppRoutes() {
 
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<MainLayout />}>
+          {/* ==================== STUDENT ==================== */}
           <Route
             path="student"
             element={<RoleRoute allowedRoles={[ROLES.STUDENT]} />}
           >
-            {/* Tự vừng của học sinh */}
             <Route path="myvocabulary" element={<MyVocabulary />} />
             <Route
               path="create-study-session"
@@ -82,7 +106,6 @@ function AppRoutes() {
             />
             <Route path="study-flash-card" element={<StudyFlashcard />} />
 
-            {/* gói thành viên */}
             <Route path="student-membership" element={<StudentMembership />} />
 
             <Route path="topics" element={<StudentTopicList />} />
@@ -104,17 +127,9 @@ function AppRoutes() {
               element={<StudentAIPracticeChat />}
             />
             <Route path="profile" element={<StudentProfile />} />
-            {/* <Route
-              path="ai-practice/create"
-              element={<StudentAIPracticeCreate />}
-            />
-            <Route path="ai-practice/:chatId" element={<StudentAIPractice />} />
-            <Route
-              path="ai-practice/:chatId/result"
-              element={<StudentAIPractice />}
-            /> */}
           </Route>
 
+          {/* ==================== TEACHER ==================== */}
           <Route
             path="teacher"
             element={<RoleRoute allowedRoles={[ROLES.TEACHER]} />}
@@ -134,7 +149,7 @@ function AppRoutes() {
             <Route path="create-student" element={<CreateStudent />} />
             <Route path="student-detail/:id" element={<StudentDetail />} />
 
-            {/* topic */}
+            {/* topic — listening */}
             <Route path="topics" element={<TeacherTopicList />} />
             <Route
               path="topics/:topicId"
@@ -160,8 +175,37 @@ function AppRoutes() {
               path="topics/:topicId/listening-lessons/:lessonId/preview"
               element={<ListeningPreview />}
             />
+
+            {/* ===== GRAMMAR — TEACHER ===== */}
+            <Route path="grammar" element={<TeacherGrammarRoadmapList />} />
+            <Route
+              path="grammar/roadmaps/:roadmapId/topics"
+              element={<TeacherGrammarTopicList />}
+            />
+            <Route
+              path="grammar/roadmaps/:roadmapId/topics/create"
+              element={<TeacherGrammarTopicForm />}
+            />
+            <Route
+              path="grammar/roadmaps/:roadmapId/topics/:topicId/edit"
+              element={<TeacherGrammarTopicForm />}
+            />
+
+            {/* Layout 5 tab cho Teacher */}
+            <Route
+              path="grammar/topics/:topicId"
+              element={<TeacherGrammarTopicLayout />}
+            >
+              <Route index element={<TeacherGrammarTheory />} />
+              <Route path="theory" element={<TeacherGrammarTheory />} />
+              <Route path="tips" element={<TeacherGrammarTip />} />
+              <Route path="examples" element={<TeacherGrammarExample />} />
+              <Route path="quiz" element={<TeacherGrammarQuiz />} />
+              <Route path="history" element={<TeacherGrammarHistory />} />
+            </Route>
           </Route>
 
+          {/* ==================== ADMIN ==================== */}
           <Route
             path="admin"
             element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}
@@ -178,7 +222,6 @@ function AppRoutes() {
               element={<UpdateVocabulary />}
             />
             {/* Quản lý giáo viên */}
-
             <Route path="teachers" element={<TeacherManagement />} />
             <Route path="create-teacher" element={<CreateTeacher />} />
             <Route path="teacher-detail/:id" element={<TeacherDetail />} />
@@ -206,10 +249,11 @@ function AppRoutes() {
               element={<MembershipPackageEdit />}
             />
             <Route path="payment-history" element={<PaymentHistoryPage />} />
-            {/* quản lý cấp độ */}
 
+            {/* quản lý cấp độ */}
             <Route path="level" element={<LevelManage />} />
-            {/*   quản lý chủ đề */}
+
+            {/*   quản lý chủ đề — listening */}
             <Route path="topics" element={<TopicManage />} />
             <Route path="create-topic" element={<CreateTopic />} />
             <Route path="edit-topic/:id" element={<EditTopic />} />
@@ -236,6 +280,40 @@ function AppRoutes() {
               element={<AdminListeningPreview />}
             />
             <Route path="ai-usage" element={<AdminAIUsage />} />
+
+            {/* ===== GRAMMAR — ADMIN ===== */}
+            <Route path="grammar" element={<AdminGrammarRoadmapList />} />
+            <Route
+              path="grammar/roadmaps/create"
+              element={<AdminGrammarRoadmapForm />}
+            />
+            <Route
+              path="grammar/roadmaps/:id/edit"
+              element={<AdminGrammarRoadmapForm />}
+            />
+            <Route
+              path="grammar/roadmaps/:roadmapId/topics"
+              element={<AdminGrammarTopicList />}
+            />
+
+            {/* Yêu cầu chỉnh sửa — đặt trước nested layout */}
+            <Route
+              path="grammar/edit-requests"
+              element={<AdminGrammarEditRequests />}
+            />
+
+            {/* Nested layout — 5 tab */}
+            <Route
+              path="grammar/topics/:topicId"
+              element={<AdminGrammarTopicLayout />}
+            >
+              <Route index element={<AdminGrammarTheory />} />
+              <Route path="theory" element={<AdminGrammarTheory />} />
+              <Route path="tips" element={<AdminGrammarTip />} />
+              <Route path="examples" element={<AdminGrammarExample />} />
+              <Route path="quiz" element={<AdminGrammarQuiz />} />
+              <Route path="history" element={<AdminGrammarTopicHistory />} />
+            </Route>
           </Route>
         </Route>
       </Route>

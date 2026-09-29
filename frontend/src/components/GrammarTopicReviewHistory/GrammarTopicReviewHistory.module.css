@@ -1,0 +1,381 @@
+/* =========================================================
+   GRAMMAR TOPIC REVIEW HISTORY — timeline
+   ========================================================= */
+
+.wrapper {
+  padding: 4px 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text, #334155);
+  box-sizing: border-box;
+}
+
+.wrapper *,
+.wrapper *::before,
+.wrapper *::after {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  box-sizing: border-box;
+}
+
+/* ===== ÉP CỨNG FONT ===== */
+.wrapper .timeline,
+.wrapper .timeline > div,
+.wrapper .item,
+.wrapper .item > div,
+.wrapper .card,
+.wrapper .card > div {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.wrapper .actionBadge,
+.wrapper .actionBadge span,
+.wrapper .actionBadge * {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.2px !important;
+}
+
+.wrapper .time,
+.wrapper .time span,
+.wrapper .time svg,
+.wrapper .time * {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+}
+
+.wrapper .by,
+.wrapper .by span,
+.wrapper .by strong,
+.wrapper .by * {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 12.5px !important;
+}
+
+.wrapper .byLabel,
+.wrapper .by .byLabel {
+  font-size: 12.5px !important;
+  font-weight: 400 !important;
+}
+
+.wrapper .by strong {
+  font-weight: 700 !important;
+}
+
+.wrapper .reasonBox,
+.wrapper .reasonBox > *,
+.wrapper .reasonLabel,
+.wrapper .reasonList,
+.wrapper .reasonList li,
+.wrapper .reasonItem,
+.wrapper .reasonItem * {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.wrapper .reasonLabel {
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+}
+
+.wrapper .reasonList {
+  font-size: 13px !important;
+  list-style: disc !important;
+}
+
+.wrapper .reasonItem {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+}
+
+.wrapper .emptyBox,
+.wrapper .emptyBox *,
+.wrapper .emptyBox p,
+.wrapper .loadingBox,
+.wrapper .loadingBox * {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.wrapper .emptyBox p {
+  font-size: 13.5px !important;
+  font-weight: 400 !important;
+}
+
+/* ================= TIMELINE LAYOUT ================= */
+.wrapper .timeline {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.wrapper .item {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 20px;
+}
+
+.wrapper .item:last-child {
+  padding-bottom: 0;
+}
+
+.wrapper .line {
+  position: absolute;
+  left: 17px;
+  top: 42px;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-border, #e2e8f0);
+  z-index: 0;
+}
+
+/* ================= ICON ================= */
+.wrapper .iconWrap {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid;
+  font-size: 13px;
+  flex-shrink: 0;
+  background: var(--color-surface, #ffffff);
+}
+
+/* ================= CARD ================= */
+.wrapper .card {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  transition: all 0.15s ease;
+}
+
+.wrapper .card:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--action-color, #0ea792) 40%,
+    transparent
+  );
+  box-shadow: 0 4px 12px -6px
+    color-mix(in srgb, var(--action-color, #0ea792) 50%, transparent);
+}
+
+.wrapper .cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+/* ================= BADGE ================= */
+.wrapper .actionBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ================= TIME ================= */
+.wrapper .time {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-text-muted, #64748b);
+}
+
+.wrapper .time svg {
+  font-size: 10px;
+}
+
+/* ================= BY ================= */
+.wrapper .by {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted, #64748b);
+  margin-bottom: 4px;
+}
+
+.wrapper .byIcon {
+  font-size: 10px;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.wrapper .byLabel {
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.wrapper .by strong {
+  color: var(--color-secondary, #0f172a);
+}
+
+/* ================= REASON BOX ================= */
+.wrapper .reasonBox {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--reason-bg, #fef2f2);
+  border-left: 3px solid var(--reason-color, #dc2626);
+  border-radius: 0 8px 8px 0;
+}
+
+.wrapper .reasonLabel {
+  display: block;
+  color: var(--reason-color, #991b1b);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.wrapper .reasonList {
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+  color: var(--reason-color, #7f1d1d);
+}
+
+.wrapper .reasonItem {
+  color: var(--reason-color, #7f1d1d);
+  word-break: break-word;
+  margin-bottom: 3px;
+}
+
+.wrapper .reasonItem:last-child {
+  margin-bottom: 0;
+}
+
+.wrapper .reasonList li::marker {
+  color: var(--reason-color, #dc2626);
+  font-weight: 700;
+}
+
+/* ================= REASON BOX — REQUEST_EDIT đặc biệt ================= */
+/* Nền trắng, bullet màu xanh chủ đạo web (#0ea792) */
+.wrapper .reasonBoxRequestEdit {
+  background: #ffffff !important;
+  border-left-color: #ea580c !important;
+}
+
+.wrapper .reasonBoxRequestEdit .reasonLabel {
+  color: #ea580c !important;
+}
+
+.wrapper .reasonBoxRequestEdit .reasonList {
+  color: #334155 !important;
+}
+
+.wrapper .reasonBoxRequestEdit .reasonItem {
+  color: #334155 !important;
+}
+
+.wrapper .reasonBoxRequestEdit .reasonList li::marker {
+  color: #0ea792 !important;
+  font-weight: 700 !important;
+}
+
+/* ================= LOADING ================= */
+.wrapper .loadingBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.wrapper .spinner {
+  font-size: 28px;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ================= EMPTY ================= */
+.wrapper .emptyBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 240px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.wrapper .emptyIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-tertiary, #f8fafc);
+  color: var(--color-primary, #0ea792);
+}
+
+.wrapper .emptyIcon {
+  font-size: 26px;
+  opacity: 0.7;
+}
+
+.wrapper .emptyBox p {
+  margin: 0;
+  color: var(--color-text-muted, #64748b);
+  max-width: 320px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 640px) {
+  .wrapper .item {
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+
+  .wrapper .line {
+    left: 15px;
+    top: 38px;
+  }
+
+  .wrapper .iconWrap {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+  }
+
+  .wrapper .card {
+    padding: 10px 12px;
+  }
+
+  .wrapper .cardHeader {
+    gap: 8px;
+  }
+
+  .wrapper .time,
+  .wrapper .time * {
+    font-size: 10.5px !important;
+  }
+
+  .wrapper .actionBadge,
+  .wrapper .actionBadge * {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    padding: 2px 8px;
+  }
+
+  .wrapper .reasonList {
+    padding-left: 18px;
+  }
+
+  .wrapper .reasonItem {
+    font-size: 12.5px !important;
+  }
+}

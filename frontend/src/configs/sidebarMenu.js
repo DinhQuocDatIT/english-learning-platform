@@ -17,13 +17,14 @@ import {
   faRobot,
   faHexagonNodesBolt,
   faUser,
+  faSpellCheck,
+  faClipboardCheck,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
 
 export const sidebarMenus = {
   [ROLES.STUDENT]: [
-    
     {
       path: "/dashboard/student/myvocabulary",
       name: "Từ vựng",
@@ -52,7 +53,6 @@ export const sidebarMenus = {
       name: "Quản lý học sinh",
       icon: faUsers,
     },
-
     {
       path: "/dashboard/teacher/vocabulary",
       name: "Quản lý từ vựng",
@@ -62,6 +62,11 @@ export const sidebarMenus = {
       path: "/dashboard/teacher/topics",
       name: "Quản lý chủ đề",
       icon: faBookOpen,
+    },
+    {
+      path: "/dashboard/teacher/grammar",
+      name: "Ngữ pháp",
+      icon: faSpellCheck,
     },
     {
       path: "/dashboard/teacher/profile",
@@ -105,6 +110,17 @@ export const sidebarMenus = {
       path: "/dashboard/admin/topics",
       name: "Quản lý chủ đề",
       icon: faBookOpen,
+    },
+    {
+      path: "/dashboard/admin/grammar",
+      name: "Quản lý ngữ pháp",
+      icon: faSpellCheck,
+    },
+    {
+      path: "/dashboard/admin/grammar/edit-requests",
+      name: "Yêu cầu chỉnh sửa",
+      icon: faClipboardCheck,
+      badge: true,
     },
     {
       path: "/dashboard/admin/ai-usage",

@@ -18,6 +18,10 @@ const Sidebar = ({ isOpen }) => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const role = user.role;
   const menus = sidebarMenus[role] || [];
+
+  // ✅ Các path cần dùng `end` để tránh active nhầm khi ở URL con
+  const EXACT_MATCH_PATHS = ["/dashboard", "/dashboard/admin/grammar"];
+
   return (
     <aside className={`${styles.sidebar} ${!isOpen ? styles.closed : ""}`}>
       <div className={styles.topSection}>
@@ -34,7 +38,7 @@ const Sidebar = ({ isOpen }) => {
             className={({ isActive }) =>
               `${styles.navLink} ${isActive ? styles.active : ""}`
             }
-            end={item.path === "/dashboard"}
+            end={EXACT_MATCH_PATHS.includes(item.path)}
           >
             <div className={styles.iconWrapper}>
               <FontAwesomeIcon icon={item.icon} className={styles.icon} />
@@ -49,7 +53,9 @@ const Sidebar = ({ isOpen }) => {
           <NavLink
             to="/dashboard/student/student-membership"
             className={({ isActive }) =>
-              `${styles.premiumCTA} ${isActive ? styles.premiumActive : ""} ${!isOpen ? styles.premiumCTAClosed : ""}`
+              `${styles.premiumCTA} ${isActive ? styles.premiumActive : ""} ${
+                !isOpen ? styles.premiumCTAClosed : ""
+              }`
             }
           >
             <div className={styles.premiumIconWrapper}>

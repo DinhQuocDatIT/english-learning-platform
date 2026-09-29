@@ -1,0 +1,455 @@
+/* =========================================================
+   ADMIN GRAMMAR TOPIC LAYOUT
+   ========================================================= */
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px 40px 60px;
+  background: var(--color-background);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+/* Ép font trực tiếp cho mọi phần tử con */
+.container,
+.container *,
+.container *::before,
+.container *::after {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+}
+
+.container h1,
+.container h2,
+.container h3,
+.container h4,
+.container h5,
+.container h6,
+.container p,
+.container span,
+.container strong,
+.container small,
+.container label,
+.container button,
+.container input,
+.container select,
+.container textarea,
+.container code,
+.container a,
+.container div {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 14px;
+  color: var(--color-text-muted);
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary);
+}
+
+/* ================= BACK BUTTON ================= */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.backBtn span {
+  font-size: 13px;
+  font-weight: 500;
+  color: inherit;
+}
+
+.backBtn svg {
+  font-size: 12px;
+}
+
+.backBtn:hover {
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+  border-color: var(--color-primary);
+}
+
+/* ================= HEADER ================= */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-secondary);
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.topicSlug {
+  font-family: "Consolas", "Monaco", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-tertiary);
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ================= HEADER ACTIONS ================= */
+.headerActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1.5px solid;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.actionBtn > span {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.actionBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none !important;
+}
+
+.actionBtn svg {
+  font-size: 12px;
+  color: inherit;
+}
+
+/* Publish button — dùng màu primary */
+.publishBtn {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-white);
+  box-shadow: 0 6px 16px -6px rgba(14, 167, 146, 0.6);
+}
+
+.publishBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -6px rgba(14, 167, 146, 0.6);
+}
+
+/* Reject button */
+.rejectBtn {
+  background: transparent;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.rejectBtn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: var(--color-text-white);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -6px rgba(220, 38, 38, 0.5);
+}
+
+/* Unpublish button */
+.unpublishBtn {
+  background: transparent;
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+.unpublishBtn:hover {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: var(--color-text-white);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -6px rgba(245, 158, 11, 0.5);
+}
+
+.disabledHint {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: 8px 14px;
+  background: var(--color-tertiary);
+  border-radius: 8px;
+}
+
+/* ================= INFO BANNER ================= */
+.infoBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  background: #fef3c7;
+  border: 1.5px solid #fde68a;
+  border-radius: 12px;
+  color: #92400e;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.infoBanner span {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: inherit;
+}
+
+.infoBanner strong {
+  font-weight: 800;
+  color: #78350f;
+}
+
+.infoBanner svg {
+  font-size: 14px;
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+/* ================= TAB BAR ================= */
+.tabBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  background: var(--color-surface);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tabBtn > span {
+  font-size: 13px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.tabBtn:hover {
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+}
+
+.tabBtn svg {
+  font-size: 12px;
+  color: inherit;
+}
+
+/* Active tab — dùng màu primary */
+.tabBtnActive {
+  background: var(--color-primary);
+  color: var(--color-text-white);
+}
+
+.tabBtnActive:hover {
+  background: var(--color-primary-hover);
+  color: var(--color-text-white);
+}
+
+/* ================= CONTENT WRAPPER — chỉ border, KHÔNG shadow ================= */
+.contentWrapper {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ================= CONTENT HEADER — nền trắng ================= */
+.contentHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.contentIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-primary) 12%, white);
+  color: var(--color-primary);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.contentIcon svg {
+  font-size: 12px;
+  color: inherit;
+}
+
+.contentTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.contentSubtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-secondary);
+  letter-spacing: 0;
+  text-transform: none;
+  margin-left: 2px;
+}
+
+.contentBody {
+  padding: 32px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 300px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 800px) {
+  .container {
+    padding: 16px 16px 40px;
+  }
+
+  .header {
+    padding: 16px 18px;
+    flex-direction: column;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .actionBtn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .contentBody {
+    padding: 20px 20px 30px;
+  }
+
+  .contentTitle {
+    font-size: 11px;
+  }
+
+  .contentSubtitle {
+    font-size: 11px;
+  }
+
+  .tabBar {
+    padding: 6px 10px;
+  }
+
+  .tabBtn {
+    padding: 8px 12px;
+    font-size: 12.5px;
+  }
+
+  .tabBtn > span {
+    font-size: 12.5px;
+  }
+}
