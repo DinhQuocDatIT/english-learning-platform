@@ -19,6 +19,6 @@ public class GrammarRoadmapResponse {
     private String description;
     private String color;
     private Integer totalTopics;
-    private Integer totalQuestions;
+    private Integer pendingTopics;
     private List<GrammarTopicResponse> topics = new ArrayList<>();
 }

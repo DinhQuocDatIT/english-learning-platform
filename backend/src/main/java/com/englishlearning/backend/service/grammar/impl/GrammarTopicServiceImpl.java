@@ -50,7 +50,7 @@ public class GrammarTopicServiceImpl implements GrammarTopicService {
                 .name(topic.getName())
                 .slug(topic.getSlug())
                 .description(topic.getDescription())
-                .totalQuestions(topic.getTotalQuestions())
+                .displayOrder(topic.getDisplayOrder())
                 .status(topic.getStatus().name())
                 .theories(theories)
                 .build();

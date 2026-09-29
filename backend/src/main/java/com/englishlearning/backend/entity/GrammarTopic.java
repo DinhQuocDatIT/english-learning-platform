@@ -25,23 +25,21 @@ public class GrammarTopic {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Thuộc roadmap nào
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "roadmap_id", nullable = false)
     private GrammarRoadmap roadmap;
 
-    // self-reference: cây cha/con (VD: "Ngữ pháp mất gốc" > "Từ loại")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private GrammarTopic parent;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<GrammarTopic> children = new ArrayList<>();
+    // Ai tạo topic này
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
 
     @Column(nullable = false, length = 200)
-    private String name;              // "Từ loại trong TOEIC (Parts of Speech)"
+    private String name;
 
     @Column(nullable = false, unique = true, length = 200)
-    private String slug;              // "tu-loai-trong-toeic"
+    private String slug;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -49,18 +47,14 @@ public class GrammarTopic {
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder = 0;
 
-    @Column(name = "total_questions", nullable = false)
-    private Integer totalQuestions = 0;
-
-    @Column(length = 255)
-    private String icon;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private GrammarStatus status = GrammarStatus.DRAFT;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private GrammarStatus status = GrammarStatus.DRAFT;
+
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

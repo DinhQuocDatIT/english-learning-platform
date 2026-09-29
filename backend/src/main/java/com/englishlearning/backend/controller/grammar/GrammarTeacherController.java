@@ -2,6 +2,7 @@ package com.englishlearning.backend.controller.grammar;
 
 import com.englishlearning.backend.dto.grammar.request.GrammarTheoryCreateRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTopicRequest;
+import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTheoryResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicDetailResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
@@ -25,6 +26,25 @@ import java.util.List;
 public class GrammarTeacherController {
 
     private final GrammarTeacherService grammarTeacherService;
+
+    // =====================================================
+    // ROADMAP
+    // =====================================================
+
+    @GetMapping("/roadmaps")
+    public ResponseEntity<ApiResponse<List<GrammarRoadmapResponse>>> getRoadmapsForTeacher(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long teacherId = userDetails.getUser().getId();
+        List<GrammarRoadmapResponse> response =
+                grammarTeacherService.getAllRoadmapsForTeacher(teacherId);
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                200,
+                "Lấy danh sách lộ trình thành công",
+                response
+        ));
+    }
 
     // =====================================================
     // TOPIC

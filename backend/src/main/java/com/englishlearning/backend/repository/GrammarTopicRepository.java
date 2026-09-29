@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface GrammarTopicRepository extends JpaRepository<GrammarTopic, Long> {
 
     // =====================================================
-    // CHO HỌC SINH (chỉ thấy PUBLISHED)
+    // STUDENT: chỉ thấy PUBLISHED
     // =====================================================
     List<GrammarTopic> findByRoadmapIdAndStatusOrderByDisplayOrderAsc(
             Long roadmapId, GrammarStatus status);
@@ -22,32 +22,51 @@ public interface GrammarTopicRepository extends JpaRepository<GrammarTopic, Long
     Optional<GrammarTopic> findBySlugAndStatus(String slug, GrammarStatus status);
 
     // =====================================================
-    // CHO GIÁO VIÊN / ADMIN (thấy mọi status)
+    // TEACHER: PUBLISHED của mọi người + của mình (mọi status)
+    // =====================================================
+    @Query("SELECT t FROM GrammarTopic t WHERE t.roadmap.id = :roadmapId " +
+            "AND (t.status = 'PUBLISHED' OR t.createdBy.id = :teacherId) " +
+            "ORDER BY t.displayOrder ASC")
+    List<GrammarTopic> findForTeacher(
+            @Param("roadmapId") Long roadmapId,
+            @Param("teacherId") Long teacherId);
+
+    // =====================================================
+    // ADMIN: tất cả trừ DRAFT
+    // =====================================================
+    @Query("SELECT t FROM GrammarTopic t WHERE t.roadmap.id = :roadmapId " +
+            "AND t.status != 'DRAFT' " +
+            "ORDER BY t.displayOrder ASC")
+    List<GrammarTopic> findForAdmin(@Param("roadmapId") Long roadmapId);
+
+    // =====================================================
+    // QUERY CŨ (giữ nguyên)
     // =====================================================
     List<GrammarTopic> findByRoadmapIdOrderByDisplayOrderAsc(Long roadmapId);
-
     List<GrammarTopic> findByRoadmapIdAndStatusInOrderByDisplayOrderAsc(
             Long roadmapId, List<GrammarStatus> statuses);
-
     List<GrammarTopic> findByStatusOrderByDisplayOrderAsc(GrammarStatus status);
-
     Optional<GrammarTopic> findBySlug(String slug);
 
-    // =====================================================
-    // ĐẾM / THỐNG KÊ
-    // =====================================================
     int countByRoadmapId(Long roadmapId);
-
     int countByRoadmapIdAndStatus(Long roadmapId, GrammarStatus status);
 
-    @Query("SELECT COALESCE(SUM(t.totalQuestions), 0) FROM GrammarTopic t " +
-            "WHERE t.roadmap.id = :roadmapId AND t.status = :status")
-    int sumTotalQuestionsByRoadmapIdAndStatus(
+    // =====================================================
+    // ĐẾM CHO ROADMAP (theo role)
+    // =====================================================
+    @Query("SELECT COUNT(t) FROM GrammarTopic t WHERE t.roadmap.id = :roadmapId " +
+            "AND (t.status = 'PUBLISHED' OR t.createdBy.id = :teacherId)")
+    int countForTeacher(
             @Param("roadmapId") Long roadmapId,
-            @Param("status") GrammarStatus status);
+            @Param("teacherId") Long teacherId);
 
-    // Kiểm tra slug đã tồn tại (trừ chính nó khi update)
+    @Query("SELECT COUNT(t) FROM GrammarTopic t WHERE t.roadmap.id = :roadmapId " +
+            "AND t.status != 'DRAFT'")
+    int countForAdmin(@Param("roadmapId") Long roadmapId);
+
+    // =====================================================
+    // VALIDATE
+    // =====================================================
     boolean existsBySlug(String slug);
-
     boolean existsBySlugAndIdNot(String slug, Long id);
 }

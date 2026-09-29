@@ -14,7 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,7 +39,7 @@ public class GrammarRoadmapServiceImpl implements GrammarRoadmapService {
     }
 
     // =====================================================
-    // GET ROADMAP DETAIL (kèm cây topic PUBLISHED)
+    // GET ROADMAP DETAIL (kèm list topic PUBLISHED)
     // =====================================================
     @Override
     public GrammarRoadmapResponse getRoadmapDetail(Long roadmapId) {
@@ -46,63 +47,23 @@ public class GrammarRoadmapServiceImpl implements GrammarRoadmapService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lộ trình"));
 
         // Chỉ lấy topic đã PUBLISHED
-        List<GrammarTopic> allTopics = topicRepository
+        List<GrammarTopicResponse> topics = topicRepository
                 .findByRoadmapIdAndStatusOrderByDisplayOrderAsc(
-                        roadmapId, GrammarStatus.PUBLISHED);
-
-        List<GrammarTopicResponse> tree = buildTree(allTopics);
+                        roadmapId, GrammarStatus.PUBLISHED)
+                .stream()
+                .map(t -> GrammarTopicResponse.builder()
+                        .id(t.getId())
+                        .name(t.getName())
+                        .slug(t.getSlug())
+                        .description(t.getDescription())
+                        .displayOrder(t.getDisplayOrder())
+                        .status(t.getStatus().name())
+                        .build())
+                .collect(Collectors.toList());
 
         GrammarRoadmapResponse response = toResponse(roadmap, true);
-        response.setTopics(tree);
+        response.setTopics(topics);
         return response;
-    }
-
-    // =====================================================
-    // BUILD TREE (parent/children)
-    // =====================================================
-    private List<GrammarTopicResponse> buildTree(List<GrammarTopic> allTopics) {
-        if (allTopics.isEmpty()) return new ArrayList<>();
-
-        Map<Long, GrammarTopicResponse> map = new LinkedHashMap<>();
-
-        // Tạo response cho mỗi topic
-        for (GrammarTopic t : allTopics) {
-            map.put(t.getId(), GrammarTopicResponse.builder()
-                    .id(t.getId())
-                    .name(t.getName())
-                    .slug(t.getSlug())
-                    .description(t.getDescription())
-                    .displayOrder(t.getDisplayOrder())
-                    .totalQuestions(t.getTotalQuestions())
-                    .icon(t.getIcon())
-                    .parentId(t.getParent() != null ? t.getParent().getId() : null)
-                    .status(t.getStatus().name())
-                    .children(new ArrayList<>())
-                    .build());
-        }
-
-        // Gắn con vào cha
-        List<GrammarTopicResponse> roots = new ArrayList<>();
-        for (GrammarTopicResponse node : map.values()) {
-            if (node.getParentId() == null) {
-                roots.add(node);
-            } else {
-                GrammarTopicResponse parent = map.get(node.getParentId());
-                if (parent != null) {
-                    parent.getChildren().add(node);
-                } else {
-                    // Parent không có trong danh sách (bị filter do status)
-                    // → coi như root để không mất dữ liệu
-                    roots.add(node);
-                }
-            }
-        }
-
-        // Sort theo displayOrder (giữ nguyên thứ tự)
-        roots.sort(Comparator.comparing(GrammarTopicResponse::getDisplayOrder,
-                Comparator.nullsLast(Comparator.naturalOrder())));
-
-        return roots;
     }
 
     // =====================================================
@@ -110,8 +71,6 @@ public class GrammarRoadmapServiceImpl implements GrammarRoadmapService {
     // =====================================================
     private GrammarRoadmapResponse toResponse(GrammarRoadmap r, boolean includeTopics) {
         int totalTopics = topicRepository.countByRoadmapIdAndStatus(
-                r.getId(), GrammarStatus.PUBLISHED);
-        int totalQuestions = topicRepository.sumTotalQuestionsByRoadmapIdAndStatus(
                 r.getId(), GrammarStatus.PUBLISHED);
 
         return GrammarRoadmapResponse.builder()
@@ -123,7 +82,6 @@ public class GrammarRoadmapServiceImpl implements GrammarRoadmapService {
                 .description(r.getDescription())
                 .color(r.getColor())
                 .totalTopics(totalTopics)
-                .totalQuestions(totalQuestions)
                 .build();
     }
 }

@@ -2,6 +2,7 @@ package com.englishlearning.backend.service.grammar.impl;
 
 import com.englishlearning.backend.dto.grammar.request.GrammarTheoryCreateRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTopicRequest;
+import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTheoryResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicDetailResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
@@ -14,6 +15,7 @@ import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.GrammarRoadmapRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
 import com.englishlearning.backend.repository.GrammarTopicRepository;
+import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.service.grammar.GrammarTeacherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,22 +37,51 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     private final GrammarRoadmapRepository roadmapRepository;
     private final GrammarTopicRepository topicRepository;
     private final GrammarTheoryRepository theoryRepository;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+
+    // =====================================================
+    // ROADMAP
+    // =====================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GrammarRoadmapResponse> getAllRoadmapsForTeacher(Long teacherId) {
+        return roadmapRepository.findAllByOrderByDisplayOrderAsc()
+                .stream()
+                .map(r -> {
+                    int totalTopics = topicRepository.countForTeacher(r.getId(), teacherId);
+                    return GrammarRoadmapResponse.builder()
+                            .id(r.getId())
+                            .name(r.getName())
+                            .subtitle(r.getSubtitle())
+                            .level(r.getLevel())
+                            .levelLabel(r.getLevelLabel())
+                            .description(r.getDescription())
+                            .color(r.getColor())
+                            .totalTopics(totalTopics)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
 
     // =====================================================
     // TOPIC
     // =====================================================
 
+    /**
+     * TEACHER thấy:
+     *  - PUBLISHED của mọi người
+     *  - DRAFT / PENDING / REJECTED / HIDDEN của chính mình
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GrammarTopicResponse> getMyTopics(Long teacherId, Long roadmapId) {
-        List<GrammarTopic> topics;
-        if (roadmapId != null) {
-            topics = topicRepository.findByRoadmapIdOrderByDisplayOrderAsc(roadmapId);
-        } else {
-            topics = topicRepository.findAll();
+        if (roadmapId == null) {
+            return new ArrayList<>();
         }
-        return topics.stream()
+        return topicRepository.findForTeacher(roadmapId, teacherId)
+                .stream()
                 .map(this::toTopicResponse)
                 .collect(Collectors.toList());
     }
@@ -72,7 +103,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
                 .name(topic.getName())
                 .slug(topic.getSlug())
                 .description(topic.getDescription())
-                .totalQuestions(topic.getTotalQuestions())
+                .displayOrder(topic.getDisplayOrder())
                 .status(topic.getStatus().name())
                 .theories(theories)
                 .build();
@@ -80,7 +111,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
 
     @Override
     public GrammarTopicResponse createTopic(Long teacherId, GrammarTopicRequest request) {
-        // Validate slug unique
         if (topicRepository.existsBySlug(request.getSlug())) {
             throw new BusinessException("Slug đã tồn tại: " + request.getSlug());
         }
@@ -88,21 +118,13 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarRoadmap roadmap = roadmapRepository.findById(request.getRoadmapId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy roadmap"));
 
-        GrammarTopic parent = null;
-        if (request.getParentId() != null) {
-            parent = topicRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy topic cha"));
-        }
-
         GrammarTopic topic = new GrammarTopic();
         topic.setRoadmap(roadmap);
-        topic.setParent(parent);
+        topic.setCreatedBy(userRepository.getReferenceById(teacherId));
         topic.setName(request.getName().trim());
         topic.setSlug(request.getSlug().trim().toLowerCase());
         topic.setDescription(request.getDescription());
         topic.setDisplayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0);
-        topic.setTotalQuestions(request.getTotalQuestions() != null ? request.getTotalQuestions() : 0);
-        topic.setIcon(request.getIcon());
         topic.setStatus(GrammarStatus.DRAFT);
 
         GrammarTopic saved = topicRepository.save(topic);
@@ -114,13 +136,16 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // Chỉ cho sửa khi DRAFT hoặc REJECTED
+        // ✅ Check quyền sở hữu
+        if (!topic.getCreatedBy().getId().equals(teacherId)) {
+            throw new BusinessException("Bạn không có quyền sửa chủ điểm này");
+        }
+
         if (topic.getStatus() != GrammarStatus.DRAFT
                 && topic.getStatus() != GrammarStatus.REJECTED) {
             throw new BusinessException("Chỉ có thể sửa chủ điểm ở trạng thái NHÁP hoặc TỪ CHỐI");
         }
 
-        // Validate slug unique (trừ chính nó)
         if (!topic.getSlug().equals(request.getSlug())
                 && topicRepository.existsBySlugAndIdNot(request.getSlug(), topicId)) {
             throw new BusinessException("Slug đã tồn tại: " + request.getSlug());
@@ -130,8 +155,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         topic.setSlug(request.getSlug().trim().toLowerCase());
         topic.setDescription(request.getDescription());
         if (request.getDisplayOrder() != null) topic.setDisplayOrder(request.getDisplayOrder());
-        if (request.getTotalQuestions() != null) topic.setTotalQuestions(request.getTotalQuestions());
-        topic.setIcon(request.getIcon());
 
         GrammarTopic saved = topicRepository.save(topic);
         return toTopicResponse(saved);
@@ -141,6 +164,11 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     public void deleteTopic(Long teacherId, Long topicId) {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
+
+        // ✅ Check quyền sở hữu
+        if (!topic.getCreatedBy().getId().equals(teacherId)) {
+            throw new BusinessException("Bạn không có quyền xóa chủ điểm này");
+        }
 
         if (topic.getStatus() != GrammarStatus.DRAFT) {
             throw new BusinessException("Chỉ có thể xóa chủ điểm ở trạng thái NHÁP");
@@ -154,16 +182,19 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
+        // ✅ Check quyền sở hữu
+        if (!topic.getCreatedBy().getId().equals(teacherId)) {
+            throw new BusinessException("Bạn không có quyền gửi duyệt chủ điểm này");
+        }
+
         if (topic.getStatus() != GrammarStatus.DRAFT
                 && topic.getStatus() != GrammarStatus.REJECTED) {
             throw new BusinessException("Chỉ có thể gửi duyệt chủ điểm ở trạng thái NHÁP hoặc TỪ CHỐI");
         }
 
-        // Đổi status topic
         topic.setStatus(GrammarStatus.PENDING);
         topicRepository.save(topic);
 
-        // Đổi tất cả theory DRAFT → PENDING
         List<GrammarTheory> theories = theoryRepository
                 .findByTopicIdOrderByDisplayOrderAsc(topicId);
         for (GrammarTheory theory : theories) {
@@ -195,6 +226,11 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTopic topic = topicRepository.findById(request.getTopicId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
+        // ✅ Check quyền sở hữu topic
+        if (!topic.getCreatedBy().getId().equals(teacherId)) {
+            throw new BusinessException("Bạn không có quyền thêm lý thuyết cho chủ điểm này");
+        }
+
         if (topic.getStatus() != GrammarStatus.DRAFT
                 && topic.getStatus() != GrammarStatus.REJECTED) {
             throw new BusinessException("Chỉ có thể thêm lý thuyết khi chủ điểm ở trạng thái NHÁP");
@@ -220,6 +256,11 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
 
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
+
+        // ✅ Check quyền sở hữu topic
+        if (!topic.getCreatedBy().getId().equals(teacherId)) {
+            throw new BusinessException("Bạn không có quyền thêm lý thuyết cho chủ điểm này");
+        }
 
         if (topic.getStatus() != GrammarStatus.DRAFT
                 && topic.getStatus() != GrammarStatus.REJECTED) {
@@ -251,6 +292,11 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTheory theory = theoryRepository.findById(theoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lý thuyết"));
 
+        // ✅ Check quyền sở hữu topic chứa theory này
+        if (!theory.getTopic().getCreatedBy().getId().equals(teacherId)) {
+            throw new BusinessException("Bạn không có quyền sửa lý thuyết này");
+        }
+
         if (theory.getStatus() != GrammarStatus.DRAFT
                 && theory.getStatus() != GrammarStatus.REJECTED) {
             throw new BusinessException("Chỉ có thể sửa lý thuyết ở trạng thái NHÁP hoặc TỪ CHỐI");
@@ -270,6 +316,11 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     public void deleteTheory(Long teacherId, Long theoryId) {
         GrammarTheory theory = theoryRepository.findById(theoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lý thuyết"));
+
+        // ✅ Check quyền sở hữu topic chứa theory này
+        if (!theory.getTopic().getCreatedBy().getId().equals(teacherId)) {
+            throw new BusinessException("Bạn không có quyền xóa lý thuyết này");
+        }
 
         if (theory.getStatus() != GrammarStatus.DRAFT) {
             throw new BusinessException("Chỉ có thể xóa lý thuyết ở trạng thái NHÁP");
@@ -299,11 +350,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
                 .slug(t.getSlug())
                 .description(t.getDescription())
                 .displayOrder(t.getDisplayOrder())
-                .totalQuestions(t.getTotalQuestions())
-                .icon(t.getIcon())
-                .parentId(t.getParent() != null ? t.getParent().getId() : null)
                 .status(t.getStatus().name())
-                .children(new ArrayList<>())
                 .build();
     }
 

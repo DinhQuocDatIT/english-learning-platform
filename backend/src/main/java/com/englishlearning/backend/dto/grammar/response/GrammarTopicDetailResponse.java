@@ -15,7 +15,7 @@ public class GrammarTopicDetailResponse {
     private String name;
     private String slug;
     private String description;
-    private Integer totalQuestions;
+    private Integer displayOrder;
     private String status;
     private List<GrammarTheoryResponse> theories = new ArrayList<>();
 }
