@@ -62,7 +62,12 @@ import PaymentHistoryPage from "../pages/admin/membershipPackage/PaymentHistoryP
 import TeacherGrammarRoadmapList from "../pages/teacher/Grammar/TeacherGrammarRoadmapList/TeacherGrammarRoadmapList";
 import TeacherGrammarTopicList from "../pages/teacher/Grammar/TeacherGrammarTopicList/TeacherGrammarTopicList";
 import TeacherGrammarTopicForm from "../pages/teacher/Grammar/TeacherGrammarTopicForm/TeacherGrammarTopicForm";
-import TeacherGrammarTheoryManage from "../pages/teacher/Grammar/TeacherGrammarTheoryManage/TeacherGrammarTheoryManage";
+import TeacherGrammarTopicLayout from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTopicLayout";
+import TeacherGrammarTheory from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTheory/TeacherGrammarTheory";
+import TeacherGrammarTip from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTip/TeacherGrammarTip";
+import TeacherGrammarExample from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarExample/TeacherGrammarExample";
+import TeacherGrammarQuiz from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarQuiz/TeacherGrammarQuiz";
+import TeacherGrammarHistory from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarHistory/TeacherGrammarHistory";
 
 // ===== GRAMMAR — ADMIN =====
 import AdminGrammarRoadmapList from "../pages/admin/Grammar/AdminGrammarRoadmapList/AdminGrammarRoadmapList";
@@ -171,7 +176,7 @@ function AppRoutes() {
               element={<ListeningPreview />}
             />
 
-            {/* ===== GRAMMAR ===== */}
+            {/* ===== GRAMMAR — TEACHER ===== */}
             <Route path="grammar" element={<TeacherGrammarRoadmapList />} />
             <Route
               path="grammar/roadmaps/:roadmapId/topics"
@@ -185,10 +190,19 @@ function AppRoutes() {
               path="grammar/roadmaps/:roadmapId/topics/:topicId/edit"
               element={<TeacherGrammarTopicForm />}
             />
+
+            {/* Layout 5 tab cho Teacher */}
             <Route
-              path="grammar/topics/:topicId/theories"
-              element={<TeacherGrammarTheoryManage />}
-            />
+              path="grammar/topics/:topicId"
+              element={<TeacherGrammarTopicLayout />}
+            >
+              <Route index element={<TeacherGrammarTheory />} />
+              <Route path="theory" element={<TeacherGrammarTheory />} />
+              <Route path="tips" element={<TeacherGrammarTip />} />
+              <Route path="examples" element={<TeacherGrammarExample />} />
+              <Route path="quiz" element={<TeacherGrammarQuiz />} />
+              <Route path="history" element={<TeacherGrammarHistory />} />
+            </Route>
           </Route>
 
           {/* ==================== ADMIN ==================== */}
@@ -267,7 +281,7 @@ function AppRoutes() {
             />
             <Route path="ai-usage" element={<AdminAIUsage />} />
 
-            {/* ===== GRAMMAR ===== */}
+            {/* ===== GRAMMAR — ADMIN ===== */}
             <Route path="grammar" element={<AdminGrammarRoadmapList />} />
             <Route
               path="grammar/roadmaps/create"
@@ -282,7 +296,7 @@ function AppRoutes() {
               element={<AdminGrammarTopicList />}
             />
 
-            {/* ✅ Yêu cầu chỉnh sửa — ĐẶT TRƯỚC nested layout */}
+            {/* Yêu cầu chỉnh sửa — đặt trước nested layout */}
             <Route
               path="grammar/edit-requests"
               element={<AdminGrammarEditRequests />}

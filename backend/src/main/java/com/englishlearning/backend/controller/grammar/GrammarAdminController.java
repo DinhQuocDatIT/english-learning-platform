@@ -186,4 +186,15 @@ public class GrammarAdminController {
         return ResponseEntity.ok(new ApiResponse<>(
                 200, "Từ chối yêu cầu thành công", response));
     }
+  
+    @PostMapping("/topics/{topicId}/restore")
+    public ResponseEntity<ApiResponse<GrammarTopicResponse>> restoreTopic(
+            @PathVariable Long topicId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long adminId = userDetails.getUser().getId();
+        GrammarTopicResponse response =
+                grammarAdminService.restoreTopic(adminId, topicId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Bỏ ẩn chủ điểm thành công", response));
+    }
 }

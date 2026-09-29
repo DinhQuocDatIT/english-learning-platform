@@ -193,7 +193,7 @@ function TeacherGrammarTopicList() {
           <button
             className={`${styles.actionBtn} ${styles.primaryBtn}`}
             onClick={() =>
-              navigate(`/dashboard/teacher/grammar/topics/${topic.id}/theories`)
+              navigate(`/dashboard/teacher/grammar/topics/${topic.id}/theory`)
             }
             title="Quản lý lý thuyết"
           >

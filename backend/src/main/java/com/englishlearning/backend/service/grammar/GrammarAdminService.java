@@ -22,7 +22,7 @@ public interface GrammarAdminService {
     GrammarTopicResponse publishTopic(Long adminId, Long topicId);
     GrammarTopicResponse unpublishTopic(Long adminId, Long topicId);
     GrammarTopicResponse rejectTopic(Long adminId, Long topicId, String reason);
-
+    GrammarTopicResponse restoreTopic(Long adminId, Long topicId);
     // Review history
     List<GrammarTopicReviewResponse> getTopicHistory(Long topicId);
 }

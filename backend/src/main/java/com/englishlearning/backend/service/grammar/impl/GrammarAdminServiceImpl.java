@@ -218,7 +218,36 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         log.info("❌ Admin {} đã từ chối topic id={}, lý do: {}", adminId, topicId, reason);
         return toTopicResponse(saved);
     }
+    @Override
+    public GrammarTopicResponse restoreTopic(Long adminId, Long topicId) {
+        GrammarTopic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
+        if (topic.getStatus() != GrammarStatus.HIDDEN) {
+            throw new BusinessException("Chỉ có thể bỏ ẩn chủ điểm đang bị ẩn");
+        }
+
+        topic.setStatus(GrammarStatus.PUBLISHED);
+        GrammarTopic saved = topicRepository.save(topic);
+
+        // Restore tất cả theory về PUBLISHED
+        List<GrammarTheory> theories = theoryRepository
+                .findByTopicIdOrderByDisplayOrderAsc(topicId);
+        for (GrammarTheory theory : theories) {
+            if (theory.getStatus() == GrammarStatus.HIDDEN
+                    || theory.getStatus() == GrammarStatus.PUBLISHED) {
+                theory.setStatus(GrammarStatus.PUBLISHED);
+            }
+        }
+        theoryRepository.saveAll(theories);
+
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
+        reviewService.log(topic, GrammarReviewAction.APPROVE, "Bỏ ẩn chủ điểm", admin);
+
+        log.info("✅ Admin {} đã bỏ ẩn topic id={}", adminId, topicId);
+        return toTopicResponse(saved);
+    }
     @Override
     @Transactional(readOnly = true)
     public List<GrammarTopicReviewResponse> getTopicHistory(Long topicId) {

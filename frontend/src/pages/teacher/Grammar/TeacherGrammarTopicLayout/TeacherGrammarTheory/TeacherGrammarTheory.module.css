@@ -1,0 +1,895 @@
+/* =========================================================
+   TEACHER GRAMMAR THEORY MANAGE
+   ========================================================= */
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px 40px 120px;
+  background: var(--color-background);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.container *,
+.container *::before,
+.container *::after {
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.container h1,
+.container h2,
+.container h3,
+.container h4,
+.container p,
+.container span,
+.container strong,
+.container small,
+.container label,
+.container button,
+.container input,
+.container select,
+.container textarea,
+.container code,
+.container table,
+.container th,
+.container td {
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 14px;
+  color: var(--color-text-muted);
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary);
+}
+
+/* ================= BACK ================= */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  margin-bottom: 18px;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.backBtn span {
+  font-size: 13px;
+  font-weight: 500;
+  color: inherit;
+}
+
+.backBtn svg {
+  font-size: 12px;
+}
+
+.backBtn:hover {
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+  border-color: var(--color-primary);
+}
+
+/* ================= HEADER ================= */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.topicLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 4px 10px;
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.topicLabel svg {
+  font-size: 10px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.4px;
+  line-height: 1.25;
+}
+
+.topicSlug {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  padding: 4px 10px;
+  background: color-mix(in srgb, var(--color-primary) 10%, white);
+  color: var(--color-accent);
+  border-radius: 6px;
+  font-family: "Consolas", "Monaco", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 6px 16px -6px rgba(14, 167, 146, 0.6);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.addBtn span {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.addBtn svg {
+  font-size: 12px;
+}
+
+.addBtn:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -6px rgba(14, 167, 146, 0.6);
+}
+
+/* ================= PAGE (khung giấy) ================= */
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 48px 56px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px -8px rgba(15, 23, 42, 0.06);
+}
+
+.pageContent {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ================= SECTION BLOCK ================= */
+.sectionBlock {
+  position: relative;
+  padding: 4px 8px;
+  margin: 0 -8px;
+  border-radius: 10px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.sectionBlock:hover {
+  background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+}
+
+/* EDITING */
+.sectionEditing {
+  padding: 16px;
+  margin: 0;
+  background: color-mix(in srgb, var(--color-primary) 3%, white);
+  border: 2px solid var(--color-primary);
+  cursor: default;
+}
+
+.sectionEditing:hover {
+  padding: 16px;
+  margin: 0;
+  background: color-mix(in srgb, var(--color-primary) 3%, white);
+}
+
+/* ================= SECTION TITLE ROW ================= */
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-secondary);
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sectionTitle::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 20px;
+  background: var(--color-primary);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ================= EDIT INPUTS ================= */
+.titleInput {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 14px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--color-secondary);
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.titleInput::placeholder {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.titleInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+.typeSelect {
+  padding: 8px 12px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.typeSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+.orderInput {
+  width: 64px;
+  padding: 8px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.orderInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+/* ================= ACTIONS ================= */
+.sectionActions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.sectionBlock:hover .sectionActions,
+.sectionEditing .sectionActions {
+  opacity: 1;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--color-text-muted);
+}
+
+.iconBtn svg {
+  font-size: 12px;
+  color: inherit;
+}
+
+.iconBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.iconBtnDelete {
+  color: #dc2626;
+}
+
+.iconBtnDelete:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+/* ================= CONTENT ================= */
+.sectionContent {
+  padding-left: 14px;
+}
+
+.textContent {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+/* ================= VIEW TABLE ================= */
+.viewTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.viewTable th,
+.viewTable td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  font-family: inherit;
+}
+
+.viewTable th {
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 13px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.viewTable td {
+  color: var(--color-text);
+}
+
+.viewTable tr:last-child td {
+  border-bottom: none;
+}
+
+/* ================= VIEW LIST ================= */
+.viewList {
+  margin: 0;
+  padding-left: 24px;
+  font-size: 15px;
+  line-height: 1.8;
+  list-style: disc;
+  color: var(--color-text);
+}
+
+.viewList li {
+  margin-bottom: 4px;
+  display: list-item;
+  font-family: inherit;
+}
+
+.viewList li::marker {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+/* ================= VIEW NOTE ================= */
+.viewNote {
+  padding: 14px 18px;
+  border-left: 3px solid;
+
+  font-size: 14.5px;
+  line-height: 1.6;
+  font-style: italic;
+  font-family: inherit;
+}
+
+.note_yellow {
+  background: #fffbeb;
+  border-color: #fbbf24;
+  color: #92400e;
+}
+
+.note_blue {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1e40af;
+}
+
+.note_green {
+  background: #f0fdf4;
+  border-color: #22c55e;
+  color: #166534;
+}
+
+.note_red {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+/* ================= EDIT TEXTAREA ================= */
+.contentTextarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 90px;
+  font-family: inherit;
+  color: var(--color-text);
+  transition: all 0.15s ease;
+}
+
+.contentTextarea::placeholder {
+  color: #94a3b8;
+  font-family: inherit;
+}
+
+.contentTextarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+/* ================= HINT TEXT ================= */
+.hintText {
+  margin: 8px 0 0 0;
+  padding: 8px 12px;
+  background: #fffbeb;
+  border-left: 3px solid #fbbf24;
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: #92400e;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.hintText strong {
+  font-weight: 700;
+  color: #78350f;
+}
+
+/* ================= TABLE EDITOR ================= */
+.tableWrapper {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px;
+  overflow-x: auto;
+}
+
+.editTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+.editTable th,
+.editTable td {
+  padding: 6px;
+  border: 1px solid var(--color-border);
+}
+
+.editTable th {
+  background: var(--color-tertiary);
+}
+
+.editTable input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-size: 13px;
+  background: transparent;
+  font-family: inherit;
+  color: var(--color-text);
+  transition: all 0.15s ease;
+}
+
+.editTable input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 2px rgba(14, 167, 146, 0.12);
+}
+
+/* ================= LIST EDITOR ================= */
+.listWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.listRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.listBullet {
+  color: var(--color-primary);
+  font-weight: 800;
+  font-size: 16px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.listRow input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--color-text);
+  transition: all 0.15s ease;
+}
+
+.listRow input::placeholder {
+  color: #94a3b8;
+  font-family: inherit;
+}
+
+.listRow input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+/* ================= BUTTONS ================= */
+.rowDeleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.rowDeleteBtn svg {
+  font-size: 11px;
+  color: inherit;
+}
+
+.rowDeleteBtn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.addRowBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px dashed var(--color-primary);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.addRowBtn span {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.addRowBtn svg {
+  font-size: 10px;
+}
+
+.addRowBtn:hover {
+  background: var(--color-tertiary);
+  border-style: solid;
+}
+
+/* ================= COLOR OPTIONS ================= */
+.colorOptions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.colorBtn {
+  padding: 6px 14px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: all 0.15s ease;
+}
+
+.colorBtn:hover {
+  transform: translateY(-1px);
+}
+
+.color_yellow {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.color_blue {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.color_green {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.color_red {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.colorActive {
+  border-color: var(--color-secondary);
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.25);
+}
+
+/* ================= EMPTY ================= */
+.emptyBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 40px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.emptyBox p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: inherit;
+}
+
+/* ================= SAVE BAR ================= */
+.saveBar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 22px;
+  background: var(--color-secondary);
+  color: var(--color-text-white);
+  border-radius: 999px;
+  box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.4);
+  z-index: 100;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.saveBarText {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-white);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.saveAllBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  border: none;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.saveAllBtn span {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.saveAllBtn svg {
+  font-size: 12px;
+}
+
+.saveAllBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.saveAllBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 800px) {
+  .container {
+    padding: 18px 20px 100px;
+  }
+
+  .page {
+    padding: 24px 20px;
+    border-radius: 14px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .addBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sectionTitleRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .titleInput {
+    width: 100%;
+  }
+
+  .saveBar {
+    width: calc(100% - 40px);
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .saveAllBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .sectionContent {
+    padding-left: 0;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+}
+
+/* ================= ACTION ROW ================= */
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}

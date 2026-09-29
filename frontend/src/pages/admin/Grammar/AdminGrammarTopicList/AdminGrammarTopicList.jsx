@@ -10,6 +10,7 @@ import {
   faCheck,
   faEyeSlash,
   faFilter,
+  faRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
@@ -86,6 +87,18 @@ function AdminGrammarTopicList() {
     }
   };
 
+  // ✅ Bỏ ẩn — đưa topic về PUBLISHED
+  const handleRestore = async (topic) => {
+    if (!window.confirm(`Bỏ ẩn chủ điểm "${topic.name}"?`)) return;
+    try {
+      await grammarService.adminRestoreTopic(topic.id);
+      toast.success("Đã bỏ ẩn chủ điểm!");
+      fetchData();
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Không thể bỏ ẩn.");
+    }
+  };
+
   const countByStatus = (status) => {
     if (status === "ALL") return topics.length;
     return topics.filter((t) => t.status === status).length;
@@ -101,6 +114,7 @@ function AdminGrammarTopicList() {
     const isPublished = topic.status === "PUBLISHED";
     const isPending = topic.status === "PENDING";
     const isRejected = topic.status === "REJECTED";
+    const isHidden = topic.status === "HIDDEN";
 
     const orderNumber =
       topic.displayOrder != null ? topic.displayOrder : index + 1;
@@ -165,6 +179,18 @@ function AdminGrammarTopicList() {
             </button>
           )}
 
+          {/* ✅ Nút Bỏ ẩn — chỉ hiện khi topic HIDDEN */}
+          {isHidden && (
+            <button
+              className={`${styles.actionBtn} ${styles.restoreBtn}`}
+              onClick={() => handleRestore(topic)}
+              title="Bỏ ẩn chủ điểm"
+            >
+              <FontAwesomeIcon icon={faRotateLeft} />
+              <span>Bỏ ẩn</span>
+            </button>
+          )}
+
           <button
             className={styles.actionBtn}
             onClick={() =>
@@ -206,7 +232,7 @@ function AdminGrammarTopicList() {
         <span>Quay lại</span>
       </button>
 
-      {/* HEADER — tên trái, label phải */}
+      {/* HEADER */}
       <div className={styles.header}>
         <h1 className={styles.headerTitle}>{roadmap?.name}</h1>
         <span className={styles.levelLabel}>

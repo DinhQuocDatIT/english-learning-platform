@@ -174,6 +174,9 @@ const GrammarService = {
       { note },
     );
   },
+  adminRestoreTopic(topicId) {
+    return axiosClient.post(`/v1/admin/grammar/topics/${topicId}/restore`);
+  },
 };
 
 export default GrammarService;
