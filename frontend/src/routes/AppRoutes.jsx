@@ -58,6 +58,9 @@ import AdminAIUsage from "../pages/admin/AIUsage/AdminAIUsage";
 import StudentProfile from "../pages/student/StudentProfile/StudentProfile";
 import PaymentHistoryPage from "../pages/admin/membershipPackage/PaymentHistoryPage/PaymentHistoryPage";
 
+// ===== GRAMMAR — STUDENT =====
+import StudentGrammarRoadmap from "../pages/student/Grammar/StudentGrammarRoadmap/StudentGrammarRoadmap";
+
 // ===== GRAMMAR — TEACHER =====
 import TeacherGrammarRoadmapList from "../pages/teacher/Grammar/TeacherGrammarRoadmapList/TeacherGrammarRoadmapList";
 import TeacherGrammarTopicList from "../pages/teacher/Grammar/TeacherGrammarTopicList/TeacherGrammarTopicList";
@@ -127,6 +130,9 @@ function AppRoutes() {
               element={<StudentAIPracticeChat />}
             />
             <Route path="profile" element={<StudentProfile />} />
+
+            {/* ===== GRAMMAR — STUDENT ===== */}
+            <Route path="grammar" element={<StudentGrammarRoadmap />} />
           </Route>
 
           {/* ==================== TEACHER ==================== */}
