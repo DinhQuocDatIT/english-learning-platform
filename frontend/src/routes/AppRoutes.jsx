@@ -60,6 +60,11 @@ import PaymentHistoryPage from "../pages/admin/membershipPackage/PaymentHistoryP
 
 // ===== GRAMMAR — STUDENT =====
 import StudentGrammarRoadmap from "../pages/student/Grammar/StudentGrammarRoadmap/StudentGrammarRoadmap";
+import StudentGrammarTopicLayout from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarTopicLayout";
+import StudentGrammarTheory from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarTheory/StudentGrammarTheory";
+import StudentGrammarTip from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarTip/StudentGrammarTip";
+import StudentGrammarExample from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarExample/StudentGrammarExample";
+import StudentGrammarQuiz from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarQuiz/StudentGrammarQuiz";
 
 // ===== GRAMMAR — TEACHER =====
 import TeacherGrammarRoadmapList from "../pages/teacher/Grammar/TeacherGrammarRoadmapList/TeacherGrammarRoadmapList";
@@ -133,6 +138,18 @@ function AppRoutes() {
 
             {/* ===== GRAMMAR — STUDENT ===== */}
             <Route path="grammar" element={<StudentGrammarRoadmap />} />
+
+            {/* Layout 4 tab cho Student */}
+            <Route
+              path="grammar/topics/:topicId"
+              element={<StudentGrammarTopicLayout />}
+            >
+              <Route index element={<StudentGrammarTheory />} />
+              <Route path="theory" element={<StudentGrammarTheory />} />
+              <Route path="tips" element={<StudentGrammarTip />} />
+              <Route path="examples" element={<StudentGrammarExample />} />
+              <Route path="quiz" element={<StudentGrammarQuiz />} />
+            </Route>
           </Route>
 
           {/* ==================== TEACHER ==================== */}
