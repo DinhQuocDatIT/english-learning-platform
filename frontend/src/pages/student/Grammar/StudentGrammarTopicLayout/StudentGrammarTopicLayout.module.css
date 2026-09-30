@@ -1,0 +1,304 @@
+/* =========================================================
+   STUDENT GRAMMAR TOPIC LAYOUT
+   ========================================================= */
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px 40px 60px;
+  background: var(--color-background, #ffffff);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text, #334155);
+  box-sizing: border-box;
+}
+
+/* Ép font cứng cho mọi thẻ con */
+.container,
+.container *,
+.container *::before,
+.container *::after {
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* Liệt kê từng loại thẻ - chặn global CSS ghi đè */
+.container h1,
+.container h2,
+.container h3,
+.container h4,
+.container h5,
+.container h6,
+.container p,
+.container span,
+.container strong,
+.container em,
+.container small,
+.container label,
+.container button,
+.container input,
+.container select,
+.container textarea,
+.container code,
+.container a,
+.container div {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* Ép riêng cho các class quan trọng */
+.headerTitle,
+.headerTitle *,
+.backBtn,
+.backBtn *,
+.tabBtn,
+.tabBtn *,
+.contentTitle,
+.contentTitle *,
+.contentSubtitle {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 14px;
+  color: var(--color-text-muted, #64748b);
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ================= BACK ================= */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text-muted, #64748b);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.backBtn span {
+  font-size: 13px;
+  font-weight: 500;
+  color: inherit;
+}
+
+.backBtn svg {
+  font-size: 12px;
+}
+
+.backBtn:hover {
+  background: var(--color-tertiary, #f2fbfa);
+  color: var(--color-accent, #168a7c);
+  border-color: var(--color-primary, #0ea792);
+}
+
+/* ================= HEADER — chỉ tên topic ================= */
+.headerCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 24px;
+  margin-bottom: 16px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.headerTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-primary, #0f172a);
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+/* ================= TAB BAR ================= */
+.tabBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  margin: 0 auto 20px auto;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: fit-content;
+}
+
+.tabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--color-text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tabBtn > span {
+  font-size: 13px;
+  font-weight: 500;
+  color: inherit;
+}
+
+.tabBtn:hover {
+  background: var(--color-tertiary, #f1f5f9);
+  color: var(--color-accent, #168a7c);
+}
+
+.tabBtn svg {
+  font-size: 12px;
+  color: inherit;
+}
+
+/* Active tab — dùng màu primary */
+.tabBtnActive {
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  font-weight: 600;
+}
+
+.tabBtnActive:hover {
+  background: var(--color-primary-hover, #52afa3);
+  color: var(--color-text-white, #ffffff);
+}
+
+/* ================= CONTENT WRAPPER ================= */
+.contentWrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px -4px rgba(15, 23, 42, 0.06);
+}
+
+.contentHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--color-surface, #ffffff);
+  border-bottom: 1px solid var(--color-border, #f1f5f9);
+}
+
+.contentIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-primary) 15%, white);
+  color: var(--color-primary, #0ea792);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.contentIcon svg {
+  color: inherit;
+}
+
+.contentTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-accent, #168a7c);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.contentSubtitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-secondary, #0f172a);
+  letter-spacing: 0;
+  text-transform: none;
+  margin-left: 4px;
+}
+
+.contentBody {
+  padding: 32px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 300px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 800px) {
+  .container {
+    padding: 16px 16px 40px;
+  }
+
+  .headerCard {
+    padding: 16px 18px;
+  }
+
+  .headerTitle {
+    font-size: 17px;
+  }
+
+  .tabBar {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .tabBtn {
+    padding: 8px 12px;
+    font-size: 12.5px;
+  }
+
+  .tabBtn > span {
+    font-size: 12.5px;
+  }
+
+  .contentBody {
+    padding: 20px 20px 30px;
+  }
+
+  .contentTitle {
+    font-size: 12px;
+  }
+
+  .contentSubtitle {
+    font-size: 12px;
+  }
+}

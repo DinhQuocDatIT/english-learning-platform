@@ -41,6 +41,11 @@ export const sidebarMenus = {
       icon: faRobot,
     },
     {
+      path: "/dashboard/student/grammar",
+      name: "Ngữ pháp",
+      icon: faSpellCheck,
+    },
+    {
       path: "/dashboard/student/profile",
       name: "Hồ sơ",
       icon: faUser,
