@@ -1,11 +1,13 @@
 package com.englishlearning.backend.repository;
 
 import com.englishlearning.backend.entity.Student;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -29,4 +31,21 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             @Param("xp") int xp,
             @Param("studentId") Long studentId
     );
+    @Query("""
+        SELECT s FROM Student s
+        JOIN FETCH s.user u
+        WHERE u.deletedAt IS NULL
+        ORDER BY s.experience DESC, s.id ASC
+    """)
+    List<Student> findTopStudents(Pageable pageable);
+
+    /**
+     * Đếm tổng số student active (user chưa bị xóa mềm).
+     */
+    @Query("""
+        SELECT COUNT(s) FROM Student s
+        JOIN s.user u
+        WHERE u.deletedAt IS NULL
+    """)
+    long countActiveStudents();
 }
