@@ -19,6 +19,7 @@ import {
   faUser,
   faSpellCheck,
   faClipboardCheck,
+  faTrophy,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -44,6 +45,11 @@ export const sidebarMenus = {
       path: "/dashboard/student/grammar",
       name: "Ngữ pháp",
       icon: faSpellCheck,
+    },
+    {
+      path: "/dashboard/student/leaderboard",
+      name: "Bảng xếp hạng",
+      icon: faTrophy,
     },
     {
       path: "/dashboard/student/profile",

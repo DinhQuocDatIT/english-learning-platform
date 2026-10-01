@@ -58,6 +58,9 @@ import AdminAIUsage from "../pages/admin/AIUsage/AdminAIUsage";
 import StudentProfile from "../pages/student/StudentProfile/StudentProfile";
 import PaymentHistoryPage from "../pages/admin/membershipPackage/PaymentHistoryPage/PaymentHistoryPage";
 
+// ===== LEADERBOARD — STUDENT =====
+import Leaderboard from "../pages/student/Leaderboard/Leaderboard";
+
 // ===== GRAMMAR — STUDENT =====
 import StudentGrammarRoadmap from "../pages/student/Grammar/StudentGrammarRoadmap/StudentGrammarRoadmap";
 import StudentGrammarTopicLayout from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarTopicLayout";
@@ -136,10 +139,12 @@ function AppRoutes() {
             />
             <Route path="profile" element={<StudentProfile />} />
 
+            {/* ===== LEADERBOARD — STUDENT ===== */}
+            <Route path="leaderboard" element={<Leaderboard />} />
+
             {/* ===== GRAMMAR — STUDENT ===== */}
             <Route path="grammar" element={<StudentGrammarRoadmap />} />
 
-            {/* Layout 4 tab cho Student */}
             <Route
               path="grammar/topics/:topicId"
               element={<StudentGrammarTopicLayout />}
@@ -159,7 +164,6 @@ function AppRoutes() {
           >
             <Route path="profile" element={<TeacherProfile />} />
 
-            {/*   quản lý từ vựng */}
             <Route path="vocabulary" element={<VocabularyManagement />} />
             <Route path="create-vocabulary" element={<CreateVocabulary />} />
             <Route path="import-vocabulary" element={<ImportVocabulary />} />
@@ -167,12 +171,10 @@ function AppRoutes() {
               path="update-vocabulary/:id"
               element={<UpdateVocabulary />}
             />
-            {/* quản lý học sinh */}
             <Route path="students" element={<StudentManagement />} />
             <Route path="create-student" element={<CreateStudent />} />
             <Route path="student-detail/:id" element={<StudentDetail />} />
 
-            {/* topic — listening */}
             <Route path="topics" element={<TeacherTopicList />} />
             <Route
               path="topics/:topicId"
@@ -214,7 +216,6 @@ function AppRoutes() {
               element={<TeacherGrammarTopicForm />}
             />
 
-            {/* Layout 5 tab cho Teacher */}
             <Route
               path="grammar/topics/:topicId"
               element={<TeacherGrammarTopicLayout />}
@@ -236,7 +237,6 @@ function AppRoutes() {
             <Route path="profile" element={<AdminProfile />} />
             <Route path="index" element={<DashBoard />} />
 
-            {/*   quản lý từ vựng */}
             <Route path="vocabulary" element={<VocabularyManagement />} />
             <Route path="create-vocabulary" element={<CreateVocabulary />} />
             <Route path="import-vocabulary" element={<ImportVocabulary />} />
@@ -244,17 +244,14 @@ function AppRoutes() {
               path="update-vocabulary/:id"
               element={<UpdateVocabulary />}
             />
-            {/* Quản lý giáo viên */}
             <Route path="teachers" element={<TeacherManagement />} />
             <Route path="create-teacher" element={<CreateTeacher />} />
             <Route path="teacher-detail/:id" element={<TeacherDetail />} />
 
-            {/* quản lý học sinh */}
             <Route path="students" element={<StudentManagement />} />
             <Route path="create-student" element={<CreateStudent />} />
             <Route path="student-detail/:id" element={<StudentDetail />} />
 
-            {/* quản lý gói thành viên */}
             <Route
               path="membership-package"
               element={<MembershipPackageManage />}
@@ -273,10 +270,8 @@ function AppRoutes() {
             />
             <Route path="payment-history" element={<PaymentHistoryPage />} />
 
-            {/* quản lý cấp độ */}
             <Route path="level" element={<LevelManage />} />
 
-            {/*   quản lý chủ đề — listening */}
             <Route path="topics" element={<TopicManage />} />
             <Route path="create-topic" element={<CreateTopic />} />
             <Route path="edit-topic/:id" element={<EditTopic />} />
@@ -319,13 +314,11 @@ function AppRoutes() {
               element={<AdminGrammarTopicList />}
             />
 
-            {/* Yêu cầu chỉnh sửa — đặt trước nested layout */}
             <Route
               path="grammar/edit-requests"
               element={<AdminGrammarEditRequests />}
             />
 
-            {/* Nested layout — 5 tab */}
             <Route
               path="grammar/topics/:topicId"
               element={<AdminGrammarTopicLayout />}
