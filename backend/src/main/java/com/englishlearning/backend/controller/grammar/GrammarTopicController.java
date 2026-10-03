@@ -1,9 +1,11 @@
 package com.englishlearning.backend.controller.grammar;
 
 import com.englishlearning.backend.dto.grammar.response.GrammarExampleResponse;
+import com.englishlearning.backend.dto.grammar.response.GrammarTipResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicDetailResponse;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.service.grammar.GrammarExampleService;
+import com.englishlearning.backend.service.grammar.GrammarTipService;
 import com.englishlearning.backend.service.grammar.GrammarTopicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +21,7 @@ public class GrammarTopicController {
 
     private final GrammarTopicService topicService;
     private final GrammarExampleService exampleService;
-
+    private final GrammarTipService tipService;
     /**
      * Lấy chi tiết topic kèm danh sách lý thuyết PUBLISHED
      */
@@ -55,5 +57,13 @@ public class GrammarTopicController {
                         response
                 )
         );
+    }
+    @GetMapping("/{id}/tips")
+    public ResponseEntity<ApiResponse<List<GrammarTipResponse>>> getPublishedTips(
+            @PathVariable Long id
+    ) {
+        List<GrammarTipResponse> response = tipService.getPublishedTips(id);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ApiResponse<>(200, "Lấy danh sách mẹo thành công", response));
     }
 }

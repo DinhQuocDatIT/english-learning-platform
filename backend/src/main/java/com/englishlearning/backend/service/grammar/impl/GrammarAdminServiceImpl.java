@@ -15,6 +15,7 @@ import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.GrammarExampleRepository;
 import com.englishlearning.backend.repository.GrammarRoadmapRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
+import com.englishlearning.backend.repository.GrammarTipRepository;
 import com.englishlearning.backend.repository.GrammarTopicRepository;
 import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.service.grammar.GrammarAdminService;
@@ -37,6 +38,7 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
     private final GrammarTopicRepository topicRepository;
     private final GrammarTheoryRepository theoryRepository;
     private final GrammarExampleRepository exampleRepository;
+    private final GrammarTipRepository tipRepository;
     private final UserRepository userRepository;
     private final GrammarTopicReviewService reviewService;
 
@@ -170,6 +172,14 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.REJECTED, GrammarStatus.PUBLISHED);
 
+        // Publish tất cả tip
+        tipRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.PENDING, GrammarStatus.PUBLISHED);
+        tipRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.DRAFT, GrammarStatus.PUBLISHED);
+        tipRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.REJECTED, GrammarStatus.PUBLISHED);
+
         // Ghi history
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
@@ -189,6 +199,10 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
 
         // Ẩn example theo
         exampleRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.PUBLISHED, GrammarStatus.HIDDEN);
+
+        // Ẩn tip theo
+        tipRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PUBLISHED, GrammarStatus.HIDDEN);
 
         User admin = userRepository.findById(adminId)
@@ -229,6 +243,10 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PENDING, GrammarStatus.REJECTED);
 
+        // Tip PENDING → REJECTED
+        tipRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.PENDING, GrammarStatus.REJECTED);
+
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
         reviewService.log(topic, GrammarReviewAction.REJECT, reason.trim(), admin);
@@ -262,6 +280,10 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
 
         // Restore examples
         exampleRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.HIDDEN, GrammarStatus.PUBLISHED);
+
+        // Restore tips
+        tipRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.HIDDEN, GrammarStatus.PUBLISHED);
 
         User admin = userRepository.findById(adminId)

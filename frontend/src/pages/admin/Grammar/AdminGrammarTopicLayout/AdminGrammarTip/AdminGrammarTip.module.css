@@ -1,20 +1,406 @@
+/* =========================================================
+   ADMIN GRAMMAR TIP (interactive quiz)
+   ========================================================= */
+
+.loadingBox,
+.loadingBox *,
+.emptyBox,
+.emptyBox *,
+.list,
+.list *,
+.tipCard,
+.tipCard *,
+.tipHeader,
+.tipHeader *,
+.tipIcon,
+.tipIcon *,
+.tipTitle,
+.tipContent,
+.boxLabel,
+.applyBox,
+.applyBox *,
+.stepList,
+.stepList *,
+.quizBox,
+.quizBox *,
+.question,
+.optionsPreview,
+.optionsPreview *,
+.optionPreview,
+.optionPreview *,
+.optionLabel,
+.optionText,
+.resultBox,
+.resultBox *,
+.resetBtn {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  box-sizing: border-box;
+}
+
+.tipCard h1,
+.tipCard h2,
+.tipCard h3,
+.tipCard h4,
+.tipCard p,
+.tipCard span,
+.tipCard strong,
+.tipCard em,
+.tipCard small,
+.tipCard li,
+.tipCard ol,
+.tipCard ul,
+.tipCard label,
+.tipCard button,
+.tipCard div,
+.emptyBox p,
+.resultBox strong,
+.resultBox p,
+.optionPreview span {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ================= EMPTY ================= */
 .emptyBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  min-height: 240px;
+  gap: 12px;
+  min-height: 200px;
   padding: 40px;
   text-align: center;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
+  font-size: 14px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 3%, white);
+  border: 1px dashed var(--color-border, #e2e8f0);
+  border-radius: 12px;
 }
+
 .emptyIcon {
-  font-size: 42px;
-  opacity: 0.5;
-  color: #f59e0b;
+  font-size: 36px;
+  color: #fbbf24;
 }
+
 .emptyBox p {
   margin: 0;
+  color: var(--color-text-muted, #64748b);
   font-size: 14px;
+  font-weight: 500;
+}
+
+/* ================= LIST ================= */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ================= TIP CARD ================= */
+.tipCard {
+  padding: 20px 22px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 14px;
+  transition: border-color 0.15s ease;
+}
+
+.tipCard:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary, #0ea792) 40%,
+    var(--color-border, #e2e8f0)
+  );
+}
+
+/* ================= TIP HEADER ================= */
+.tipHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tipIcon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #fef3c7;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.tipTitle {
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  letter-spacing: -0.2px;
+  line-height: 1.4;
+}
+
+/* ================= CONTENT ================= */
+.tipContent {
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text, #334155);
+  white-space: pre-wrap;
+  font-weight: 400;
+}
+
+/* ================= BOX LABEL ================= */
+.boxLabel {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #d97706;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+/* ================= APPLY BOX ================= */
+.applyBox {
+  padding: 14px 16px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.applyBox .boxLabel {
+  color: #d97706;
+}
+
+.stepList {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #78350f;
+  list-style: decimal;
+}
+
+.stepList li {
+  margin-bottom: 2px;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: #78350f;
+  line-height: 1.7;
+}
+
+.stepList li::marker {
+  color: #d97706;
+  font-weight: 700;
+}
+
+/* ================= QUIZ BOX ================= */
+.quizBox {
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 5%, white);
+  border: 1px solid
+    color-mix(in srgb, var(--color-primary, #0ea792) 25%, transparent);
+  border-radius: 10px;
+}
+
+.quizBox .boxLabel {
+  color: var(--color-accent, #168a7c);
+}
+
+.question {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-secondary, #1e293b);
+  line-height: 1.5;
+}
+
+/* ================= OPTIONS ================= */
+.optionsPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optionPreview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: var(--color-text, #334155);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.optionPreview span {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 500;
+  color: inherit;
+}
+
+.optionPreview:not(:disabled):hover {
+  border-color: var(--color-primary, #0ea792);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 6%, white);
+}
+
+.optionPreview:disabled {
+  cursor: default;
+}
+
+/* =========================================================
+   OPTION ĐÚNG — DÙNG MÀU PRIMARY (giống teacher)
+   ========================================================= */
+.optionCorrect {
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 12%, white);
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-accent, #168a7c);
+  font-weight: 600;
+}
+
+.optionCorrect span {
+  color: var(--color-accent, #168a7c);
+  font-weight: 600;
+}
+
+/* Option sai — đỏ nhạt */
+.optionWrong {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.optionWrong span {
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.optionLabel {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: inherit;
+  font-size: 13.5px;
+}
+
+.optionText {
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: inherit;
+}
+
+/* =========================================================
+   RESULT BOX — DÙNG MÀU PRIMARY (giống teacher)
+   ========================================================= */
+.resultBox {
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 13.5px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resultBox strong {
+  display: block;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  margin: 0;
+}
+
+.resultBox p {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.65;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* ĐÚNG — nền xanh ngọc nhạt, viền xanh ngọc (giống Teacher) */
+.resultCorrect {
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 8%, white);
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary, #0ea792) 20%,
+    transparent
+  );
+  color: var(--color-accent, #168a7c);
+}
+
+.resultCorrect strong {
+  color: var(--color-accent, #168a7c);
+}
+
+/* SAI — đỏ nhạt */
+.resultWrong {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.resultWrong strong {
+  color: #dc2626;
+}
+
+/* =========================================================
+   RESET BUTTON
+   ========================================================= */
+.resetBtn {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.15s ease;
+}
+
+.resetBtn:hover {
+  opacity: 0.7;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 560px) {
+  .tipCard {
+    padding: 16px;
+  }
+
+  .tipTitle {
+    font-size: 15px;
+  }
 }

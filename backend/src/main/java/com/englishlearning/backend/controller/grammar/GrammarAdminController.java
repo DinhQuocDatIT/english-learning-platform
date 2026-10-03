@@ -3,16 +3,13 @@ package com.englishlearning.backend.controller.grammar;
 import com.englishlearning.backend.dto.grammar.request.GrammarEditRequestReviewRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarRoadmapRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTopicRejectRequest;
-import com.englishlearning.backend.dto.grammar.response.GrammarEditRequestResponse;
-import com.englishlearning.backend.dto.grammar.response.GrammarExampleResponse;
-import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
-import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
-import com.englishlearning.backend.dto.grammar.response.GrammarTopicReviewResponse;
+import com.englishlearning.backend.dto.grammar.response.*;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.security.CustomUserDetails;
 import com.englishlearning.backend.service.grammar.GrammarAdminService;
 import com.englishlearning.backend.service.grammar.GrammarEditRequestService;
 import com.englishlearning.backend.service.grammar.GrammarExampleService;
+import com.englishlearning.backend.service.grammar.GrammarTipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,7 +29,7 @@ public class GrammarAdminController {
     private final GrammarAdminService grammarAdminService;
     private final GrammarEditRequestService editRequestService;
     private final GrammarExampleService exampleService;
-
+    private final GrammarTipService tipService;
     // =====================================================
     // ROADMAP
     // =====================================================
@@ -210,5 +207,12 @@ public class GrammarAdminController {
                 editRequestService.rejectRequest(adminId, requestId, note);
         return ResponseEntity.ok(new ApiResponse<>(
                 200, "Từ chối yêu cầu thành công", response));
+    }
+    @GetMapping("/topics/{topicId}/tips")
+    public ResponseEntity<ApiResponse<List<GrammarTipResponse>>> getTipsForAdmin(
+            @PathVariable Long topicId) {
+        List<GrammarTipResponse> response = tipService.getTipsForAdmin(topicId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy danh sách mẹo thành công", response));
     }
 }

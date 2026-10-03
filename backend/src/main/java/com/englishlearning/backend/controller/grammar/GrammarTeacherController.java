@@ -1,15 +1,13 @@
 package com.englishlearning.backend.controller.grammar;
 
-import com.englishlearning.backend.dto.grammar.request.GrammarEditRequestCreateRequest;
-import com.englishlearning.backend.dto.grammar.request.GrammarExampleRequest;
-import com.englishlearning.backend.dto.grammar.request.GrammarTheoryCreateRequest;
-import com.englishlearning.backend.dto.grammar.request.GrammarTopicRequest;
+import com.englishlearning.backend.dto.grammar.request.*;
 import com.englishlearning.backend.dto.grammar.response.*;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.security.CustomUserDetails;
 import com.englishlearning.backend.service.grammar.GrammarEditRequestService;
 import com.englishlearning.backend.service.grammar.GrammarExampleService;
 import com.englishlearning.backend.service.grammar.GrammarTeacherService;
+import com.englishlearning.backend.service.grammar.GrammarTipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +27,7 @@ public class GrammarTeacherController {
     private final GrammarTeacherService grammarTeacherService;
     private final GrammarEditRequestService editRequestService;
     private final GrammarExampleService exampleService;
-
+    private final GrammarTipService tipService;
     // =====================================================
     // ROADMAP
     // =====================================================
@@ -262,5 +260,46 @@ public class GrammarTeacherController {
         exampleService.deleteExample(teacherId, exampleId);
         return ResponseEntity.ok(new ApiResponse<>(
                 200, "Xóa ví dụ thành công", null));
+    }
+    @GetMapping("/topics/{topicId}/tips")
+    public ResponseEntity<ApiResponse<List<GrammarTipResponse>>> getTips(
+            @PathVariable Long topicId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        List<GrammarTipResponse> response =
+                tipService.getTipsForEdit(teacherId, topicId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy danh sách mẹo thành công", response));
+    }
+
+    @PostMapping("/tips")
+    public ResponseEntity<ApiResponse<GrammarTipResponse>> createTip(
+            @Valid @RequestBody GrammarTipRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        GrammarTipResponse response = tipService.createTip(teacherId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
+                201, "Tạo mẹo thành công", response));
+    }
+
+    @PutMapping("/tips/{tipId}")
+    public ResponseEntity<ApiResponse<GrammarTipResponse>> updateTip(
+            @PathVariable Long tipId,
+            @Valid @RequestBody GrammarTipRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        GrammarTipResponse response = tipService.updateTip(teacherId, tipId, request);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Cập nhật mẹo thành công", response));
+    }
+
+    @DeleteMapping("/tips/{tipId}")
+    public ResponseEntity<ApiResponse<Void>> deleteTip(
+            @PathVariable Long tipId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        tipService.deleteTip(teacherId, tipId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Xóa mẹo thành công", null));
     }
 }

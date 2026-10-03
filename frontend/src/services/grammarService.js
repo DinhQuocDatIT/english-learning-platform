@@ -17,7 +17,9 @@ const GrammarService = {
   getTopicDetail(topicId) {
     return axiosClient.get(`/v1/grammar/topics/${topicId}`);
   },
-
+  getPublishedTips(topicId) {
+    return axiosClient.get(`/v1/grammar/topics/${topicId}/tips`);
+  },
   // =====================================================
   // TEACHER — ROADMAP
   // =====================================================
@@ -115,6 +117,21 @@ const GrammarService = {
     return axiosClient.delete(`/v1/teacher/grammar/examples/${exampleId}`);
   },
   // =====================================================
+  // TEACHER — TIP
+  // =====================================================
+  getTips(topicId) {
+    return axiosClient.get(`/v1/teacher/grammar/topics/${topicId}/tips`);
+  },
+  createTip(data) {
+    return axiosClient.post("/v1/teacher/grammar/tips", data);
+  },
+  updateTip(tipId, data) {
+    return axiosClient.put(`/v1/teacher/grammar/tips/${tipId}`, data);
+  },
+  deleteTip(tipId) {
+    return axiosClient.delete(`/v1/teacher/grammar/tips/${tipId}`);
+  },
+  // =====================================================
   // ADMIN — ROADMAP
   // =====================================================
   adminGetAllRoadmaps() {
@@ -167,6 +184,9 @@ const GrammarService = {
   },
   adminGetExamples(topicId) {
     return axiosClient.get(`/v1/admin/grammar/topics/${topicId}/examples`);
+  },
+  adminGetTips(topicId) {
+    return axiosClient.get(`/v1/admin/grammar/topics/${topicId}/tips`);
   },
   // =====================================================
   // ADMIN — EDIT REQUEST (MỚI)

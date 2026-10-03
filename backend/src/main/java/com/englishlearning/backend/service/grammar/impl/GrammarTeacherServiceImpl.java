@@ -18,6 +18,7 @@ import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.GrammarExampleRepository;
 import com.englishlearning.backend.repository.GrammarRoadmapRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
+import com.englishlearning.backend.repository.GrammarTipRepository;
 import com.englishlearning.backend.repository.GrammarTopicRepository;
 import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.service.grammar.GrammarTeacherService;
@@ -43,6 +44,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     private final GrammarTopicRepository topicRepository;
     private final GrammarTheoryRepository theoryRepository;
     private final GrammarExampleRepository exampleRepository;
+    private final GrammarTipRepository tipRepository;
     private final UserRepository userRepository;
     private final GrammarTopicReviewService reviewService;
     private final ObjectMapper objectMapper;
@@ -76,11 +78,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     // TOPIC
     // =====================================================
 
-    /**
-     * TEACHER thấy:
-     *  - PUBLISHED của mọi người
-     *  - DRAFT / PENDING / REJECTED / HIDDEN của chính mình
-     */
     @Override
     @Transactional(readOnly = true)
     public List<GrammarTopicResponse> getMyTopics(Long teacherId, Long roadmapId) {
@@ -219,6 +216,12 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.REJECTED, GrammarStatus.PENDING);
 
+        // ===== Tip: DRAFT/REJECTED → PENDING =====
+        tipRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.DRAFT, GrammarStatus.PENDING);
+        tipRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.REJECTED, GrammarStatus.PENDING);
+
         // 📝 Ghi lịch sử duyệt
         User teacher = userRepository.findById(teacherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
@@ -238,7 +241,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // Teacher chỉ xem history của topic do mình tạo
         if (!topic.getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền xem lịch sử chủ điểm này");
         }
@@ -264,7 +266,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTopic topic = topicRepository.findById(request.getTopicId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // ✅ Check quyền sở hữu topic
         if (!topic.getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền thêm lý thuyết cho chủ điểm này");
         }
@@ -295,7 +296,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // ✅ Check quyền sở hữu topic
         if (!topic.getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền thêm lý thuyết cho chủ điểm này");
         }
@@ -330,7 +330,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTheory theory = theoryRepository.findById(theoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lý thuyết"));
 
-        // ✅ Check quyền sở hữu topic chứa theory này
         if (!theory.getTopic().getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền sửa lý thuyết này");
         }
@@ -355,7 +354,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTheory theory = theoryRepository.findById(theoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lý thuyết"));
 
-        // ✅ Check quyền sở hữu topic chứa theory này
         if (!theory.getTopic().getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền xóa lý thuyết này");
         }

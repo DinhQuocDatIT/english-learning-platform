@@ -2,6 +2,65 @@
    TEACHER GRAMMAR EXAMPLE
    ========================================================= */
 
+/* Ép font cứng cho mọi thẻ — không dùng inherit */
+.loadingBox,
+.loadingBox *,
+.readOnlyBanner,
+.readOnlyBanner *,
+.actionRow,
+.actionRow *,
+.addBtn,
+.addBtn *,
+.list,
+.list *,
+.emptyBox,
+.emptyBox *,
+.item,
+.item *,
+.itemBody,
+.itemBody *,
+.order,
+.sentenceEn,
+.sentenceVi,
+.note,
+.inputEn,
+.inputVi,
+.inputNote,
+.editFooter,
+.editFooter *,
+.orderLabel,
+.orderInput,
+.cancelBtn,
+.cancelBtn *,
+.deleteBtn,
+.saveBar,
+.saveBar *,
+.saveBarText,
+.saveAllBtn,
+.saveAllBtn * {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  box-sizing: border-box;
+}
+
+/* Ép từng loại thẻ con trong các class có text */
+.readOnlyBanner span,
+.readOnlyBanner strong,
+.readOnlyBanner svg,
+.itemBody p,
+.itemBody span,
+.itemBody strong,
+.itemBody div,
+.sentenceEn,
+.sentenceVi,
+.note,
+.orderLabel,
+.orderLabel span,
+.saveBarText,
+.saveBar span {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* ================= LOADING ================= */
 .loadingBox {
   display: flex;
   flex-direction: column;
@@ -9,12 +68,12 @@
   justify-content: center;
   min-height: 400px;
   gap: 14px;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
 }
 
 .spinner {
   font-size: 32px;
-  color: var(--color-primary);
+  color: var(--color-primary, #0ea792);
 }
 
 /* ================= READONLY BANNER ================= */
@@ -38,9 +97,21 @@
   color: #d97706;
 }
 
+/* Ép font cứng cho span bên trong */
+.readOnlyBanner span {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: #92400e !important;
+  line-height: 1.5 !important;
+}
+
 .readOnlyBanner strong {
-  font-weight: 700;
-  color: #78350f;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #78350f !important;
+  line-height: 1.5 !important;
 }
 
 /* ================= ACTION ROW ================= */
@@ -55,8 +126,8 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  background: var(--color-primary);
-  color: var(--color-text-white);
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
   border: none;
   border-radius: 10px;
   font-size: 13.5px;
@@ -77,7 +148,7 @@
 }
 
 .addBtn:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+  background: var(--color-primary-hover, #52afa3);
   transform: translateY(-2px);
   box-shadow: 0 10px 22px -6px rgba(14, 167, 146, 0.6);
 }
@@ -103,16 +174,18 @@
   min-height: 200px;
   padding: 40px;
   text-align: center;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
   font-size: 14px;
-  background: color-mix(in srgb, var(--color-primary) 3%, white);
-  border: 1px dashed var(--color-border);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 3%, white);
+  border: 1px dashed var(--color-border, #e2e8f0);
   border-radius: 12px;
 }
 
 .emptyBox p {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* ================= ITEM ================= */
@@ -121,8 +194,8 @@
   display: flex;
   gap: 14px;
   padding: 16px 18px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -131,8 +204,8 @@
 .item:hover {
   border-color: color-mix(
     in srgb,
-    var(--color-primary) 50%,
-    var(--color-border)
+    var(--color-primary, #0ea792) 50%,
+    var(--color-border, #e2e8f0)
   );
   box-shadow: 0 4px 14px -6px rgba(14, 167, 146, 0.25);
 }
@@ -140,23 +213,23 @@
 .itemEditing {
   cursor: default;
   padding: 16px;
-  background: color-mix(in srgb, var(--color-primary) 3%, white);
-  border: 2px solid var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 3%, white);
+  border: 2px solid var(--color-primary, #0ea792);
   box-shadow: 0 4px 18px -6px rgba(14, 167, 146, 0.3);
 }
 
 .itemEditing:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-primary, #0ea792);
   box-shadow: 0 4px 18px -6px rgba(14, 167, 146, 0.3);
 }
 
 .itemReadOnly {
   cursor: default;
-  background: color-mix(in srgb, var(--color-secondary) 2%, white);
+  background: color-mix(in srgb, var(--color-secondary, #1e293b) 2%, white);
 }
 
 .itemReadOnly:hover {
-  border-color: var(--color-border);
+  border-color: var(--color-border, #e2e8f0);
   box-shadow: none;
 }
 
@@ -166,14 +239,13 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--color-tertiary);
-  color: var(--color-accent);
+  background: var(--color-tertiary, #f8fafc);
+  color: var(--color-accent, #168a7c);
   font-weight: 800;
   font-size: 12.5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: inherit;
 }
 
 /* ================= ITEM BODY ================= */
@@ -189,7 +261,7 @@
   margin: 0;
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-secondary);
+  color: var(--color-secondary, #1e293b);
   line-height: 1.5;
   letter-spacing: -0.2px;
 }
@@ -198,19 +270,20 @@
   margin: 0;
   font-size: 14px;
   font-style: italic;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
   line-height: 1.5;
 }
 
 .note {
   margin-top: 4px;
   padding: 10px 14px;
-  background: color-mix(in srgb, var(--color-primary) 6%, white);
-  border-left: 3px solid var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 6%, white);
+  border-left: 3px solid var(--color-primary, #0ea792);
   border-radius: 6px;
   font-size: 13px;
-  color: var(--color-text);
+  color: var(--color-text, #334155);
   line-height: 1.6;
+  font-weight: 400;
 }
 
 /* ================= EDIT INPUTS ================= */
@@ -219,12 +292,12 @@
 .inputNote {
   width: 100%;
   padding: 10px 14px;
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
   border-radius: 8px;
   font-size: 14px;
-  font-family: inherit;
-  color: var(--color-text);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  color: var(--color-text, #334155);
   outline: none;
   transition: all 0.15s ease;
   box-sizing: border-box;
@@ -233,12 +306,12 @@
 .inputEn {
   font-weight: 600;
   font-size: 15px;
-  color: var(--color-secondary);
+  color: var(--color-secondary, #1e293b);
 }
 
 .inputVi {
   font-style: italic;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
 }
 
 .inputNote {
@@ -251,13 +324,13 @@
 .inputVi::placeholder,
 .inputNote::placeholder {
   color: #94a3b8;
-  font-family: inherit;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
 .inputEn:focus,
 .inputVi:focus,
 .inputNote:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-primary, #0ea792);
   box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
 }
 
@@ -277,26 +350,26 @@
   gap: 8px;
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
 }
 
 .orderInput {
   width: 64px;
   padding: 7px 8px;
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
   border-radius: 8px;
   font-size: 12.5px;
   font-weight: 700;
-  font-family: inherit;
-  color: var(--color-text-muted);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  color: var(--color-text-muted, #64748b);
   text-align: center;
   transition: all 0.15s ease;
 }
 
 .orderInput:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--color-primary, #0ea792);
   box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
 }
 
@@ -305,13 +378,13 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  border: 1.5px solid var(--color-border);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text-muted, #64748b);
+  border: 1.5px solid var(--color-border, #e2e8f0);
   border-radius: 8px;
   font-size: 12.5px;
   font-weight: 700;
-  font-family: inherit;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -327,8 +400,8 @@
 }
 
 .cancelBtn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-primary, #0ea792);
   transform: translateY(-1px);
 }
 
@@ -341,11 +414,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
   border-radius: 8px;
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
   cursor: pointer;
   transition: all 0.15s ease;
   align-self: flex-start;
@@ -364,7 +437,7 @@
 .deleteBtn:hover {
   background: #dc2626;
   border-color: #dc2626;
-  color: #fff;
+  color: #ffffff;
 }
 
 /* ================= SAVE BAR ================= */
@@ -377,8 +450,8 @@
   align-items: center;
   gap: 20px;
   padding: 12px 22px;
-  background: var(--color-secondary);
-  color: var(--color-text-white);
+  background: var(--color-secondary, #1e293b);
+  color: var(--color-text-white, #ffffff);
   border-radius: 999px;
   box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.4);
   z-index: 100;
@@ -399,9 +472,9 @@
 .saveBarText {
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-text-white);
+  color: var(--color-text-white, #ffffff);
   white-space: nowrap;
-  font-family: inherit;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
 .saveAllBtn {
@@ -409,13 +482,13 @@
   align-items: center;
   gap: 8px;
   padding: 9px 18px;
-  background: var(--color-primary);
-  color: var(--color-text-white);
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
   border: none;
   border-radius: 999px;
   font-size: 13.5px;
   font-weight: 700;
-  font-family: inherit;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -431,7 +504,7 @@
 }
 
 .saveAllBtn:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+  background: var(--color-primary-hover, #52afa3);
   transform: translateY(-1px);
 }
 
