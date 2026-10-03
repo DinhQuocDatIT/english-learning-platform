@@ -1,12 +1,14 @@
 package com.englishlearning.backend.controller.grammar;
 
 import com.englishlearning.backend.dto.grammar.request.GrammarEditRequestCreateRequest;
+import com.englishlearning.backend.dto.grammar.request.GrammarExampleRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTheoryCreateRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTopicRequest;
 import com.englishlearning.backend.dto.grammar.response.*;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.security.CustomUserDetails;
 import com.englishlearning.backend.service.grammar.GrammarEditRequestService;
+import com.englishlearning.backend.service.grammar.GrammarExampleService;
 import com.englishlearning.backend.service.grammar.GrammarTeacherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class GrammarTeacherController {
 
     private final GrammarTeacherService grammarTeacherService;
     private final GrammarEditRequestService editRequestService;
+    private final GrammarExampleService exampleService;
 
     // =====================================================
     // ROADMAP
@@ -211,5 +214,53 @@ public class GrammarTeacherController {
         grammarTeacherService.deleteTheory(teacherId, theoryId);
         return ResponseEntity.ok(new ApiResponse<>(
                 200, "Xóa lý thuyết thành công", null));
+    }
+
+    // =====================================================
+    // EXAMPLE
+    // =====================================================
+
+    @GetMapping("/topics/{topicId}/examples")
+    public ResponseEntity<ApiResponse<List<GrammarExampleResponse>>> getExamples(
+            @PathVariable Long topicId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        List<GrammarExampleResponse> response =
+                exampleService.getExamplesForEdit(teacherId, topicId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy danh sách ví dụ thành công", response));
+    }
+
+    @PostMapping("/examples")
+    public ResponseEntity<ApiResponse<GrammarExampleResponse>> createExample(
+            @Valid @RequestBody GrammarExampleRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        GrammarExampleResponse response =
+                exampleService.createExample(teacherId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
+                201, "Tạo ví dụ thành công", response));
+    }
+
+    @PutMapping("/examples/{exampleId}")
+    public ResponseEntity<ApiResponse<GrammarExampleResponse>> updateExample(
+            @PathVariable Long exampleId,
+            @Valid @RequestBody GrammarExampleRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        GrammarExampleResponse response =
+                exampleService.updateExample(teacherId, exampleId, request);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Cập nhật ví dụ thành công", response));
+    }
+
+    @DeleteMapping("/examples/{exampleId}")
+    public ResponseEntity<ApiResponse<Void>> deleteExample(
+            @PathVariable Long exampleId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        exampleService.deleteExample(teacherId, exampleId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Xóa ví dụ thành công", null));
     }
 }

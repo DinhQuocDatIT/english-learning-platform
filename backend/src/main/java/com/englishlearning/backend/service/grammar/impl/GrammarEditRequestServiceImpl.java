@@ -10,6 +10,7 @@ import com.englishlearning.backend.enums.GrammarReviewAction;
 import com.englishlearning.backend.enums.GrammarStatus;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
+import com.englishlearning.backend.repository.GrammarExampleRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
 import com.englishlearning.backend.repository.GrammarTopicEditRequestRepository;
 import com.englishlearning.backend.repository.GrammarTopicRepository;
@@ -34,6 +35,7 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
     private final GrammarTopicEditRequestRepository editRequestRepository;
     private final GrammarTopicRepository topicRepository;
     private final GrammarTheoryRepository theoryRepository;
+    private final GrammarExampleRepository exampleRepository;
     private final UserRepository userRepository;
     private final GrammarTopicReviewService reviewService;
 
@@ -185,6 +187,10 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
             }
         }
         theoryRepository.saveAll(theories);
+
+        // ✅ Chuyển tất cả example của topic về DRAFT (nếu đang PUBLISHED)
+        exampleRepository.updateStatusByTopicAndFromStatus(
+                topic.getId(), GrammarStatus.PUBLISHED, GrammarStatus.DRAFT);
 
         // Ghi log
         reviewService.log(topic, GrammarReviewAction.APPROVE_EDIT,

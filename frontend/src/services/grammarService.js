@@ -11,7 +11,9 @@ const GrammarService = {
   getRoadmapDetail(roadmapId) {
     return axiosClient.get(`/v1/grammar/roadmaps/${roadmapId}`);
   },
-
+  getPublishedExamples(topicId) {
+    return axiosClient.get(`/v1/grammar/topics/${topicId}/examples`);
+  },
   getTopicDetail(topicId) {
     return axiosClient.get(`/v1/grammar/topics/${topicId}`);
   },
@@ -97,7 +99,21 @@ const GrammarService = {
       `/v1/teacher/grammar/topics/${topicId}/edit-requests`,
     );
   },
-
+  // =====================================================
+  // TEACHER — EXAMPLE
+  // =====================================================
+  getExamples(topicId) {
+    return axiosClient.get(`/v1/teacher/grammar/topics/${topicId}/examples`);
+  },
+  createExample(data) {
+    return axiosClient.post("/v1/teacher/grammar/examples", data);
+  },
+  updateExample(exampleId, data) {
+    return axiosClient.put(`/v1/teacher/grammar/examples/${exampleId}`, data);
+  },
+  deleteExample(exampleId) {
+    return axiosClient.delete(`/v1/teacher/grammar/examples/${exampleId}`);
+  },
   // =====================================================
   // ADMIN — ROADMAP
   // =====================================================
@@ -149,7 +165,9 @@ const GrammarService = {
   adminGetTopicHistory(topicId) {
     return axiosClient.get(`/v1/admin/grammar/topics/${topicId}/history`);
   },
-
+  adminGetExamples(topicId) {
+    return axiosClient.get(`/v1/admin/grammar/topics/${topicId}/examples`);
+  },
   // =====================================================
   // ADMIN — EDIT REQUEST (MỚI)
   // =====================================================

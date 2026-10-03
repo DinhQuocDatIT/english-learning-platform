@@ -1,23 +1,149 @@
+/* =========================================================
+   STUDENT GRAMMAR EXAMPLE (readonly)
+   ========================================================= */
+
+.loadingBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 14px;
+  color: var(--color-text-muted);
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary);
+}
+
+/* ================= EMPTY ================= */
 .emptyBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  min-height: 240px;
+  gap: 12px;
+  min-height: 200px;
   padding: 40px;
   text-align: center;
-  color: #64748b;
-  font-family: inherit;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  background: color-mix(in srgb, var(--color-primary) 3%, white);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
 }
+
 .emptyIcon {
-  font-size: 42px;
-  opacity: 0.5;
-  color: #7c3aed;
+  font-size: 36px;
+  color: #cbd5e1;
 }
+
 .emptyBox p {
   margin: 0;
-  font-size: 14px;
-  color: #64748b;
+  color: var(--color-text-muted);
+}
+
+/* ================= LIST ================= */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ================= ITEM ================= */
+.item {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.item:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary) 40%,
+    var(--color-border)
+  );
+  box-shadow: 0 4px 14px -6px rgba(14, 167, 146, 0.2);
+}
+
+/* ================= ORDER BADGE ================= */
+.order {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+  font-weight: 800;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: inherit;
+}
+
+/* ================= ITEM BODY ================= */
+.itemBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sentenceEn {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--color-secondary);
+  line-height: 1.55;
+  letter-spacing: -0.2px;
+}
+
+.sentenceVi {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.note {
+  margin-top: 4px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--color-primary) 6%, white);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 560px) {
+  .item {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .order {
+    width: 24px;
+    height: 24px;
+    font-size: 11.5px;
+  }
+
+  .sentenceEn {
+    font-size: 14.5px;
+  }
+
+  .sentenceVi,
+  .note {
+    font-size: 12.5px;
+  }
 }
