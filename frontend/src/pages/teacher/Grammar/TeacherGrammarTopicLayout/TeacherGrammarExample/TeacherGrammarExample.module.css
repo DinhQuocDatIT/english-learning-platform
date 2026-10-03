@@ -1,20 +1,489 @@
-.emptyBox {
+/* =========================================================
+   TEACHER GRAMMAR EXAMPLE
+   ========================================================= */
+
+.loadingBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 400px;
   gap: 14px;
-  min-height: 240px;
+  color: var(--color-text-muted);
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary);
+}
+
+/* ================= READONLY BANNER ================= */
+.readOnlyBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #fffbeb;
+  border-left: 3px solid #fbbf24;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.readOnlyBanner svg {
+  font-size: 14px;
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.readOnlyBanner strong {
+  font-weight: 700;
+  color: #78350f;
+}
+
+/* ================= ACTION ROW ================= */
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 6px 16px -6px rgba(14, 167, 146, 0.6);
+}
+
+.addBtn span {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.addBtn svg {
+  font-size: 12px;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -6px rgba(14, 167, 146, 0.6);
+}
+
+.addBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ================= LIST ================= */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ================= EMPTY ================= */
+.emptyBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
   padding: 40px;
   text-align: center;
   color: var(--color-text-muted);
+  font-size: 14px;
+  background: color-mix(in srgb, var(--color-primary) 3%, white);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
 }
-.emptyIcon {
-  font-size: 42px;
-  opacity: 0.5;
-  color: #7c3aed;
-}
+
 .emptyBox p {
   margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* ================= ITEM ================= */
+.item {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.item:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary) 50%,
+    var(--color-border)
+  );
+  box-shadow: 0 4px 14px -6px rgba(14, 167, 146, 0.25);
+}
+
+.itemEditing {
+  cursor: default;
+  padding: 16px;
+  background: color-mix(in srgb, var(--color-primary) 3%, white);
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 4px 18px -6px rgba(14, 167, 146, 0.3);
+}
+
+.itemEditing:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 18px -6px rgba(14, 167, 146, 0.3);
+}
+
+.itemReadOnly {
+  cursor: default;
+  background: color-mix(in srgb, var(--color-secondary) 2%, white);
+}
+
+.itemReadOnly:hover {
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+/* ================= ORDER BADGE ================= */
+.order {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-tertiary);
+  color: var(--color-accent);
+  font-weight: 800;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+/* ================= ITEM BODY ================= */
+.itemBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sentenceEn {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-secondary);
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+}
+
+.sentenceVi {
+  margin: 0;
   font-size: 14px;
+  font-style: italic;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.note {
+  margin-top: 4px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--color-primary) 6%, white);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+/* ================= EDIT INPUTS ================= */
+.inputEn,
+.inputVi,
+.inputNote {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--color-text);
+  outline: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.inputEn {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-secondary);
+}
+
+.inputVi {
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.inputNote {
+  resize: vertical;
+  min-height: 60px;
+  line-height: 1.5;
+}
+
+.inputEn::placeholder,
+.inputVi::placeholder,
+.inputNote::placeholder {
+  color: #94a3b8;
+  font-family: inherit;
+}
+
+.inputEn:focus,
+.inputVi:focus,
+.inputNote:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+/* ================= EDIT FOOTER ================= */
+.editFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.orderLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.orderInput {
+  width: 64px;
+  padding: 7px 8px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.orderInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cancelBtn span {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.cancelBtn svg {
+  font-size: 11px;
+}
+
+.cancelBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+/* ================= DELETE BUTTON ================= */
+.deleteBtn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  align-self: flex-start;
+  opacity: 0;
+}
+
+.item:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn svg {
+  font-size: 12px;
+  color: inherit;
+}
+
+.deleteBtn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+/* ================= SAVE BAR ================= */
+.saveBar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 22px;
+  background: var(--color-secondary);
+  color: var(--color-text-white);
+  border-radius: 999px;
+  box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.4);
+  z-index: 100;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.saveBarText {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-white);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.saveAllBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  border: none;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.saveAllBtn span {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.saveAllBtn svg {
+  font-size: 12px;
+}
+
+.saveAllBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.saveAllBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 800px) {
+  .addBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .saveBar {
+    width: calc(100% - 40px);
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .saveAllBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .item {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .order {
+    width: 24px;
+    height: 24px;
+    font-size: 11.5px;
+  }
+
+  .sentenceEn {
+    font-size: 14px;
+  }
+
+  .sentenceVi,
+  .note {
+    font-size: 12.5px;
+  }
+
+  .deleteBtn {
+    opacity: 1;
+  }
 }

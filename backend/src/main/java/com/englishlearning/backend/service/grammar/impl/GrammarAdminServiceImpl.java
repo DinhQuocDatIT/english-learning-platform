@@ -12,6 +12,7 @@ import com.englishlearning.backend.enums.GrammarReviewAction;
 import com.englishlearning.backend.enums.GrammarStatus;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
+import com.englishlearning.backend.repository.GrammarExampleRepository;
 import com.englishlearning.backend.repository.GrammarRoadmapRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
 import com.englishlearning.backend.repository.GrammarTopicRepository;
@@ -35,6 +36,7 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
     private final GrammarRoadmapRepository roadmapRepository;
     private final GrammarTopicRepository topicRepository;
     private final GrammarTheoryRepository theoryRepository;
+    private final GrammarExampleRepository exampleRepository;
     private final UserRepository userRepository;
     private final GrammarTopicReviewService reviewService;
 
@@ -160,6 +162,14 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         }
         theoryRepository.saveAll(theories);
 
+        // Publish tất cả example
+        exampleRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.PENDING, GrammarStatus.PUBLISHED);
+        exampleRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.DRAFT, GrammarStatus.PUBLISHED);
+        exampleRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.REJECTED, GrammarStatus.PUBLISHED);
+
         // Ghi history
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
@@ -176,6 +186,10 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
 
         topic.setStatus(GrammarStatus.HIDDEN);
         GrammarTopic saved = topicRepository.save(topic);
+
+        // Ẩn example theo
+        exampleRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.PUBLISHED, GrammarStatus.HIDDEN);
 
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
@@ -211,6 +225,10 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         }
         theoryRepository.saveAll(theories);
 
+        // Example PENDING → REJECTED
+        exampleRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.PENDING, GrammarStatus.REJECTED);
+
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
         reviewService.log(topic, GrammarReviewAction.REJECT, reason.trim(), admin);
@@ -218,6 +236,7 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         log.info("❌ Admin {} đã từ chối topic id={}, lý do: {}", adminId, topicId, reason);
         return toTopicResponse(saved);
     }
+
     @Override
     public GrammarTopicResponse restoreTopic(Long adminId, Long topicId) {
         GrammarTopic topic = topicRepository.findById(topicId)
@@ -241,6 +260,10 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         }
         theoryRepository.saveAll(theories);
 
+        // Restore examples
+        exampleRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.HIDDEN, GrammarStatus.PUBLISHED);
+
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
         reviewService.log(topic, GrammarReviewAction.APPROVE, "Bỏ ẩn chủ điểm", admin);
@@ -248,10 +271,10 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         log.info("✅ Admin {} đã bỏ ẩn topic id={}", adminId, topicId);
         return toTopicResponse(saved);
     }
+
     @Override
     @Transactional(readOnly = true)
     public List<GrammarTopicReviewResponse> getTopicHistory(Long topicId) {
-        // Check topic tồn tại
         if (!topicRepository.existsById(topicId)) {
             throw new ResourceNotFoundException("Không tìm thấy chủ điểm");
         }

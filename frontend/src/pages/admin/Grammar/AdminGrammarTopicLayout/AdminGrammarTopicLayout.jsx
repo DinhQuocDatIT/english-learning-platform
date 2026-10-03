@@ -25,8 +25,8 @@ import styles from "./AdminGrammarTopicLayout.module.css";
 // 5 tab cho Admin duyệt
 const TABS = [
   { key: "theory", path: "theory", label: "Lý thuyết", icon: faBookOpen },
-  { key: "tip", path: "tips", label: "Mẹo", icon: faLightbulb },
   { key: "example", path: "examples", label: "Ví dụ", icon: faStar },
+  { key: "tip", path: "tips", label: "Mẹo", icon: faLightbulb },
   { key: "quiz", path: "quiz", label: "Trắc nghiệm", icon: faQuestionCircle },
   { key: "history", path: "history", label: "Lịch sử duyệt", icon: faHistory },
 ];
