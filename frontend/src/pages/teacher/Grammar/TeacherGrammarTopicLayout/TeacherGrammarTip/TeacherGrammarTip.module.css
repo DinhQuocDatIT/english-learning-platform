@@ -1,20 +1,845 @@
-.emptyBox {
+/* =========================================================
+   TEACHER GRAMMAR TIP
+   ========================================================= */
+
+.loadingBox,
+.loadingBox *,
+.readOnlyBanner,
+.readOnlyBanner *,
+.actionRow,
+.actionRow *,
+.addBtn,
+.addBtn *,
+.list,
+.list *,
+.emptyBox,
+.emptyBox *,
+.tipCard,
+.tipCard *,
+.tipHeader,
+.tipHeader *,
+.tipIcon,
+.tipIcon *,
+.tipTitle,
+.tipContent,
+.applyBox,
+.applyBox *,
+.boxLabel,
+.stepList,
+.stepList *,
+.quizBox,
+.quizBox *,
+.question,
+.optionsPreview,
+.optionsPreview *,
+.optionPreview,
+.optionPreview *,
+.optionLabel,
+.optionCorrect,
+.explanationBox,
+.explanationBox *,
+.editHeader,
+.editHeader *,
+.titleInput,
+.orderInput,
+.contentInput,
+.questionInput,
+.explanationInput,
+.section,
+.section *,
+.stepRow,
+.stepRow *,
+.stepNum,
+.stepInput,
+.optionsGrid,
+.optionsGrid *,
+.optionRow,
+.optionRow *,
+.correctBtn,
+.optionInput,
+.rowDeleteBtn,
+.addRowBtn,
+.addRowBtn *,
+.editFooter,
+.editFooter *,
+.cancelBtn,
+.cancelBtn *,
+.saveBar,
+.saveBar *,
+.saveBarText,
+.saveAllBtn,
+.saveAllBtn *,
+.deleteBtn {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  box-sizing: border-box;
+}
+
+.tipCard h1,
+.tipCard h2,
+.tipCard h3,
+.tipCard h4,
+.tipCard p,
+.tipCard span,
+.tipCard strong,
+.tipCard em,
+.tipCard small,
+.tipCard li,
+.tipCard ol,
+.tipCard ul,
+.tipCard label,
+.tipCard button,
+.tipCard input,
+.tipCard textarea,
+.tipCard div,
+.readOnlyBanner span,
+.readOnlyBanner strong,
+.saveBar span,
+.saveBar strong {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ================= READONLY BANNER ================= */
+.readOnlyBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #fffbeb;
+  border-left: 3px solid #fbbf24;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.readOnlyBanner svg {
+  font-size: 14px;
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.readOnlyBanner span {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.readOnlyBanner strong {
+  font-weight: 700;
+  color: #78350f;
+}
+
+/* ================= ACTION ROW ================= */
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 6px 16px -6px rgba(14, 167, 146, 0.6);
+}
+
+.addBtn span {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.addBtn svg {
+  font-size: 12px;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover, #52afa3);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -6px rgba(14, 167, 146, 0.6);
+}
+
+.addBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ================= LIST ================= */
+.list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  min-height: 240px;
-  padding: 40px;
+  gap: 16px;
+}
+
+/* ================= EMPTY ================= */
+.emptyBox {
+  padding: 60px 20px;
   text-align: center;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 3%, white);
+  border: 1px dashed var(--color-border, #e2e8f0);
+  border-radius: 12px;
 }
-.emptyIcon {
-  font-size: 42px;
-  opacity: 0.5;
-  color: #f59e0b;
-}
+
 .emptyBox p {
   margin: 0;
+  color: var(--color-text-muted, #64748b);
   font-size: 14px;
+  font-weight: 500;
+}
+
+/* ================= TIP CARD ================= */
+.tipCard {
+  padding: 20px 22px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tipCard:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary, #0ea792) 50%,
+    var(--color-border, #e2e8f0)
+  );
+  box-shadow: 0 4px 14px -6px rgba(14, 167, 146, 0.2);
+}
+
+.tipCardEditing {
+  cursor: default;
+  padding: 18px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 3%, white);
+  border: 2px solid var(--color-primary, #0ea792);
+  box-shadow: 0 4px 18px -6px rgba(14, 167, 146, 0.3);
+}
+
+.tipCardEditing:hover {
+  border-color: var(--color-primary, #0ea792);
+}
+
+.tipCardReadOnly {
+  cursor: default;
+}
+
+.tipCardReadOnly:hover {
+  border-color: var(--color-border, #e2e8f0);
+  box-shadow: none;
+}
+
+/* ================= TIP HEADER ================= */
+.tipHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tipIcon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #fef3c7;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.tipTitle {
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  letter-spacing: -0.2px;
+  line-height: 1.4;
+}
+
+.deleteBtn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 11px;
+  color: var(--color-text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  opacity: 0;
+}
+
+.tipCard:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+/* ================= CONTENT ================= */
+.tipContent {
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text, #334155);
+  white-space: pre-wrap;
+  font-weight: 400;
+}
+
+/* ================= BOX LABEL ================= */
+.boxLabel {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #d97706;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+/* ================= APPLY BOX ================= */
+.applyBox {
+  padding: 14px 16px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.applyBox .boxLabel {
+  color: #d97706;
+}
+
+.stepList {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #78350f;
+  list-style: decimal;
+}
+
+.stepList li {
+  margin-bottom: 2px;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: #78350f;
+  line-height: 1.7;
+}
+
+.stepList li::marker {
+  color: #d97706;
+  font-weight: 700;
+}
+
+/* ================= QUIZ BOX ================= */
+.quizBox {
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 5%, white);
+  border: 1px solid
+    color-mix(in srgb, var(--color-primary, #0ea792) 25%, transparent);
+  border-radius: 10px;
+}
+
+.quizBox .boxLabel {
+  color: var(--color-accent, #168a7c);
+}
+
+.question {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-secondary, #1e293b);
+  line-height: 1.5;
+}
+
+.optionsPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optionPreview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: var(--color-text, #334155);
+  font-weight: 500;
+}
+
+.optionPreview span {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: inherit;
+}
+
+/* Option đúng — đồng bộ màu primary */
+.optionCorrect {
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 12%, white);
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-accent, #168a7c);
+  font-weight: 600;
+}
+
+.optionCorrect span {
+  color: var(--color-accent, #168a7c);
+  font-weight: 600;
+}
+
+.optionLabel {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: inherit;
+  font-size: 13.5px;
+}
+
+/* =========================================================
+   EXPLANATION BOX — giống bên admin, KHÔNG border-left đậm
+   ========================================================= */
+.explanationBox {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 8%, white);
+  border: 1px solid
+    color-mix(in srgb, var(--color-primary, #0ea792) 20%, transparent);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--color-accent, #168a7c);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.explanationBox strong {
+  display: block;
+  font-weight: 700;
+  color: var(--color-accent, #168a7c);
+  font-size: 13.5px;
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.explanationBox p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-accent, #168a7c);
+  line-height: 1.65;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* ================= EDIT MODE ================= */
+.editHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.titleInput {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.titleInput:focus {
+  border-color: var(--color-primary, #0ea792);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+.orderInput {
+  width: 64px;
+  padding: 10px 8px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-text-muted, #64748b);
+  text-align: center;
+  outline: none;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.orderInput:focus {
+  border-color: var(--color-primary, #0ea792);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+.contentInput,
+.questionInput,
+.explanationInput {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  color: var(--color-text, #334155);
+  outline: none;
+  resize: vertical;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+}
+
+.contentInput:focus,
+.questionInput:focus,
+.explanationInput:focus {
+  border-color: var(--color-primary, #0ea792);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+.contentInput::placeholder,
+.questionInput::placeholder,
+.explanationInput::placeholder,
+.titleInput::placeholder,
+.stepInput::placeholder,
+.optionInput::placeholder {
+  color: #94a3b8;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* ================= SECTION ================= */
+.section {
+  padding: 14px;
+  margin-bottom: 14px;
+  background: #fafbfc;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+}
+
+/* ================= STEP EDITOR ================= */
+.stepRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.stepNum {
+  flex-shrink: 0;
+  width: 24px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #d97706;
+  text-align: right;
+}
+
+.stepInput {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  color: var(--color-text, #334155);
+  outline: none;
+}
+
+.stepInput:focus {
+  border-color: var(--color-primary, #0ea792);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+/* ================= OPTION EDITOR ================= */
+.optionsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.optionRowCorrect {
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 12%, white);
+  border-color: var(--color-primary, #0ea792);
+}
+
+.correctBtn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: #f1f5f9;
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--color-text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.correctBtn:hover {
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-primary, #0ea792);
+}
+
+.correctBtnActive {
+  background: var(--color-primary, #0ea792);
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+}
+
+.correctBtnActive:hover {
+  background: var(--color-primary-hover, #52afa3);
+  border-color: var(--color-primary-hover, #52afa3);
+  color: var(--color-text-white, #ffffff);
+}
+
+.optionInput {
+  flex: 1;
+  padding: 7px 10px;
+  background: transparent;
+  border: none;
+  font-size: 13.5px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  color: var(--color-text, #334155);
+  outline: none;
+}
+
+/* ================= BUTTONS ================= */
+.rowDeleteBtn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rowDeleteBtn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+.addRowBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: transparent;
+  color: var(--color-primary, #0ea792);
+  border: 1px dashed var(--color-primary, #0ea792);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.addRowBtn span {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.addRowBtn:hover {
+  background: var(--color-tertiary, #f8fafc);
+  border-style: solid;
+}
+
+/* ================= EDIT FOOTER ================= */
+.editFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text-muted, #64748b);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cancelBtn span {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.cancelBtn:hover {
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-primary, #0ea792);
+}
+
+/* ================= SAVE BAR ================= */
+.saveBar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 22px;
+  background: var(--color-secondary, #1e293b);
+  color: var(--color-text-white, #ffffff);
+  border-radius: 999px;
+  box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.4);
+  z-index: 100;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.saveBarText {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-white, #ffffff);
+  white-space: nowrap;
+}
+
+.saveAllBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  border: none;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.saveAllBtn span {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.saveAllBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover, #52afa3);
+  transform: translateY(-1px);
+}
+
+.saveAllBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 800px) {
+  .addBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .saveBar {
+    width: calc(100% - 40px);
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .saveAllBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .tipCard {
+    padding: 16px;
+  }
+
+  .tipTitle {
+    font-size: 15px;
+  }
+
+  .deleteBtn {
+    opacity: 1;
+  }
+
+  .optionsGrid {
+    gap: 6px;
+  }
 }

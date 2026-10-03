@@ -12,6 +12,7 @@ import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.GrammarExampleRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
+import com.englishlearning.backend.repository.GrammarTipRepository;
 import com.englishlearning.backend.repository.GrammarTopicEditRequestRepository;
 import com.englishlearning.backend.repository.GrammarTopicRepository;
 import com.englishlearning.backend.repository.UserRepository;
@@ -36,6 +37,7 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
     private final GrammarTopicRepository topicRepository;
     private final GrammarTheoryRepository theoryRepository;
     private final GrammarExampleRepository exampleRepository;
+    private final GrammarTipRepository tipRepository;
     private final UserRepository userRepository;
     private final GrammarTopicReviewService reviewService;
 
@@ -45,27 +47,22 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
 
     @Override
     public GrammarEditRequestResponse createRequest(Long teacherId, Long topicId, String reason) {
-        // 1. Validate reason
         if (reason == null || reason.trim().isEmpty()) {
             throw new BusinessException("Vui lòng nhập lý do chỉnh sửa");
         }
 
-        // 2. Lấy topic
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // 3. Check quyền sở hữu
         if (!topic.getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền gửi yêu cầu cho chủ điểm này");
         }
 
-        // 4. Chỉ cho gửi khi topic đang PUBLISHED
         if (topic.getStatus() != GrammarStatus.PUBLISHED) {
             throw new BusinessException(
                     "Chỉ có thể gửi yêu cầu chỉnh sửa khi chủ điểm đang được publish");
         }
 
-        // 5. Check không có yêu cầu PENDING nào
         boolean hasPending = editRequestRepository.existsByTopicIdAndStatus(
                 topicId, GrammarEditRequestStatus.PENDING);
         if (hasPending) {
@@ -73,7 +70,6 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
                     "Đã có yêu cầu chỉnh sửa đang chờ duyệt. Vui lòng đợi admin xử lý.");
         }
 
-        // 6. Tạo request
         User teacher = userRepository.findById(teacherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy teacher"));
 
@@ -86,7 +82,6 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
 
         GrammarTopicEditRequest saved = editRequestRepository.save(request);
 
-        // 7. Ghi log history
         reviewService.log(topic, GrammarReviewAction.REQUEST_EDIT,
                 "Lý do: " + reason.trim(), teacher);
 
@@ -104,7 +99,6 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // Check quyền
         if (!topic.getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền xem yêu cầu của chủ điểm này");
         }
@@ -159,12 +153,10 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
         GrammarTopicEditRequest request = editRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy yêu cầu"));
 
-        // Chỉ duyệt được yêu cầu PENDING
         if (request.getStatus() != GrammarEditRequestStatus.PENDING) {
             throw new BusinessException("Yêu cầu này đã được xử lý rồi");
         }
 
-        // Update request
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
 
@@ -192,7 +184,10 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topic.getId(), GrammarStatus.PUBLISHED, GrammarStatus.DRAFT);
 
-        // Ghi log
+        // ✅ Chuyển tất cả tip của topic về DRAFT (nếu đang PUBLISHED)
+        tipRepository.updateStatusByTopicAndFromStatus(
+                topic.getId(), GrammarStatus.PUBLISHED, GrammarStatus.DRAFT);
+
         reviewService.log(topic, GrammarReviewAction.APPROVE_EDIT,
                 "Đồng ý cho chỉnh sửa. Lý do: " + request.getReason(), admin);
 
@@ -220,7 +215,6 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
         request.setReviewNote(note != null ? note.trim() : null);
         GrammarTopicEditRequest saved = editRequestRepository.save(request);
 
-        // Ghi log
         String logReason = "Từ chối yêu cầu sửa"
                 + (note != null && !note.isBlank() ? ". Lý do: " + note.trim() : "");
         reviewService.log(request.getTopic(), GrammarReviewAction.REJECT_EDIT,
