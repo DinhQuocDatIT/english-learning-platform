@@ -13,6 +13,7 @@ import com.englishlearning.backend.enums.GrammarStatus;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.GrammarExampleRepository;
+import com.englishlearning.backend.repository.GrammarQuizRepository;
 import com.englishlearning.backend.repository.GrammarRoadmapRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
 import com.englishlearning.backend.repository.GrammarTipRepository;
@@ -39,6 +40,7 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
     private final GrammarTheoryRepository theoryRepository;
     private final GrammarExampleRepository exampleRepository;
     private final GrammarTipRepository tipRepository;
+    private final GrammarQuizRepository quizRepository;
     private final UserRepository userRepository;
     private final GrammarTopicReviewService reviewService;
 
@@ -152,7 +154,7 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         topic.setStatus(GrammarStatus.PUBLISHED);
         GrammarTopic saved = topicRepository.save(topic);
 
-        // Publish tất cả theory
+        // Theory
         List<GrammarTheory> theories = theoryRepository
                 .findByTopicIdOrderByDisplayOrderAsc(topicId);
         for (GrammarTheory theory : theories) {
@@ -164,7 +166,7 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         }
         theoryRepository.saveAll(theories);
 
-        // Publish tất cả example
+        // Example
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PENDING, GrammarStatus.PUBLISHED);
         exampleRepository.updateStatusByTopicAndFromStatus(
@@ -172,7 +174,7 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.REJECTED, GrammarStatus.PUBLISHED);
 
-        // Publish tất cả tip
+        // Tip
         tipRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PENDING, GrammarStatus.PUBLISHED);
         tipRepository.updateStatusByTopicAndFromStatus(
@@ -180,7 +182,14 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         tipRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.REJECTED, GrammarStatus.PUBLISHED);
 
-        // Ghi history
+        // Quiz
+        quizRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.PENDING, GrammarStatus.PUBLISHED);
+        quizRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.DRAFT, GrammarStatus.PUBLISHED);
+        quizRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.REJECTED, GrammarStatus.PUBLISHED);
+
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
         reviewService.log(topic, GrammarReviewAction.APPROVE, null, admin);
@@ -197,12 +206,11 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         topic.setStatus(GrammarStatus.HIDDEN);
         GrammarTopic saved = topicRepository.save(topic);
 
-        // Ẩn example theo
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PUBLISHED, GrammarStatus.HIDDEN);
-
-        // Ẩn tip theo
         tipRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.PUBLISHED, GrammarStatus.HIDDEN);
+        quizRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PUBLISHED, GrammarStatus.HIDDEN);
 
         User admin = userRepository.findById(adminId)
@@ -229,7 +237,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         topic.setStatus(GrammarStatus.REJECTED);
         GrammarTopic saved = topicRepository.save(topic);
 
-        // Theory PENDING → REJECTED
         List<GrammarTheory> theories = theoryRepository
                 .findByTopicIdOrderByDisplayOrderAsc(topicId);
         for (GrammarTheory theory : theories) {
@@ -239,12 +246,11 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         }
         theoryRepository.saveAll(theories);
 
-        // Example PENDING → REJECTED
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PENDING, GrammarStatus.REJECTED);
-
-        // Tip PENDING → REJECTED
         tipRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.PENDING, GrammarStatus.REJECTED);
+        quizRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PENDING, GrammarStatus.REJECTED);
 
         User admin = userRepository.findById(adminId)
@@ -267,7 +273,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         topic.setStatus(GrammarStatus.PUBLISHED);
         GrammarTopic saved = topicRepository.save(topic);
 
-        // Restore tất cả theory về PUBLISHED
         List<GrammarTheory> theories = theoryRepository
                 .findByTopicIdOrderByDisplayOrderAsc(topicId);
         for (GrammarTheory theory : theories) {
@@ -278,12 +283,11 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         }
         theoryRepository.saveAll(theories);
 
-        // Restore examples
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.HIDDEN, GrammarStatus.PUBLISHED);
-
-        // Restore tips
         tipRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.HIDDEN, GrammarStatus.PUBLISHED);
+        quizRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.HIDDEN, GrammarStatus.PUBLISHED);
 
         User admin = userRepository.findById(adminId)

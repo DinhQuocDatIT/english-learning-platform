@@ -464,7 +464,7 @@ function TeacherGrammarTip() {
 
   return (
     <>
-      {!canEdit && (
+      {/* {!canEdit && (
         <div className={styles.readOnlyBanner}>
           <FontAwesomeIcon icon={faLock} />
           <span>
@@ -472,7 +472,7 @@ function TeacherGrammarTip() {
             có thể xem. Muốn chỉnh sửa, hãy gửi yêu cầu hoặc chờ admin xử lý.
           </span>
         </div>
-      )}
+      )} */}
 
       <div className={styles.actionRow}>
         <button

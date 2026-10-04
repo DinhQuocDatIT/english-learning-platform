@@ -1,0 +1,465 @@
+/* =========================================================
+   ADMIN GRAMMAR QUIZ DETAIL
+   ========================================================= */
+
+/* ============ ÉP FONT CỨNG CHO TOÀN BỘ ============ */
+.container,
+.container *,
+.container *::before,
+.container *::after,
+.loadingBox,
+.loadingBox *,
+.errorBox,
+.errorBox *,
+.backBtn,
+.backBtn *,
+.header,
+.header *,
+.headerIcon,
+.headerIcon *,
+.headerText,
+.headerText *,
+.questions,
+.questions *,
+.questionCard,
+.questionCard *,
+.qHeader,
+.qHeader *,
+.qNumber,
+.qText,
+.options,
+.options *,
+.option,
+.option *,
+.optionLabel,
+.optionText,
+.correctMark,
+.explanationBlock,
+.explanationBlock *,
+.explanationLabel,
+.explanationText,
+.optionExplanationsBlock,
+.optionExplanationsBlock *,
+.optExpList,
+.optExpItem,
+.optExpItem *,
+.optExpLabel,
+.optExpText {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  box-sizing: border-box;
+}
+
+/* Ép tường minh cho mọi loại thẻ con có text */
+.container h1,
+.container h2,
+.container h3,
+.container h4,
+.container p,
+.container span,
+.container strong,
+.container em,
+.container small,
+.container b,
+.container i,
+.container label,
+.container button,
+.container div,
+.container li,
+.container ul,
+.container ol,
+.container a {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* ================= CONTAINER ================= */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 100px;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ================= ERROR ================= */
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px;
+  color: var(--color-text-muted, #64748b);
+  text-align: center;
+}
+
+.errorBox p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-muted, #64748b);
+}
+
+.errorBox button {
+  padding: 8px 16px;
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.errorBox button:hover {
+  background: var(--color-primary-hover, #52afa3);
+}
+
+/* ================= BACK ================= */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  margin-bottom: 18px;
+  background: transparent;
+  color: var(--color-text-muted, #64748b);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.backBtn span {
+  font-size: 13px;
+  font-weight: 500;
+  color: inherit;
+}
+
+.backBtn svg {
+  font-size: 12px;
+}
+
+.backBtn:hover {
+  background: var(--color-tertiary, #e6f7f4);
+  color: var(--color-primary, #0ea792);
+  border-color: var(--color-primary, #0ea792);
+}
+
+/* ================= HEADER ================= */
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 6%, white);
+  border: 1px solid
+    color-mix(in srgb, var(--color-primary, #0ea792) 25%, transparent);
+  border-radius: 16px;
+}
+
+.headerIcon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.headerIcon svg {
+  font-size: 20px;
+  color: inherit;
+}
+
+.headerText {
+  flex: 1;
+  min-width: 0;
+}
+
+.headerText h1 {
+  margin: 0 0 6px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  letter-spacing: -0.3px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.headerText p {
+  margin: 0 0 8px 0;
+  font-size: 13.5px;
+  color: var(--color-text-muted, #64748b);
+  line-height: 1.5;
+}
+
+.headerMeta {
+  display: inline-flex;
+  gap: 12px;
+  font-size: 12.5px;
+  color: var(--color-accent, #168a7c);
+  font-weight: 700;
+}
+
+.headerMeta span {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: inherit;
+}
+
+/* ================= QUESTIONS ================= */
+.questions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ================= QUESTION CARD ================= */
+.questionCard {
+  padding: 20px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px -4px rgba(15, 23, 42, 0.04);
+}
+
+/* ================= Q HEADER ================= */
+.qHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.qNumber {
+  padding: 4px 12px;
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+/* ================= Q TEXT ================= */
+.qText {
+  margin: 0 0 14px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-secondary, #1e293b);
+  line-height: 1.55;
+}
+
+/* ================= OPTIONS ================= */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: var(--color-text, #1e293b);
+  transition: all 0.15s ease;
+}
+
+/* Option đúng — đồng bộ màu primary */
+.optionCorrect {
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 12%, white);
+  border-color: var(--color-primary, #0ea792);
+}
+
+.optionLabel {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: var(--color-text-muted, #64748b);
+  font-weight: 800;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.optionLabelCorrect {
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+}
+
+.optionText {
+  flex: 1;
+  font-weight: 500;
+  font-size: 13.5px;
+  color: inherit;
+  line-height: 1.5;
+}
+
+.correctMark {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.correctMark svg {
+  font-size: 10px;
+  color: inherit;
+}
+
+/* ================= EXPLANATION BLOCK ================= */
+.explanationBlock {
+  padding: 12px 14px;
+  margin-top: 12px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 8%, white);
+  border: 1px solid
+    color-mix(in srgb, var(--color-primary, #0ea792) 20%, transparent);
+  border-radius: 10px;
+}
+
+.explanationLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--color-accent, #168a7c);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.explanationLabel svg {
+  font-size: 11px;
+  color: inherit;
+}
+
+.explanationText {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--color-accent, #168a7c);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* ================= OPTION EXPLANATIONS ================= */
+.optionExplanationsBlock {
+  padding: 12px 14px;
+  margin-top: 10px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 4%, white);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+}
+
+.optionExplanationsBlock .explanationLabel {
+  color: var(--color-accent, #168a7c);
+}
+
+.optExpList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optExpItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+}
+
+/* Item đáp án đúng — màu primary */
+.optExpItemCorrect {
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 10%, white);
+  border-color: var(--color-primary, #0ea792);
+}
+
+.optExpLabel {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #f1f5f9;
+  color: var(--color-text-muted, #64748b);
+  font-weight: 800;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.optExpLabelCorrect {
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+}
+
+.optExpText {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text, #1e293b);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 640px) {
+  .container {
+    padding: 16px 12px 80px;
+  }
+
+  .header {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .headerText h1 {
+    font-size: 17px;
+  }
+
+  .qText {
+    font-size: 14px;
+  }
+
+  .option {
+    padding: 9px 12px;
+  }
+
+  .optionText {
+    font-size: 13px;
+  }
+}

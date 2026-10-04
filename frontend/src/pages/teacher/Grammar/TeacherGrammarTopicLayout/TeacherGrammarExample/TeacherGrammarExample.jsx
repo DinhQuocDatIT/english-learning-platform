@@ -299,7 +299,7 @@ function TeacherGrammarExample() {
   return (
     <>
       {/* WARNING khi không cho sửa */}
-      {!canEdit && (
+      {/* {!canEdit && (
         <div className={styles.readOnlyBanner}>
           <FontAwesomeIcon icon={faLock} />
           <span>
@@ -307,7 +307,7 @@ function TeacherGrammarExample() {
             có thể xem. Muốn chỉnh sửa, hãy gửi yêu cầu hoặc chờ admin xử lý.
           </span>
         </div>
-      )}
+      )} */}
 
       {/* ACTION ROW */}
       <div className={styles.actionRow}>

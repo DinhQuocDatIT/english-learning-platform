@@ -68,6 +68,8 @@ import StudentGrammarTheory from "../pages/student/Grammar/StudentGrammarTopicLa
 import StudentGrammarTip from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarTip/StudentGrammarTip";
 import StudentGrammarExample from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarExample/StudentGrammarExample";
 import StudentGrammarQuiz from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarQuiz/StudentGrammarQuiz";
+import StudentGrammarQuizPlay from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarQuizPlay/StudentGrammarQuizPlay";
+import StudentGrammarQuizResult from "../pages/student/Grammar/StudentGrammarTopicLayout/StudentGrammarQuizResult/StudentGrammarQuizResult";
 
 // ===== GRAMMAR — TEACHER =====
 import TeacherGrammarRoadmapList from "../pages/teacher/Grammar/TeacherGrammarRoadmapList/TeacherGrammarRoadmapList";
@@ -77,8 +79,9 @@ import TeacherGrammarTopicLayout from "../pages/teacher/Grammar/TeacherGrammarTo
 import TeacherGrammarTheory from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTheory/TeacherGrammarTheory";
 import TeacherGrammarTip from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTip/TeacherGrammarTip";
 import TeacherGrammarExample from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarExample/TeacherGrammarExample";
-import TeacherGrammarQuiz from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarQuiz/TeacherGrammarQuiz";
 import TeacherGrammarHistory from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarHistory/TeacherGrammarHistory";
+import TeacherGrammarQuiz from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarQuiz/TeacherGrammarQuiz";
+import TeacherGrammarQuizEditor from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarQuizEditor/TeacherGrammarQuizEditor";
 
 // ===== GRAMMAR — ADMIN =====
 import AdminGrammarRoadmapList from "../pages/admin/Grammar/AdminGrammarRoadmapList/AdminGrammarRoadmapList";
@@ -91,6 +94,7 @@ import AdminGrammarExample from "../pages/admin/Grammar/AdminGrammarTopicLayout/
 import AdminGrammarQuiz from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarQuiz/AdminGrammarQuiz";
 import AdminGrammarTopicHistory from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarTopicHistory/AdminGrammarTopicLayout";
 import AdminGrammarEditRequests from "../pages/admin/Grammar/AdminGrammarEditRequests/AdminGrammarEditRequests";
+import AdminGrammarQuizDetail from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarQuizDetail/AdminGrammarQuizDetail";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -139,7 +143,6 @@ function AppRoutes() {
             />
             <Route path="profile" element={<StudentProfile />} />
 
-            {/* ===== LEADERBOARD — STUDENT ===== */}
             <Route path="leaderboard" element={<Leaderboard />} />
 
             {/* ===== GRAMMAR — STUDENT ===== */}
@@ -154,6 +157,13 @@ function AppRoutes() {
               <Route path="tips" element={<StudentGrammarTip />} />
               <Route path="examples" element={<StudentGrammarExample />} />
               <Route path="quiz" element={<StudentGrammarQuiz />} />
+              {/* ✅ Play nằm TRONG layout */}
+              <Route path="quiz/:quizId" element={<StudentGrammarQuizPlay />} />
+              {/* ✅ Result nằm TRONG layout (route riêng để reset scroll) */}
+              <Route
+                path="quiz/:quizId/result"
+                element={<StudentGrammarQuizResult />}
+              />
             </Route>
           </Route>
 
@@ -163,7 +173,6 @@ function AppRoutes() {
             element={<RoleRoute allowedRoles={[ROLES.TEACHER]} />}
           >
             <Route path="profile" element={<TeacherProfile />} />
-
             <Route path="vocabulary" element={<VocabularyManagement />} />
             <Route path="create-vocabulary" element={<CreateVocabulary />} />
             <Route path="import-vocabulary" element={<ImportVocabulary />} />
@@ -215,7 +224,14 @@ function AppRoutes() {
               path="grammar/roadmaps/:roadmapId/topics/:topicId/edit"
               element={<TeacherGrammarTopicForm />}
             />
-
+            <Route
+              path="grammar/topics/:topicId/quizzes/create"
+              element={<TeacherGrammarQuizEditor />}
+            />
+            <Route
+              path="grammar/topics/:topicId/quizzes/:quizId/edit"
+              element={<TeacherGrammarQuizEditor />}
+            />
             <Route
               path="grammar/topics/:topicId"
               element={<TeacherGrammarTopicLayout />}
@@ -313,12 +329,14 @@ function AppRoutes() {
               path="grammar/roadmaps/:roadmapId/topics"
               element={<AdminGrammarTopicList />}
             />
-
             <Route
               path="grammar/edit-requests"
               element={<AdminGrammarEditRequests />}
             />
-
+            <Route
+              path="grammar/topics/:topicId/quizzes/:quizId"
+              element={<AdminGrammarQuizDetail />}
+            />
             <Route
               path="grammar/topics/:topicId"
               element={<AdminGrammarTopicLayout />}

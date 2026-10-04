@@ -20,6 +20,67 @@ const GrammarService = {
   getPublishedTips(topicId) {
     return axiosClient.get(`/v1/grammar/topics/${topicId}/tips`);
   },
+
+  // =====================================================
+  // QUIZ — PUBLIC + STUDENT
+  // =====================================================
+  getPublishedQuizzes(topicId) {
+    return axiosClient.get(`/v1/grammar/topics/${topicId}/quizzes`);
+  },
+  getQuizForPlay(quizId) {
+    return axiosClient.get(`/v1/student/grammar/quizzes/${quizId}`);
+  },
+  startOrResumeQuizAttempt(quizId) {
+    return axiosClient.post(`/v1/student/grammar/quizzes/${quizId}/start`);
+  },
+  getQuizAttempt(quizId) {
+    return axiosClient.get(`/v1/student/grammar/quizzes/${quizId}/attempt`);
+  },
+  saveQuizAnswer(attemptId, questionId, answer) {
+    return axiosClient.put(`/v1/student/grammar/attempts/${attemptId}/answer`, {
+      questionId,
+      answer,
+    });
+  },
+  submitQuizAttempt(attemptId) {
+    return axiosClient.post(`/v1/student/grammar/attempts/${attemptId}/submit`);
+  },
+  getQuizAttemptById(attemptId) {
+    return axiosClient.get(`/v1/student/grammar/attempts/${attemptId}`);
+  },
+  // =====================================================
+  // QUIZ — PUBLIC + STUDENT
+  // =====================================================
+  getPublishedQuizzes(topicId) {
+    return axiosClient.get(`/v1/grammar/topics/${topicId}/quizzes`);
+  },
+
+  getQuizForPlay(quizId) {
+    return axiosClient.get(`/v1/student/grammar/quizzes/${quizId}`);
+  },
+
+  startOrResumeQuizAttempt(quizId) {
+    return axiosClient.post(`/v1/student/grammar/quizzes/${quizId}/start`);
+  },
+
+  getQuizAttempt(quizId) {
+    return axiosClient.get(`/v1/student/grammar/quizzes/${quizId}/attempt`);
+  },
+
+  saveQuizAnswer(attemptId, questionId, answer) {
+    return axiosClient.put(`/v1/student/grammar/attempts/${attemptId}/answer`, {
+      questionId,
+      answer,
+    });
+  },
+
+  submitQuizAttempt(attemptId) {
+    return axiosClient.post(`/v1/student/grammar/attempts/${attemptId}/submit`);
+  },
+
+  getQuizAttemptById(attemptId) {
+    return axiosClient.get(`/v1/student/grammar/attempts/${attemptId}`);
+  },
   // =====================================================
   // TEACHER — ROADMAP
   // =====================================================
@@ -132,6 +193,25 @@ const GrammarService = {
     return axiosClient.delete(`/v1/teacher/grammar/tips/${tipId}`);
   },
   // =====================================================
+  // TEACHER — QUIZ
+  // =====================================================
+  getQuizzes(topicId) {
+    return axiosClient.get(`/v1/teacher/grammar/topics/${topicId}/quizzes`);
+  },
+  getQuiz(quizId) {
+    return axiosClient.get(`/v1/teacher/grammar/quizzes/${quizId}`);
+  },
+  createQuiz(data) {
+    return axiosClient.post("/v1/teacher/grammar/quizzes", data);
+  },
+  updateQuiz(quizId, data) {
+    return axiosClient.put(`/v1/teacher/grammar/quizzes/${quizId}`, data);
+  },
+  deleteQuiz(quizId) {
+    return axiosClient.delete(`/v1/teacher/grammar/quizzes/${quizId}`);
+  },
+
+  // =====================================================
   // ADMIN — ROADMAP
   // =====================================================
   adminGetAllRoadmaps() {
@@ -187,6 +267,16 @@ const GrammarService = {
   },
   adminGetTips(topicId) {
     return axiosClient.get(`/v1/admin/grammar/topics/${topicId}/tips`);
+  },
+
+  // =====================================================
+  // ADMIN — QUIZ (readonly)
+  // =====================================================
+  adminGetQuizzes(topicId) {
+    return axiosClient.get(`/v1/admin/grammar/topics/${topicId}/quizzes`);
+  },
+  adminGetQuizDetail(quizId) {
+    return axiosClient.get(`/v1/admin/grammar/quizzes/${quizId}`);
   },
   // =====================================================
   // ADMIN — EDIT REQUEST (MỚI)

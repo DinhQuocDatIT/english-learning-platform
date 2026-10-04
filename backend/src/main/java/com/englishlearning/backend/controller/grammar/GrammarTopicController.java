@@ -1,15 +1,19 @@
 package com.englishlearning.backend.controller.grammar;
 
 import com.englishlearning.backend.dto.grammar.response.GrammarExampleResponse;
+import com.englishlearning.backend.dto.grammar.response.GrammarQuizSummaryResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTipResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicDetailResponse;
 import com.englishlearning.backend.dto.response.ApiResponse;
+import com.englishlearning.backend.security.CustomUserDetails;
 import com.englishlearning.backend.service.grammar.GrammarExampleService;
+import com.englishlearning.backend.service.grammar.GrammarQuizService;
 import com.englishlearning.backend.service.grammar.GrammarTipService;
 import com.englishlearning.backend.service.grammar.GrammarTopicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +22,7 @@ import java.util.List;
 @RequestMapping("/api/v1/grammar/topics")
 @RequiredArgsConstructor
 public class GrammarTopicController {
-
+    private final GrammarQuizService quizService;
     private final GrammarTopicService topicService;
     private final GrammarExampleService exampleService;
     private final GrammarTipService tipService;
@@ -65,5 +69,15 @@ public class GrammarTopicController {
         List<GrammarTipResponse> response = tipService.getPublishedTips(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ApiResponse<>(200, "Lấy danh sách mẹo thành công", response));
+    }
+    @GetMapping("/{id}/quizzes")
+    public ResponseEntity<ApiResponse<List<GrammarQuizSummaryResponse>>> getPublishedQuizzes(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails != null ? userDetails.getUser().getId() : null;
+        List<GrammarQuizSummaryResponse> response =
+                quizService.getPublishedQuizzes(id, userId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ApiResponse<>(200, "Lấy danh sách đề thành công", response));
     }
 }

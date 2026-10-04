@@ -6,29 +6,21 @@ import {
   faBookOpen,
   faStar,
   faLightbulb,
-  faBook,
-  faPen,
   faQuestionCircle,
-  faGamepad,
   faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
 import styles from "./StudentGrammarTopicLayout.module.css";
 
-// 7 tab giống anhnhu24h
+// 4 tab cho Student
 const TABS = [
   { key: "theory", path: "theory", label: "Bài giảng", icon: faBookOpen },
   { key: "example", path: "examples", label: "Ví dụ", icon: faStar },
   { key: "tip", path: "tips", label: "Mẹo TOEIC", icon: faLightbulb },
+  { key: "quiz", path: "quiz", label: "Trắc nghiệm", icon: faQuestionCircle },
 ];
-// const TABS = [
-//   { key: "theory", path: "theory", label: "Bài giảng", icon: faBookOpen },
-//   { key: "example", path: "examples", label: "Ví dụ", icon: faStar },
-//   { key: "tip", path: "tips", label: "Mẹo TOEIC", icon: faLightbulb },
-//   { key: "vocabulary", path: "vocabulary", label: "Từ vựng", icon: faBook },
-//   { key: "exercise", path: "exercises", label: "Bài tập", icon: faPen },
-// ];
+
 function StudentGrammarTopicLayout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,8 +47,12 @@ function StudentGrammarTopicLayout() {
     }
   };
 
-  const currentPath = location.pathname.split("/").pop();
-  const activeTab = TABS.find((t) => t.path === currentPath)?.key || "theory";
+  // ✅ Xác định tab active từ path
+  const pathParts = location.pathname.split("/").filter(Boolean);
+  const topicIdIdx = pathParts.findIndex((p) => p === String(topicId));
+  const subPath = pathParts[topicIdIdx + 1] || "theory";
+
+  const activeTab = TABS.find((t) => t.path === subPath)?.key || "theory";
   const activeTabObj = TABS.find((t) => t.key === activeTab) || TABS[0];
 
   const handleTabChange = (tab) => {
@@ -88,7 +84,7 @@ function StudentGrammarTopicLayout() {
         <span>Quay lại</span>
       </button>
 
-      {/* HEADER — chỉ tên topic */}
+      {/* HEADER */}
       <div className={styles.headerCard}>
         <h1 className={styles.headerTitle}>{topic?.name}</h1>
       </div>
