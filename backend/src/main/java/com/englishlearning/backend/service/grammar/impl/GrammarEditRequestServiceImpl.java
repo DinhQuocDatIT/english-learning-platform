@@ -11,6 +11,7 @@ import com.englishlearning.backend.enums.GrammarStatus;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.GrammarExampleRepository;
+import com.englishlearning.backend.repository.GrammarQuizRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
 import com.englishlearning.backend.repository.GrammarTipRepository;
 import com.englishlearning.backend.repository.GrammarTopicEditRequestRepository;
@@ -38,6 +39,7 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
     private final GrammarTheoryRepository theoryRepository;
     private final GrammarExampleRepository exampleRepository;
     private final GrammarTipRepository tipRepository;
+    private final GrammarQuizRepository quizRepository;
     private final UserRepository userRepository;
     private final GrammarTopicReviewService reviewService;
 
@@ -165,12 +167,12 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
         request.setReviewedAt(LocalDateTime.now());
         GrammarTopicEditRequest saved = editRequestRepository.save(request);
 
-        // ✅ Chuyển topic về DRAFT để teacher sửa
+        // Chuyển topic về DRAFT
         GrammarTopic topic = request.getTopic();
         topic.setStatus(GrammarStatus.DRAFT);
         topicRepository.save(topic);
 
-        // Chuyển tất cả theory của topic về DRAFT (nếu đang PUBLISHED)
+        // Theory PUBLISHED → DRAFT
         List<GrammarTheory> theories = theoryRepository
                 .findByTopicIdOrderByDisplayOrderAsc(topic.getId());
         for (GrammarTheory theory : theories) {
@@ -180,12 +182,16 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
         }
         theoryRepository.saveAll(theories);
 
-        // ✅ Chuyển tất cả example của topic về DRAFT (nếu đang PUBLISHED)
+        // Example PUBLISHED → DRAFT
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topic.getId(), GrammarStatus.PUBLISHED, GrammarStatus.DRAFT);
 
-        // ✅ Chuyển tất cả tip của topic về DRAFT (nếu đang PUBLISHED)
+        // Tip PUBLISHED → DRAFT
         tipRepository.updateStatusByTopicAndFromStatus(
+                topic.getId(), GrammarStatus.PUBLISHED, GrammarStatus.DRAFT);
+
+        // Quiz PUBLISHED → DRAFT
+        quizRepository.updateStatusByTopicAndFromStatus(
                 topic.getId(), GrammarStatus.PUBLISHED, GrammarStatus.DRAFT);
 
         reviewService.log(topic, GrammarReviewAction.APPROVE_EDIT,

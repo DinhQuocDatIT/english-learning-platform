@@ -6,10 +6,7 @@ import com.englishlearning.backend.dto.grammar.request.GrammarTopicRejectRequest
 import com.englishlearning.backend.dto.grammar.response.*;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.security.CustomUserDetails;
-import com.englishlearning.backend.service.grammar.GrammarAdminService;
-import com.englishlearning.backend.service.grammar.GrammarEditRequestService;
-import com.englishlearning.backend.service.grammar.GrammarExampleService;
-import com.englishlearning.backend.service.grammar.GrammarTipService;
+import com.englishlearning.backend.service.grammar.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +27,7 @@ public class GrammarAdminController {
     private final GrammarEditRequestService editRequestService;
     private final GrammarExampleService exampleService;
     private final GrammarTipService tipService;
+    private final GrammarQuizService quizService;
     // =====================================================
     // ROADMAP
     // =====================================================
@@ -214,5 +212,25 @@ public class GrammarAdminController {
         List<GrammarTipResponse> response = tipService.getTipsForAdmin(topicId);
         return ResponseEntity.ok(new ApiResponse<>(
                 200, "Lấy danh sách mẹo thành công", response));
+    }
+    // =====================================================
+// QUIZ (Admin xem để duyệt)
+// =====================================================
+
+    @GetMapping("/topics/{topicId}/quizzes")
+    public ResponseEntity<ApiResponse<List<GrammarQuizSummaryResponse>>> getQuizzesForAdmin(
+            @PathVariable Long topicId) {
+        List<GrammarQuizSummaryResponse> response =
+                quizService.getQuizzesForAdmin(topicId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy danh sách đề thành công", response));
+    }
+
+    @GetMapping("/quizzes/{quizId}")
+    public ResponseEntity<ApiResponse<GrammarQuizResponse>> getQuizForAdmin(
+            @PathVariable Long quizId) {
+        GrammarQuizResponse response = quizService.getQuizForAdmin(quizId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy chi tiết đề thành công", response));
     }
 }

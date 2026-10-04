@@ -16,6 +16,7 @@ import com.englishlearning.backend.enums.GrammarStatus;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
 import com.englishlearning.backend.repository.GrammarExampleRepository;
+import com.englishlearning.backend.repository.GrammarQuizRepository;
 import com.englishlearning.backend.repository.GrammarRoadmapRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
 import com.englishlearning.backend.repository.GrammarTipRepository;
@@ -45,6 +46,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     private final GrammarTheoryRepository theoryRepository;
     private final GrammarExampleRepository exampleRepository;
     private final GrammarTipRepository tipRepository;
+    private final GrammarQuizRepository quizRepository;
     private final UserRepository userRepository;
     private final GrammarTopicReviewService reviewService;
     private final ObjectMapper objectMapper;
@@ -140,7 +142,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // ✅ Check quyền sở hữu
         if (!topic.getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền sửa chủ điểm này");
         }
@@ -169,7 +170,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // ✅ Check quyền sở hữu
         if (!topic.getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền xóa chủ điểm này");
         }
@@ -186,7 +186,6 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
 
-        // ✅ Check quyền sở hữu
         if (!topic.getCreatedBy().getId().equals(teacherId)) {
             throw new BusinessException("Bạn không có quyền gửi duyệt chủ điểm này");
         }
@@ -199,7 +198,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         topic.setStatus(GrammarStatus.PENDING);
         topicRepository.save(topic);
 
-        // ===== Theory: DRAFT/REJECTED → PENDING =====
+        // Theory: DRAFT/REJECTED → PENDING
         List<GrammarTheory> theories = theoryRepository
                 .findByTopicIdOrderByDisplayOrderAsc(topicId);
         for (GrammarTheory theory : theories) {
@@ -210,19 +209,24 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         }
         theoryRepository.saveAll(theories);
 
-        // ===== Example: DRAFT/REJECTED → PENDING =====
+        // Example: DRAFT/REJECTED → PENDING
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.DRAFT, GrammarStatus.PENDING);
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.REJECTED, GrammarStatus.PENDING);
 
-        // ===== Tip: DRAFT/REJECTED → PENDING =====
+        // Tip: DRAFT/REJECTED → PENDING
         tipRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.DRAFT, GrammarStatus.PENDING);
         tipRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.REJECTED, GrammarStatus.PENDING);
 
-        // 📝 Ghi lịch sử duyệt
+        // Quiz: DRAFT/REJECTED → PENDING
+        quizRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.DRAFT, GrammarStatus.PENDING);
+        quizRepository.updateStatusByTopicAndFromStatus(
+                topicId, GrammarStatus.REJECTED, GrammarStatus.PENDING);
+
         User teacher = userRepository.findById(teacherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
         reviewService.log(topic, GrammarReviewAction.SUBMIT, null, teacher);

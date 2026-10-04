@@ -1,20 +1,679 @@
+/* =========================================================
+   TEACHER GRAMMAR QUIZ
+   ========================================================= */
+
+/* Ép font cứng cho mọi thẻ */
+.loadingBox,
+.loadingBox *,
+.readOnlyBanner,
+.readOnlyBanner *,
+.actionRow,
+.actionRow *,
+.addBtn,
+.addBtn *,
+.emptyBox,
+.emptyBox *,
+.grid,
+.grid *,
+.card,
+.card *,
+.cardHeader,
+.cardHeader *,
+.cardIcon,
+.cardIcon *,
+.cardTitle,
+.cardDesc,
+.cardFooter,
+.metaItem,
+.metaItem *,
+.cardActions,
+.iconBtn,
+.iconBtn *,
+.deleteIconBtn {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  box-sizing: border-box;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 0;
+  min-height: 200px;
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ================= ACTION ROW ================= */
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 6px 16px -6px rgba(14, 167, 146, 0.6);
+}
+
+.addBtn span {
+  font-size: 13px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.addBtn svg {
+  font-size: 11px;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover, #52afa3);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px -6px rgba(14, 167, 146, 0.6);
+}
+
+.addBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ================= READONLY BANNER ================= */
+.readOnlyBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #fffbeb;
+  border-left: 3px solid #fbbf24;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.readOnlyBanner svg {
+  font-size: 14px;
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.readOnlyBanner span {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.readOnlyBanner strong {
+  font-weight: 700;
+  color: #78350f;
+}
+
+/* ================= EMPTY ================= */
 .emptyBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 14px;
-  min-height: 240px;
-  padding: 40px;
+  min-height: 220px;
+  padding: 40px 20px;
   text-align: center;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted, #64748b);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 3%, white);
+  border: 1px dashed var(--color-border, #e2e8f0);
+  border-radius: 14px;
 }
+
 .emptyIcon {
-  font-size: 42px;
+  font-size: 38px;
+  color: var(--color-primary, #0ea792);
   opacity: 0.5;
-  color: #dc2626;
 }
+
 .emptyBox p {
   margin: 0;
+  color: var(--color-text-muted, #64748b);
   font-size: 14px;
+  font-weight: 500;
+  max-width: 400px;
+}
+
+/* ================= GRID — 3 CỘT ================= */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* ================= CARD ================= */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px 12px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  transition: all 0.18s ease;
+  cursor: default;
+  min-height: 150px;
+}
+
+.card:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary, #0ea792) 50%,
+    var(--color-border, #e2e8f0)
+  );
+  box-shadow: 0 6px 16px -10px rgba(14, 167, 146, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ================= CARD HEADER ================= */
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 12%, white);
+  color: var(--color-primary, #0ea792);
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.cardIcon svg {
+  font-size: 13px;
+  color: inherit;
+}
+
+/* ================= CARD TITLE ================= */
+.cardTitle {
+  flex: 1;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight:700 !important;
+  color: var(--color-secondary, #1e293b);
+  letter-spacing: -0.2px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  min-width: 0;
+}
+
+/* ================= CARD DESC ================= */
+.cardDesc {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-muted, #64748b);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* ================= CARD FOOTER — không gạch ngang ================= */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  /* BỎ border-top và padding-top */
+}
+
+/* ================= META — không background ================= */
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted, #64748b);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.metaItem svg {
+  font-size: 10px;
+  color: inherit;
+}
+
+.metaItem strong {
+  font-weight: 800;
+  color: inherit;
+  margin: 0 1px;
+}
+
+/* ================= CARD ACTIONS ================= */
+.cardActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 7px;
+  font-size: 11px;
+  color: var(--color-text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.iconBtn svg {
+  font-size: 11px;
+  color: inherit;
+}
+
+.iconBtn:hover {
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 10%, white);
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-primary, #0ea792);
+}
+
+.deleteIconBtn:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .addBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}/* =========================================================
+   TEACHER GRAMMAR QUIZ
+   ========================================================= */
+
+/* Ép font cứng cho mọi thẻ */
+.loadingBox,
+.loadingBox *,
+.readOnlyBanner,
+.readOnlyBanner *,
+.actionRow,
+.actionRow *,
+.addBtn,
+.addBtn *,
+.emptyBox,
+.emptyBox *,
+.grid,
+.grid *,
+.card,
+.card *,
+.cardHeader,
+.cardHeader *,
+.cardIcon,
+.cardIcon *,
+.cardTitle,
+.cardDesc,
+.cardFooter,
+.metaItem,
+.metaItem *,
+.cardActions,
+.iconBtn,
+.iconBtn *,
+.deleteIconBtn {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  box-sizing: border-box;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 0;
+  min-height: 200px;
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ================= ACTION ROW ================= */
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 6px 16px -6px rgba(14, 167, 146, 0.6);
+}
+
+.addBtn span {
+  font-size: 13px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.addBtn svg {
+  font-size: 11px;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover, #52afa3);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px -6px rgba(14, 167, 146, 0.6);
+}
+
+.addBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ================= READONLY BANNER ================= */
+.readOnlyBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #fffbeb;
+  border-left: 3px solid #fbbf24;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.readOnlyBanner svg {
+  font-size: 14px;
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.readOnlyBanner span {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.readOnlyBanner strong {
+  font-weight: 700;
+  color: #78350f;
+}
+
+/* ================= EMPTY ================= */
+.emptyBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 220px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-text-muted, #64748b);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 3%, white);
+  border: 1px dashed var(--color-border, #e2e8f0);
+  border-radius: 14px;
+}
+
+.emptyIcon {
+  font-size: 38px;
+  color: var(--color-primary, #0ea792);
+  opacity: 0.5;
+}
+
+.emptyBox p {
+  margin: 0;
+  color: var(--color-text-muted, #64748b);
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 400px;
+}
+
+/* ================= GRID — 3 CỘT ================= */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* ================= CARD ================= */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px 12px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  transition: all 0.18s ease;
+  cursor: default;
+  min-height: 150px;
+}
+
+.card:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary, #0ea792) 50%,
+    var(--color-border, #e2e8f0)
+  );
+  box-shadow: 0 6px 16px -10px rgba(14, 167, 146, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ================= CARD HEADER ================= */
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 12%, white);
+  color: var(--color-primary, #0ea792);
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.cardIcon svg {
+  font-size: 13px;
+  color: inherit;
+}
+
+/* ================= CARD TITLE ================= */
+.cardTitle {
+  flex: 1;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--color-secondary, #1e293b);
+  letter-spacing: -0.2px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  min-width: 0;
+}
+
+/* ================= CARD DESC ================= */
+.cardDesc {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-muted, #64748b);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* ================= CARD FOOTER — không gạch ngang ================= */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  /* BỎ border-top và padding-top */
+}
+
+/* ================= META — không background ================= */
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-primary);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.metaItem svg {
+  font-size: 10px;
+  color: inherit;
+}
+
+.metaItem strong {
+  font-weight: 800;
+  color: inherit;
+  margin: 0 1px;
+}
+
+/* ================= CARD ACTIONS ================= */
+.cardActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 7px;
+  font-size: 11px;
+  color: var(--color-text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.iconBtn svg {
+  font-size: 11px;
+  color: inherit;
+}
+
+.iconBtn:hover {
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 10%, white);
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-primary, #0ea792);
+}
+
+.deleteIconBtn:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .addBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }

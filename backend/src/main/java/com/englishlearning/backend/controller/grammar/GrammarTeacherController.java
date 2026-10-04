@@ -4,10 +4,7 @@ import com.englishlearning.backend.dto.grammar.request.*;
 import com.englishlearning.backend.dto.grammar.response.*;
 import com.englishlearning.backend.dto.response.ApiResponse;
 import com.englishlearning.backend.security.CustomUserDetails;
-import com.englishlearning.backend.service.grammar.GrammarEditRequestService;
-import com.englishlearning.backend.service.grammar.GrammarExampleService;
-import com.englishlearning.backend.service.grammar.GrammarTeacherService;
-import com.englishlearning.backend.service.grammar.GrammarTipService;
+import com.englishlearning.backend.service.grammar.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +25,7 @@ public class GrammarTeacherController {
     private final GrammarEditRequestService editRequestService;
     private final GrammarExampleService exampleService;
     private final GrammarTipService tipService;
+    private final GrammarQuizService quizService;
     // =====================================================
     // ROADMAP
     // =====================================================
@@ -301,5 +299,60 @@ public class GrammarTeacherController {
         tipService.deleteTip(teacherId, tipId);
         return ResponseEntity.ok(new ApiResponse<>(
                 200, "Xóa mẹo thành công", null));
+    }
+    // =====================================================
+// QUIZ
+// =====================================================
+
+    @GetMapping("/topics/{topicId}/quizzes")
+    public ResponseEntity<ApiResponse<List<GrammarQuizSummaryResponse>>> getQuizzes(
+            @PathVariable Long topicId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        List<GrammarQuizSummaryResponse> response =
+                quizService.getQuizzesForEdit(teacherId, topicId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy danh sách đề thành công", response));
+    }
+
+    @GetMapping("/quizzes/{quizId}")
+    public ResponseEntity<ApiResponse<GrammarQuizResponse>> getQuiz(
+            @PathVariable Long quizId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        GrammarQuizResponse response = quizService.getQuizForEdit(teacherId, quizId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy chi tiết đề thành công", response));
+    }
+
+    @PostMapping("/quizzes")
+    public ResponseEntity<ApiResponse<GrammarQuizResponse>> createQuiz(
+            @Valid @RequestBody GrammarQuizRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        GrammarQuizResponse response = quizService.createQuiz(teacherId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
+                201, "Tạo đề thành công", response));
+    }
+
+    @PutMapping("/quizzes/{quizId}")
+    public ResponseEntity<ApiResponse<GrammarQuizResponse>> updateQuiz(
+            @PathVariable Long quizId,
+            @Valid @RequestBody GrammarQuizRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        GrammarQuizResponse response = quizService.updateQuiz(teacherId, quizId, request);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Cập nhật đề thành công", response));
+    }
+
+    @DeleteMapping("/quizzes/{quizId}")
+    public ResponseEntity<ApiResponse<Void>> deleteQuiz(
+            @PathVariable Long quizId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long teacherId = userDetails.getUser().getId();
+        quizService.deleteQuiz(teacherId, quizId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Xóa đề thành công", null));
     }
 }

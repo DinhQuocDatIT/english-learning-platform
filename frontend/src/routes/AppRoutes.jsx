@@ -77,8 +77,11 @@ import TeacherGrammarTopicLayout from "../pages/teacher/Grammar/TeacherGrammarTo
 import TeacherGrammarTheory from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTheory/TeacherGrammarTheory";
 import TeacherGrammarTip from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarTip/TeacherGrammarTip";
 import TeacherGrammarExample from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarExample/TeacherGrammarExample";
-import TeacherGrammarQuiz from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarQuiz/TeacherGrammarQuiz";
 import TeacherGrammarHistory from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarHistory/TeacherGrammarHistory";
+
+// ✅ Quiz — tab trong layout + editor page riêng
+import TeacherGrammarQuiz from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarQuiz/TeacherGrammarQuiz";
+import TeacherGrammarQuizEditor from "../pages/teacher/Grammar/TeacherGrammarTopicLayout/TeacherGrammarQuizEditor/TeacherGrammarQuizEditor";
 
 // ===== GRAMMAR — ADMIN =====
 import AdminGrammarRoadmapList from "../pages/admin/Grammar/AdminGrammarRoadmapList/AdminGrammarRoadmapList";
@@ -91,6 +94,9 @@ import AdminGrammarExample from "../pages/admin/Grammar/AdminGrammarTopicLayout/
 import AdminGrammarQuiz from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarQuiz/AdminGrammarQuiz";
 import AdminGrammarTopicHistory from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarTopicHistory/AdminGrammarTopicLayout";
 import AdminGrammarEditRequests from "../pages/admin/Grammar/AdminGrammarEditRequests/AdminGrammarEditRequests";
+
+// ✅ MỚI: Quiz Detail page riêng cho Admin
+import AdminGrammarQuizDetail from "../pages/admin/Grammar/AdminGrammarTopicLayout/AdminGrammarQuizDetail/AdminGrammarQuizDetail";
 
 function AppRoutes() {
   const isAuthenticated = AuthStorage.isAuthenticated();
@@ -216,6 +222,17 @@ function AppRoutes() {
               element={<TeacherGrammarTopicForm />}
             />
 
+            {/* ✅ QUIZ EDITOR — page riêng full-screen (ngoài layout) */}
+            <Route
+              path="grammar/topics/:topicId/quizzes/create"
+              element={<TeacherGrammarQuizEditor />}
+            />
+            <Route
+              path="grammar/topics/:topicId/quizzes/:quizId/edit"
+              element={<TeacherGrammarQuizEditor />}
+            />
+
+            {/* ✅ LAYOUT TOPIC — có tab quiz ở trong */}
             <Route
               path="grammar/topics/:topicId"
               element={<TeacherGrammarTopicLayout />}
@@ -319,6 +336,13 @@ function AppRoutes() {
               element={<AdminGrammarEditRequests />}
             />
 
+            {/* ✅ QUIZ DETAIL — page riêng (ngoài layout topic) */}
+            <Route
+              path="grammar/topics/:topicId/quizzes/:quizId"
+              element={<AdminGrammarQuizDetail />}
+            />
+
+            {/* Layout topic Admin — có tab quiz (list) */}
             <Route
               path="grammar/topics/:topicId"
               element={<AdminGrammarTopicLayout />}
