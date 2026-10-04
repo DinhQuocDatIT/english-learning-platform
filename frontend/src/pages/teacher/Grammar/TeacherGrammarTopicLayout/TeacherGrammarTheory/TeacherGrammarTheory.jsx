@@ -7,6 +7,7 @@ import {
   faSave,
   faTrash,
   faXmark,
+  faLock,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
@@ -50,6 +51,7 @@ function InlineSection({
   isNew,
   onCancelNew,
   topicId,
+  readOnly,
 }) {
   const [form, setForm] = useState({
     title: theory?.title || "",
@@ -172,24 +174,28 @@ function InlineSection({
   if (!isEditing) {
     return (
       <div
-        className={styles.sectionBlock}
-        onClick={() => onStartEdit(theory)}
-        title="Click để sửa"
+        className={`${styles.sectionBlock} ${
+          readOnly ? styles.sectionReadOnly : ""
+        }`}
+        onClick={() => !readOnly && onStartEdit(theory)}
+        title={readOnly ? "" : "Click để sửa"}
       >
         <div className={styles.sectionTitleRow}>
           <h3 className={styles.sectionTitle}>{theory.title}</h3>
-          <div className={styles.sectionActions}>
-            <button
-              className={`${styles.iconBtn} ${styles.iconBtnDelete}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(theory);
-              }}
-              title="Xóa"
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </button>
-          </div>
+          {!readOnly && (
+            <div className={styles.sectionActions}>
+              <button
+                className={`${styles.iconBtn} ${styles.iconBtnDelete}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(theory);
+                }}
+                title="Xóa"
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.sectionContent}>
@@ -410,7 +416,7 @@ function InlineSection({
 // MAIN
 // =====================================================
 function TeacherGrammarTheory() {
-  const { topicId } = useOutletContext();
+  const { topicId, topic } = useOutletContext();
 
   const [theories, setTheories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -419,8 +425,12 @@ function TeacherGrammarTheory() {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [pendingChanges, setPendingChanges] = useState({});
 
+  // Topic chỉ cho sửa khi DRAFT / REJECTED
+  const canEdit =
+    !topic || topic.status === "DRAFT" || topic.status === "REJECTED";
+
   useEffect(() => {
-    fetchData();
+    if (topicId) fetchData();
   }, [topicId]);
 
   const fetchData = async () => {
@@ -512,6 +522,17 @@ function TeacherGrammarTheory() {
     }
   };
 
+  const handleAddNew = () => {
+    if (!canEdit) {
+      toast.warning(
+        "Chỉ có thể thêm section khi chủ điểm ở trạng thái NHÁP hoặc TỪ CHỐI.",
+      );
+      return;
+    }
+    setEditingId(null);
+    setIsCreatingNew(true);
+  };
+
   const hasPending = Object.keys(pendingChanges).length > 0;
 
   if (loading) {
@@ -524,14 +545,24 @@ function TeacherGrammarTheory() {
 
   return (
     <>
+      {/* WARNING khi không cho sửa */}
+      {/* {!canEdit && (
+        <div className={styles.readOnlyBanner}>
+          <FontAwesomeIcon icon={faLock} />
+          <span>
+            Chủ điểm đang ở trạng thái <strong>{topic?.status}</strong>. Bạn chỉ
+            có thể xem. Muốn chỉnh sửa, hãy gửi yêu cầu hoặc chờ admin xử lý.
+          </span>
+        </div>
+      )} */}
+
       {/* HEADER ACTION */}
       <div className={styles.actionRow}>
         <button
           className={styles.addBtn}
-          onClick={() => {
-            setEditingId(null);
-            setIsCreatingNew(true);
-          }}
+          onClick={handleAddNew}
+          disabled={!canEdit}
+          title={!canEdit ? "Chủ điểm không ở trạng thái cho phép sửa" : ""}
         >
           <FontAwesomeIcon icon={faPlus} />
           <span>Thêm section</span>
@@ -545,6 +576,7 @@ function TeacherGrammarTheory() {
           theory={th}
           isEditing={editingId === th.id}
           onStartEdit={(t) => {
+            if (!canEdit) return;
             setIsCreatingNew(false);
             setEditingId(t.id);
           }}
@@ -553,6 +585,7 @@ function TeacherGrammarTheory() {
           onChange={handleChange}
           onRemovePending={handleRemovePending}
           topicId={topicId}
+          readOnly={!canEdit}
         />
       ))}
 
@@ -570,7 +603,11 @@ function TeacherGrammarTheory() {
 
       {theories.length === 0 && !isCreatingNew && (
         <div className={styles.emptyBox}>
-          <p>Chưa có section nào. Bấm "Thêm section" để bắt đầu.</p>
+          <p>
+            {canEdit
+              ? 'Chưa có section nào. Bấm "Thêm section" để bắt đầu.'
+              : "Chủ điểm này chưa có section nào."}
+          </p>
         </div>
       )}
 

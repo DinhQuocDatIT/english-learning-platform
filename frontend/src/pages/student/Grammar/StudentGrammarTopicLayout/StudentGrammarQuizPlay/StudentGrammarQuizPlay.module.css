@@ -295,3 +295,40 @@
     justify-content: center;
   }
 }
+.playProgressText {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary, #0ea792);
+  white-space: nowrap;
+  min-width: 80px;
+  justify-content: flex-end;
+}
+
+.playProgressText span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ✅ Spinner nhỏ hiện cạnh "Câu X/Y" khi đang lưu */
+.inlineSpinner {
+  font-size: 11px;
+  color: #f59e0b;
+}
+.playProgressText {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary, #0ea792);
+  white-space: nowrap;
+  min-width: 70px;
+  text-align: right;
+}
+
+.playProgressText span {
+  font-size: 13px;
+  font-weight: 600;
+  color: inherit;
+}

@@ -20,7 +20,6 @@ function StudentGrammarQuizPlay() {
   const [attempt, setAttempt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [localAnswers, setLocalAnswers] = useState({});
 
@@ -40,7 +39,6 @@ function StudentGrammarQuizPlay() {
       const res = await grammarService.startOrResumeQuizAttempt(quizId);
       const data = res?.data?.data;
 
-      // ✅ Nếu attempt đã COMPLETED → chuyển sang trang result
       if (data?.status === "COMPLETED") {
         navigate(
           `/dashboard/student/grammar/topics/${topicId}/quiz/${quizId}/result`,
@@ -61,20 +59,20 @@ function StudentGrammarQuizPlay() {
     }
   };
 
+  // ✅ Lưu đáp án chạy NGẦM — không hiện loading gì cả
   const handleSelect = async (questionId, label) => {
     if (attempt?.status !== "IN_PROGRESS") return;
 
+    // Cập nhật UI ngay
     setLocalAnswers((prev) => ({ ...prev, [questionId]: label }));
 
+    // Gọi API lưu ngầm (fire and forget, không setSaving, không hiện spinner)
     if (!attempt?.id) return;
     try {
-      setSaving(true);
       await grammarService.saveQuizAnswer(attempt.id, questionId, label);
     } catch (e) {
-      console.error(e);
+      console.error("Lỗi lưu đáp án:", e);
       toast.error("Không thể lưu đáp án. Vui lòng thử lại.");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -112,7 +110,6 @@ function StudentGrammarQuizPlay() {
       await grammarService.submitQuizAttempt(attempt.id);
       toast.success("Nộp bài thành công!");
 
-      // ✅ Chuyển sang trang result
       navigate(
         `/dashboard/student/grammar/topics/${topicId}/quiz/${quizId}/result`,
         { replace: true },
@@ -150,16 +147,12 @@ function StudentGrammarQuizPlay() {
         <div className={styles.playTitle}>
           <h2>{attempt.quiz?.title}</h2>
         </div>
+
+        {/* ✅ Chỉ hiện "Câu X/Y", không spinner, không "Đang lưu..." */}
         <div className={styles.playProgressText}>
-          {saving ? (
-            <span className={styles.savingText}>
-              <FontAwesomeIcon icon={faSpinner} spin /> Đang lưu...
-            </span>
-          ) : (
-            <span>
-              Câu {currentIdx + 1}/{questions.length}
-            </span>
-          )}
+          <span>
+            Câu {currentIdx + 1}/{questions.length}
+          </span>
         </div>
       </div>
 

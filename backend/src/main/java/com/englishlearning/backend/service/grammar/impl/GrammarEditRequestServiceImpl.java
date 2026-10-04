@@ -84,8 +84,9 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
 
         GrammarTopicEditRequest saved = editRequestRepository.save(request);
 
+        // ✅ Chỉ log reason gốc, không prefix
         reviewService.log(topic, GrammarReviewAction.REQUEST_EDIT,
-                "Lý do: " + reason.trim(), teacher);
+                reason.trim(), teacher);
 
         log.info("📝 Teacher {} gửi yêu cầu sửa topic id={}, reason={}",
                 teacherId, topicId, reason);
@@ -194,8 +195,9 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
         quizRepository.updateStatusByTopicAndFromStatus(
                 topic.getId(), GrammarStatus.PUBLISHED, GrammarStatus.DRAFT);
 
+        // ✅ Chỉ log reason gốc
         reviewService.log(topic, GrammarReviewAction.APPROVE_EDIT,
-                "Đồng ý cho chỉnh sửa. Lý do: " + request.getReason(), admin);
+                request.getReason(), admin);
 
         log.info("✅ Admin {} duyệt yêu cầu sửa requestId={}, topicId={}",
                 adminId, requestId, topic.getId());
@@ -221,10 +223,9 @@ public class GrammarEditRequestServiceImpl implements GrammarEditRequestService 
         request.setReviewNote(note != null ? note.trim() : null);
         GrammarTopicEditRequest saved = editRequestRepository.save(request);
 
-        String logReason = "Từ chối yêu cầu sửa"
-                + (note != null && !note.isBlank() ? ". Lý do: " + note.trim() : "");
+        // ✅ Chỉ log note (nếu có), không prefix
         reviewService.log(request.getTopic(), GrammarReviewAction.REJECT_EDIT,
-                logReason, admin);
+                note != null && !note.isBlank() ? note.trim() : null, admin);
 
         log.info("❌ Admin {} từ chối yêu cầu sửa requestId={}", adminId, requestId);
 

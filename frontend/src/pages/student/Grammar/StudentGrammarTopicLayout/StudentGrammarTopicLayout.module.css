@@ -238,7 +238,7 @@
 
 .contentTitle {
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--color-accent, #168a7c);
   letter-spacing: 0.5px;
@@ -246,8 +246,8 @@
 }
 
 .contentSubtitle {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--color-secondary, #0f172a);
   letter-spacing: 0;
   text-transform: none;

@@ -1,5 +1,6 @@
 /* =========================================================
    GRAMMAR TOPIC REVIEW HISTORY — timeline
+   ĐỒNG BỘ MÀU PRIMARY (trừ badge label)
    ========================================================= */
 
 .wrapper {
@@ -18,7 +19,7 @@
   box-sizing: border-box;
 }
 
-/* ===== ÉP CỨNG FONT ===== */
+/* Ép cứng font */
 .wrapper .timeline,
 .wrapper .timeline > div,
 .wrapper .item,
@@ -28,6 +29,7 @@
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
+/* ================= ACTION BADGE (giữ màu semantic) ================= */
 .wrapper .actionBadge,
 .wrapper .actionBadge span,
 .wrapper .actionBadge * {
@@ -37,6 +39,7 @@
   letter-spacing: 0.2px !important;
 }
 
+/* ================= TIME ================= */
 .wrapper .time,
 .wrapper .time span,
 .wrapper .time svg,
@@ -46,6 +49,7 @@
   font-weight: 500 !important;
 }
 
+/* ================= BY ================= */
 .wrapper .by,
 .wrapper .by span,
 .wrapper .by strong,
@@ -61,9 +65,10 @@
 }
 
 .wrapper .by strong {
-  font-weight: 700 !important;
+  font-weight: 500 !important;
 }
 
+/* ================= REASON BOX ================= */
 .wrapper .reasonBox,
 .wrapper .reasonBox > *,
 .wrapper .reasonLabel,
@@ -72,11 +77,6 @@
 .wrapper .reasonItem,
 .wrapper .reasonItem * {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
-}
-
-.wrapper .reasonLabel {
-  font-size: 10.5px !important;
-  font-weight: 700 !important;
 }
 
 .wrapper .reasonList {
@@ -90,6 +90,7 @@
   line-height: 1.55 !important;
 }
 
+/* ================= EMPTY / LOADING ================= */
 .wrapper .emptyBox,
 .wrapper .emptyBox *,
 .wrapper .emptyBox p,
@@ -127,11 +128,15 @@
   top: 42px;
   bottom: 0;
   width: 2px;
-  background: var(--color-border, #e2e8f0);
+  background: color-mix(
+    in srgb,
+    var(--color-primary, #0ea792) 30%,
+    transparent
+  );
   z-index: 0;
 }
 
-/* ================= ICON ================= */
+/* ================= ICON — DÙNG PRIMARY ================= */
 .wrapper .iconWrap {
   position: relative;
   z-index: 1;
@@ -141,10 +146,16 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid;
+  border: 2px solid var(--color-primary, #0ea792);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 12%, white);
+  color: var(--color-primary, #0ea792);
   font-size: 13px;
   flex-shrink: 0;
-  background: var(--color-surface, #ffffff);
+}
+
+.wrapper .iconWrap svg {
+  color: inherit;
+  font-size: 13px !important;
 }
 
 /* ================= CARD ================= */
@@ -161,11 +172,11 @@
 .wrapper .card:hover {
   border-color: color-mix(
     in srgb,
-    var(--action-color, #0ea792) 40%,
+    var(--color-primary, #0ea792) 40%,
     transparent
   );
   box-shadow: 0 4px 12px -6px
-    color-mix(in srgb, var(--action-color, #0ea792) 50%, transparent);
+    color-mix(in srgb, var(--color-primary, #0ea792) 50%, transparent);
 }
 
 .wrapper .cardHeader {
@@ -177,16 +188,17 @@
   flex-wrap: wrap;
 }
 
-/* ================= BADGE ================= */
+/* ================= BADGE (giữ màu semantic) ================= */
 .wrapper .actionBadge {
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  border: 1px solid;
-  border-radius: 999px;
+  background: transparent;
+  border: none;
   letter-spacing: 0.2px;
   text-transform: uppercase;
   white-space: nowrap;
+  font-weight: 700 !important;
 }
 
 /* ================= TIME ================= */
@@ -199,6 +211,7 @@
 
 .wrapper .time svg {
   font-size: 10px;
+  color: inherit;
 }
 
 /* ================= BY ================= */
@@ -212,7 +225,7 @@
 
 .wrapper .byIcon {
   font-size: 10px;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--color-primary, #0ea792);
 }
 
 .wrapper .byLabel {
@@ -223,32 +236,27 @@
   color: var(--color-secondary, #0f172a);
 }
 
-/* ================= REASON BOX ================= */
+/* =========================================================
+   REASON BOX — ĐỒNG BỘ PRIMARY
+   ========================================================= */
 .wrapper .reasonBox {
   margin-top: 10px;
   padding: 10px 12px;
-  background: var(--reason-bg, #fef2f2);
-  border-left: 3px solid var(--reason-color, #dc2626);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 8%, white);
+  border-left: 3px solid var(--color-primary, #0ea792);
   border-radius: 0 8px 8px 0;
-}
-
-.wrapper .reasonLabel {
-  display: block;
-  color: var(--reason-color, #991b1b);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
 }
 
 .wrapper .reasonList {
   margin: 0;
   padding-left: 20px;
   list-style: disc;
-  color: var(--reason-color, #7f1d1d);
+  color: var(--color-accent, #168a7c);
 }
 
 .wrapper .reasonItem {
-  color: var(--reason-color, #7f1d1d);
+  color: var(--color-accent, #168a7c);
+  font-weight: 400 !important;
   word-break: break-word;
   margin-bottom: 3px;
 }
@@ -258,32 +266,8 @@
 }
 
 .wrapper .reasonList li::marker {
-  color: var(--reason-color, #dc2626);
+  color: var(--color-primary, #0ea792);
   font-weight: 700;
-}
-
-/* ================= REASON BOX — REQUEST_EDIT đặc biệt ================= */
-/* Nền trắng, bullet màu xanh chủ đạo web (#0ea792) */
-.wrapper .reasonBoxRequestEdit {
-  background: #ffffff !important;
-  border-left-color: #ea580c !important;
-}
-
-.wrapper .reasonBoxRequestEdit .reasonLabel {
-  color: #ea580c !important;
-}
-
-.wrapper .reasonBoxRequestEdit .reasonList {
-  color: #334155 !important;
-}
-
-.wrapper .reasonBoxRequestEdit .reasonItem {
-  color: #334155 !important;
-}
-
-.wrapper .reasonBoxRequestEdit .reasonList li::marker {
-  color: #0ea792 !important;
-  font-weight: 700 !important;
 }
 
 /* ================= LOADING ================= */
@@ -318,7 +302,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: var(--color-tertiary, #f8fafc);
+  background: color-mix(in srgb, var(--color-primary, #0ea792) 10%, white);
   color: var(--color-primary, #0ea792);
 }
 
@@ -351,6 +335,10 @@
     font-size: 11px;
   }
 
+  .wrapper .iconWrap svg {
+    font-size: 11px !important;
+  }
+
   .wrapper .card {
     padding: 10px 12px;
   }
@@ -368,7 +356,6 @@
   .wrapper .actionBadge * {
     font-size: 10px !important;
     font-weight: 600 !important;
-    padding: 2px 8px;
   }
 
   .wrapper .reasonList {

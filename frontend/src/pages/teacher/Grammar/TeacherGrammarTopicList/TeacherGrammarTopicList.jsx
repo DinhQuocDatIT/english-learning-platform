@@ -165,6 +165,8 @@ function TeacherGrammarTopicList() {
             <span className={styles.name} title={topic.name}>
               {topic.name}
             </span>
+          </div>
+          <div className={styles.metaRow}>
             <span
               className={styles.statusBadge}
               style={{
@@ -184,9 +186,6 @@ function TeacherGrammarTopicList() {
               </span>
             )}
           </div>
-          <div className={styles.metaRow}>
-            <code className={styles.slug}>{topic.slug}</code>
-          </div>
         </div>
 
         <div className={styles.actions}>
@@ -195,10 +194,10 @@ function TeacherGrammarTopicList() {
             onClick={() =>
               navigate(`/dashboard/teacher/grammar/topics/${topic.id}/theory`)
             }
-            title="Quản lý lý thuyết"
+            title="Quản lý nội dung"
           >
             <FontAwesomeIcon icon={faBookOpen} />
-            <span>Lý thuyết</span>
+            <span>Nội dung</span>
           </button>
 
           {/* DRAFT / REJECTED → Sửa, Xóa, Gửi duyệt */}
