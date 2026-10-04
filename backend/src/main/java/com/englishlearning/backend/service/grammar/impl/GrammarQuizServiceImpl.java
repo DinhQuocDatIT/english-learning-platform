@@ -66,18 +66,31 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
             throw new BusinessException("Đề này chưa được publish");
         }
 
-        Optional<GrammarQuizAttempt> existing = attemptRepository
-                .findByStudentIdAndQuizIdAndStatus(
+        // ✅ Lấy attempt IN_PROGRESS mới nhất (chống trùng)
+        List<GrammarQuizAttempt> inProgressList = attemptRepository
+                .findByStudentIdAndQuizIdAndStatusOrderByIdDesc(
                         student.getId(), quizId, GrammarQuizAttemptStatus.IN_PROGRESS);
 
-        GrammarQuizAttempt attempt = existing.orElseGet(() -> {
+        GrammarQuizAttempt attempt;
+        if (!inProgressList.isEmpty()) {
+            attempt = inProgressList.get(0);
+
+            // Dọn các attempt IN_PROGRESS cũ nếu có nhiều hơn 1
+            if (inProgressList.size() > 1) {
+                for (int i = 1; i < inProgressList.size(); i++) {
+                    attemptRepository.delete(inProgressList.get(i));
+                }
+                log.info("🧹 Đã xoá {} attempt IN_PROGRESS trùng của student {} quiz {}",
+                        inProgressList.size() - 1, student.getId(), quizId);
+            }
+        } else {
             GrammarQuizAttempt a = new GrammarQuizAttempt();
             a.setStudent(student);
             a.setQuiz(quiz);
             a.setAnswers("{}");
             a.setStatus(GrammarQuizAttemptStatus.IN_PROGRESS);
-            return attemptRepository.save(a);
-        });
+            attempt = attemptRepository.save(a);
+        }
 
         return toAttemptResponse(attempt, quiz, false);
     }
@@ -157,11 +170,14 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
     public GrammarQuizAttemptResponse getAttemptForQuiz(Long userId, Long quizId) {
         Student student = findStudent(userId);
 
-        Optional<GrammarQuizAttempt> inProgress = attemptRepository
-                .findByStudentIdAndQuizIdAndStatus(
+        // ✅ List + get(0)
+        List<GrammarQuizAttempt> inProgressList = attemptRepository
+                .findByStudentIdAndQuizIdAndStatusOrderByIdDesc(
                         student.getId(), quizId, GrammarQuizAttemptStatus.IN_PROGRESS);
-        if (inProgress.isPresent()) {
-            return toAttemptResponse(inProgress.get(), inProgress.get().getQuiz(), false);
+
+        if (!inProgressList.isEmpty()) {
+            GrammarQuizAttempt attempt = inProgressList.get(0);
+            return toAttemptResponse(attempt, attempt.getQuiz(), false);
         }
 
         List<GrammarQuizAttempt> completed = attemptRepository
@@ -273,7 +289,6 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
         if (request.getDisplayOrder() != null) quiz.setDisplayOrder(request.getDisplayOrder());
         quizRepository.save(quiz);
 
-        // Xoá hết câu hỏi cũ → tạo lại
         questionRepository.deleteAllByQuizId(quizId);
         saveQuestions(quiz, request.getQuestions());
 
@@ -359,7 +374,6 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
             q.setCorrectAnswer(req.getCorrectAnswer());
             q.setExplanation(req.getExplanation());
 
-            // ✅ Lưu map explanations — chỉ lưu nếu có ít nhất 1 giá trị không rỗng
             if (req.getOptionExplanations() != null && !req.getOptionExplanations().isEmpty()) {
                 Map<String, String> cleaned = new HashMap<>();
                 req.getOptionExplanations().forEach((k, v) -> {
@@ -403,7 +417,6 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
         }
     }
 
-    // ✅ MỚI: parse map cho optionExplanations
     private Map<String, String> parseStringMap(String json) {
         if (json == null || json.isBlank()) return new HashMap<>();
         try {
@@ -446,11 +459,11 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
                         .totalQuestions(totalQuestions);
 
         if (student != null) {
-            boolean hasInProgress = attemptRepository
-                    .findByStudentIdAndQuizIdAndStatus(
-                            student.getId(), q.getId(), GrammarQuizAttemptStatus.IN_PROGRESS)
-                    .isPresent();
-            b.hasInProgressAttempt(hasInProgress);
+            // ✅ List + isEmpty
+            List<GrammarQuizAttempt> inProgressList = attemptRepository
+                    .findByStudentIdAndQuizIdAndStatusOrderByIdDesc(
+                            student.getId(), q.getId(), GrammarQuizAttemptStatus.IN_PROGRESS);
+            b.hasInProgressAttempt(!inProgressList.isEmpty());
 
             List<GrammarQuizAttempt> completed = attemptRepository
                     .findByStudentIdAndQuizIdAndStatusOrderByCompletedAtDesc(
@@ -489,7 +502,6 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
                         .displayOrder(qu.getDisplayOrder())
                         .correctAnswer(showAnswers ? qu.getCorrectAnswer() : null)
                         .explanation(showAnswers ? qu.getExplanation() : null)
-                        // ✅ Trả map explanations khi showAnswers = true
                         .optionExplanations(showAnswers
                                 ? parseStringMap(qu.getOptionExplanations())
                                 : null)

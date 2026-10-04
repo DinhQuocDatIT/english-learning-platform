@@ -1,0 +1,297 @@
+/* =========================================================
+   STUDENT GRAMMAR QUIZ — PLAY
+   ========================================================= */
+
+.loadingBox,
+.loadingBox *,
+.playHeader,
+.playHeader *,
+.questionCard,
+.questionCard *,
+.questionCard p,
+.questionCard span,
+.questionCard strong,
+.questionCard button,
+.questionCard div,
+.navRow,
+.navRow * {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  box-sizing: border-box;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.spinner {
+  font-size: 32px;
+  color: var(--color-primary, #0ea792);
+}
+
+/* ================= PLAY HEADER ================= */
+.playHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.exitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--color-text-muted, #64748b);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.exitBtn span {
+  font-size: 13px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.exitBtn svg {
+  font-size: 12px;
+}
+
+.exitBtn:hover {
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-primary, #0ea792);
+  background: color-mix(in srgb, var(--color-primary) 6%, white);
+}
+
+.playTitle h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-secondary, #1e293b);
+  text-align: center;
+  word-break: break-word;
+}
+
+.playProgressText {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary, #0ea792);
+  white-space: nowrap;
+}
+.playProgressText span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary, #0ea792);
+}
+.savingText {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #f59e0b;
+  font-size: 12px;
+}
+
+/* ================= QUESTION CARD ================= */
+.questionCard {
+  padding: 32px 28px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px -8px rgba(15, 23, 42, 0.06);
+  margin-bottom: 20px;
+}
+
+.questionText {
+  margin: 0 0 24px 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-secondary, #1e293b);
+  line-height: 1.55;
+  letter-spacing: -0.2px;
+}
+
+/* ================= OPTION LIST ================= */
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optionItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--color-surface, #ffffff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  font-size: 14.5px;
+  color: var(--color-text, #1e293b);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.optionItem:hover {
+  border-color: var(--color-primary, #0ea792);
+  background: color-mix(in srgb, var(--color-primary) 6%, white);
+}
+
+.optionItemSelected {
+  border-color: var(--color-primary, #0ea792);
+  background: color-mix(in srgb, var(--color-primary) 10%, white);
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.12);
+}
+
+.optionLabel {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: var(--color-text-muted, #64748b);
+  font-weight: 800;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.optionItemSelected .optionLabel {
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+}
+
+.optionText {
+  flex: 1;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: inherit;
+}
+
+/* ================= NAV ROW ================= */
+.navRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.navBtn,
+.navBtnPrimary,
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.navBtn span,
+.navBtnPrimary span,
+.submitBtn span {
+  font-size: 14px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.navBtn {
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text-muted, #64748b);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+}
+
+.navBtn:hover:not(:disabled) {
+  border-color: var(--color-primary, #0ea792);
+  color: var(--color-primary, #0ea792);
+  background: color-mix(in srgb, var(--color-primary) 6%, white);
+}
+
+.navBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.navBtnPrimary {
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  box-shadow: 0 4px 12px -4px rgba(14, 167, 146, 0.5);
+}
+
+.navBtnPrimary:hover {
+  background: var(--color-primary-hover, #52afa3);
+  transform: translateY(-1px);
+}
+
+.submitBtn {
+  background: var(--color-primary, #0ea792);
+  color: var(--color-text-white, #ffffff);
+  box-shadow: 0 4px 12px -4px rgba(14, 167, 146, 0.5);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover, #52afa3);
+  transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 640px) {
+  .questionCard {
+    padding: 22px 18px;
+  }
+
+  .questionText {
+    font-size: 15.5px;
+  }
+
+  .optionItem {
+    padding: 12px 14px;
+    font-size: 13.5px;
+  }
+
+  .optionText {
+    font-size: 13.5px;
+  }
+
+  .playHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .playTitle h2 {
+    text-align: left;
+  }
+
+  .navRow {
+    flex-direction: column-reverse;
+  }
+
+  .navBtn,
+  .navBtnPrimary,
+  .submitBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -6,16 +6,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface GrammarQuizAttemptRepository extends JpaRepository<GrammarQuizAttempt, Long> {
 
-    // Lấy attempt đang làm dở (nếu có) — mỗi student chỉ có 1 attempt IN_PROGRESS / quiz
-    Optional<GrammarQuizAttempt> findByStudentIdAndQuizIdAndStatus(
+    /**
+     * Lấy tất cả attempt theo (student, quiz, status), sắp xếp id DESC.
+     * Dùng List thay vì Optional để tránh NonUniqueResultException.
+     */
+    List<GrammarQuizAttempt> findByStudentIdAndQuizIdAndStatusOrderByIdDesc(
             Long studentId, Long quizId, GrammarQuizAttemptStatus status);
 
-    // Lịch sử tất cả attempt COMPLETED của student với quiz
+    /**
+     * Lấy tất cả attempt COMPLETED, mới nhất trước.
+     */
     List<GrammarQuizAttempt> findByStudentIdAndQuizIdAndStatusOrderByCompletedAtDesc(
             Long studentId, Long quizId, GrammarQuizAttemptStatus status);
 
