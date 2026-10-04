@@ -85,9 +85,9 @@ function StudentGrammarTopicLayout() {
       </button>
 
       {/* HEADER */}
-      <div className={styles.headerCard}>
+      {/* <div className={styles.headerCard}>
         <h1 className={styles.headerTitle}>{topic?.name}</h1>
-      </div>
+      </div> */}
 
       {/* TAB BAR */}
       <div className={styles.tabBar}>

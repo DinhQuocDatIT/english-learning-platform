@@ -5,12 +5,16 @@ import {
   faPaperPlane,
   faCheck,
   faXmark,
-  faEyeSlash,
   faClock,
   faUser,
   faPen,
-  faCircleCheck,
-  faCircleXmark,
+  faCloudArrowUp, // SUBMIT
+  faRocket, // APPROVE (publish)
+  faBan, // REJECT
+  faEyeSlash, // UNPUBLISH
+  faPenToSquare, // REQUEST_EDIT
+  faCircleCheck, // APPROVE_EDIT
+  faCircleXmark, // REJECT_EDIT
 } from "@fortawesome/free-solid-svg-icons";
 import grammarService from "../../services/grammarService";
 import styles from "./GrammarTopicReviewHistory.module.css";
@@ -18,49 +22,49 @@ import styles from "./GrammarTopicReviewHistory.module.css";
 const ACTION_CONFIG = {
   SUBMIT: {
     label: "Gửi duyệt",
-    icon: faPaperPlane,
+    icon: faCloudArrowUp, // ⬆️ gửi lên duyệt — trực quan hơn paper-plane
     color: "#3b82f6",
     bg: "#eff6ff",
     border: "#bfdbfe",
   },
   APPROVE: {
     label: "Đã publish",
-    icon: faCheck,
-    color: "#16a34a",
+    icon: faRocket, // 🚀 publish = phóng — hợp nghĩa "đã công khai"
+    color: "#1fce5f",
     bg: "#f0fdf4",
     border: "#bbf7d0",
   },
   REJECT: {
     label: "Từ chối chủ điểm",
-    icon: faXmark,
+    icon: faBan, // 🚫 cấm — mạnh hơn dấu X
     color: "#dc2626",
     bg: "#fef2f2",
     border: "#fecaca",
   },
   UNPUBLISH: {
     label: "Đã ẩn",
-    icon: faEyeSlash,
+    icon: faEyeSlash, // 👁️‍🗨️ ẩn — giữ nguyên, đúng nghĩa
     color: "#f59e0b",
     bg: "#fffbeb",
     border: "#fde68a",
   },
   REQUEST_EDIT: {
     label: "Yêu cầu chỉnh sửa",
-    icon: faPen,
+    icon: faPenToSquare, // ✏️ sửa trong khung — rõ "chỉnh sửa" hơn cây bút đơn
     color: "#ea580c",
     bg: "#fff7ed",
     border: "#fed7aa",
   },
   APPROVE_EDIT: {
     label: "Đồng ý cho sửa",
-    icon: faCircleCheck,
+    icon: faCircleCheck, // ✅ giữ nguyên — đúng nghĩa "đồng ý"
     color: "#0891b2",
     bg: "#ecfeff",
     border: "#a5f3fc",
   },
   REJECT_EDIT: {
     label: "Từ chối yêu cầu sửa",
-    icon: faCircleXmark,
+    icon: faCircleXmark, // ❌ giữ nguyên — đúng nghĩa "từ chối"
     color: "#b91c1c",
     bg: "#fef2f2",
     border: "#fecaca",
@@ -130,14 +134,7 @@ function GrammarTopicReviewHistory({ topicId, role = "admin" }) {
             <div key={h.id} className={styles.item}>
               {!isLast && <div className={styles.line} />}
 
-              <div
-                className={styles.iconWrap}
-                style={{
-                  background: cfg.bg,
-                  color: cfg.color,
-                  borderColor: cfg.border,
-                }}
-              >
+              <div className={styles.iconWrap}>
                 <FontAwesomeIcon icon={cfg.icon} />
               </div>
 
@@ -146,13 +143,12 @@ function GrammarTopicReviewHistory({ topicId, role = "admin" }) {
                   <span
                     className={styles.actionBadge}
                     style={{
-                      background: cfg.bg,
                       color: cfg.color,
-                      borderColor: cfg.border,
                     }}
                   >
                     {cfg.label}
                   </span>
+
                   <span className={styles.time}>
                     <FontAwesomeIcon icon={faClock} />
                     {new Date(h.performedAt).toLocaleString("vi-VN", {
@@ -172,21 +168,7 @@ function GrammarTopicReviewHistory({ topicId, role = "admin" }) {
                 </div>
 
                 {reasons.length > 0 && (
-                  <div
-                    className={`${styles.reasonBox} ${
-                      h.action === "REQUEST_EDIT"
-                        ? styles.reasonBoxRequestEdit
-                        : ""
-                    }`}
-                    style={{
-                      "--reason-color": cfg.color,
-                      "--reason-bg": cfg.bg,
-                      "--reason-border": cfg.border,
-                    }}
-                  >
-                    <span className={styles.reasonLabel}>
-                      {cfg.label} ({reasons.length})
-                    </span>
+                  <div className={styles.reasonBox}>
                     <ul className={styles.reasonList}>
                       {reasons.map((r, i) => (
                         <li key={i} className={styles.reasonItem}>
