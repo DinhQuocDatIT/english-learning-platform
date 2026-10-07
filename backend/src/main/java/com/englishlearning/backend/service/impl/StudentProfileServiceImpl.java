@@ -83,14 +83,12 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         Student student = getStudentByUserId(userId);
         Long studentId = student.getId();
 
-        // XP + topics
         int totalXp = student.getExperience() != null ? student.getExperience() : 0;
         int totalCompletedTopics = student.getTotalCompletedTopic() != null
                 ? student.getTotalCompletedTopic() : 0;
         int totalLearningSeconds = student.getTotalLearningSeconds() != null
                 ? student.getTotalLearningSeconds() : 0;
 
-        // Ranking — dùng statsRepository (có tie-break)
         long totalStudents = statsRepository.countAllStudents();
         Integer ranking = null;
         Double topPercent = null;
@@ -101,7 +99,6 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             topPercent = round1(((higher + 1.0) / totalStudents) * 100.0);
         }
 
-        // Practice stats
         long totalSessions = statsRepository.countCompletedSessions(studentId)
                 + statsRepository.countInProgressSessions(studentId);
         long completedSessions = statsRepository.countCompletedSessions(studentId);
@@ -111,11 +108,9 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         long totalAiCorrect = statsRepository.sumTotalCorrect(studentId);
         Double avgAiScore = statsRepository.getAverageScore(studentId);
 
-        // Listening stats
         long totalListening = statsRepository.countListeningAnswers(studentId);
         long totalListeningCorrect = statsRepository.countListeningCorrect(studentId);
 
-        // Accuracy — tổng hợp AI + Listening
         long totalAll = totalAiAnswers + totalListening;
         long totalCorrectAll = totalAiCorrect + totalListeningCorrect;
         double accuracy = totalAll > 0 ? (totalCorrectAll * 100.0) / totalAll : 0.0;
@@ -277,7 +272,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                         Comparator.nullsLast(Comparator.reverseOrder())
                 ))
                 .limit(MAX_RECENT_WORDS)
-                .map(v -> v.getVocabulary() != null ? v.getVocabulary().getWord() : null)
+                .map(StudentVocabulary::getWord)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 

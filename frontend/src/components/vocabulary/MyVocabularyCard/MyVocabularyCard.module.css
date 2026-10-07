@@ -1,213 +1,226 @@
 .wordCard {
-  background-color: var(--color-background, #ffffff);
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 14px;
-  padding: 24px;
-
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px 20px;
 
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.wordCard * {
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .wordCard:hover {
-  transform: translateY(-2px);
-
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border-color: #0ea792;
+  box-shadow: 0 2px 12px rgba(14, 167, 146, 0.08);
 }
+
+/* =========================
+   HEADER
+========================= */
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
 
-  gap: 16px;
-  margin-bottom: 16px;
+.wordInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .wordTitle {
-  font-size: 24px;
-  font-weight: 800;
-
-  color: var(--color-secondary, #1e293b);
-
-  margin: 0 0 2px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
 }
 
 .pronunciation {
-  font-size: 14px;
-  color: var(--color-text-muted, #64748b);
+  font-size: 13px;
+  color: #94a3b8;
   font-weight: 500;
 }
 
-.statusBadge {
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.speakBtn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #d4f3ef;
+  color: #0ea792;
+
+  border: none;
+  border-radius: 50%;
+
+  font-size: 12px;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.speakBtn:hover {
+  background: #0ea792;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.statusBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 5px 10px;
+
+  border: 1px solid transparent;
   border-radius: 20px;
 
   font-size: 11px;
   font-weight: 700;
 
-  padding: 4px 10px;
-
-  letter-spacing: 0.3px;
-
   cursor: pointer;
-
   white-space: nowrap;
 
-  transition:
-    opacity 0.2s,
-    transform 0.1s;
+  transition: all 0.2s ease;
 }
 
-.statusBadge:hover {
-  opacity: 0.8;
+.statusBtn span {
+  font-size: 11px;
 }
 
-.statusBadge:active {
-  transform: scale(0.97);
+.statusUnlearned {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #e2e8f0;
 }
 
-.unlearned {
-  background-color: #f1f5f9;
-
-  color: var(--color-text-muted, #64748b);
-
-  border: 1px solid var(--color-border, #e2e8f0);
+.statusUnlearned:hover {
+  background: #e2e8f0;
+  color: #475569;
 }
 
-.learned {
-  background-color: var(--color-tertiary, #d4f3ef);
-
-  color: var(--color-accent, #168a7c);
-
-  border: 1px solid transparent;
+.statusLearned {
+  background: #d4f3ef;
+  color: #168a7c;
+  border-color: #a7e8de;
 }
+
+.statusLearned:hover {
+  background: #a7e8de;
+  color: #0f7164;
+}
+
+/* =========================
+   MEANINGS
+========================= */
 
 .meaningsContainer {
   display: flex;
   flex-direction: column;
-
-  gap: 14px;
-
-  flex-grow: 1;
-
-  margin-bottom: 20px;
+  gap: 8px;
 }
 
 .meaningItem {
   display: flex;
-  flex-direction: column;
-
-  gap: 4px;
-}
-
-.posRow {
-  display: flex;
-  align-items: center;
-
+  align-items: flex-start;
   gap: 8px;
+
+  padding: 6px 0;
 }
 
 .posTag {
-  background-color: var(--color-surface, #f8fafc);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  color: var(--color-text, #1e293b);
-
-  border: 1px solid var(--color-border, #e2e8f0);
+  background: #d4f3ef;
+  color: #168a7c;
 
   font-size: 10px;
   font-weight: 700;
-
-  padding: 2px 6px;
-
-  border-radius: 4px;
-
+  letter-spacing: 0.2px;
   text-transform: uppercase;
 
+  padding: 2px 7px;
+  border-radius: 4px;
+
+  flex-shrink: 0;
   white-space: nowrap;
+  margin-top: 1px;
+}
+
+.meaningContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .meaningText {
   font-size: 14px;
-  font-weight: 600;
-
-  color: var(--color-text, #1e293b);
+  font-weight: 500;
+  color: #1e293b;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .exampleText {
-  font-size: 13px;
-
-  color: var(--color-text-muted, #64748b);
-
+  font-size: 12.5px;
+  color: #94a3b8;
   font-style: italic;
 
   margin: 0;
-
-  padding-left: 2px;
-
   line-height: 1.5;
 }
 
 .noMeaning {
   font-size: 14px;
-
-  color: var(--color-text-muted, #64748b);
-
+  color: #94a3b8;
   margin: 0;
 }
 
-.cardFooter {
-  border-top: 1px solid var(--color-border, #e2e8f0);
+/* =========================
+   RESPONSIVE
+========================= */
 
-  padding-top: 14px;
+@media (max-width: 600px) {
+  .wordCard {
+    padding: 14px 16px;
+  }
 
-  display: flex;
-  align-items: center;
+  .wordTitle {
+    font-size: 18px;
+  }
 
-  justify-content: space-between;
-
-  gap: 12px;
-}
-.cardFooter span {
-  font-size: 14px;
-  font-weight: 400;
-  color: #64748b;
-}
-.listenBtn {
-  background: transparent;
-
-  border: none;
-
-  color: var(--color-text-muted, #64748b);
-
-  font-size: 13px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 0;
-
-  transition: color 0.2s;
-}
-
-.listenBtn:hover {
-  color: var(--color-primary, #0ea792);
-}
-
-.reviewCount {
-  font-size: 12px;
-
-  color: var(--color-text-muted, #64748b);
-
-  white-space: nowrap;
+  .meaningText {
+    font-size: 13px;
+  }
 }
