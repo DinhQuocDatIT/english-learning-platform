@@ -27,4 +27,5 @@ public interface StudentVocabularyService {
             Long studentVocabularyId,
             LearningStatus status
     );
+    void delete(Long userId, Long studentVocabularyId);
 }

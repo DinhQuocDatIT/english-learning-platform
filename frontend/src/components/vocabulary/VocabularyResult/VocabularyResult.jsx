@@ -6,25 +6,49 @@ import {
   faVolumeHigh,
   faPlus,
   faSpinner,
+  faChevronDown,
+  faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { speakText } from "../../../utils/textToSpeech";
 
+const POS_LABELS = {
+  noun: "Danh từ",
+  verb: "Động từ",
+  adjective: "Tính từ",
+  adverb: "Trạng từ",
+  preposition: "Giới từ",
+  conjunction: "Liên từ",
+  pronoun: "Đại từ",
+  numeral: "Số từ",
+  article: "Mạo từ",
+  interjection: "Thán từ",
+  "danh từ": "Danh từ",
+  "động từ": "Động từ",
+  "tính từ": "Tính từ",
+  "trạng từ": "Trạng từ",
+  "giới từ": "Giới từ",
+  "liên từ": "Liên từ",
+  "đại từ": "Đại từ",
+  "số từ": "Số từ",
+  "mạo từ": "Mạo từ",
+  "thán từ": "Thán từ",
+};
+
+const MAX_DISPLAY = 5;
+
 function VocabularyResult({ vocabulary, onSave, saving = false }) {
   const [voices, setVoices] = useState([]);
-
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
 
     const loadVoices = () => {
-      const availableVoices = window.speechSynthesis.getVoices();
-
-      setVoices(availableVoices);
+      setVoices(window.speechSynthesis.getVoices());
     };
 
     loadVoices();
-
     window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
 
     return () => {
@@ -32,154 +56,116 @@ function VocabularyResult({ vocabulary, onSave, saving = false }) {
     };
   }, []);
 
-
-  const getUkVoice = () => {
+  const getEnglishVoice = () => {
     return (
       voices.find(
-        (voice) =>
-          voice.lang.toLowerCase() === "en-gb" &&
-          voice.name.toLowerCase().includes("google"),
-      ) || voices.find((voice) => voice.lang.toLowerCase().startsWith("en-gb"))
+        (v) =>
+          v.lang.toLowerCase() === "en-us" &&
+          v.name.toLowerCase().includes("google"),
+      ) ||
+      voices.find((v) => v.lang.toLowerCase().startsWith("en-us")) ||
+      voices.find((v) => v.lang.toLowerCase().startsWith("en"))
     );
   };
 
-  const getUsVoice = () => {
-    return (
-      voices.find(
-        (voice) =>
-          voice.lang.toLowerCase() === "en-us" &&
-          voice.name.toLowerCase().includes("google"),
-      ) || voices.find((voice) => voice.lang.toLowerCase().startsWith("en-us"))
-    );
-  };
-
-
-  const handleSpeakUk = () => {
+  const handleSpeak = () => {
     if (!vocabulary?.word) return;
 
-    const voice = getUkVoice();
-
     speakText(vocabulary.word, {
-      voice,
-      lang: "en-GB",
-      rate: 0.9,
-    });
-  };
-
-
-  const handleSpeakUs = () => {
-    if (!vocabulary?.word) return;
-
-    const voice = getUsVoice();
-
-    speakText(vocabulary.word, {
-      voice,
+      voice: getEnglishVoice(),
       lang: "en-US",
       rate: 0.9,
     });
   };
 
-
   const handleSave = () => {
     if (saving) return;
-
     onSave(vocabulary);
   };
 
+  const translatePos = (pos) => {
+    if (!pos || !pos.trim()) return "";
+    const key = pos.toLowerCase().trim();
+    return POS_LABELS[key] || pos;
+  };
+
+  const meanings = vocabulary?.meanings || [];
+  const visibleMeanings = showAll ? meanings : meanings.slice(0, MAX_DISPLAY);
+  const hasMore = meanings.length > MAX_DISPLAY;
+
+  const hasPronunciation =
+    vocabulary.pronunciation && vocabulary.pronunciation.trim() !== "";
+
   return (
     <div className={styles.vocabularyResult}>
-      {/* WORD HEADER */}
+      {/* HEADER */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.word}>{vocabulary.word}</h1>
 
-      <div className={styles.wordHeaderFlex}>
-        <div className={styles.wordInfo}>
-          <div className={styles.wordTitleRow}>
-            <h1 className={styles.wordTitle}>{vocabulary.word}</h1>
-          </div>
+          <button
+            type="button"
+            className={styles.speakBtn}
+            onClick={handleSpeak}
+            aria-label={`Phát âm ${vocabulary.word}`}
+          >
+            <FontAwesomeIcon icon={faVolumeHigh} />
+          </button>
 
-          {/* PRONUNCIATION */}
-
-          <div className={styles.pronunciationRow}>
-            {/* UK */}
-
-            <div className={styles.pronunciationItem}>
-              <span className={styles.accentLabel}>UK</span>
-
-              <button
-                type="button"
-                className={styles.accentSpeakerBtn}
-                onClick={handleSpeakUk}
-                title={`Phát âm UK: ${vocabulary.word}`}
-                aria-label={`Phát âm UK ${vocabulary.word}`}
-              >
-                <FontAwesomeIcon icon={faVolumeHigh} />
-              </button>
-
-              <span className={styles.pronunciationText}>
-                {vocabulary.pronunciationUk ||
-                  vocabulary.pronunciation ||
-                  "/.../"}
-              </span>
-            </div>
-
-            {/* US */}
-
-            <div className={styles.pronunciationItem}>
-              <span className={styles.accentLabel}>US</span>
-
-              <button
-                type="button"
-                className={styles.accentSpeakerBtn}
-                onClick={handleSpeakUs}
-                title={`Phát âm US: ${vocabulary.word}`}
-                aria-label={`Phát âm US ${vocabulary.word}`}
-              >
-                <FontAwesomeIcon icon={faVolumeHigh} />
-              </button>
-
-              <span className={styles.pronunciationText}>
-                {vocabulary.pronunciationUs ||
-                  vocabulary.pronunciation ||
-                  "/.../"}
-              </span>
-            </div>
-          </div>
+          {hasPronunciation && (
+            <span className={styles.pronunciation}>
+              {vocabulary.pronunciation}
+            </span>
+          )}
         </div>
-
-        {/* SAVE */}
 
         <button
           type="button"
-          className={styles.saveWordBtn}
+          className={styles.saveBtn}
           onClick={handleSave}
           disabled={saving}
         >
           <FontAwesomeIcon icon={saving ? faSpinner : faPlus} spin={saving} />
-
           <span>{saving ? "Đang lưu..." : "Lưu từ"}</span>
         </button>
       </div>
 
       {/* MEANINGS */}
+      <div className={styles.meanings}>
+        {visibleMeanings.map((item, index) => {
+          const posLabel = translatePos(item.partOfSpeech);
 
-      <div className={styles.meaningsList}>
-        {vocabulary.meanings?.map((item, index) => (
-          <div key={index} className={styles.meaningCardItem}>
-            <div className={styles.meaningTopRow}>
-              <span className={styles.posBadge}>{item.partOfSpeech}</span>
+          return (
+            <div key={index} className={styles.meaningItem}>
+              {posLabel && <span className={styles.posBadge}>{posLabel}</span>}
 
-              <span className={styles.meaningText}>{item.meaning}</span>
-            </div>
+              <div className={styles.meaningContent}>
+                <p className={styles.meaningText}>{item.meaning}</p>
 
-            {item.example && (
-              <div className={styles.exampleRow}>
-                <span className={styles.exampleLine} />
-
-                <p className={styles.exampleText}>"{item.example}"</p>
+                {item.example && (
+                  <p className={styles.exampleText}>"{item.example}"</p>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
+
+      {/* SHOW MORE */}
+      {hasMore && (
+        <button
+          type="button"
+          className={styles.showMoreBtn}
+          onClick={() => setShowAll(!showAll)}
+        >
+          <FontAwesomeIcon icon={showAll ? faChevronUp : faChevronDown} />
+          <span>
+            {showAll
+              ? "Thu gọn"
+              : `Xem thêm ${meanings.length - MAX_DISPLAY} nghĩa`}
+          </span>
+        </button>
+      )}
     </div>
   );
 }

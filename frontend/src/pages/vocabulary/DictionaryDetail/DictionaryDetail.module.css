@@ -1,0 +1,351 @@
+.wrapper {
+  padding: 24px;
+  background-color: var(--color-surface, #f8fafc);
+  min-height: 100vh;
+  font-family: inherit;
+  color: var(--color-text, #1e293b);
+
+  max-width: 1000px;
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wrapper * {
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+/* =========================
+   HEADER TOP
+========================= */
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  background: transparent;
+  border: none;
+
+  color: var(--color-text-muted, #64748b);
+
+  font-size: 14px;
+  font-weight: 600;
+
+  padding: 8px 12px;
+  border-radius: 8px;
+
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  background: var(--color-background, #ffffff);
+  color: var(--color-primary, #0ea792);
+}
+
+.idBadge {
+  display: inline-flex;
+  align-items: center;
+
+  background: #e2e8f0;
+  color: var(--color-text, #1e293b);
+
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card {
+  background: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  padding: 24px;
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* =========================
+   WORD HEADER
+========================= */
+
+.wordHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.word {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--color-secondary, #1e293b);
+  margin: 0 0 6px 0;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.pronunciation {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-muted, #64748b);
+  margin: 0;
+  font-family: "Courier New", monospace;
+}
+
+.wordActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.langBadge {
+  display: inline-flex;
+  align-items: center;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.langEn {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.langVi {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.speakBtn {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--color-tertiary, #d4f3ef);
+  color: var(--color-primary, #0ea792);
+
+  border: none;
+  border-radius: 50%;
+
+  font-size: 15px;
+  cursor: pointer;
+
+  transition: all 0.2s;
+}
+
+.speakBtn:hover {
+  background: var(--color-primary, #0ea792);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+/* =========================
+   SECTION HEADER
+========================= */
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-secondary, #1e293b);
+  margin: 0;
+}
+
+.countBadge {
+  display: inline-flex;
+  align-items: center;
+
+  background: var(--color-tertiary, #d4f3ef);
+  color: var(--color-accent, #168a7c);
+
+  font-size: 12px;
+  font-weight: 700;
+
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+/* =========================
+   MEANINGS
+========================= */
+
+.meaningsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meaningItem {
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.meaningItem:last-child {
+  border-bottom: none;
+}
+
+.meaningTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.posTag {
+  display: inline-flex;
+  align-items: center;
+
+  background: var(--color-tertiary, #d4f3ef);
+  color: var(--color-accent, #168a7c);
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+
+  padding: 3px 8px;
+  border-radius: 4px;
+
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.meaningText {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text, #1e293b);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.exampleText {
+  margin: 6px 0 0 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--color-tertiary, #d4f3ef);
+
+  font-size: 13px;
+  font-style: italic;
+  color: var(--color-text-muted, #64748b);
+  line-height: 1.5;
+}
+
+/* =========================
+   TRANSLATIONS
+========================= */
+
+.translationList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.translationItem {
+  display: inline-flex;
+  align-items: center;
+
+  background: #eff6ff;
+  color: #1e40af;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  padding: 6px 12px;
+  border-radius: 6px;
+
+  border: 1px solid #dbeafe;
+}
+
+/* =========================
+   EMPTY / LOADING / ERROR
+========================= */
+
+.emptyBox {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-text-muted, #64748b);
+  font-style: italic;
+}
+
+.loading {
+  padding: 100px 20px;
+  text-align: center;
+  color: var(--color-text-muted, #64748b);
+  font-size: 15px;
+}
+
+.errorBox {
+  padding: 40px 20px;
+  text-align: center;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 600px) {
+  .wrapper {
+    padding: 16px;
+  }
+
+  .word {
+    font-size: 24px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .wordHeader {
+    flex-direction: column;
+  }
+
+  .wordActions {
+    align-self: flex-start;
+  }
+
+  .meaningText {
+    font-size: 14px;
+  }
+}

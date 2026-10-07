@@ -20,6 +20,14 @@ function VocabularySearchDropdown() {
   const [savingId, setSavingId] = useState(null);
 
   const searchRef = useRef(null);
+  const inputRef = useRef(null); // ← THÊM ref cho input
+
+  // ✅ Auto focus khi component mount
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -46,31 +54,58 @@ function VocabularySearchDropdown() {
 
     setIsOpen(true);
 
+    const controller = new AbortController();
+    let isCancelled = false;
+
     const timer = setTimeout(async () => {
       try {
         setLoading(true);
 
-        const response = await vocabularyService.searchVocabulary(keyword);
+        const response = await vocabularyService.search(keyword, 10, {
+          signal: controller.signal,
+        });
 
-        console.log("Vocabulary search API:", response);
+        if (isCancelled) return;
 
         const data = response?.data?.data ?? [];
 
-        setVocabularyList(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Lỗi tra cứu từ vựng:", error);
+        const seen = new Set();
+        const unique = [];
 
+        for (const item of data) {
+          const key =
+            item.word.toLowerCase() +
+            "|" +
+            (item.meanings || []).map((m) => m.meaning.toLowerCase()).join("|");
+
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(item);
+          }
+        }
+
+        setVocabularyList(unique);
+      } catch (error) {
+        if (error.name === "CanceledError" || isCancelled) return;
+
+        console.error("Lỗi tra cứu từ vựng:", error);
         setVocabularyList([]);
 
         toast.error(
           error.response?.data?.message || "Không thể tra cứu từ vựng.",
         );
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
-    }, 400);
+    }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [searchTerm]);
 
   const handleInputChange = (e) => {
@@ -78,26 +113,24 @@ function VocabularySearchDropdown() {
   };
 
   const handleSaveVocabulary = async (vocabulary) => {
-    if (!vocabulary?.id) {
+    if (!vocabulary?.word) {
       toast.error("Không xác định được từ vựng.");
       return;
     }
 
     try {
-      setSavingId(vocabulary.id);
+      setSavingId(vocabulary.word);
 
-      const response = await studentVocabularyService.saveVocabulary({
-        vocabularyId: vocabulary.id,
+      await studentVocabularyService.saveVocabulary({
+        word: vocabulary.word,
+        pronunciation: vocabulary.pronunciation,
+        meanings: vocabulary.meanings,
       });
-
-      console.log("Save vocabulary response:", response);
 
       toast.success(`Đã lưu từ "${vocabulary.word}" vào kho từ vựng!`);
     } catch (error) {
       console.error("Lỗi lưu từ vựng:", error);
-
       const message = error.response?.data?.message || "Không thể lưu từ vựng.";
-
       toast.error(message);
     } finally {
       setSavingId(null);
@@ -108,19 +141,19 @@ function VocabularySearchDropdown() {
     setSearchTerm("");
     setVocabularyList([]);
     setIsOpen(false);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   return (
     <div className={styles.container} ref={searchRef}>
-      {/* SEARCH SECTION */}
-
       <div className={styles.searchSection}>
         <div className={styles.sectionHeader}>
           <FontAwesomeIcon
             icon={faMagnifyingGlass}
             className={styles.headerIcon}
           />
-
           <span>TỪ ĐIỂN</span>
         </div>
 
@@ -131,6 +164,7 @@ function VocabularySearchDropdown() {
           />
 
           <input
+            ref={inputRef} // ← GẮN REF VÀO INPUT
             type="text"
             value={searchTerm}
             onChange={handleInputChange}
@@ -158,12 +192,9 @@ function VocabularySearchDropdown() {
 
       {isOpen && (
         <div className={styles.dropdownResultOverlay}>
-          {/* LOADING */}
-
           {loading && (
             <div className={styles.loading}>
               <FontAwesomeIcon icon={faMagnifyingGlass} spin />
-
               <span>Đang tra cứu...</span>
             </div>
           )}
@@ -173,23 +204,21 @@ function VocabularySearchDropdown() {
               <div className={styles.emptyIcon}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </div>
-
               <p>
                 Không tìm thấy từ <strong>"{searchTerm}"</strong>
               </p>
-
               <span>Hãy thử nhập từ khác</span>
             </div>
           )}
 
           {!loading &&
             vocabularyList.length > 0 &&
-            vocabularyList.map((vocabulary) => (
+            vocabularyList.map((vocabulary, index) => (
               <VocabularyResult
-                key={vocabulary.id}
+                key={`${vocabulary.word}-${index}`}
                 vocabulary={vocabulary}
                 onSave={handleSaveVocabulary}
-                saving={savingId === vocabulary.id}
+                saving={savingId === vocabulary.word}
               />
             ))}
         </div>

@@ -110,4 +110,22 @@ public class StudentVocabularyController {
                 )
         );
     }
+    @DeleteMapping("/{studentVocabularyId}")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long studentVocabularyId
+    ) {
+        studentVocabularyService.delete(
+                userDetails.getUser().getId(),
+                studentVocabularyId
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Xóa từ vựng thành công",
+                        null
+                )
+        );
+    }
 }

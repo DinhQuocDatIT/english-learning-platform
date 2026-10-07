@@ -17,13 +17,13 @@ public interface StudentVocabularyRepository
             LearningStatus learningStatus
     );
 
-    Optional<StudentVocabulary> findByStudentIdAndVocabularyId(
+    Optional<StudentVocabulary> findByStudentIdAndWordIgnoreCase(
             Long studentId,
-            Long vocabularyId
+            String word
     );
 
-    boolean existsByStudentIdAndVocabularyId(
+    boolean existsByStudentIdAndWordIgnoreCase(
             Long studentId,
-            Long vocabularyId
+            String word
     );
 }

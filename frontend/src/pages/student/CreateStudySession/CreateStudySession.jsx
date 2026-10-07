@@ -122,9 +122,19 @@ function CreateStudySession() {
 
     try {
       setSearching(true);
-      const response = await vocabularyService.searchVocabulary(keyword);
-      const words = response.data?.data ?? response.data ?? [];
-      setSearchResults(words);
+
+      const response = await vocabularyService.lookup(keyword);
+      const data = response?.data?.data;
+
+      if (data) {
+        const result = {
+          ...data,
+          id: `lookup-${data.word}`,
+        };
+        setSearchResults([result]);
+      } else {
+        setSearchResults([]);
+      }
     } catch (error) {
       console.error("Search vocabulary error:", error);
       setSearchResults([]);
@@ -148,7 +158,7 @@ function CreateStudySession() {
   };
 
   const getWordId = (word) => {
-    return word.vocabularyId ?? word.id;
+    return word.id ?? word.word;
   };
 
   const getMeaning = (word) => {
@@ -173,8 +183,7 @@ function CreateStudySession() {
           Quay lại
         </button>
 
-        <h1 className={styles.pageTitle}>Tạo phiên học</h1>
-        <p className={styles.subtitle}>Chọn những từ bạn muốn ôn tập hôm nay</p>
+       
       </div>
 
       <div className={styles.mainLayout}>
@@ -357,14 +366,21 @@ function CreateStudySession() {
                         <span className={styles.cardWordTitle}>
                           {word.word}
                         </span>
-                        <span className={styles.cardWordPronounce}>
-                          {word.pronunciation}
-                        </span>
+
+                        {word.pronunciation && (
+                          <span className={styles.cardWordPronounce}>
+                            {word.pronunciation}
+                          </span>
+                        )}
+
                         <span className={styles.cardWordMeaning}>
                           {getMeaning(word)}
                         </span>
+
                         {getPartOfSpeech(word) && (
-                          <small>{getPartOfSpeech(word)}</small>
+                          <span className={styles.cardWordPos}>
+                            {getPartOfSpeech(word)}
+                          </span>
                         )}
                       </div>
 
@@ -372,6 +388,7 @@ function CreateStudySession() {
                         type="button"
                         className={styles.removeWordBtn}
                         onClick={() => handleRemoveWord(id)}
+                        title="Xóa từ"
                       >
                         <FontAwesomeIcon icon={faXmark} />
                       </button>

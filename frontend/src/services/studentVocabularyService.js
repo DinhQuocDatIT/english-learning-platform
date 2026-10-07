@@ -24,6 +24,11 @@ const studentVocabularyService = {
       },
     );
   },
+  delete(studentVocabularyId) {
+    return axiosClient.delete(
+      `/v1/student-vocabularies/${studentVocabularyId}`,
+    );
+  },
 };
 
 export default studentVocabularyService;

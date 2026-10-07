@@ -12,9 +12,7 @@ import PublicRoute from "./PublicRoute";
 import AdminProfile from "../pages/admin/AdminProfile/AdminProfile";
 import TeacherProfile from "../pages/teacher/TeacherProfile/TeacherProfile";
 import VocabularyManagement from "../pages/vocabulary/VocabularyManagement/VocabularyManagement";
-import CreateVocabulary from "../pages/vocabulary/CreateVocabulary/CreateVocabulary";
-import ImportVocabulary from "../pages/vocabulary/ImportVocabulary/ImportVocabulary";
-import UpdateVocabulary from "../pages/vocabulary/UpdateVocabulary/UpdateVocabulary";
+import DictionaryDetail from "../pages/vocabulary/DictionaryDetail/DictionaryDetail";
 import TeacherManagement from "../pages/admin/TeacherManagement/TeacherManagement";
 import CreateTeacher from "../pages/admin/CreateTeacher/CreateTeacher";
 import TeacherDetail from "../pages/admin/TeacherDetail/TeacherDetail";
@@ -157,9 +155,7 @@ function AppRoutes() {
               <Route path="tips" element={<StudentGrammarTip />} />
               <Route path="examples" element={<StudentGrammarExample />} />
               <Route path="quiz" element={<StudentGrammarQuiz />} />
-              {/* ✅ Play nằm TRONG layout */}
               <Route path="quiz/:quizId" element={<StudentGrammarQuizPlay />} />
-              {/* ✅ Result nằm TRONG layout (route riêng để reset scroll) */}
               <Route
                 path="quiz/:quizId/result"
                 element={<StudentGrammarQuizResult />}
@@ -174,11 +170,9 @@ function AppRoutes() {
           >
             <Route path="profile" element={<TeacherProfile />} />
             <Route path="vocabulary" element={<VocabularyManagement />} />
-            <Route path="create-vocabulary" element={<CreateVocabulary />} />
-            <Route path="import-vocabulary" element={<ImportVocabulary />} />
             <Route
-              path="update-vocabulary/:id"
-              element={<UpdateVocabulary />}
+              path="vocabulary/:id"
+              element={<DictionaryDetail />}
             />
             <Route path="students" element={<StudentManagement />} />
             <Route path="create-student" element={<CreateStudent />} />
@@ -254,11 +248,9 @@ function AppRoutes() {
             <Route path="index" element={<DashBoard />} />
 
             <Route path="vocabulary" element={<VocabularyManagement />} />
-            <Route path="create-vocabulary" element={<CreateVocabulary />} />
-            <Route path="import-vocabulary" element={<ImportVocabulary />} />
             <Route
-              path="update-vocabulary/:id"
-              element={<UpdateVocabulary />}
+              path="vocabulary/:id"
+              element={<DictionaryDetail />}
             />
             <Route path="teachers" element={<TeacherManagement />} />
             <Route path="create-teacher" element={<CreateTeacher />} />

@@ -15,6 +15,7 @@
 .container *::before,
 .container *::after {
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 /* --- HEADER TRÊN CÙNG --- */
@@ -42,11 +43,11 @@
 }
 
 .pageTitle {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   color: var(--color-secondary, #1e293b);
   margin: 0 0 6px 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
   line-height: 1.2;
 }
 
@@ -243,52 +244,7 @@
   border-color: var(--color-primary, #0ea792);
 }
 
-.customNumBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 16px;
-  background-color: var(--color-surface, #f8fafc);
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-muted, #64748b);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.customNumBtn:hover {
-  border-color: var(--color-primary, #0ea792);
-  color: var(--color-primary, #0ea792);
-}
-
 /* --- PHẦN TỰ CHỌN TỪ VỰNG --- */
-.actionLinks {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-}
-
-.textLink {
-  background: none;
-  border: none;
-  color: var(--color-primary, #0ea792);
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-}
-
-.textLink:hover {
-  text-decoration: underline;
-}
-
-.dotSeparator {
-  color: var(--color-text-muted, #64748b);
-}
-
 .searchBoxWrapper {
   position: relative;
   margin-bottom: 16px;
@@ -322,14 +278,13 @@
 
 .wordsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
-  max-height: 300px;
+  max-height: 400px;
   overflow-y: auto;
   padding-right: 4px;
 }
 
-/* Tùy chỉnh thanh cuộn cho lưới từ vựng */
 .wordsGrid::-webkit-scrollbar {
   width: 6px;
 }
@@ -338,60 +293,120 @@
   border-radius: 4px;
 }
 
+/* =========================================
+   CARD TỪ VỰNG - ĐÃ SỬA LAYOUT
+========================================= */
+
 .wordCheckboxCard {
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 10px;
-  padding: 12px;
-  cursor: pointer;
+  position: relative;
+
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  background-color: var(--color-background, #ffffff);
+  gap: 10px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  padding: 12px 14px;
+
+  background: #ffffff;
+
   transition: all 0.2s ease;
 }
 
 .wordCheckboxCard:hover {
-  border-color: var(--color-primary, #0ea792);
-}
-
-.wordCardSelected {
-  border-color: var(--color-primary, #0ea792);
-  background-color: rgba(14, 167, 146, 0.03);
+  border-color: #0ea792;
+  box-shadow: 0 2px 8px rgba(14, 167, 146, 0.08);
 }
 
 .wordCardContent {
+  flex: 1;
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  overflow: hidden;
+  gap: 3px;
 }
 
 .cardWordTitle {
   font-size: 15px;
   font-weight: 700;
-  color: var(--color-secondary, #1e293b);
-}
+  color: #1e293b;
+  line-height: 1.3;
 
-.cardWordPronounce {
-  font-size: 12px;
-  color: var(--color-text-muted, #64748b);
-}
-
-.cardWordMeaning {
-  font-size: 13px;
-  color: var(--color-text, #1e293b);
-  margin-top: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.styledCheckbox {
-  accent-color: var(--color-primary, #0ea792);
-  width: 16px;
-  height: 16px;
+.cardWordPronounce {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+  line-height: 1.2;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardWordMeaning {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.4;
+  margin-top: 4px;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardWordPos {
+  display: inline-flex;
+  align-items: center;
+
+  background: #d4f3ef;
+  color: #168a7c;
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+
+  padding: 2px 7px;
+  border-radius: 4px;
+
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.removeWordBtn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+  color: #94a3b8;
+
+  border: none;
+  border-radius: 50%;
+
+  font-size: 12px;
   cursor: pointer;
-  margin-top: 2px;
+
+  flex-shrink: 0;
+
+  transition: all 0.2s ease;
+}
+
+.removeWordBtn:hover {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 /* --- CỘT PHẢI: SUMMARY SIDEBAR --- */
@@ -473,9 +488,9 @@
   color: #ffffff;
   border: none;
   border-radius: 10px;
-  padding: 10px 10px;
+  padding: 12px;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -484,16 +499,21 @@
   transition:
     background-color 0.2s ease,
     transform 0.1s ease;
- 
 }
 
-.startSessionBtn:hover {
+.startSessionBtn:hover:not(:disabled) {
   background-color: var(--color-primary-hover, #0c8f7e);
 }
 
-.startSessionBtn:active {
+.startSessionBtn:active:not(:disabled) {
   transform: scale(0.98);
 }
+
+.startSessionBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* =========================================================
    TÌM KIẾM TỪ VỰNG
 ========================================================= */
@@ -512,7 +532,6 @@
   background-color: var(--color-surface, #f8fafc);
 }
 
-/* Scrollbar search */
 .searchResults::-webkit-scrollbar {
   width: 6px;
 }
@@ -526,8 +545,6 @@
   background: transparent;
 }
 
-
-/* Một kết quả tìm kiếm */
 .searchResultItem {
   display: flex;
   align-items: center;
@@ -552,8 +569,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-
-/* Phần thông tin từ */
 .searchResultItem > div:first-child {
   min-width: 0;
   flex: 1;
@@ -563,8 +578,6 @@
   gap: 3px;
 }
 
-
-/* Tên từ */
 .searchResultItem strong {
   font-size: 15px;
   font-weight: 700;
@@ -575,8 +588,6 @@
   text-overflow: ellipsis;
 }
 
-
-/* Phát âm */
 .searchResultItem span {
   font-size: 12px;
   color: var(--color-text-muted, #64748b);
@@ -586,8 +597,6 @@
   text-overflow: ellipsis;
 }
 
-
-/* Nghĩa */
 .searchResultItem small {
   margin-top: 2px;
 
@@ -599,8 +608,6 @@
   text-overflow: ellipsis;
 }
 
-
-/* Nút Thêm */
 .searchResultItem button {
   flex-shrink: 0;
 
@@ -639,8 +646,6 @@
   transform: scale(0.97);
 }
 
-
-
 .searchResultItem button:disabled {
   cursor: not-allowed;
 
@@ -651,14 +656,9 @@
   opacity: 0.8;
 }
 
-
-
 .searchResultItem button svg {
   font-size: 12px;
 }
-
-
-
 
 .searchResults > p {
   margin: 0;
@@ -669,9 +669,6 @@
   font-size: 13px;
   color: var(--color-text-muted, #64748b);
 }
-
-
-
 
 @media (max-width: 640px) {
   .searchResults {
