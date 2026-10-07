@@ -6,12 +6,13 @@ import {
   faVolumeHigh,
   faCircleCheck,
   faCircle,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { speakText } from "../../../utils/textToSpeech";
 import { getEnglishVoices } from "../../../utils/englishVoices";
 
-function MyVocabularyCard({ vocabulary, onChangeStatus }) {
+function MyVocabularyCard({ vocabulary, onChangeStatus, onDelete }) {
   const [ukVoice, setUkVoice] = useState(null);
 
   useEffect(() => {
@@ -50,6 +51,11 @@ function MyVocabularyCard({ vocabulary, onChangeStatus }) {
     onChangeStatus(vocabulary);
   };
 
+  const handleDelete = () => {
+    if (!vocabulary?.id) return;
+    onDelete(vocabulary);
+  };
+
   return (
     <div className={styles.wordCard}>
       {/* HEADER */}
@@ -84,6 +90,15 @@ function MyVocabularyCard({ vocabulary, onChangeStatus }) {
           >
             <FontAwesomeIcon icon={isLearned ? faCircleCheck : faCircle} />
             <span>{isLearned ? "Đã học" : "Chưa học"}</span>
+          </button>
+
+          <button
+            type="button"
+            className={styles.deleteBtn}
+            onClick={handleDelete}
+            title="Xóa từ vựng"
+          >
+            <FontAwesomeIcon icon={faTrash} />
           </button>
         </div>
       </div>

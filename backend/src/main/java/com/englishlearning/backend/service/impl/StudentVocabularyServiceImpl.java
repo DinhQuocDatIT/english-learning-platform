@@ -136,7 +136,29 @@ public class StudentVocabularyServiceImpl
         StudentVocabulary updated = studentVocabularyRepository.save(sv);
         return mapToResponse(updated);
     }
+    @Override
+    @Transactional
+    public void delete(Long userId, Long studentVocabularyId) {
+        Student student = studentRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy student của user"
+                ));
 
+        StudentVocabulary sv = studentVocabularyRepository
+                .findById(studentVocabularyId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy từ vựng đã lưu"
+                ));
+
+        if (!sv.getStudent().getId().equals(student.getId())) {
+            throw new UnauthorizedException(
+                    "Bạn không có quyền xóa từ vựng này"
+            );
+        }
+
+        studentVocabularyRepository.delete(sv);
+    }
     private SavedVocabularyResponse mapToResponse(StudentVocabulary sv) {
         List<VocabularyMeaningResponse> meanings = sv.getMeanings()
                 .stream()

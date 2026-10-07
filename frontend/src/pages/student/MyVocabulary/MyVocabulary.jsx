@@ -62,9 +62,9 @@ function MyVocabulary() {
 
   const handleChangeTab = (tab) => {
     setActiveTab(tab);
-
     fetchVocabularies(tab);
   };
+
   const handleChangeStatus = async (item) => {
     try {
       showLoading();
@@ -87,6 +87,30 @@ function MyVocabulary() {
       toast.error(
         error?.response?.data?.message || "Không thể cập nhật trạng thái.",
       );
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const handleDeleteVocabulary = async (item) => {
+    if (
+      !window.confirm(`Bạn có chắc muốn xóa từ "${item.word}" khỏi thư viện?`)
+    ) {
+      return;
+    }
+
+    try {
+      showLoading();
+
+      await studentVocabularyService.delete(item.id);
+
+      toast.success(`Đã xóa từ "${item.word}" khỏi thư viện`);
+
+      await fetchVocabularies(activeTab);
+    } catch (error) {
+      console.error("Lỗi xóa từ vựng:", error);
+
+      toast.error(error?.response?.data?.message || "Không thể xóa từ vựng.");
     } finally {
       hideLoading();
     }
@@ -188,6 +212,7 @@ function MyVocabulary() {
               key={item.id}
               vocabulary={item}
               onChangeStatus={handleChangeStatus}
+              onDelete={handleDeleteVocabulary}
             />
           ))}
         </div>

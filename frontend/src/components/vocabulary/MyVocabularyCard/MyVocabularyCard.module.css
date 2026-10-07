@@ -137,6 +137,33 @@
   color: #0f7164;
 }
 
+.deleteBtn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #fee2e2;
+  color: #dc2626;
+
+  border: none;
+  border-radius: 50%;
+
+  font-size: 12px;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.deleteBtn:hover {
+  background: #dc2626;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
 /* =========================
    MEANINGS
 ========================= */
@@ -222,5 +249,24 @@
 
   .meaningText {
     font-size: 13px;
+  }
+
+  .headerActions {
+    gap: 6px;
+  }
+
+  .speakBtn,
+  .deleteBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .statusBtn {
+    padding: 4px 8px;
+  }
+
+  .statusBtn span {
+    font-size: 10px;
   }
 }
