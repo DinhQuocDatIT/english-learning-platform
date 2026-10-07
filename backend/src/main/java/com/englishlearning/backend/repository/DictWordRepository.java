@@ -1,6 +1,7 @@
 package com.englishlearning.backend.repository;
 
 import com.englishlearning.backend.entity.DictWord;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -51,17 +52,39 @@ public interface DictWordRepository extends JpaRepository<DictWord, Long> {
                  ELSE 2 END
     """)
     List<DictWord> findByWordLikeIgnoreCase(@Param("word") String word);
+
     @Query("""
-    SELECT w FROM DictWord w 
-    WHERE (
-        LOWER(w.word) = LOWER(:kw)
-        OR LOWER(w.word) LIKE LOWER(CONCAT(:kw, '%'))
-    )
-      AND w.langCode IN ('en', 'vi')
-    ORDER BY 
-        CASE WHEN LOWER(w.word) = LOWER(:kw) THEN 0 ELSE 1 END,
-        CASE WHEN w.langCode = 'en' THEN 0 ELSE 1 END,
-        LENGTH(w.word), w.word
-""")
+        SELECT w FROM DictWord w 
+        WHERE (
+            LOWER(w.word) = LOWER(:kw)
+            OR LOWER(w.word) LIKE LOWER(CONCAT(:kw, '%'))
+        )
+          AND w.langCode IN ('en', 'vi')
+        ORDER BY 
+            CASE WHEN LOWER(w.word) = LOWER(:kw) THEN 0 ELSE 1 END,
+            CASE WHEN w.langCode = 'en' THEN 0 ELSE 1 END,
+            LENGTH(w.word), w.word
+    """)
     List<DictWord> searchByKeywordExact(@Param("kw") String kw, Pageable pageable);
+
+    // ===== ADMIN QUERIES =====
+
+    Page<DictWord> findByLangCode(String langCode, Pageable pageable);
+
+    @Query("""
+        SELECT w FROM DictWord w 
+        WHERE w.langCode = :lang
+          AND LOWER(w.word) LIKE LOWER(CONCAT('%', :kw, '%'))
+        ORDER BY 
+            CASE WHEN LOWER(w.word) = LOWER(:kw) THEN 0 
+                 WHEN LOWER(w.word) LIKE LOWER(CONCAT(:kw, '%')) THEN 1 
+                 ELSE 2 END,
+            LENGTH(w.word),
+            w.word
+    """)
+    Page<DictWord> searchByLangAndKeyword(
+            @Param("lang") String lang,
+            @Param("kw") String kw,
+            Pageable pageable
+    );
 }

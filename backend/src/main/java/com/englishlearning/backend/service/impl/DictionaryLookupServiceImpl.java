@@ -31,13 +31,11 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
         System.out.println(">>> Lookup: [" + normalized + "] lang=" + (isVietnamese ? "vi" : "en"));
 
         if (isVietnamese) {
-            // Tìm từ Việt
             List<DictWord> viCandidates = wordRepo.findByWordAndLang(normalized, "vi");
             if (viCandidates.isEmpty()) {
                 viCandidates = wordRepo.findAllByWordIgnoreCase(normalized);
             }
 
-            // Lấy translations sang tiếng Anh
             Set<String> englishWords = new LinkedHashSet<>();
             for (DictWord viWord : viCandidates) {
                 List<DictTranslation> translations = translationRepo.findByWordId(viWord.getId());
@@ -49,7 +47,6 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
                 }
             }
 
-            // Lookup lại từng từ tiếng Anh
             if (!englishWords.isEmpty()) {
                 List<WordLookupResponse.WordLookupMeaning> mergedMeanings = new ArrayList<>();
                 String pronunciation = null;
@@ -79,7 +76,6 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
                 }
             }
 
-            // Fallback
             for (DictWord candidate : viCandidates) {
                 WordLookupResponse response = buildResponse(candidate);
                 if (response != null && !response.getMeanings().isEmpty()) {
@@ -274,16 +270,16 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
         if (pos == null || pos.isBlank()) return null;
 
         return switch (pos.trim().toUpperCase()) {
-            case "N" -> "Danh từ";
-            case "V" -> "Động từ";
-            case "A" -> "Tính từ";
-            case "ADV" -> "Trạng từ";
-            case "PRE" -> "Giới từ";
-            case "CONJ" -> "Liên từ";
-            case "PRON" -> "Đại từ";
-            case "NUM" -> "Số từ";
-            case "ART" -> "Mạo từ";
-            case "INT" -> "Thán từ";
+            case "N", "NOUN" -> "Danh từ";
+            case "V", "VERB" -> "Động từ";
+            case "A", "ADJ", "ADJECTIVE" -> "Tính từ";
+            case "ADV", "ADVERB" -> "Trạng từ";
+            case "PRE", "PREPOSITION" -> "Giới từ";
+            case "CONJ", "CONJUNCTION" -> "Liên từ";
+            case "PRON", "PRONOUN" -> "Đại từ";
+            case "NUM", "NUMERAL" -> "Số từ";
+            case "ART", "ARTICLE" -> "Mạo từ";
+            case "INT", "INTERJECTION" -> "Thán từ";
             default -> null;
         };
     }
