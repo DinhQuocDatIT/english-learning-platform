@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSpinner,
   faFileAlt,
   faClipboardList,
   faPlay,
@@ -11,6 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./StudentGrammarQuiz.module.css";
 
 function StudentGrammarQuiz() {
@@ -42,11 +42,7 @@ function StudentGrammarQuiz() {
   };
 
   if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải danh sách đề..." />;
   }
 
   return (
@@ -73,7 +69,6 @@ function StudentGrammarQuiz() {
                   if (e.key === "Enter") handleStart(quiz.id);
                 }}
               >
-                {/* BODY */}
                 <div className={styles.cardBody}>
                   <h3 className={styles.cardTitle} title={quiz.title}>
                     {quiz.title}
@@ -98,7 +93,6 @@ function StudentGrammarQuiz() {
                   </div>
                 </div>
 
-                {/* ACTION */}
                 <div className={styles.cardActions}>
                   <button
                     type="button"

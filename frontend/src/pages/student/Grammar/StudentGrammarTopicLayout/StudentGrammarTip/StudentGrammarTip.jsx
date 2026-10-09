@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSpinner, faLightbulb } from "@fortawesome/free-solid-svg-icons";
+import { faLightbulb } from "@fortawesome/free-solid-svg-icons";
 import grammarService from "../../../../../services/grammarService";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./StudentGrammarTip.module.css";
 
 const OPTION_LABELS = ["A", "B", "C", "D"];
@@ -19,7 +20,7 @@ function TipCard({ tip }) {
   const handleSelect = (label) => {
     if (submitted) return;
     setSelected(label);
-    setSubmitted(true); // chọn là hiện kết quả luôn
+    setSubmitted(true);
   };
 
   const handleReset = () => {
@@ -85,7 +86,6 @@ function TipCard({ tip }) {
             })}
           </div>
 
-          {/* Kết quả — chỉ hiện khi đã chọn đáp án */}
           {submitted && (
             <div
               className={`${styles.resultBox} ${
@@ -139,12 +139,9 @@ function StudentGrammarTip() {
     }
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải mẹo..." />;
   }
 
   if (tips.length === 0) {

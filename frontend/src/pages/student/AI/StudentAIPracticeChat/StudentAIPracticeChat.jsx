@@ -24,6 +24,7 @@ import practiceService from "../../../../services/practiceService";
 import studentMembershipService from "../../../../services/studentMembershipService";
 import { useLoading } from "../../../../contexts/LoadingContext";
 import AnswerCheckingLoading from "../../../../components/AnswerCheckingLoading/AnswerCheckingLoading";
+import Loading from "../../../../components/common/Loading/Loading";
 import {
   getDisplayName,
   getDescription,
@@ -43,7 +44,6 @@ function StudentAIPracticeChat() {
   const { showLoading, hideLoading } = useLoading();
   const { showXpToast } = useXp();
 
-  // State
   const [practice, setPractice] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(null);
   const [answer, setAnswer] = useState("");
@@ -59,17 +59,14 @@ function StudentAIPracticeChat() {
   const [hasMembership, setHasMembership] = useState(false);
   const [aiUsage, setAiUsage] = useState(null);
 
-  // ✅ State cho dropdown mô tả lỗi
   const [expandedErrorKey, setExpandedErrorKey] = useState(null);
   const [expandedResultErrorKey, setExpandedResultErrorKey] = useState(null);
 
   const chatEndRef = useRef(null);
   const feedbackRef = useRef(null);
 
-  // ✅ Icon chung cho TẤT CẢ lỗi
   const ERROR_ICON = faTriangleExclamation;
 
-  // ✅ LOAD DỮ LIỆU
   useEffect(() => {
     fetchData();
   }, [chatId]);
@@ -100,12 +97,10 @@ function StudentAIPracticeChat() {
     }
   };
 
-  // Scroll to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [evaluation, turnHistory]);
 
-  // ✅ Tính điểm yếu từ turnHistory - group theo errorKey
   const calculateWeaknessesFromHistory = () => {
     if (turnHistory.length === 0) return [];
 
@@ -175,7 +170,6 @@ function StudentAIPracticeChat() {
     }
   };
 
-  // ✅ SUBMIT ANSWER
   const handleSubmitAnswer = async () => {
     if (!hasMembership) {
       toast.warning(
@@ -216,7 +210,6 @@ function StudentAIPracticeChat() {
 
       const data = response?.data?.data;
 
-      // ✅ Hiển thị toast XP nếu nhận được XP
       if (data?.experienceEarned && data.experienceEarned > 0) {
         showXpToast(data.experienceEarned);
       }
@@ -227,7 +220,7 @@ function StudentAIPracticeChat() {
           }),
         );
       }
-      // Cập nhật số lượt còn lại
+
       try {
         const usageResponse = await studentMembershipService.getAIUsage();
         setAiUsage(usageResponse?.data?.data || null);
@@ -333,16 +326,9 @@ function StudentAIPracticeChat() {
     }, 200);
   };
 
-  // Loading state
+  // ===== LOADING =====
   if (!practice) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang tải bài luyện tập...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải bài luyện tập..." />;
   }
 
   const isCompleted = practice.status === "COMPLETED";
@@ -359,11 +345,9 @@ function StudentAIPracticeChat() {
       aiUsage.totalRequests || aiUsage.maxRequests || aiUsage.dailyLimit || 100;
     if (total <= 0) return 0;
     const used = total - aiUsage.remainingRequests;
-    // ✅ Càng dùng nhiều → thanh càng dài
     return Math.max(0, Math.min((used / total) * 100, 100));
   })();
 
-  // Render feedback for a turn
   const renderTurnFeedback = (turn) => {
     if (!turn) return null;
 
@@ -475,7 +459,6 @@ function StudentAIPracticeChat() {
   return (
     <div className={styles.container}>
       <main className={styles.mainContent}>
-        {/* Progress Section */}
         <div className={styles.progressSection}>
           <div className={styles.progressHeader}>
             <span className={styles.progressTitle}>
@@ -499,10 +482,8 @@ function StudentAIPracticeChat() {
           </div>
         </div>
 
-        {/* Feedback Section */}
         {selectedHistoryTurn && renderTurnFeedback(selectedHistoryTurn)}
 
-        {/* Divider */}
         {!isCompleted && (
           <div className={styles.dividerDoing}>
             <span className={styles.dividerBadge}>
@@ -515,7 +496,6 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* AI Tutor */}
         {isCompleted ? (
           <div className={styles.completedContainer}>
             <div className={styles.completedIcon}>
@@ -583,7 +563,6 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* Answer Input or Checking Loading */}
         {!isCompleted &&
           (isSubmitting ? (
             <AnswerCheckingLoading studentAnswer={submittingAnswer || answer} />
@@ -654,7 +633,7 @@ function StudentAIPracticeChat() {
                   className={styles.submitBtn}
                   disabled={isSubmitting || !answer.trim()}
                 >
-                  <span>Kiểm tra đáp án / Gửi câu trả lời</span>
+                  <span> Gửi câu trả lời</span>
                   <FontAwesomeIcon icon={faPaperPlane} />
                 </button>
               </div>
@@ -663,7 +642,6 @@ function StudentAIPracticeChat() {
         <div ref={chatEndRef} />
       </main>
 
-      {/* SIDEBAR */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarProfile}>
           <div className={styles.avatarPlaceholder}>
@@ -716,7 +694,6 @@ function StudentAIPracticeChat() {
             />
           </div>
 
-          {/* ✅ MINI BAR — LƯỢT AI CÒN LẠI */}
           {aiUsage && hasMembership && (
             <>
               <div className={styles.sessionDivider} />
@@ -756,7 +733,6 @@ function StudentAIPracticeChat() {
           )}
         </div>
 
-        {/* History */}
         {showHistory && (
           <div className={styles.historySection} id="history">
             <div className={styles.sectionTitle}>
@@ -814,7 +790,6 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* Vocabulary */}
         {practice?.vocabularyWords && practice.vocabularyWords.length > 0 && (
           <div className={styles.vocabSection}>
             <div className={styles.sectionTitle}>
@@ -831,7 +806,6 @@ function StudentAIPracticeChat() {
           </div>
         )}
 
-        {/* FOCUS AREAS với DROPDOWN */}
         <div className={styles.focusSection}>
           <div className={styles.sectionTitle}>
             <FontAwesomeIcon icon={faBullseye} />
@@ -907,7 +881,6 @@ function StudentAIPracticeChat() {
         </div>
       </aside>
 
-      {/* Result Modal */}
       {showResult && (result || isCompleted) && (
         <div
           className={styles.resultModal}

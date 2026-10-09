@@ -24,6 +24,7 @@ import {
   getTopicFullLabel,
   getTopicFaIcon,
 } from "../../../../constants/topicConstants";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./StudentAIPractice.module.css";
 
 const LEVEL_CONFIG = {
@@ -188,12 +189,7 @@ function StudentAIPractice() {
 
   if (loading) {
     return (
-      <div className={styles.wrapper}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang chuẩn bị không gian học tập AI...</p>
-        </div>
-      </div>
+      <Loading size="large" text="Đang chuẩn bị không gian học tập AI..." />
     );
   }
 
@@ -315,7 +311,6 @@ function StudentAIPractice() {
             </span>
           </div>
 
-          {/* Filter Tabs */}
           {history.length > 0 && (
             <div className={styles.tabContainer}>
               <button
@@ -341,7 +336,6 @@ function StudentAIPractice() {
         </div>
 
         {history.length === 0 ? (
-          /* Empty state when no practices yet */
           <div className={styles.emptyState}>
             <div className={styles.emptyIconCircle}>
               <FontAwesomeIcon icon={faRobot} />
@@ -359,7 +353,6 @@ function StudentAIPractice() {
               Bắt đầu bài tập đầu tiên
             </button>
 
-            {/* Quick topics recommendation */}
             <div className={styles.quickTopicsContainer}>
               <span className={styles.quickTopicsTitle}>
                 Gợi ý chủ đề thú vị:
@@ -393,7 +386,6 @@ function StudentAIPractice() {
             </div>
           </div>
         ) : filteredHistory.length === 0 ? (
-          /* Empty state for specific filter tab */
           <div className={styles.emptyFilterState}>
             <p>Không có bài luyện tập nào ở trạng thái này.</p>
             <button
@@ -404,7 +396,6 @@ function StudentAIPractice() {
             </button>
           </div>
         ) : (
-          /* Practice Cards Grid */
           <div className={styles.practiceGrid}>
             {filteredHistory.map((item) => {
               const topicInfo = getTopicInfo(item.topic);
@@ -432,7 +423,6 @@ function StudentAIPractice() {
                   className={`${styles.practiceCard} ${isDone ? styles.cardDone : styles.cardDoing}`}
                   onClick={() => handleViewPractice(item.id)}
                 >
-                  {/* Card Header */}
                   <div className={styles.cardHeader}>
                     <div className={styles.cardTopicBadge}>
                       <span className={styles.topicIconBox}>
@@ -456,7 +446,6 @@ function StudentAIPractice() {
                     </span>
                   </div>
 
-                  {/* Card Meta (Level + Date) */}
                   <div className={styles.cardMetaRow}>
                     <span
                       className={styles.levelBadge}
@@ -474,7 +463,6 @@ function StudentAIPractice() {
                     </span>
                   </div>
 
-                  {/* Progress & Metrics */}
                   <div className={styles.cardProgressSection}>
                     <div className={styles.progressInfoRow}>
                       <span className={styles.progressLabel}>
@@ -501,7 +489,6 @@ function StudentAIPractice() {
                     </div>
                   </div>
 
-                  {/* Card Footer Action */}
                   <div className={styles.cardFooter}>
                     {isDone ? (
                       <span className={styles.actionLinkDone}>

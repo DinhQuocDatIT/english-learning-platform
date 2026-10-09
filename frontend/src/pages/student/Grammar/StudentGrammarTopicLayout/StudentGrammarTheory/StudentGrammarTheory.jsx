@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSpinner, faBookOpen } from "@fortawesome/free-solid-svg-icons";
+import { faBookOpen } from "@fortawesome/free-solid-svg-icons";
 import grammarService from "../../../../../services/grammarService";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./StudentGrammarTheory.module.css";
 
 // =====================================================
@@ -97,7 +98,6 @@ function StudentGrammarTheory() {
   const fetchTheories = async () => {
     try {
       setLoading(true);
-      // API public — student dùng getTopicDetail có kèm theories PUBLISHED
       const res = await grammarService.getTopicDetail(topicId);
       const data = res?.data?.data;
       setTheories(data?.theories || []);
@@ -109,11 +109,7 @@ function StudentGrammarTheory() {
   };
 
   if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải bài giảng..." />;
   }
 
   if (theories.length === 0) {

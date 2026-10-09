@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSpinner,
   faArrowLeft,
   faCheck,
   faXmark,
@@ -14,6 +13,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./StudentGrammarQuizResult.module.css";
 
 const OPTION_LABELS = ["A", "B", "C", "D"];
@@ -37,7 +37,6 @@ function StudentGrammarQuizResult() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizId]);
 
-  // ✅ Scroll top khi mount + khi showDetail toggle
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
     document.documentElement.scrollTop = 0;
@@ -53,7 +52,6 @@ function StudentGrammarQuizResult() {
       const res = await grammarService.getQuizAttempt(quizId);
       const data = res?.data?.data;
 
-      // ✅ Nếu chưa COMPLETED → quay lại trang làm bài
       if (!data || data.status !== "COMPLETED") {
         toast.info("Vui lòng hoàn thành bài làm trước.");
         navigate(
@@ -89,11 +87,7 @@ function StudentGrammarQuizResult() {
   };
 
   if (loading || !attempt) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải kết quả..." />;
   }
 
   const questions = attempt.quiz?.questions || [];

@@ -39,6 +39,7 @@ import { toast } from "react-toastify";
 import studentProfileService from "../../../services/studentProfileService";
 import UserService from "../../../services/UserService";
 import getImageUrl from "../../../utils/imageUrl";
+import Loading from "../../../components/common/Loading/Loading";
 
 import styles from "./StudentProfile.module.css";
 
@@ -61,9 +62,6 @@ function StudentProfile() {
 
   const [activeChartTooltip, setActiveChartTooltip] = useState(null);
 
-  // ============================================
-  // FETCH ALL
-  // ============================================
   const fetchAll = async () => {
     try {
       setLoading(true);
@@ -114,9 +112,6 @@ function StudentProfile() {
     fetchAll();
   }, []);
 
-  // ============================================
-  // HELPERS
-  // ============================================
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     return new Date(dateStr).toLocaleDateString("vi-VN", {
@@ -186,16 +181,9 @@ function StudentProfile() {
     return { linePath, areaPath };
   };
 
-  // ============================================
-  // LOADING
-  // ============================================
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.loadingWrapper}>
-        <div className={styles.loadingSpinner} />
-        <p>Đang tải thông tin cá nhân...</p>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải thông tin cá nhân..." />;
   }
 
   if (!user) {
@@ -209,9 +197,6 @@ function StudentProfile() {
     );
   }
 
-  // ============================================
-  // DERIVED DATA
-  // ============================================
   const levelData = level || {};
   const statsData = stats || {};
   const membershipData = membership || { hasMembership: false };
@@ -272,12 +257,8 @@ function StudentProfile() {
 
   return (
     <div className={styles.wrapper}>
-      {/* ============================================
-          HERO BANNER
-          ============================================ */}
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
-          {/* Avatar */}
           <div className={styles.heroAvatarWrapper}>
             <div className={styles.heroAvatar}>
               <img
@@ -347,7 +328,6 @@ function StudentProfile() {
           </div>
         </div>
 
-        {/* Level Box */}
         <div className={styles.heroLevelBox}>
           <div className={styles.levelBoxHeader}>
             <div className={styles.levelIconSmall}>
@@ -387,9 +367,6 @@ function StudentProfile() {
         </div>
       </section>
 
-      {/* ============================================
-          STATS GRID
-          ============================================ */}
       <section className={styles.statsGrid}>
         {statItems.map((item) => (
           <div key={item.id} className={styles.statCard}>
@@ -417,11 +394,8 @@ function StudentProfile() {
         ))}
       </section>
 
-      {/* ============================================
-          DASHBOARD GRID
-          ============================================ */}
       <section className={styles.dashboardGrid}>
-        {/* 1. Membership — GIỮ NGUYÊN */}
+        {/* Membership */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -520,7 +494,7 @@ function StudentProfile() {
           )}
         </div>
 
-        {/* 2. Weekly Activity — GIỮ NGUYÊN */}
+        {/* Weekly Activity */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -681,7 +655,7 @@ function StudentProfile() {
           )}
         </div>
 
-        {/* 3. AI Stats — CẢI TIẾN */}
+        {/* AI Stats */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -783,7 +757,7 @@ function StudentProfile() {
           </div>
         </div>
 
-        {/* 4. Error Improve — CẢI TIẾN */}
+        {/* Error Improve */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -824,7 +798,6 @@ function StudentProfile() {
         </div>
       </section>
 
-      {/* MODALS */}
       <EditProfileModal
         isOpen={showEditModal}
         user={user}
@@ -1020,7 +993,7 @@ function ErrorImproveCard({ error, index }) {
 }
 
 // =====================================================
-// AVATAR UPLOAD MODAL (TẠO MỚI)
+// AVATAR UPLOAD MODAL
 // =====================================================
 function AvatarUploadModal({ isOpen, onClose, currentAvatar, onSuccess }) {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -1212,7 +1185,7 @@ function AvatarUploadModal({ isOpen, onClose, currentAvatar, onSuccess }) {
 }
 
 // =====================================================
-// EDIT PROFILE MODAL (giữ nguyên)
+// EDIT PROFILE MODAL
 // =====================================================
 function EditProfileModal({ isOpen, user, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -1405,7 +1378,7 @@ function EditProfileModal({ isOpen, user, onClose, onSuccess }) {
 }
 
 // =====================================================
-// CHANGE PASSWORD MODAL (giữ nguyên)
+// CHANGE PASSWORD MODAL
 // =====================================================
 function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({

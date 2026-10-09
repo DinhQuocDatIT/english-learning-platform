@@ -8,6 +8,7 @@ import MembershipNotice from "../../../components/MembershipNotice/MembershipNot
 import membershipPackageService from "../../../services/membershipPackageService";
 import studentMembershipService from "../../../services/studentMembershipService";
 import AuthStorage from "../../../services/AuthStorage";
+import Loading from "../../../components/common/Loading/Loading";
 
 import { toast } from "react-toastify";
 
@@ -22,7 +23,6 @@ function StudentMembership() {
 
   const [selectedPackage, setSelectedPackage] = useState(null);
 
-  // Chỉ lưu ID của gói đang đăng ký
   const [registeringId, setRegisteringId] = useState(null);
 
   const [membershipNotice, setMembershipNotice] = useState({
@@ -31,10 +31,6 @@ function StudentMembership() {
   });
 
   const user = AuthStorage.getUser();
-
-  // =========================
-  // LOAD CURRENT MEMBERSHIP
-  // =========================
 
   useEffect(() => {
     const fetchCurrentMembership = async () => {
@@ -65,10 +61,6 @@ function StudentMembership() {
     fetchCurrentMembership();
   }, [user?.id]);
 
-  // =========================
-  // LOAD ACTIVE PACKAGES
-  // =========================
-
   useEffect(() => {
     const fetchPackages = async () => {
       try {
@@ -92,12 +84,7 @@ function StudentMembership() {
     fetchPackages();
   }, []);
 
-  // =========================
-  // SELECT PACKAGE
-  // =========================
-
   const handleSelectPackage = (pkg) => {
-    // Đang có gói còn hạn
     if (currentMembership) {
       setMembershipNotice({
         open: true,
@@ -107,17 +94,12 @@ function StudentMembership() {
       return;
     }
 
-    // Đang có request đăng ký
     if (registeringId !== null) {
       return;
     }
 
     setSelectedPackage(pkg);
   };
-
-  // =========================
-  // CONFIRM REGISTER
-  // =========================
 
   const handleConfirmRegister = async () => {
     if (!selectedPackage) {
@@ -127,21 +109,18 @@ function StudentMembership() {
     const packageId = selectedPackage.id;
 
     try {
-      // Chỉ card có packageId này hiện loading
       setRegisteringId(packageId);
 
       const response = await studentMembershipService.register({
         membershipPackageId: packageId,
       });
 
-      // Đóng modal
       setSelectedPackage(null);
 
       toast.success(
         response.data?.message || "Đăng ký gói thành viên thành công.",
       );
 
-      // Load lại membership hiện tại
       const currentResponse =
         await studentMembershipService.getCurrentMembership();
 
@@ -161,14 +140,9 @@ function StudentMembership() {
         toast.error(message);
       }
     } finally {
-      // Kết thúc loading
       setRegisteringId(null);
     }
   };
-
-  // =========================
-  // CLOSE CONFIRM MODAL
-  // =========================
 
   const handleCloseConfirm = () => {
     if (registeringId !== null) {
@@ -178,30 +152,13 @@ function StudentMembership() {
     setSelectedPackage(null);
   };
 
-  // =========================
-  // RENDER LOADING
-  // =========================
-
+  // ===== LOADING =====
   if (loadingMembership) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          Đang tải thông tin gói thành viên...
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải thông tin gói thành viên..." />;
   }
-
-  // =========================
-  // RENDER
-  // =========================
 
   return (
     <div className={styles.container}>
-      {/* =========================
-          HEADER
-      ========================= */}
-
       <div className={styles.header}>
         <h1 className={styles.title}>Gói thành viên</h1>
 
@@ -210,15 +167,7 @@ function StudentMembership() {
         </p>
       </div>
 
-      {/* =========================
-          ERROR
-      ========================= */}
-
       {error && <div className={styles.error}>{error}</div>}
-
-      {/* =========================
-          CURRENT MEMBERSHIP
-      ========================= */}
 
       {currentMembership ? (
         <div className={styles.currentSection}>
@@ -238,7 +187,6 @@ function StudentMembership() {
             </div>
 
             <div className={styles.currentInfo}>
-              {/* GIÁ */}
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>GIÁ ĐÃ THANH TOÁN</span>
 
@@ -250,21 +198,18 @@ function StudentMembership() {
                 </strong>
               </div>
 
-              {/* NGÀY BẮT ĐẦU */}
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>NGÀY BẮT ĐẦU</span>
 
                 <strong>{currentMembership.startDate}</strong>
               </div>
 
-              {/* NGÀY HẾT HẠN */}
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>NGÀY HẾT HẠN</span>
 
                 <strong>{currentMembership.endDate}</strong>
               </div>
 
-              {/* CÒN LẠI */}
               <div className={styles.remainingBox}>
                 <span className={styles.infoLabel}>THỜI GIAN CÒN LẠI</span>
 
@@ -292,10 +237,6 @@ function StudentMembership() {
         </div>
       )}
 
-      {/* =========================
-          PACKAGES
-      ========================= */}
-
       <div className={styles.packageSection}>
         <div className={styles.sectionTitle}>
           {currentMembership
@@ -304,7 +245,7 @@ function StudentMembership() {
         </div>
 
         {loadingPackages ? (
-          <div className={styles.loading}>Đang tải danh sách gói...</div>
+          <Loading fullScreen={false} text="Đang tải danh sách gói..." />
         ) : packages.length === 0 ? (
           <div className={styles.emptyPackages}>
             Hiện chưa có gói thành viên nào.
@@ -336,10 +277,6 @@ function StudentMembership() {
         )}
       </div>
 
-      {/* =========================
-          CONFIRM MODAL
-      ========================= */}
-
       <MembershipConfirmModal
         packageData={selectedPackage}
         open={selectedPackage !== null}
@@ -347,10 +284,6 @@ function StudentMembership() {
         onClose={handleCloseConfirm}
         onConfirm={handleConfirmRegister}
       />
-
-      {/* =========================
-          MEMBERSHIP NOTICE
-      ========================= */}
 
       <MembershipNotice
         open={membershipNotice.open}

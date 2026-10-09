@@ -21,6 +21,7 @@ import listeningLessonService from "../../../../services/listeningLessonService"
 import studentMembershipService from "../../../../services/studentMembershipService";
 import getImageUrl from "../../../../utils/imageUrl";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 
 import styles from "./StudentLessonList.module.css";
 
@@ -67,7 +68,6 @@ function StudentLessonList() {
     }
   };
 
-  // Filter
   const filteredLessons = lessons.filter((lesson) => {
     const keyword = searchKeyword.trim().toLowerCase();
     return !keyword || lesson.title?.toLowerCase().includes(keyword);
@@ -77,9 +77,7 @@ function StudentLessonList() {
     navigate(`/dashboard/student/topics`);
   };
 
-  // ===== XỬ LÝ CLICK VÀO BÀI HỌC =====
   const handleLessonClick = async (lesson) => {
-    // Nếu bài không phải Premium -> vào thẳng
     if (!lesson.isPremium) {
       navigate(
         `/dashboard/student/topics/${topicId}/lessons/${lesson.id}/preview`,
@@ -87,7 +85,6 @@ function StudentLessonList() {
       return;
     }
 
-    // Bài Premium -> kiểm tra membership
     try {
       setCheckingId(lesson.id);
       showLoading();
@@ -96,12 +93,10 @@ function StudentLessonList() {
       const membershipInfo = response?.data?.data;
 
       if (membershipInfo) {
-        // Có membership -> vào bài
         navigate(
           `/dashboard/student/topics/${topicId}/lessons/${lesson.id}/preview`,
         );
       } else {
-        // Không có membership -> hiện thông báo
         toast.warning(
           `Bài học "${lesson.title}" yêu cầu gói Premium. Vui lòng đăng ký để truy cập!`,
           {
@@ -109,8 +104,6 @@ function StudentLessonList() {
             autoClose: 5000,
           },
         );
-        // Chuyển hướng đến trang đăng ký membership
-        // navigate("/dashboard/student/membership");
       }
     } catch (error) {
       console.error("Lỗi kiểm tra quyền truy cập:", error);
@@ -121,20 +114,14 @@ function StudentLessonList() {
     }
   };
 
-  // Hàm random số lượng người học (tạm thời)
   const getLearnerCount = () => {
     const counts = [127, 89, 234, 56, 312, 45, 178, 93, 256, 67];
     return counts[Math.floor(Math.random() * counts.length)];
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.wrapper}>
-        <div className={styles.emptyState}>
-          <h3>Đang tải...</h3>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải danh sách bài học..." />;
   }
 
   return (

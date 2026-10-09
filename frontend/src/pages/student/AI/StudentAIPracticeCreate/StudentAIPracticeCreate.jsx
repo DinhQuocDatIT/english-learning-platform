@@ -22,6 +22,7 @@ import {
   getTopicIcon,
 } from "../../../../constants/topicConstants";
 import { getRandomVocabSuggestions } from "../../../../constants/vocabularySuggestions";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./StudentAIPracticeCreate.module.css";
 
 function StudentAIPracticeCreate() {
@@ -41,7 +42,6 @@ function StudentAIPracticeCreate() {
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [aiUsage, setAiUsage] = useState(null);
 
-  // ✅ suggestions giờ là mảng object { en, vi }
   const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
@@ -156,7 +156,6 @@ function StudentAIPracticeCreate() {
     setVocabInputs(newInputs);
   };
 
-  // ✅ Chọn chip → thêm từ EN vào ô input
   const handleSelectSuggestion = (wordObj) => {
     const wordEn = wordObj.en;
     const currentWords = getValidVocabWords();
@@ -256,14 +255,7 @@ function StudentAIPracticeCreate() {
   const isFormValid = formData.level && formData.topic && formData.sentenceType;
 
   if (isCheckingAccess) {
-    return (
-      <div className={styles.wrapper}>
-        <div className={styles.loadingWrapper}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang kiểm tra quyền truy cập...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang kiểm tra quyền truy cập..." />;
   }
 
   return (
@@ -400,7 +392,6 @@ function StudentAIPracticeCreate() {
               Chọn từ gợi ý bên dưới hoặc nhập tay (tối đa {MAX_VOCAB_WORDS} từ)
             </p>
 
-            {/* ✅ GỢI Ý TỪ VỰNG với TOOLTIP */}
             {suggestions.length > 0 && (
               <div className={styles.suggestionSection}>
                 <div className={styles.suggestionLabel}>
@@ -439,7 +430,6 @@ function StudentAIPracticeCreate() {
               </div>
             )}
 
-            {/* NHẬP TAY */}
             <div className={styles.vocabInputContainer}>
               {vocabInputs.map((word, index) => (
                 <div key={index} className={styles.vocabInputWrapper}>
@@ -489,7 +479,6 @@ function StudentAIPracticeCreate() {
           </div>
         </div>
 
-        {/* Actions */}
         <div className={styles.formActions}>
           <button
             type="button"

@@ -9,6 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./StudentGrammarQuizPlay.module.css";
 
 const OPTION_LABELS = ["A", "B", "C", "D"];
@@ -59,14 +60,11 @@ function StudentGrammarQuizPlay() {
     }
   };
 
-  // ✅ Lưu đáp án chạy NGẦM — không hiện loading gì cả
   const handleSelect = async (questionId, label) => {
     if (attempt?.status !== "IN_PROGRESS") return;
 
-    // Cập nhật UI ngay
     setLocalAnswers((prev) => ({ ...prev, [questionId]: label }));
 
-    // Gọi API lưu ngầm (fire and forget, không setSaving, không hiện spinner)
     if (!attempt?.id) return;
     try {
       await grammarService.saveQuizAnswer(attempt.id, questionId, label);
@@ -126,11 +124,7 @@ function StudentGrammarQuizPlay() {
   };
 
   if (loading || !attempt) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải đề..." />;
   }
 
   const questions = attempt.quiz?.questions || [];
@@ -148,7 +142,6 @@ function StudentGrammarQuizPlay() {
           <h2>{attempt.quiz?.title}</h2>
         </div>
 
-        {/* ✅ Chỉ hiện "Câu X/Y", không spinner, không "Đang lưu..." */}
         <div className={styles.playProgressText}>
           <span>
             Câu {currentIdx + 1}/{questions.length}

@@ -341,7 +341,6 @@ function StudyFlashcard() {
 
   return (
     <div className={styles.container}>
-      {/* TOP BAR */}
       <div className={styles.topBar}>
         <button
           type="button"
@@ -391,11 +390,9 @@ function StudyFlashcard() {
         </div>
       </div>
 
-      {/* MAIN */}
       <div className={styles.mainContent}>
         <div className={styles.cardContainer}>
           <div className={styles.card}>
-            {/* CARD HEADER */}
             <div className={styles.cardHeader}>
               {getPartOfSpeech(currentCard) ? (
                 <span className={styles.badge}>
@@ -420,7 +417,6 @@ function StudyFlashcard() {
               )}
             </div>
 
-            {/* QUESTION */}
             <div className={styles.questionSection}>
               <p className={styles.questionLabel}>Nghĩa tiếng Việt</p>
               <h2 className={styles.questionText}>{getMeaning(currentCard)}</h2>
@@ -451,7 +447,6 @@ function StudyFlashcard() {
               )}
             </div>
 
-            {/* ANSWER */}
             <div className={styles.answerSection}>
               <div className={styles.inputWrapper}>
                 <input
@@ -508,7 +503,6 @@ function StudyFlashcard() {
               )}
             </div>
 
-            {/* ACTIONS */}
             <div className={styles.cardActions}>
               {!isChecked ? (
                 <>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSpinner,
   faTrophy,
   faCrown,
   faMedal,
@@ -10,6 +9,7 @@ import {
 import { toast } from "react-toastify";
 import StreakBadge from "../../../components/StreakBadge/StreakBadge";
 import leaderboardService from "../../../services/leaderboardService";
+import Loading from "../../../components/common/Loading/Loading";
 import getImageUrl from "../../../utils/imageUrl";
 import styles from "./Leaderboard.module.css";
 
@@ -59,14 +59,7 @@ function Leaderboard() {
   }, [top3, others]);
 
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingBox}>
-          <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-          <p>Đang tải bảng xếp hạng...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải bảng xếp hạng..." />;
   }
 
   if (top3.length === 0 && others.length === 0) {
@@ -116,7 +109,7 @@ function Leaderboard() {
 
       {/* PODIUM — TOP 3 */}
       <div className={styles.podium}>
-        {/* TOP 2 — VÀNG #f59e0b */}
+        {/* TOP 2 */}
         {top2 && (
           <div
             className={`${styles.podiumCard} ${styles.rank2}`}
@@ -152,7 +145,7 @@ function Leaderboard() {
           </div>
         )}
 
-        {/* TOP 1 — XANH NGỌC #0ea792 */}
+        {/* TOP 1 */}
         {top1 && (
           <div
             className={`${styles.podiumCard} ${styles.rank1}`}
@@ -196,7 +189,7 @@ function Leaderboard() {
           </div>
         )}
 
-        {/* TOP 3 — ĐỎ #dc2626 */}
+        {/* TOP 3 */}
         {top3Item && (
           <div
             className={`${styles.podiumCard} ${styles.rank3}`}
