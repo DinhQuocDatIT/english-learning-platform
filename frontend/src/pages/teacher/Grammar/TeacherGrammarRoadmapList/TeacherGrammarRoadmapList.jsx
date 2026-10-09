@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSpinner,
   faGraduationCap,
   faLayerGroup,
   faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarRoadmapList.module.css";
 
 function TeacherGrammarRoadmapList() {
@@ -23,7 +23,7 @@ function TeacherGrammarRoadmapList() {
   const fetchRoadmaps = async () => {
     try {
       setLoading(true);
-      const res = await grammarService.getRoadmapsForTeacher(); // ← ĐỔI
+      const res = await grammarService.getRoadmapsForTeacher();
       setRoadmaps(res?.data?.data || []);
     } catch (e) {
       console.error(e);
@@ -38,14 +38,7 @@ function TeacherGrammarRoadmapList() {
   };
 
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingBox}>
-          <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-          <p>Đang tải...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải danh sách lộ trình..." />;
   }
 
   return (

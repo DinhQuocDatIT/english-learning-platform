@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import dictWordService from "../../../services/dictWordService";
 import { useLoading } from "../../../contexts/LoadingContext";
 import AuthStorage from "../../../services/AuthStorage";
+import Loading from "../../../components/common/Loading/Loading";
 import { toast } from "react-toastify";
 
 function VocabularyManagement() {
@@ -134,7 +135,7 @@ function VocabularyManagement() {
       <div className={styles.tableCard}>
         <div className={styles.tableResponsive}>
           {loading ? (
-            <div className={styles.loading}>Đang tải...</div>
+            <Loading fullScreen={false} text="Đang tải từ điển..." />
           ) : (
             <table className={styles.table}>
               <thead>

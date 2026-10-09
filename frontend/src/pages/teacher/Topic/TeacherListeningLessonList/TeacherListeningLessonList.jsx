@@ -18,13 +18,14 @@ import {
   faPlay,
   faTrash,
   faEye,
-  faPen
+  faPen,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 import teacherTopicService from "../../../../services/teacherTopicService";
 import listeningLessonService from "../../../../services/listeningLessonService";
 import getImageUrl from "../../../../utils/imageUrl";
+import Loading from "../../../../components/common/Loading/Loading";
 
 import styles from "./TeacherListeningLessonList.module.css";
 import { STATUS_MAP, STATUS_BG_COLOR_MAP } from "../../../../constants/status";
@@ -73,7 +74,6 @@ function TeacherListeningLessonList() {
     }
   };
 
-  // Filter
   const filteredLessons = lessons.filter((lesson) => {
     const keyword = filters.keyword.trim().toLowerCase();
     return !keyword || lesson.title?.toLowerCase().includes(keyword);
@@ -91,14 +91,12 @@ function TeacherListeningLessonList() {
     navigate(`/dashboard/teacher/topics/${topicId}/listening-lessons/create`);
   };
 
-  // Click vào card -> vào trang quản lý câu hỏi
   const handleCardClick = (lessonId) => {
     navigate(
       `/dashboard/teacher/topics/${topicId}/listening-lessons/${lessonId}/sentences`,
     );
   };
 
-  // Xem chi tiết
   const handleViewLesson = (lessonId) => {
     setActiveMenuId(null);
     navigate(
@@ -106,7 +104,6 @@ function TeacherListeningLessonList() {
     );
   };
 
-  // Chỉnh sửa
   const handleEditLesson = (lessonId) => {
     setActiveMenuId(null);
     navigate(
@@ -114,9 +111,7 @@ function TeacherListeningLessonList() {
     );
   };
 
-  // ===== XÓA CỨNG (HARD DELETE) =====
   const handleHardDelete = async (lesson) => {
-    // Kiểm tra trạng thái có được xóa không
     if (lesson.status !== "DRAFT" && lesson.status !== "REJECTED") {
       toast.warning(
         `Bài học "${lesson.title}" đang ở trạng thái ${STATUS_MAP[lesson.status] || lesson.status}. Chỉ có thể xóa khi ở trạng thái Nháp (DRAFT) hoặc Từ chối (REJECTED).`,
@@ -136,7 +131,7 @@ function TeacherListeningLessonList() {
       setDeletingId(lesson.id);
       await listeningLessonService.hardDelete(lesson.id);
       toast.success(`Xóa bài học "${lesson.title}" thành công!`);
-      await fetchData(); // Refresh danh sách
+      await fetchData();
     } catch (error) {
       console.error("Lỗi xóa bài học:", error);
       const message = error.response?.data?.message || "Không thể xóa bài học.";
@@ -147,29 +142,21 @@ function TeacherListeningLessonList() {
     }
   };
 
-  // Kiểm tra có thể chỉnh sửa không (DRAFT hoặc REJECTED)
   const canEdit = (status) => {
     return status === "DRAFT" || status === "REJECTED";
   };
 
-  // Kiểm tra có thể xóa không (DRAFT hoặc REJECTED)
   const canDelete = (status) => {
     return status === "DRAFT" || status === "REJECTED";
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.wrapper}>
-        <div className={styles.emptyState}>
-          <h3>Đang tải...</h3>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải danh sách bài nghe..." />;
   }
 
   return (
     <div className={styles.wrapper}>
-      {/* Header với nút quay lại */}
       <div className={styles.headerTop}>
         <button className={styles.backButton} onClick={handleGoBack}>
           <FontAwesomeIcon icon={faArrowLeft} />
@@ -230,7 +217,6 @@ function TeacherListeningLessonList() {
         </div>
       </div>
 
-      {/* Search */}
       <div className={styles.filterCard}>
         <div className={styles.searchGroup}>
           <label className={styles.filterLabel}>Tìm kiếm bài học</label>
@@ -248,7 +234,6 @@ function TeacherListeningLessonList() {
         </div>
       </div>
 
-      {/* Stats Bar */}
       <div className={styles.statsBar}>
         <span className={styles.statsText}>
           <FontAwesomeIcon icon={faBook} />
@@ -264,7 +249,6 @@ function TeacherListeningLessonList() {
         </span>
       </div>
 
-      {/* Grid */}
       {filteredLessons.length === 0 ? (
         <div className={styles.emptyState}>
           <FontAwesomeIcon icon={faHeadphones} className={styles.emptyIcon} />
@@ -300,7 +284,6 @@ function TeacherListeningLessonList() {
                 onClick={() => handleCardClick(lesson.id)}
                 style={{ cursor: "pointer" }}
               >
-                {/* Image */}
                 <div className={styles.imageWrapper}>
                   {getImageUrl(lesson.lessonImage) ? (
                     <img
@@ -333,7 +316,6 @@ function TeacherListeningLessonList() {
 
                   <div className={styles.imageOverlay} />
 
-                  {/* Level */}
                   {lesson.levelName && (
                     <span
                       className={styles.levelBadge}
@@ -345,7 +327,6 @@ function TeacherListeningLessonList() {
                     </span>
                   )}
 
-                  {/* Premium */}
                   {lesson.isPremium && (
                     <span className={styles.premiumBadge}>
                       <FontAwesomeIcon icon={faCrown} />
@@ -353,7 +334,6 @@ function TeacherListeningLessonList() {
                     </span>
                   )}
 
-                  {/* Status */}
                   {lesson.status && (
                     <span
                       className={styles.statusBadge}
@@ -366,14 +346,12 @@ function TeacherListeningLessonList() {
                     </span>
                   )}
 
-                  {/* Play Overlay */}
                   <div className={styles.playOverlay}>
                     <div className={styles.playBtn}>
                       <FontAwesomeIcon icon={faPlay} />
                     </div>
                   </div>
 
-                  {/* Menu */}
                   <div className={styles.actionContainer}>
                     <button
                       type="button"
@@ -390,8 +368,6 @@ function TeacherListeningLessonList() {
 
                     {activeMenuId === lesson.id && (
                       <div className={styles.dropdownMenu}>
-                        
-                  
                         {isEditable && (
                           <button
                             type="button"
@@ -405,7 +381,6 @@ function TeacherListeningLessonList() {
                           </button>
                         )}
 
-                        {/* 3. Xem chi tiết - luôn hiển thị */}
                         <button
                           type="button"
                           onClick={(e) => {
@@ -417,7 +392,6 @@ function TeacherListeningLessonList() {
                           Xem chi tiết
                         </button>
 
-                        {/* 4. Xóa - chỉ hiển thị khi DRAFT hoặc REJECTED */}
                         {isDeletable && (
                           <button
                             type="button"
@@ -437,7 +411,6 @@ function TeacherListeningLessonList() {
                   </div>
                 </div>
 
-                {/* Body */}
                 <div className={styles.cardBody}>
                   <h3 className={styles.cardTitle}>{lesson.title}</h3>
                   {lesson.description && (

@@ -10,6 +10,7 @@ import {
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
 import { slugify } from "../../../../constants/grammarConstants";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarTopicForm.module.css";
 
 function TeacherGrammarTopicForm() {
@@ -94,15 +95,9 @@ function TeacherGrammarTopicForm() {
     }
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingBox}>
-          <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-          <p>Đang tải...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải chủ điểm..." />;
   }
 
   return (

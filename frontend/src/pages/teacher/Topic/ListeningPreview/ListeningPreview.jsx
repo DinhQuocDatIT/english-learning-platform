@@ -21,6 +21,7 @@ import { speakText } from "../../../../utils/textToSpeech";
 import listeningLessonService from "../../../../services/listeningLessonService";
 import listeningSentenceService from "../../../../services/listeningSentenceService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 import PlaybackSpeedPopup from "../../../../components/PlaybackSpeedPopup/PlaybackSpeedPopup";
 import PlaybackVoicePopup from "../../../../components/PlaybackVoicePopup/PlaybackVoicePopup";
 import getImageUrl from "../../../../utils/imageUrl";
@@ -35,19 +36,16 @@ function ListeningPreview() {
   const [sentences, setSentences] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Player state
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState("1x");
   const [showSpeedPopup, setShowSpeedPopup] = useState(false);
   const [speakingId, setSpeakingId] = useState(null);
 
-  // Voice state
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [showVoicePopup, setShowVoicePopup] = useState(false);
 
-  // Typing & UI state
   const [userInput, setUserInput] = useState("");
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -59,7 +57,6 @@ function ListeningPreview() {
   const getNumericSpeed = (speedStr) =>
     parseFloat(speedStr.replace("x", "")) || 1.0;
 
-  // Load voices
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
     const loadVoices = () => {
@@ -253,15 +250,9 @@ function ListeningPreview() {
     if (inputRef.current) inputRef.current.focus();
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingWrapper}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang tải bài học...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải bài học..." />;
   }
 
   const currentSentence = sentences[currentSentenceIndex];
@@ -275,9 +266,7 @@ function ListeningPreview() {
 
   return (
     <div className={styles.container}>
-      {/* LEFT MAIN SECTION */}
       <div className={styles.leftMainSection}>
-        {/* Hero Header Banner */}
         <div
           className={styles.heroHeader}
           style={{
@@ -309,7 +298,6 @@ function ListeningPreview() {
           </div>
         </div>
 
-        {/* Player Bar */}
         <div className={styles.playerBar}>
           <div className={styles.playerControlsLeft}>
             <button
@@ -378,7 +366,6 @@ function ListeningPreview() {
           </div>
         </div>
 
-        {/* Input Box */}
         <div className={styles.inputBoxCard}>
           <div className={styles.inputLabelHeader}>
             GÕ NHỮNG GÌ BẠN NGHE ĐƯỢC:
@@ -407,7 +394,6 @@ function ListeningPreview() {
           </button>
         </div>
 
-        {/* Word Boxes */}
         {targetWords.length > 0 && (
           <div className={styles.wordBoxesContainer}>
             {targetWords.map((targetWord, idx) => {
@@ -422,9 +408,7 @@ function ListeningPreview() {
               const isTypedCorrectly = typedWord && typedWord === cleanTarget;
 
               const isShown =
-                isCurrentAllShown ||
-                currentRevealed[idx] ||
-                isTypedCorrectly;
+                isCurrentAllShown || currentRevealed[idx] || isTypedCorrectly;
 
               return (
                 <div key={idx} className={styles.wordBoxItem}>
@@ -457,7 +441,6 @@ function ListeningPreview() {
           {isCurrentAllShown ? "ẨN TẤT CẢ TỪ" : "HIỆN TẤT CẢ TỪ"}
         </button>
 
-        {/* Result Banner */}
         {showResult && (
           <div
             className={`${styles.resultBanner} ${
@@ -481,7 +464,6 @@ function ListeningPreview() {
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className={styles.actionButtons}>
           <button
             className={styles.checkButton}
@@ -503,15 +485,12 @@ function ListeningPreview() {
         </div>
       </div>
 
-      {/* RIGHT SIDEBAR - Transcript */}
       <div className={styles.rightSidebar}>
         <div className={styles.sidebarHeader}>
           <span className={styles.sidebarTitle}>
             <FontAwesomeIcon icon={faHeadphones} /> BẢN CHÉP
           </span>
-          <span className={styles.sentenceCount}>
-            {sentences.length} câu
-          </span>
+          <span className={styles.sentenceCount}>{sentences.length} câu</span>
         </div>
 
         <div className={styles.transcriptList}>

@@ -13,6 +13,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import studentService from "../../../../services/studentService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
+import AuthStorage from "../../../../services/AuthStorage";
 import { toast } from "react-toastify";
 import DeactivateStudentModal from "../../../../components/DeactivateStudentModal/DeactivateStudentModal";
 
@@ -30,6 +32,14 @@ function StudentManagement() {
   const { showLoading, hideLoading } = useLoading();
   const navigate = useNavigate();
 
+  const role = AuthStorage.getRole();
+  const basePath =
+    role === "ADMIN"
+      ? "/dashboard/admin"
+      : role === "TEACHER"
+        ? "/dashboard/teacher"
+        : "/dashboard";
+
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [deactivating, setDeactivating] = useState(false);
@@ -38,9 +48,6 @@ function StudentManagement() {
 
   const endItem = Math.min(currentPage * pageSize, totalElements);
 
-  // =========================
-  // LẤY DANH SÁCH HỌC SINH
-  // =========================
   const fetchStudents = async () => {
     try {
       setLoading(true);
@@ -75,9 +82,6 @@ function StudentManagement() {
     }
   };
 
-  // =========================
-  // SEARCH + PAGINATION
-  // =========================
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchStudents();
@@ -86,9 +90,6 @@ function StudentManagement() {
     return () => clearTimeout(timer);
   }, [currentPage, searchTerm]);
 
-  // =========================
-  // PHÂN TRANG
-  // =========================
   const getPageNumbers = () => {
     if (totalPages <= 5) {
       return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -105,24 +106,15 @@ function StudentManagement() {
     return [1, "...", currentPage, "...", totalPages];
   };
 
-  // =========================
-  // XEM CHI TIẾT
-  // =========================
   const handleDetail = (id) => {
-    navigate(`/dashboard/admin/student-detail/${id}`);
+    navigate(`${basePath}/student-detail/${id}`);
   };
 
-  // =========================
-  // MỞ MODAL KHÓA TÀI KHOẢN
-  // =========================
   const handleDeactivate = (student) => {
     setSelectedStudent(student);
     setShowDeactivateModal(true);
   };
 
-  // =========================
-  // ĐÓNG MODAL
-  // =========================
   const handleCloseDeactivateModal = () => {
     if (deactivating) return;
 
@@ -130,9 +122,6 @@ function StudentManagement() {
     setSelectedStudent(null);
   };
 
-  // =========================
-  // XÁC NHẬN KHÓA TÀI KHOẢN
-  // =========================
   const handleConfirmDeactivate = async () => {
     if (!selectedStudent) return;
 
@@ -158,9 +147,6 @@ function StudentManagement() {
     }
   };
 
-  // =========================
-  // MỞ KHÓA TÀI KHOẢN
-  // =========================
   const handleActivate = async (student) => {
     const confirmed = window.confirm(
       `Bạn có chắc chắn muốn mở khóa tài khoản của học sinh ${student.fullName} không?`,
@@ -191,9 +177,7 @@ function StudentManagement() {
 
   return (
     <div className={styles.wrapper}>
-      {/* =========================
-          HEADER
-      ========================= */}
+      {/* HEADER */}
       <div className={styles.headerTop}>
         <div>
           <h1 className={styles.title}>Quản lý Học sinh</h1>
@@ -204,16 +188,14 @@ function StudentManagement() {
         </div>
 
         <div className={styles.headerActions}>
-          <Link to="/dashboard/admin/create-student" className={styles.addBtn}>
+          <Link to={`${basePath}/create-student`} className={styles.addBtn}>
             <FontAwesomeIcon icon={faPlus} />
             Thêm học sinh mới
           </Link>
         </div>
       </div>
 
-      {/* =========================
-          SEARCH
-      ========================= */}
+      {/* SEARCH */}
       <div className={styles.filterCard}>
         <div className={styles.searchBox}>
           <label className={styles.searchLabel}>Tìm kiếm</label>
@@ -235,13 +217,11 @@ function StudentManagement() {
         </div>
       </div>
 
-      {/* =========================
-          TABLE
-      ========================= */}
+      {/* TABLE */}
       <div className={styles.tableCard}>
         <div className={styles.tableResponsive}>
           {loading ? (
-            <div className={styles.loading}>Đang tải học sinh...</div>
+            <Loading fullScreen={false} text="Đang tải học sinh..." />
           ) : (
             <table className={styles.table}>
               <thead>
@@ -296,7 +276,6 @@ function StudentManagement() {
 
                       <td className={styles.textRight}>
                         <div className={styles.actionButtons}>
-                          {/* XEM CHI TIẾT */}
                           <button
                             className={styles.btnDetail}
                             onClick={() => handleDetail(item.id)}
@@ -305,7 +284,6 @@ function StudentManagement() {
                             Xem chi tiết
                           </button>
 
-                          {/* KHÓA / MỞ KHÓA */}
                           {item.deletedAt == null ? (
                             <button
                               className={styles.btnDelete}
@@ -333,9 +311,7 @@ function StudentManagement() {
           )}
         </div>
 
-        {/* =========================
-            PAGINATION
-        ========================= */}
+        {/* PAGINATION */}
         <div className={styles.tableFooter}>
           <div className={styles.resultsInfo}>
             Hiển thị từ <b>{startItem}</b> đến <b>{endItem}</b> trong tổng số{" "}
@@ -387,15 +363,13 @@ function StudentManagement() {
         </div>
       </div>
 
-      {/* =========================
-          DEACTIVATE MODAL
-      ========================= */}
+      {/* DEACTIVATE MODAL */}
       <DeactivateStudentModal
         student={selectedStudent}
         isOpen={showDeactivateModal}
         loading={deactivating}
-        onClose={handleCloseDeactivateModal}
         onConfirm={handleConfirmDeactivate}
+        onClose={handleCloseDeactivateModal}
       />
     </div>
   );

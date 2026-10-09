@@ -6,10 +6,12 @@ import {
   faEnvelope,
   faUserPlus,
   faLock,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { Link, useNavigate } from "react-router-dom";
 import studentService from "../../../../services/studentService";
+import AuthStorage from "../../../../services/AuthStorage";
 
 import {
   isValidEmail,
@@ -23,6 +25,14 @@ import { toast } from "react-toastify";
 
 function CreateStudent() {
   const navigate = useNavigate();
+
+  const role = AuthStorage.getRole();
+  const basePath =
+    role === "ADMIN"
+      ? "/dashboard/admin"
+      : role === "TEACHER"
+        ? "/dashboard/teacher"
+        : "/dashboard";
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -96,7 +106,6 @@ function CreateStudent() {
   const getMaxBirthDate = () => {
     const today = new Date();
 
-    // Học sinh tối thiểu 6 tuổi
     today.setFullYear(today.getFullYear() - 6);
 
     const year = today.getFullYear();
@@ -113,8 +122,6 @@ function CreateStudent() {
     const emailError = isValidEmail(formData.email);
     const passwordError = isValidPassword(formData.password);
     const genderError = isValidGender(formData.gender);
-
-    // Nếu học sinh yêu cầu độ tuổi tối thiểu 6
     const birthdayError = isValidBirthday(formData.dateOfBirth, 6);
 
     if (fullNameError) {
@@ -178,7 +185,7 @@ function CreateStudent() {
 
       toast.success("Thêm học sinh thành công!");
 
-      navigate("/dashboard/admin/students");
+      navigate(`${basePath}/students`);
     } catch (error) {
       console.error("Lỗi khi thêm học sinh:", error);
 
@@ -200,15 +207,25 @@ function CreateStudent() {
 
   return (
     <div className={styles.wrapper}>
-      {/* Breadcrumb */}
+      {/* NÚT QUAY VỀ */}
       <div className={styles.breadcrumb}>
-        <Link to="/dashboard/admin/students" className={styles.breadcrumbLink}>
-          Quản lý Học sinh
-        </Link>
-
-        <span className={styles.breadcrumbSeparator}>›</span>
-
-        <span className={styles.breadcrumbCurrent}>Thêm mới</span>
+        <button
+          type="button"
+          onClick={() => navigate(`${basePath}/students`)}
+          className={styles.breadcrumbLink}
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: 0,
+          }}
+        >
+          <FontAwesomeIcon icon={faArrowLeft} />
+          Quay về danh sách học sinh
+        </button>
       </div>
 
       {/* Title */}
@@ -402,9 +419,13 @@ function CreateStudent() {
 
           {/* Buttons */}
           <div className={styles.formActions}>
-            <Link to="/dashboard/students" className={styles.cancelBtn}>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={() => navigate(`${basePath}/students`)}
+            >
               Hủy
-            </Link>
+            </button>
 
             <button
               type="submit"

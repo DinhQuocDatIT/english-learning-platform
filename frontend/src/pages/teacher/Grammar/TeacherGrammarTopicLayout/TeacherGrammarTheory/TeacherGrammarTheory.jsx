@@ -12,11 +12,9 @@ import {
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
 import { SECTION_TYPE_OPTIONS } from "../../../../../constants/grammarConstants";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarTheory.module.css";
 
-// =====================================================
-// HELPER: Render TEXT
-// =====================================================
 function TextView({ content }) {
   if (!content) return null;
   const lines = content
@@ -37,9 +35,6 @@ function TextView({ content }) {
   );
 }
 
-// =====================================================
-// INLINE SECTION
-// =====================================================
 function InlineSection({
   theory,
   isEditing,
@@ -127,7 +122,6 @@ function InlineSection({
     onChange(payload);
   }, [form, tableHeaders, tableRows, listItems, noteColor, isDirty]);
 
-  // TABLE handlers
   const addRow = () => {
     setTableRows([...tableRows, ["", "", ""]]);
     setIsDirty(true);
@@ -149,7 +143,6 @@ function InlineSection({
     setIsDirty(true);
   };
 
-  // LIST handlers
   const addListItem = () => {
     setListItems([...listItems, ""]);
     setIsDirty(true);
@@ -412,9 +405,6 @@ function InlineSection({
   );
 }
 
-// =====================================================
-// MAIN
-// =====================================================
 function TeacherGrammarTheory() {
   const { topicId, topic } = useOutletContext();
 
@@ -425,7 +415,6 @@ function TeacherGrammarTheory() {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [pendingChanges, setPendingChanges] = useState({});
 
-  // Topic chỉ cho sửa khi DRAFT / REJECTED
   const canEdit =
     !topic || topic.status === "DRAFT" || topic.status === "REJECTED";
 
@@ -535,28 +524,13 @@ function TeacherGrammarTheory() {
 
   const hasPending = Object.keys(pendingChanges).length > 0;
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải lý thuyết..." />;
   }
 
   return (
     <>
-      {/* WARNING khi không cho sửa */}
-      {/* {!canEdit && (
-        <div className={styles.readOnlyBanner}>
-          <FontAwesomeIcon icon={faLock} />
-          <span>
-            Chủ điểm đang ở trạng thái <strong>{topic?.status}</strong>. Bạn chỉ
-            có thể xem. Muốn chỉnh sửa, hãy gửi yêu cầu hoặc chờ admin xử lý.
-          </span>
-        </div>
-      )} */}
-
-      {/* HEADER ACTION */}
       <div className={styles.actionRow}>
         <button
           className={styles.addBtn}
@@ -569,7 +543,6 @@ function TeacherGrammarTheory() {
         </button>
       </div>
 
-      {/* SECTIONS */}
       {theories.map((th) => (
         <InlineSection
           key={th.id}
@@ -611,7 +584,6 @@ function TeacherGrammarTheory() {
         </div>
       )}
 
-      {/* SAVE BAR */}
       {hasPending && (
         <div className={styles.saveBar}>
           <span className={styles.saveBarText}>

@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
   faPlus,
-  faSpinner,
   faEdit,
   faTrash,
   faPaperPlane,
@@ -20,6 +19,7 @@ import {
   getStatusColor,
 } from "../../../../constants/grammarConstants";
 import GrammarEditRequestModal from "../../../../components/GrammarEditRequestModal/GrammarEditRequestModal";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarTopicList.module.css";
 
 function TeacherGrammarTopicList() {
@@ -30,13 +30,10 @@ function TeacherGrammarTopicList() {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Edit request modal
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [submittingRequest, setSubmittingRequest] = useState(false);
   const [selectedTopicForEdit, setSelectedTopicForEdit] = useState(null);
 
-  // Track các topic đang có yêu cầu PENDING
-  // { [topicId]: true }
   const [pendingRequestTopics, setPendingRequestTopics] = useState({});
 
   useEffect(() => {
@@ -57,7 +54,6 @@ function TeacherGrammarTopicList() {
       setRoadmap(roadmapData);
       setTopics(topicsData);
 
-      // ✅ Với mỗi topic PUBLISHED, check xem có yêu cầu PENDING không
       await checkPendingRequests(topicsData);
     } catch (e) {
       console.error(e);
@@ -67,7 +63,6 @@ function TeacherGrammarTopicList() {
     }
   };
 
-  // Check pending request cho các topic PUBLISHED
   const checkPendingRequests = async (topicsList) => {
     const publishedTopics = topicsList.filter((t) => t.status === "PUBLISHED");
     if (publishedTopics.length === 0) return;
@@ -110,7 +105,6 @@ function TeacherGrammarTopicList() {
     }
   };
 
-  // ===== EDIT REQUEST =====
   const handleOpenEditRequest = (topic) => {
     setSelectedTopicForEdit(topic);
     setEditModalOpen(true);
@@ -122,7 +116,6 @@ function TeacherGrammarTopicList() {
       await grammarService.requestEditTopic(selectedTopicForEdit.id, reason);
       toast.success("Đã gửi yêu cầu chỉnh sửa!");
 
-      // ✅ Refresh badge trên sidebar Admin
       window.dispatchEvent(new Event("refresh-edit-requests"));
 
       setEditModalOpen(false);
@@ -178,7 +171,6 @@ function TeacherGrammarTopicList() {
               {getStatusLabel(topic.status)}
             </span>
 
-            {/* Badge "Chờ duyệt yêu cầu" nếu có pending */}
             {isPublished && hasPendingRequest && (
               <span className={styles.pendingRequestBadge}>
                 <FontAwesomeIcon icon={faClock} />
@@ -200,7 +192,6 @@ function TeacherGrammarTopicList() {
             <span>Nội dung</span>
           </button>
 
-          {/* DRAFT / REJECTED → Sửa, Xóa, Gửi duyệt */}
           {canEdit && (
             <>
               <button
@@ -233,7 +224,6 @@ function TeacherGrammarTopicList() {
             </>
           )}
 
-          {/* PUBLISHED → nút Yêu cầu sửa (nếu chưa có pending) */}
           {isPublished && !hasPendingRequest && (
             <button
               className={`${styles.actionBtn} ${styles.requestEditBtn}`}
@@ -249,15 +239,9 @@ function TeacherGrammarTopicList() {
     );
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingBox}>
-          <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-          <p>Đang tải...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải danh sách chủ điểm..." />;
   }
 
   return (
@@ -307,7 +291,6 @@ function TeacherGrammarTopicList() {
         </div>
       )}
 
-      {/* EDIT REQUEST MODAL */}
       <GrammarEditRequestModal
         isOpen={editModalOpen}
         onClose={() => {

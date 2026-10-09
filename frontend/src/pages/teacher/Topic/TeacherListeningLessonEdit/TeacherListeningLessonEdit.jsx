@@ -23,8 +23,8 @@ import topicService from "../../../../services/topicService";
 import levelService from "../../../../services/levelService";
 import getImageUrl from "../../../../utils/imageUrl";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 
-// Map trạng thái
 const STATUS_MAP = {
   DRAFT: "Nháp",
   PENDING: "Chờ duyệt",
@@ -68,7 +68,6 @@ function TeacherListeningLessonEdit() {
       setLoading(true);
       showLoading();
 
-      // Lấy thông tin bài nghe, topic và levels
       const [lessonResponse, topicResponse, levelResponse] = await Promise.all([
         listeningLessonService.getById(lessonId),
         topicService.getById(topicId),
@@ -83,7 +82,6 @@ function TeacherListeningLessonEdit() {
         throw new Error("Không tìm thấy bài nghe.");
       }
 
-      // Kiểm tra quyền chỉnh sửa
       const canEditStatus =
         lessonData.status === "DRAFT" || lessonData.status === "REJECTED";
       setCanEdit(canEditStatus);
@@ -92,7 +90,6 @@ function TeacherListeningLessonEdit() {
         toast.warning(
           `Bài nghe đang ở trạng thái "${STATUS_MAP[lessonData.status]}", không thể chỉnh sửa.`,
         );
-        // Chuyển về trang chi tiết sau 2 giây
         setTimeout(() => {
           navigate(
             `/dashboard/teacher/topics/${topicId}/listening-lessons/${lessonId}`,
@@ -105,7 +102,6 @@ function TeacherListeningLessonEdit() {
       setTopic(topicData);
       setLevels(levelData);
 
-      // Set form data
       setFormData({
         topicId: lessonData.topicId || topicId,
         levelId: lessonData.levelId || "",
@@ -199,7 +195,6 @@ function TeacherListeningLessonEdit() {
     data.append("description", formData.description.trim());
     data.append("isPremium", formData.isPremium);
 
-    // Chỉ gửi ảnh mới nếu có thay đổi
     if (formData.lessonImage) {
       data.append("lessonImage", formData.lessonImage);
     }
@@ -207,7 +202,6 @@ function TeacherListeningLessonEdit() {
     return data;
   };
 
-  // LƯU NHÁP
   const handleSaveDraft = async () => {
     if (!validateForm()) {
       return;
@@ -241,7 +235,6 @@ function TeacherListeningLessonEdit() {
     }
   };
 
-  // GỬI DUYỆT
   const handleSubmitForReview = async () => {
     if (!validateForm()) {
       return;
@@ -257,11 +250,9 @@ function TeacherListeningLessonEdit() {
       setError("");
       showLoading();
 
-      // Bước 1: cập nhật bài nghe
       const requestData = buildFormData();
       await listeningLessonService.update(lessonId, requestData);
 
-      // Bước 2: gửi duyệt
       await listeningLessonService.submit(lessonId);
 
       toast.success("🎉 Gửi duyệt bài nghe thành công!");
@@ -282,7 +273,6 @@ function TeacherListeningLessonEdit() {
     }
   };
 
-  // Không được chỉnh sửa -> redirect
   if (!canEdit && !loading) {
     return (
       <div className={styles.container}>
@@ -313,20 +303,13 @@ function TeacherListeningLessonEdit() {
     );
   }
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang tải thông tin...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải thông tin..." />;
   }
 
   return (
     <div className={styles.container}>
-      {/* HEADER */}
       <div className={styles.header}>
         <button
           type="button"
@@ -349,10 +332,8 @@ function TeacherListeningLessonEdit() {
         </div>
       </div>
 
-      {/* CONTENT */}
       <div className={styles.content}>
         <form className={styles.formCard} onSubmit={(e) => e.preventDefault()}>
-          {/* Warning - REJECTED */}
           {lesson?.status === "REJECTED" && (
             <div className={styles.warningMessage}>
               <FontAwesomeIcon icon={faExclamationTriangle} />
@@ -362,7 +343,6 @@ function TeacherListeningLessonEdit() {
             </div>
           )}
 
-          {/* Error */}
           {error && (
             <div className={styles.errorMessage}>
               <span>⚠️</span>
@@ -370,11 +350,8 @@ function TeacherListeningLessonEdit() {
             </div>
           )}
 
-          {/* Two columns layout */}
           <div className={styles.formGrid}>
-            {/* Left column */}
             <div className={styles.formLeft}>
-              {/* TITLE */}
               <div className={styles.formGroup}>
                 <label htmlFor="title">
                   Tiêu đề bài nghe <span className={styles.required}>*</span>
@@ -395,7 +372,6 @@ function TeacherListeningLessonEdit() {
                 </div>
               </div>
 
-              {/* LEVEL */}
               <div className={styles.formGroup}>
                 <label htmlFor="levelId">
                   Trình độ <span className={styles.required}>*</span>
@@ -423,7 +399,6 @@ function TeacherListeningLessonEdit() {
                 </div>
               </div>
 
-              {/* DESCRIPTION */}
               <div className={styles.formGroup}>
                 <label htmlFor="description">Mô tả bài nghe</label>
                 <textarea
@@ -439,9 +414,7 @@ function TeacherListeningLessonEdit() {
               </div>
             </div>
 
-            {/* Right column */}
             <div className={styles.formRight}>
-              {/* IMAGE */}
               <div className={styles.formGroup}>
                 <label htmlFor="lessonImage">Ảnh bài nghe</label>
                 <div className={styles.uploadZone}>
@@ -494,7 +467,6 @@ function TeacherListeningLessonEdit() {
                 )}
               </div>
 
-              {/* PREMIUM */}
               <div className={styles.premiumBox}>
                 <label className={styles.checkboxLabel}>
                   <input
@@ -513,12 +485,10 @@ function TeacherListeningLessonEdit() {
                   </span>
                 </label>
                 <p className={styles.premiumHint}>
-                  Chỉ học sinh có gói thành viên mới có thể truy cập bài học
-                  này
+                  Chỉ học sinh có gói thành viên mới có thể truy cập bài học này
                 </p>
               </div>
 
-              {/* Status */}
               <div className={styles.statusBox}>
                 <span className={styles.statusLabel}>Trạng thái hiện tại:</span>
                 <span
@@ -533,7 +503,6 @@ function TeacherListeningLessonEdit() {
             </div>
           </div>
 
-          {/* INFO CARD */}
           <div className={styles.infoCard}>
             <div className={styles.infoIcon}>
               <FontAwesomeIcon icon={faBookOpen} />
@@ -557,7 +526,6 @@ function TeacherListeningLessonEdit() {
             </div>
           </div>
 
-          {/* ACTIONS */}
           <div className={styles.formActions}>
             <button
               type="button"

@@ -5,6 +5,7 @@ import { faArrowLeft, faVolumeHigh } from "@fortawesome/free-solid-svg-icons";
 
 import dictWordService from "../../../services/dictWordService";
 import { useLoading } from "../../../contexts/LoadingContext";
+import Loading from "../../../components/common/Loading/Loading";
 import { speakText } from "../../../utils/textToSpeech";
 import { toast } from "react-toastify";
 import styles from "./DictionaryDetail.module.css";
@@ -53,12 +54,9 @@ function DictionaryDetail() {
     );
   }
 
+  // ===== LOADING =====
   if (!data) {
-    return (
-      <div className={styles.wrapper}>
-        <div className={styles.loading}>Đang tải...</div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải chi tiết từ vựng..." />;
   }
 
   return (

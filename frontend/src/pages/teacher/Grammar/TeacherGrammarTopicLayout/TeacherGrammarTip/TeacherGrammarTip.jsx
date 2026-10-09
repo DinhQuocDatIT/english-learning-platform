@@ -8,9 +8,11 @@ import {
   faTrash,
   faXmark,
   faLock,
+  faLightbulb,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarTip.module.css";
 
 const OPTION_LABELS = ["A", "B", "C", "D"];
@@ -100,7 +102,6 @@ function InlineTip({
     isDirty,
   ]);
 
-  // ===== STEP HANDLERS =====
   const addStep = () => {
     setApplySteps([...applySteps, ""]);
     setIsDirty(true);
@@ -116,7 +117,6 @@ function InlineTip({
     setIsDirty(true);
   };
 
-  // ===== OPTION HANDLERS =====
   const updateOption = (i, v) => {
     const copy = [...options];
     copy[i] = v;
@@ -134,7 +134,7 @@ function InlineTip({
       >
         <div className={styles.tipHeader}>
           <div className={styles.tipIcon}>
-            <FontAwesomeIcon icon={faLightbulbIcon} />
+            <FontAwesomeIcon icon={faLightbulb} />
           </div>
           <h3 className={styles.tipTitle}>{tip.title}</h3>
 
@@ -202,7 +202,6 @@ function InlineTip({
   // ===== EDIT MODE =====
   return (
     <div className={`${styles.tipCard} ${styles.tipCardEditing}`}>
-      {/* TITLE */}
       <div className={styles.editHeader}>
         <input
           className={styles.titleInput}
@@ -223,7 +222,6 @@ function InlineTip({
         />
       </div>
 
-      {/* CONTENT */}
       <textarea
         className={styles.contentInput}
         rows={4}
@@ -232,7 +230,6 @@ function InlineTip({
         placeholder="Đoạn giải thích mẹo..."
       />
 
-      {/* APPLY STEPS */}
       <div className={styles.section}>
         <span className={styles.boxLabel}>CÁCH ÁP DỤNG</span>
         {applySteps.map((step, i) => (
@@ -259,7 +256,6 @@ function InlineTip({
         </button>
       </div>
 
-      {/* QUIZ */}
       <div className={styles.section}>
         <span className={styles.boxLabel}>THỬ ÁP DỤNG NGAY</span>
         <textarea
@@ -319,7 +315,6 @@ function InlineTip({
         />
       </div>
 
-      {/* FOOTER */}
       <div className={styles.editFooter}>
         <button
           className={styles.cancelBtn}
@@ -454,26 +449,13 @@ function TeacherGrammarTip() {
   const hasPending = Object.keys(pendingChanges).length > 0;
   const nextOrder = tips.length + 1;
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải mẹo..." />;
   }
 
   return (
     <>
-      {/* {!canEdit && (
-        <div className={styles.readOnlyBanner}>
-          <FontAwesomeIcon icon={faLock} />
-          <span>
-            Chủ điểm đang ở trạng thái <strong>{topic?.status}</strong>. Bạn chỉ
-            có thể xem. Muốn chỉnh sửa, hãy gửi yêu cầu hoặc chờ admin xử lý.
-          </span>
-        </div>
-      )} */}
-
       <div className={styles.actionRow}>
         <button
           className={styles.addBtn}
@@ -552,8 +534,5 @@ function TeacherGrammarTip() {
     </>
   );
 }
-
-// Import icon lightbulb (khai báo ở đây để tránh xung đột tên biến)
-import { faLightbulb as faLightbulbIcon } from "@fortawesome/free-solid-svg-icons";
 
 export default TeacherGrammarTip;

@@ -99,16 +99,7 @@
 }
 
 /* ================= LOADING ================= */
-.loadingBox {
-  display: flex;
-  justify-content: center;
-  padding: 60px 0;
-}
 
-.spinner {
-  font-size: 32px;
-  color: var(--color-primary, #0ea792);
-}
 
 /* ================= READONLY BANNER ================= */
 .readOnlyBanner {
