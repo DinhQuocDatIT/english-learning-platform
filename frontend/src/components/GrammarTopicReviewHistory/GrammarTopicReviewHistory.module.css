@@ -270,18 +270,7 @@
   font-weight: 700;
 }
 
-/* ================= LOADING ================= */
-.wrapper .loadingBox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-}
 
-.wrapper .spinner {
-  font-size: 28px;
-  color: var(--color-primary, #0ea792);
-}
 
 /* ================= EMPTY ================= */
 .wrapper .emptyBox {

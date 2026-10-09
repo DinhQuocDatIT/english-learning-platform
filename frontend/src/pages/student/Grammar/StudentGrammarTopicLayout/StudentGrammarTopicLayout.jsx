@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate, useParams, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSpinner,
   faBookOpen,
   faStar,
   faLightbulb,
@@ -11,9 +10,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./StudentGrammarTopicLayout.module.css";
 
-// 4 tab cho Student
 const TABS = [
   { key: "theory", path: "theory", label: "Bài giảng", icon: faBookOpen },
   { key: "example", path: "examples", label: "Ví dụ", icon: faStar },
@@ -47,7 +46,6 @@ function StudentGrammarTopicLayout() {
     }
   };
 
-  // ✅ Xác định tab active từ path
   const pathParts = location.pathname.split("/").filter(Boolean);
   const topicIdIdx = pathParts.findIndex((p) => p === String(topicId));
   const subPath = pathParts[topicIdIdx + 1] || "theory";
@@ -65,15 +63,9 @@ function StudentGrammarTopicLayout() {
     navigate(-1);
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingBox}>
-          <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-          <p>Đang tải...</p>
-        </div>
-      </div>
-    );
+    return <Loading text="Đang tải chủ điểm..." />;
   }
 
   return (
@@ -83,11 +75,6 @@ function StudentGrammarTopicLayout() {
         <FontAwesomeIcon icon={faArrowLeft} />
         <span>Quay lại</span>
       </button>
-
-      {/* HEADER */}
-      {/* <div className={styles.headerCard}>
-        <h1 className={styles.headerTitle}>{topic?.name}</h1>
-      </div> */}
 
       {/* TAB BAR */}
       <div className={styles.tabBar}>

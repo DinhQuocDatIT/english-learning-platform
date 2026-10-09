@@ -11,11 +11,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarExample.module.css";
 
-// =====================================================
-// INLINE EXAMPLE EDITOR
-// =====================================================
 function InlineExample({
   example,
   isEditing,
@@ -165,9 +163,6 @@ function InlineExample({
   );
 }
 
-// =====================================================
-// MAIN
-// =====================================================
 function TeacherGrammarExample() {
   const { topicId, topic } = useOutletContext();
 
@@ -178,7 +173,6 @@ function TeacherGrammarExample() {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [pendingChanges, setPendingChanges] = useState({});
 
-  // Topic chỉ cho sửa khi DRAFT / REJECTED
   const canEdit =
     !topic || topic.status === "DRAFT" || topic.status === "REJECTED";
 
@@ -288,28 +282,13 @@ function TeacherGrammarExample() {
   const hasPending = Object.keys(pendingChanges).length > 0;
   const nextOrder = examples.length + 1;
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải ví dụ..." />;
   }
 
   return (
     <>
-      {/* WARNING khi không cho sửa */}
-      {/* {!canEdit && (
-        <div className={styles.readOnlyBanner}>
-          <FontAwesomeIcon icon={faLock} />
-          <span>
-            Chủ điểm đang ở trạng thái <strong>{topic?.status}</strong>. Bạn chỉ
-            có thể xem. Muốn chỉnh sửa, hãy gửi yêu cầu hoặc chờ admin xử lý.
-          </span>
-        </div>
-      )} */}
-
-      {/* ACTION ROW */}
       <div className={styles.actionRow}>
         <button
           className={styles.addBtn}
@@ -322,7 +301,6 @@ function TeacherGrammarExample() {
         </button>
       </div>
 
-      {/* ✅ LIST — ĐÃ BỌC */}
       <div className={styles.list}>
         {examples.map((ex) => (
           <InlineExample
@@ -367,7 +345,6 @@ function TeacherGrammarExample() {
         )}
       </div>
 
-      {/* SAVE BAR */}
       {hasPending && (
         <div className={styles.saveBar}>
           <span className={styles.saveBarText}>

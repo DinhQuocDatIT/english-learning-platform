@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   faCoins,
   faChartLine,
-  faSpinner,
   faCalendarAlt,
   faCheckCircle,
   faXmarkCircle,
@@ -30,6 +29,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
 
 import aiUsageService from "../../services/aiUsageService";
+import Loading from "../common/Loading/Loading";
 
 import styles from "./StatsTab.module.css";
 
@@ -199,35 +199,16 @@ function StatsTab({ from, to }) {
 
   if (loading) {
     return (
-      <div className={styles.loadingWrapper}>
-        <div className={styles.loading}>
-          <FontAwesomeIcon icon={faSpinner} spin />
-          <span>Đang tải dữ liệu...</span>
-        </div>
-      </div>
+      <Loading
+        size="large"
+        fullScreen={false}
+        text="Đang tải dữ liệu thống kê..."
+      />
     );
   }
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      {/* <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div className={styles.headerBadge}>
-            <span className={styles.badgeDot} />
-            <span>AI ANALYTICS</span>
-          </div>
-          <h1 className={styles.headerTitle}>Thống kê sử dụng AI</h1>
-          <p className={styles.headerSub}>
-            Tổng quan request, token, chi phí & hiệu năng
-          </p>
-        </div>
-        <div className={styles.headerChip}>
-          <FontAwesomeIcon icon={faRobot} />
-          <span>AI Monitoring</span>
-        </div>
-      </div> */}
-
       {/* Stats Cards */}
       <div className={styles.statsGrid}>
         {statCards.map((card, index) => (
@@ -528,10 +509,6 @@ function StatsTab({ from, to }) {
           <div className={styles.costBreakdown}>
             <div className={styles.costRow}>
               <div className={styles.costRowLeft}>
-                {/* <span
-                  className={styles.costDot}
-                  style={{ background: "#0ea792" }}
-                /> */}
                 <span>Input tokens</span>
               </div>
               <div className={styles.costRowRight}>
@@ -554,10 +531,6 @@ function StatsTab({ from, to }) {
             </div>
             <div className={styles.costRow}>
               <div className={styles.costRowLeft}>
-                {/* <span
-                  className={styles.costDot}
-                  style={{ background: "#0ea792" }}
-                /> */}
                 <span>Output tokens</span>
               </div>
               <div className={styles.costRowRight}>

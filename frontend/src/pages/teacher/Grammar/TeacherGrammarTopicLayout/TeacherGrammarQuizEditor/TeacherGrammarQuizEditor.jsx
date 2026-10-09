@@ -13,11 +13,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarQuizEditor.module.css";
 
 const OPTION_LABELS = ["A", "B", "C", "D"];
 
-// URL quay về tab Quiz trong layout topic
 const QUIZ_TAB_URL = (topicId) =>
   `/dashboard/teacher/grammar/topics/${topicId}/quiz`;
 
@@ -27,7 +27,7 @@ const emptyQuestion = (order) => ({
   options: ["", "", "", ""],
   correctAnswer: "A",
   explanation: "",
-  optionExplanations: { A: "", B: "", C: "", D: "" }, // ✅ MỚI
+  optionExplanations: { A: "", B: "", C: "", D: "" },
   displayOrder: order,
 });
 
@@ -71,7 +71,6 @@ function TeacherGrammarQuizEditor() {
                     q.options?.length === 4 ? q.options : ["", "", "", ""],
                   correctAnswer: q.correctAnswer || "A",
                   explanation: q.explanation || "",
-                  // ✅ Map optionExplanations — fallback về object rỗng nếu null
                   optionExplanations: {
                     A: q.optionExplanations?.A || "",
                     B: q.optionExplanations?.B || "",
@@ -95,7 +94,6 @@ function TeacherGrammarQuizEditor() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  // ===== QUESTION HANDLERS =====
   const updateQuestion = (idx, updater) => {
     setForm((prev) => {
       const questions = [...prev.questions];
@@ -141,7 +139,6 @@ function TeacherGrammarQuizEditor() {
     });
   };
 
-  // ✅ Cập nhật giải thích cho 1 đáp án cụ thể
   const handleOptionExplanationChange = (qIdx, label, value) => {
     updateQuestion(qIdx, (q) => ({
       ...q,
@@ -178,7 +175,6 @@ function TeacherGrammarQuizEditor() {
       description: form.description.trim(),
       displayOrder: form.displayOrder,
       questions: form.questions.map((q, i) => {
-        // ✅ Chỉ gửi optionExplanations nếu có ít nhất 1 ô được nhập
         const cleanedOptExpl = {};
         OPTION_LABELS.forEach((label) => {
           const val = q.optionExplanations?.[label];
@@ -220,12 +216,9 @@ function TeacherGrammarQuizEditor() {
     }
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải đề..." />;
   }
 
   return (
@@ -236,7 +229,6 @@ function TeacherGrammarQuizEditor() {
       </button>
 
       <form onSubmit={handleSubmit}>
-        {/* QUIZ INFO */}
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>Thông tin đề</h2>
           <div className={styles.grid}>
@@ -276,7 +268,6 @@ function TeacherGrammarQuizEditor() {
           </div>
         </div>
 
-        {/* QUESTIONS */}
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>
@@ -380,7 +371,6 @@ function TeacherGrammarQuizEditor() {
                 })}
               </div>
 
-              {/* ✅ MỚI: Giải thích chung cho câu hỏi */}
               <div className={styles.explanationBlock}>
                 <label className={styles.explanationLabel}>
                   <FontAwesomeIcon icon={faLightbulb} />
@@ -400,7 +390,6 @@ function TeacherGrammarQuizEditor() {
                 />
               </div>
 
-              {/* ✅ MỚI: Giải thích từng đáp án A/B/C/D */}
               <div className={styles.explanationBlock}>
                 <label className={styles.explanationLabel}>
                   <FontAwesomeIcon icon={faLightbulb} />
@@ -445,7 +434,6 @@ function TeacherGrammarQuizEditor() {
           ))}
         </div>
 
-        {/* ACTIONS */}
         <div className={styles.actions}>
           <button
             type="button"

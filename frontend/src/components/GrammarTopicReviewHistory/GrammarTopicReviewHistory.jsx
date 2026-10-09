@@ -1,70 +1,70 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSpinner,
   faPaperPlane,
   faCheck,
   faXmark,
   faClock,
   faUser,
   faPen,
-  faCloudArrowUp, // SUBMIT
-  faRocket, // APPROVE (publish)
-  faBan, // REJECT
-  faEyeSlash, // UNPUBLISH
-  faPenToSquare, // REQUEST_EDIT
-  faCircleCheck, // APPROVE_EDIT
-  faCircleXmark, // REJECT_EDIT
+  faCloudArrowUp,
+  faRocket,
+  faBan,
+  faEyeSlash,
+  faPenToSquare,
+  faCircleCheck,
+  faCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import grammarService from "../../services/grammarService";
+import Loading from "../../components/common/Loading/Loading";
 import styles from "./GrammarTopicReviewHistory.module.css";
 
 const ACTION_CONFIG = {
   SUBMIT: {
     label: "Gửi duyệt",
-    icon: faCloudArrowUp, // ⬆️ gửi lên duyệt — trực quan hơn paper-plane
+    icon: faCloudArrowUp,
     color: "#3b82f6",
     bg: "#eff6ff",
     border: "#bfdbfe",
   },
   APPROVE: {
     label: "Đã publish",
-    icon: faRocket, // 🚀 publish = phóng — hợp nghĩa "đã công khai"
+    icon: faRocket,
     color: "#1fce5f",
     bg: "#f0fdf4",
     border: "#bbf7d0",
   },
   REJECT: {
     label: "Từ chối chủ điểm",
-    icon: faBan, // 🚫 cấm — mạnh hơn dấu X
+    icon: faBan,
     color: "#dc2626",
     bg: "#fef2f2",
     border: "#fecaca",
   },
   UNPUBLISH: {
     label: "Đã ẩn",
-    icon: faEyeSlash, // 👁️‍🗨️ ẩn — giữ nguyên, đúng nghĩa
+    icon: faEyeSlash,
     color: "#f59e0b",
     bg: "#fffbeb",
     border: "#fde68a",
   },
   REQUEST_EDIT: {
     label: "Yêu cầu chỉnh sửa",
-    icon: faPenToSquare, // ✏️ sửa trong khung — rõ "chỉnh sửa" hơn cây bút đơn
+    icon: faPenToSquare,
     color: "#ea580c",
     bg: "#fff7ed",
     border: "#fed7aa",
   },
   APPROVE_EDIT: {
     label: "Đồng ý cho sửa",
-    icon: faCircleCheck, // ✅ giữ nguyên — đúng nghĩa "đồng ý"
+    icon: faCircleCheck,
     color: "#0891b2",
     bg: "#ecfeff",
     border: "#a5f3fc",
   },
   REJECT_EDIT: {
     label: "Từ chối yêu cầu sửa",
-    icon: faCircleXmark, // ❌ giữ nguyên — đúng nghĩa "từ chối"
+    icon: faCircleXmark,
     color: "#b91c1c",
     bg: "#fef2f2",
     border: "#fecaca",
@@ -103,12 +103,9 @@ function GrammarTopicReviewHistory({ topicId, role = "admin" }) {
     }
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải lịch sử..." />;
   }
 
   if (history.length === 0) {

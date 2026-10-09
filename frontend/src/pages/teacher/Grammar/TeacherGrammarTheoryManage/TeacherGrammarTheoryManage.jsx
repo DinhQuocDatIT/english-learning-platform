@@ -12,11 +12,9 @@ import {
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
 import { SECTION_TYPE_OPTIONS } from "../../../../constants/grammarConstants";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarTheoryManage.module.css";
 
-// =====================================================
-// HELPER: Render TEXT — tự tách dòng
-// =====================================================
 function TextView({ content }) {
   if (!content) return null;
   const lines = content
@@ -37,9 +35,6 @@ function TextView({ content }) {
   );
 }
 
-// =====================================================
-// INLINE SECTION
-// =====================================================
 function InlineSection({
   theory,
   isEditing,
@@ -77,7 +72,6 @@ function InlineSection({
     setIsDirty(true);
   };
 
-  // ✅ Check form có rỗng hoàn toàn không
   const isFormEmpty = () => {
     const hasTitle = form.title.trim().length > 0;
     const hasContent = form.content.trim().length > 0;
@@ -92,7 +86,6 @@ function InlineSection({
   useEffect(() => {
     if (!isEditing) return;
 
-    // ✅ Nếu form rỗng → xoá khỏi pending, không emit
     if (isFormEmpty()) {
       if (onRemovePending) onRemovePending(theory?.id || "new");
       return;
@@ -128,7 +121,6 @@ function InlineSection({
     onChange(payload);
   }, [form, tableHeaders, tableRows, listItems, noteColor, isDirty]);
 
-  // TABLE handlers
   const addRow = () => {
     setTableRows([...tableRows, ["", "", ""]]);
     setIsDirty(true);
@@ -150,7 +142,6 @@ function InlineSection({
     setIsDirty(true);
   };
 
-  // LIST handlers
   const addListItem = () => {
     setListItems([...listItems, ""]);
     setIsDirty(true);
@@ -288,7 +279,6 @@ function InlineSection({
       </div>
 
       <div className={styles.sectionContent}>
-        {/* TEXT */}
         {form.sectionType === "TEXT" && (
           <>
             <textarea
@@ -305,7 +295,6 @@ function InlineSection({
           </>
         )}
 
-        {/* TABLE */}
         {form.sectionType === "TABLE" && (
           <div className={styles.tableWrapper}>
             <table className={styles.editTable}>
@@ -354,7 +343,6 @@ function InlineSection({
           </div>
         )}
 
-        {/* LIST */}
         {form.sectionType === "LIST" && (
           <div className={styles.listWrapper}>
             {listItems.map((item, i) => (
@@ -385,7 +373,6 @@ function InlineSection({
           </div>
         )}
 
-        {/* NOTE */}
         {form.sectionType === "NOTE" && (
           <>
             <div className={styles.colorOptions}>
@@ -416,9 +403,6 @@ function InlineSection({
   );
 }
 
-// =====================================================
-// MAIN
-// =====================================================
 function TeacherGrammarTheoryManage() {
   const navigate = useNavigate();
   const { topicId } = useParams();
@@ -459,7 +443,6 @@ function TeacherGrammarTheoryManage() {
     setPendingChanges((prev) => ({ ...prev, [key]: payload }));
   };
 
-  // ✅ Xoá 1 pending khỏi danh sách
   const handleRemovePending = (key) => {
     setPendingChanges((prev) => {
       if (!prev[key]) return prev;
@@ -533,14 +516,7 @@ function TeacherGrammarTheoryManage() {
   const hasPending = Object.keys(pendingChanges).length > 0;
 
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingBox}>
-          <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-          <p>Đang tải...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải dữ liệu..." />;
   }
 
   return (

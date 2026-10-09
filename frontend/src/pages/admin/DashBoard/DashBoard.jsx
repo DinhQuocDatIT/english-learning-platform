@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import paymentService from "../../../services/paymentService";
 import listeningLessonService from "../../../services/listeningLessonService";
 import statisticsService from "../../../services/statisticsService";
+import Loading from "../../../components/common/Loading/Loading";
 
 // ===== HELPERS: Format tiền VNĐ =====
 const formatVNDNumber = (value) => {
@@ -393,7 +394,11 @@ function DashBoard() {
           </div>
           <div className={styles.chartBody}>
             {revenueLoading ? (
-              <div className={styles.chartPlaceholder}>Đang tải dữ liệu...</div>
+              <Loading
+                size="medium"
+                fullScreen={false}
+                text="Đang tải doanh thu..."
+              />
             ) : chartPoints.length === 0 ? (
               <div className={styles.chartPlaceholder}>
                 Chưa có dữ liệu doanh thu
@@ -544,7 +549,11 @@ function DashBoard() {
           </div>
           <div className={styles.chartBody}>
             {activitiesLoading ? (
-              <div className={styles.chartPlaceholder}>Đang tải dữ liệu...</div>
+              <Loading
+                size="medium"
+                fullScreen={false}
+                text="Đang tải hoạt động học tập..."
+              />
             ) : studyActivities.length === 0 ? (
               <div className={styles.chartPlaceholder}>
                 Chưa có dữ liệu hoạt động
@@ -604,9 +613,11 @@ function DashBoard() {
           </div>
 
           {pendingLoading ? (
-            <div className={styles.emptyList}>
-              <p>Đang tải danh sách chờ duyệt...</p>
-            </div>
+            <Loading
+              size="small"
+              fullScreen={false}
+              text="Đang tải danh sách chờ duyệt..."
+            />
           ) : pendingLessons.length === 0 ? (
             <div className={styles.emptyList}>
               <FontAwesomeIcon
@@ -683,9 +694,11 @@ function DashBoard() {
 
           <div className={styles.tableWrapper}>
             {purchasesLoading ? (
-              <div className={styles.emptyList}>
-                <p>Đang tải giao dịch...</p>
-              </div>
+              <Loading
+                size="small"
+                fullScreen={false}
+                text="Đang tải giao dịch..."
+              />
             ) : recentPurchases.length === 0 ? (
               <div className={styles.emptyList}>
                 <FontAwesomeIcon

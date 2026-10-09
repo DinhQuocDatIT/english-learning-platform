@@ -20,6 +20,7 @@ import styles from "./StudentDetail.module.css";
 import { toast } from "react-toastify";
 import studentService from "../../../../services/studentService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 import getImageUrl from "../../../../utils/imageUrl";
 
 import {
@@ -50,10 +51,6 @@ function StudentDetail() {
 
   const { showLoading, hideLoading } = useLoading();
 
-  // =====================================================
-  // NGÀY SINH TỐI ĐA
-  // HỌC SINH PHẢI TỪ 6 TUỔI TRỞ LÊN
-  // =====================================================
   const getMaxBirthDate = () => {
     const today = new Date();
 
@@ -66,9 +63,6 @@ function StudentDetail() {
     return `${year}-${month}-${day}`;
   };
 
-  // =====================================================
-  // LẤY STUDENT THEO USER ID
-  // =====================================================
   useEffect(() => {
     const fetchStudent = async () => {
       try {
@@ -98,25 +92,16 @@ function StudentDetail() {
     }
   }, [id]);
 
-  // =====================================================
-  // CHỈNH SỬA
-  // =====================================================
   const handleEditClick = () => {
     setFormData({ ...student });
     setIsEditing(true);
   };
 
-  // =====================================================
-  // HỦY CHỈNH SỬA
-  // =====================================================
   const handleCancelClick = () => {
     setFormData({ ...student });
     setIsEditing(false);
   };
 
-  // =====================================================
-  // INPUT CHANGE
-  // =====================================================
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -126,9 +111,6 @@ function StudentDetail() {
     }));
   };
 
-  // =====================================================
-  // VALIDATE FORM
-  // =====================================================
   const validateForm = () => {
     const fullNameError = isValidFullName(formData.fullName);
     const emailError = isValidEmail(formData.email);
@@ -158,9 +140,6 @@ function StudentDetail() {
     return true;
   };
 
-  // =====================================================
-  // UPDATE STUDENT
-  // =====================================================
   const handleSaveClick = async (e) => {
     e.preventDefault();
 
@@ -168,7 +147,6 @@ function StudentDetail() {
       return;
     }
 
-    // Validate trước khi gọi API
     const isValid = validateForm();
 
     if (!isValid) {
@@ -210,18 +188,14 @@ function StudentDetail() {
     }
   };
 
-  // =====================================================
-  // LOADING
-  // =====================================================
+  // ===== LOADING =====
   if (loading || !student || !formData) {
-    return <div className={styles.loading}>Đang tải thông tin học sinh...</div>;
+    return <Loading size="large" text="Đang tải thông tin học sinh..." />;
   }
 
   return (
     <div className={styles.container}>
-      {/* =====================================================
-          TOP BAR
-      ===================================================== */}
+      {/* TOP BAR */}
       <div className={styles.topBar}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
           <FontAwesomeIcon icon={faArrowLeft} />
@@ -252,7 +226,6 @@ function StudentDetail() {
                 disabled={saving}
               >
                 <FontAwesomeIcon icon={faCheck} />
-
                 {saving ? "Đang lưu..." : "Lưu thay đổi"}
               </button>
             </div>
@@ -260,13 +233,9 @@ function StudentDetail() {
         </div>
       </div>
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
+      {/* MAIN */}
       <div className={styles.mainGrid}>
-        {/* =====================================================
-            LEFT PROFILE
-        ===================================================== */}
+        {/* LEFT PROFILE */}
         <div className={styles.leftProfileCard}>
           <div className={styles.avatarWrapper}>
             <div className={styles.avatar}>
@@ -297,9 +266,7 @@ function StudentDetail() {
           </div>
         </div>
 
-        {/* =====================================================
-            RIGHT INFORMATION
-        ===================================================== */}
+        {/* RIGHT INFORMATION */}
         <div className={styles.rightInfoCard}>
           <h3 className={styles.infoCardTitle}>Thông tin cá nhân</h3>
 
@@ -310,9 +277,6 @@ function StudentDetail() {
             onSubmit={handleSaveClick}
             className={styles.infoGrid}
           >
-            {/* =================================================
-                EMAIL
-            ================================================= */}
             <div className={styles.infoField}>
               <div className={styles.fieldHeader}>
                 <FontAwesomeIcon icon={faEnvelope} />
@@ -334,9 +298,6 @@ function StudentDetail() {
               )}
             </div>
 
-            {/* =================================================
-                GENDER
-            ================================================= */}
             <div className={styles.infoField}>
               <div className={styles.fieldHeader}>
                 <FontAwesomeIcon icon={faVenusMars} />
@@ -351,9 +312,7 @@ function StudentDetail() {
                   className={styles.editSelect}
                 >
                   <option value="">-- Chọn giới tính --</option>
-
                   <option value="Nam">Nam</option>
-
                   <option value="Nữ">Nữ</option>
                 </select>
               ) : (
@@ -363,9 +322,6 @@ function StudentDetail() {
               )}
             </div>
 
-            {/* =================================================
-                DATE OF BIRTH
-            ================================================= */}
             <div className={styles.infoField}>
               <div className={styles.fieldHeader}>
                 <FontAwesomeIcon icon={faCalendar} />
@@ -401,9 +357,6 @@ function StudentDetail() {
               )}
             </div>
 
-            {/* =================================================
-                ROLE
-            ================================================= */}
             <div className={styles.infoField}>
               <div className={styles.fieldHeader}>
                 <FontAwesomeIcon icon={faShieldHalved} />
@@ -413,9 +366,6 @@ function StudentDetail() {
               <div className={styles.fieldValue}>{student.role}</div>
             </div>
 
-            {/* =================================================
-                CREATED AT
-            ================================================= */}
             <div className={styles.infoField}>
               <div className={styles.fieldHeader}>
                 <FontAwesomeIcon icon={faClock} />
@@ -432,13 +382,8 @@ function StudentDetail() {
         </div>
       </div>
 
-      {/* =====================================================
-          STATISTICS
-      ===================================================== */}
+      {/* STATISTICS */}
       <div className={styles.bottomStatsRow}>
-        {/* =================================================
-            LEARNING HOURS
-        ================================================= */}
         <div className={styles.statBox}>
           <div className={`${styles.boxIconWrapper} ${styles.blueIcon}`}>
             <FontAwesomeIcon icon={faClock} />
@@ -451,9 +396,6 @@ function StudentDetail() {
           </span>
         </div>
 
-        {/* =================================================
-            XP
-        ================================================= */}
         <div className={styles.statBox}>
           <div className={`${styles.boxIconWrapper} ${styles.greenIcon}`}>
             <FontAwesomeIcon icon={faUsers} />
@@ -466,9 +408,6 @@ function StudentDetail() {
           </span>
         </div>
 
-        {/* =================================================
-            TOPICS
-        ================================================= */}
         <div className={styles.statBox}>
           <div className={`${styles.boxIconWrapper} ${styles.purpleIcon}`}>
             <FontAwesomeIcon icon={faBook} />
@@ -481,9 +420,6 @@ function StudentDetail() {
           </span>
         </div>
 
-        {/* =================================================
-            COMPLETION
-        ================================================= */}
         <div className={styles.statBox}>
           <div className={`${styles.boxIconWrapper} ${styles.tealIcon}`}>
             <FontAwesomeIcon icon={faThumbsUp} />

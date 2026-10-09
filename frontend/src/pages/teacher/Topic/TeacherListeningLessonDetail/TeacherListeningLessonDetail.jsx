@@ -26,6 +26,7 @@ import listeningLessonService from "../../../../services/listeningLessonService"
 import listeningLessonReviewService from "../../../../services/listeningLessonReviewService";
 import getImageUrl from "../../../../utils/imageUrl";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 import {
   STATUS_MAP,
   STATUS_BG_COLOR_MAP,
@@ -33,7 +34,6 @@ import {
 } from "../../../../constants/status";
 import styles from "./TeacherListeningLessonDetail.module.css";
 
-// ===== PROGRESS STEPPER COMPONENT =====
 function ProgressStepper({ currentStep }) {
   const steps = [
     {
@@ -136,7 +136,6 @@ function ProgressStepper({ currentStep }) {
   );
 }
 
-// ===== REVIEW ITEM COMPONENT =====
 function ReviewItem({ review }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -259,7 +258,6 @@ function ReviewItem({ review }) {
   );
 }
 
-// ===== MAIN COMPONENT =====
 function TeacherListeningLessonDetail() {
   const navigate = useNavigate();
   const { topicId, lessonId } = useParams();
@@ -322,15 +320,9 @@ function TeacherListeningLessonDetail() {
     });
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang tải thông tin bài nghe...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải thông tin bài nghe..." />;
   }
 
   if (error || !lesson) {
@@ -357,7 +349,6 @@ function TeacherListeningLessonDetail() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
       <div className={styles.header}>
         <button className={styles.backButton} onClick={handleBack}>
           <FontAwesomeIcon icon={faArrowLeft} />
@@ -365,13 +356,10 @@ function TeacherListeningLessonDetail() {
         </button>
       </div>
 
-      {/* Progress Stepper */}
       <ProgressStepper currentStep={lesson.status} />
 
-      {/* Main Content */}
       <div className={styles.content}>
         <div className={styles.infoGrid}>
-          {/* Left Column */}
           <div className={styles.infoLeft}>
             <div className={styles.infoCard}>
               <h3 className={styles.cardTitle}>
@@ -454,7 +442,6 @@ function TeacherListeningLessonDetail() {
             </div>
           </div>
 
-          {/* Right Column */}
           <div className={styles.infoRight}>
             <div className={styles.previewCard}>
               <h3 className={styles.cardTitle}>
@@ -489,7 +476,6 @@ function TeacherListeningLessonDetail() {
               </div>
             </div>
 
-            {/* Status Info */}
             <div className={styles.statusCard}>
               <h3 className={styles.cardTitle}>Trạng thái bài học</h3>
               <div className={styles.statusInfo}>
@@ -517,7 +503,6 @@ function TeacherListeningLessonDetail() {
               </div>
             </div>
 
-            {/* Lịch sử duyệt */}
             <div className={styles.reviewCard}>
               <h3 className={styles.cardTitle}>
                 <FontAwesomeIcon icon={faHistory} className={styles.cardIcon} />

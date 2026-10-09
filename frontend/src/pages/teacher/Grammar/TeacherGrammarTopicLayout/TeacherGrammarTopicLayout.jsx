@@ -3,7 +3,6 @@ import { Outlet, useNavigate, useParams, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
-  faSpinner,
   faBookOpen,
   faLightbulb,
   faStar,
@@ -16,9 +15,9 @@ import {
   getStatusLabel,
   getStatusColor,
 } from "../../../../constants/grammarConstants";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarTopicLayout.module.css";
 
-// 5 tab cho Teacher
 const TABS = [
   { key: "theory", path: "theory", label: "Lý thuyết", icon: faBookOpen },
   { key: "example", path: "examples", label: "Ví dụ", icon: faStar },
@@ -57,40 +56,30 @@ function TeacherGrammarTopicLayout() {
   const activeTab = TABS.find((t) => t.path === currentPath)?.key || "theory";
   const activeTabObj = TABS.find((t) => t.key === activeTab) || TABS[0];
 
-  // ✅ Chuyển tab KHÔNG thêm history entry (dùng replace)
   const handleTabChange = (tab) => {
     navigate(`/dashboard/teacher/grammar/topics/${topicId}/${tab.path}`, {
       replace: true,
     });
   };
 
-  // ✅ Quay lại trang trước (topic list) — chỉ 1 lần bấm
   const handleBack = () => {
     navigate(-1);
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingBox}>
-          <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-          <p>Đang tải...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải chủ điểm..." />;
   }
 
   const statusColor = topic ? getStatusColor(topic.status) : null;
 
   return (
     <div className={styles.container}>
-      {/* BACK */}
       <button className={styles.backBtn} onClick={handleBack}>
         <FontAwesomeIcon icon={faArrowLeft} />
         <span>Quay lại</span>
       </button>
 
-      {/* HEADER */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1>{topic?.name}</h1>
@@ -114,7 +103,6 @@ function TeacherGrammarTopicLayout() {
         </div>
       </div>
 
-      {/* TAB BAR */}
       <div className={styles.tabBar}>
         {TABS.map((tab) => (
           <button
@@ -130,7 +118,6 @@ function TeacherGrammarTopicLayout() {
         ))}
       </div>
 
-      {/* CONTENT */}
       <div className={styles.page}>
         <div className={styles.pageContent}>
           <Outlet context={{ topic, topicId, onRefresh: fetchTopic }} />

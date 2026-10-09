@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSpinner,
   faGraduationCap,
   faArrowRight,
   faBookOpen,
@@ -11,9 +10,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./StudentGrammarRoadmap.module.css";
 
-// Trích số level từ tên roadmap
 function extractLevelNumber(name) {
   if (!name) return "";
   const match = name.match(/(\d+\+?)/);
@@ -37,7 +36,6 @@ function StudentGrammarRoadmap() {
       const res = await grammarService.getAllRoadmaps();
       const rawList = res?.data?.data || [];
 
-      // Loại bỏ roadmap trùng tên
       const seen = new Set();
       const list = rawList.filter((r) => {
         const key = r.name.trim().toLowerCase();
@@ -69,14 +67,10 @@ function StudentGrammarRoadmap() {
     navigate(`/dashboard/student/grammar/topics/${topicId}/theory`);
   };
 
+  // ===== LOADING =====
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loadingBox}>
-          <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-          <p>Đang tải...</p>
-        </div>
-      </div>
+      <Loading fullScreen size="large" text="Đang tải lộ trình ngữ pháp..." />
     );
   }
 
@@ -93,7 +87,6 @@ function StudentGrammarRoadmap() {
           Lộ trình <span className={styles.heroHighlight}>Ngữ pháp TOEIC</span>
         </h1>
 
-        {/* RENDER ĐÚNG THEO DATA */}
         <div className={styles.heroLevels}>
           {roadmaps.map((r, idx) => (
             <React.Fragment key={r.id}>
@@ -161,7 +154,6 @@ function StudentGrammarRoadmap() {
               </div>
 
               <div className={styles.levelGrid}>
-                {/* LEFT */}
                 <div className={styles.levelCard}>
                   <span className={styles.levelBadge}>
                     {roadmap.levelLabel || `Cấp độ ${roadmap.level}`}
@@ -187,7 +179,6 @@ function StudentGrammarRoadmap() {
                   )}
                 </div>
 
-                {/* RIGHT */}
                 <div className={styles.lessonsPanel}>
                   <h3 className={styles.lessonsTitle} style={{ color: color }}>
                     <FontAwesomeIcon icon={faBookOpen} />

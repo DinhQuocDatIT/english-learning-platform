@@ -34,19 +34,7 @@
   box-sizing: border-box;
 }
 
-/* ================= LOADING ================= */
-.loadingBox {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 60px 0;
-  min-height: 200px;
-}
 
-.spinner {
-  font-size: 32px;
-  color: var(--color-primary, #0ea792);
-}
 
 /* ================= ACTION ROW ================= */
 .actionRow {

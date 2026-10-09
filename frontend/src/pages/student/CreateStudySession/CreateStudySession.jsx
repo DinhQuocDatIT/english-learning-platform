@@ -182,8 +182,6 @@ function CreateStudySession() {
           <FontAwesomeIcon icon={faArrowLeft} />
           Quay lại
         </button>
-
-       
       </div>
 
       <div className={styles.mainLayout}>

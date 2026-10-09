@@ -26,8 +26,8 @@ import listeningLessonService from "../../../../services/listeningLessonService"
 import topicService from "../../../../services/topicService";
 import levelService from "../../../../services/levelService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 
-// Component thanh tiến trình
 function ProgressStepper({ currentStep, isSubmitting }) {
   const steps = [
     { id: "draft", label: "Nháp", icon: faPen, color: "#f59e0b" },
@@ -46,9 +46,6 @@ function ProgressStepper({ currentStep, isSubmitting }) {
     },
   ];
 
-  // Xác định step hiện tại
-  // 0: draft, 1: pending, 2: approved, 3: published
-  // Nếu đang submit -> hiển thị pending
   const activeStep = isSubmitting ? 1 : currentStep;
 
   return (
@@ -61,7 +58,6 @@ function ProgressStepper({ currentStep, isSubmitting }) {
 
           return (
             <React.Fragment key={step.id}>
-              {/* Step */}
               <div className={styles.stepItem}>
                 <div
                   className={`${styles.stepCircle} ${
@@ -99,7 +95,6 @@ function ProgressStepper({ currentStep, isSubmitting }) {
                 </div>
               </div>
 
-              {/* Line connect */}
               {index < steps.length - 1 && (
                 <div
                   className={`${styles.stepLine} ${
@@ -112,7 +107,6 @@ function ProgressStepper({ currentStep, isSubmitting }) {
         })}
       </div>
 
-      {/* Trạng thái hiện tại */}
       <div className={styles.stepperStatus}>
         <span className={styles.statusBadge}>
           {isSubmitting ? (
@@ -222,7 +216,6 @@ function TeacherListeningLessonCreate() {
       return;
     }
 
-    // Kiểm tra kích thước file (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Kích thước file không được vượt quá 5MB.");
       return;
@@ -277,7 +270,6 @@ function TeacherListeningLessonCreate() {
     return data;
   };
 
-  // TẠO NHÁP
   const handleSaveDraft = async () => {
     if (!validateForm()) {
       return;
@@ -308,7 +300,6 @@ function TeacherListeningLessonCreate() {
     }
   };
 
-  // TẠO XONG → GỬI DUYỆT
   const handleSubmitForReview = async () => {
     if (!validateForm()) {
       return;
@@ -324,7 +315,6 @@ function TeacherListeningLessonCreate() {
       setError("");
       showLoading();
 
-      // Bước 1: tạo bài nghe
       const requestData = buildFormData();
       const createResponse = await listeningLessonService.create(requestData);
       const createdLesson = createResponse?.data?.data;
@@ -333,7 +323,6 @@ function TeacherListeningLessonCreate() {
         throw new Error("Không lấy được ID bài nghe vừa tạo.");
       }
 
-      // Bước 2: gửi duyệt
       await listeningLessonService.submit(createdLesson.id);
 
       toast.success("🎉 Tạo bài nghe và gửi duyệt thành công!");
@@ -354,20 +343,13 @@ function TeacherListeningLessonCreate() {
     }
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang tải thông tin...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải thông tin..." />;
   }
 
   return (
     <div className={styles.container}>
-      {/* HEADER */}
       <div className={styles.header}>
         <button
           type="button"
@@ -378,25 +360,12 @@ function TeacherListeningLessonCreate() {
           <FontAwesomeIcon icon={faArrowLeft} />
           <span>Quay lại</span>
         </button>
-
-        {/* <div className={styles.headerInfo}>
-          <h1 className={styles.pageTitle}>
-            <FontAwesomeIcon icon={faHeadphones} className={styles.titleIcon} />
-            Tạo bài nghe mới
-          </h1>
-          <p className={styles.subtitle}>
-            Tạo bài nghe trong topic <strong>"{topic?.title}"</strong>
-          </p>
-        </div> */}
       </div>
 
-      {/* PROGRESS STEPPER */}
       <ProgressStepper currentStep={0} isSubmitting={isSubmitting} />
 
-      {/* CONTENT */}
       <div className={styles.content}>
         <form className={styles.formCard} onSubmit={(e) => e.preventDefault()}>
-          {/* Error */}
           {error && (
             <div className={styles.errorMessage}>
               <span></span>
@@ -404,11 +373,8 @@ function TeacherListeningLessonCreate() {
             </div>
           )}
 
-          {/* Two columns layout */}
           <div className={styles.formGrid}>
-            {/* Left column */}
             <div className={styles.formLeft}>
-              {/* TITLE */}
               <div className={styles.formGroup}>
                 <label htmlFor="title">
                   Tiêu đề bài nghe <span className={styles.required}>*</span>
@@ -429,7 +395,6 @@ function TeacherListeningLessonCreate() {
                 </div>
               </div>
 
-              {/* LEVEL */}
               <div className={styles.formGroup}>
                 <label htmlFor="levelId">
                   Trình độ <span className={styles.required}>*</span>
@@ -471,9 +436,7 @@ function TeacherListeningLessonCreate() {
               </div>
             </div>
 
-            {/* Right column */}
             <div className={styles.formRight}>
-              {/* IMAGE */}
               <div className={styles.formGroup}>
                 <label htmlFor="lessonImage">Ảnh bài nghe</label>
                 <div className={styles.uploadZone}>
@@ -520,7 +483,6 @@ function TeacherListeningLessonCreate() {
                 </div>
               </div>
 
-              {/* DESCRIPTION */}
               <div className={styles.premiumBox}>
                 <label className={styles.checkboxLabel}>
                   <input
@@ -545,7 +507,6 @@ function TeacherListeningLessonCreate() {
             </div>
           </div>
 
-          {/* INFO CARD */}
           <div className={styles.infoCard}>
             <div className={styles.infoIcon}>
               <FontAwesomeIcon icon={faBookOpen} />
@@ -572,7 +533,6 @@ function TeacherListeningLessonCreate() {
             </div>
           </div>
 
-          {/* ACTIONS */}
           <div className={styles.formActions}>
             <button
               type="button"

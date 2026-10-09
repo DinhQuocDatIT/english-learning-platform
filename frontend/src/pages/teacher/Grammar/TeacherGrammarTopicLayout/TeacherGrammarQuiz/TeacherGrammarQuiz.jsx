@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSpinner,
   faPlus,
   faEdit,
   faTrash,
@@ -13,6 +12,7 @@ import {
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
 import { getStatusLabel } from "../../../../../constants/grammarConstants";
+import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarQuiz.module.css";
 
 function TeacherGrammarQuiz() {
@@ -53,17 +53,13 @@ function TeacherGrammarQuiz() {
     }
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinner} />
-      </div>
-    );
+    return <Loading fullScreen={false} text="Đang tải danh sách đề..." />;
   }
 
   return (
     <>
-      {/* ACTION ROW */}
       <div className={styles.actionRow}>
         <button
           className={styles.addBtn}
@@ -79,19 +75,7 @@ function TeacherGrammarQuiz() {
           <span>Thêm đề</span>
         </button>
       </div>
-{/* 
-      {!canEdit && (
-        <div className={styles.readOnlyBanner}>
-          <FontAwesomeIcon icon={faLock} />
-          <span>
-            Chủ điểm đang ở trạng thái{" "}
-            <strong>{getStatusLabel(topic?.status)}</strong>. Bạn chỉ có thể
-            xem.
-          </span>
-        </div>
-      )} */}
 
-      {/* LIST */}
       {quizzes.length === 0 ? (
         <div className={styles.emptyBox}>
           <FontAwesomeIcon icon={faFileAlt} className={styles.emptyIcon} />
@@ -105,7 +89,6 @@ function TeacherGrammarQuiz() {
         <div className={styles.grid}>
           {quizzes.map((quiz) => (
             <div key={quiz.id} className={styles.card}>
-              {/* HEADER ROW: icon + title */}
               <div className={styles.cardHeader}>
                 <div className={styles.cardIcon}>
                   <FontAwesomeIcon icon={faFileAlt} />
@@ -115,12 +98,10 @@ function TeacherGrammarQuiz() {
                 </h3>
               </div>
 
-              {/* DESC */}
               {quiz.description && (
                 <p className={styles.cardDesc}>{quiz.description}</p>
               )}
 
-              {/* FOOTER: meta + actions */}
               <div className={styles.cardFooter}>
                 <span className={styles.metaItem}>
                   <FontAwesomeIcon icon={faClipboardList} />

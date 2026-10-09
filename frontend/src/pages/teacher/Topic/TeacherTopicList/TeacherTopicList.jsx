@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 
 import topicService from "../../../../services/topicService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 import getImageUrl from "../../../../utils/imageUrl";
 
 function TeacherTopicList() {
@@ -139,9 +140,7 @@ function TeacherTopicList() {
 
       {/* CONTENT */}
       {loading ? (
-        <div className={styles.emptyState}>
-          <h3>Đang tải danh sách chủ đề...</h3>
-        </div>
+        <Loading fullScreen={false} text="Đang tải danh sách chủ đề..." />
       ) : paginatedTopics.length === 0 ? (
         <div className={styles.emptyState}>
           <FontAwesomeIcon icon={faImage} className={styles.emptyIcon} />
@@ -161,7 +160,6 @@ function TeacherTopicList() {
                 className={styles.card}
                 onClick={() => handleOpenTopic(topic.id)}
               >
-                {/* IMAGE */}
                 <div className={styles.imageWrapper}>
                   {imageUrl ? (
                     <img
@@ -192,14 +190,12 @@ function TeacherTopicList() {
                     />
                   </div>
 
-                  {/* LISTENING ICON */}
                   <div className={styles.lessonBadge}>
                     <FontAwesomeIcon icon={faHeadphones} />
                     Bài nghe
                   </div>
                 </div>
 
-                {/* BODY */}
                 <div className={styles.cardBody}>
                   <h3 className={styles.cardTitle}>{topic.title}</h3>
 

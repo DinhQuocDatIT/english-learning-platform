@@ -29,6 +29,7 @@ import listeningLessonService from "../../../../services/listeningLessonService"
 import listeningSentenceService from "../../../../services/listeningSentenceService";
 import getImageUrl from "../../../../utils/imageUrl";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 import { speakText } from "../../../../utils/textToSpeech";
 import { STATUS_MAP, STATUS_BG_COLOR_MAP } from "../../../../constants/status";
 import PlaybackSpeedPopup from "../../../../components/PlaybackSpeedPopup/PlaybackSpeedPopup";
@@ -46,21 +47,17 @@ function ListeningSentenceManage() {
   const [sentences, setSentences] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // State cho câu đang chọn để nghe
   const [selectedSentence, setSelectedSentence] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // State cho text-to-speech
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
 
-  // State cho tốc độ và popup
   const [playbackSpeed, setPlaybackSpeed] = useState("1x");
   const [showSpeedPopup, setShowSpeedPopup] = useState(false);
   const [showVoicePopup, setShowVoicePopup] = useState(false);
 
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [editingSentence, setEditingSentence] = useState(null);
   const [formData, setFormData] = useState({
@@ -71,14 +68,11 @@ function ListeningSentenceManage() {
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Kiểm tra có được chỉnh sửa không
   const canEdit = EDITABLE_STATUSES.includes(lesson?.status);
 
-  // Helper để lấy tốc độ dạng số
   const getNumericSpeed = (speedStr) =>
     parseFloat(speedStr.replace("x", "")) || 1.0;
 
-  // Khởi tạo voices
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
 
@@ -146,7 +140,6 @@ function ListeningSentenceManage() {
     navigate(`/dashboard/teacher/topics/${topicId}`);
   };
 
-  // ===== TEXT-TO-SPEECH =====
   const handleSpeak = (text, sentenceId) => {
     if (speakingId === sentenceId) {
       window.speechSynthesis.cancel();
@@ -182,7 +175,6 @@ function ListeningSentenceManage() {
     });
   };
 
-  // ===== CLICK VÀO CÂU =====
   const handleSelectSentence = (sentence) => {
     if (isPlaying) {
       window.speechSynthesis.cancel();
@@ -192,9 +184,7 @@ function ListeningSentenceManage() {
     setSelectedSentence(sentence);
   };
 
-  // ===== OPEN MODAL =====
   const openCreateModal = () => {
-    // Chỉ cho phép khi có thể chỉnh sửa
     if (!canEdit) {
       toast.warning(
         `Không thể thêm câu hỏi khi bài nghe ở trạng thái "${STATUS_MAP[lesson?.status]}"`,
@@ -212,7 +202,6 @@ function ListeningSentenceManage() {
   };
 
   const openEditModal = (sentence) => {
-    // Chỉ cho phép khi có thể chỉnh sửa
     if (!canEdit) {
       toast.warning(
         `Không thể chỉnh sửa câu hỏi khi bài nghe ở trạng thái "${STATUS_MAP[lesson?.status]}"`,
@@ -240,7 +229,6 @@ function ListeningSentenceManage() {
     setFormError("");
   };
 
-  // ===== HANDLE FORM =====
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -305,9 +293,7 @@ function ListeningSentenceManage() {
     }
   };
 
-  // ===== DELETE =====
   const handleDelete = async (sentence) => {
-    // Chỉ cho phép khi có thể chỉnh sửa
     if (!canEdit) {
       toast.warning(
         `Không thể xóa câu hỏi khi bài nghe ở trạng thái "${STATUS_MAP[lesson?.status]}"`,
@@ -336,9 +322,7 @@ function ListeningSentenceManage() {
     }
   };
 
-  // ===== DRAG & DROP REORDER =====
   const onDragEnd = async (result) => {
-    // Chỉ cho phép khi có thể chỉnh sửa
     if (!canEdit) {
       toast.warning(
         `Không thể sắp xếp câu hỏi khi bài nghe ở trạng thái "${STATUS_MAP[lesson?.status]}"`,
@@ -369,22 +353,15 @@ function ListeningSentenceManage() {
     }
   };
 
+  // ===== LOADING =====
   if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang tải...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải dữ liệu..." />;
   }
 
   const statusColor = STATUS_BG_COLOR_MAP[lesson?.status] || "#64748b";
 
   return (
     <div className={styles.container}>
-      {/* Header */}
       <div className={styles.header}>
         <button className={styles.backButton} onClick={handleGoBack}>
           <FontAwesomeIcon icon={faArrowLeft} />
@@ -412,13 +389,9 @@ function ListeningSentenceManage() {
         </button>
       </div>
 
-      {/* Two columns layout */}
       <div className={styles.twoColumns}>
-        {/* LEFT COLUMN - Lesson Info */}
         <div className={styles.leftColumn}>
-          {/* Lesson Card */}
           <div className={styles.lessonCard}>
-            {/* Image */}
             <div className={styles.lessonImageWrapper}>
               {getImageUrl(lesson?.lessonImage) ? (
                 <img
@@ -452,7 +425,6 @@ function ListeningSentenceManage() {
               </div>
             </div>
 
-            {/* Lesson Info compact */}
             <div className={styles.lessonInfoCompact}>
               <h2 className={styles.lessonTitleCompact}>{lesson?.title}</h2>
               {lesson?.description && (
@@ -473,7 +445,6 @@ function ListeningSentenceManage() {
             </div>
           </div>
 
-          {/* Player Section */}
           <div className={styles.playerSection}>
             <div className={styles.playerHeader}>
               <span className={styles.playerTitle}>
@@ -500,7 +471,6 @@ function ListeningSentenceManage() {
                 </div>
 
                 <div className={styles.playerControls}>
-                  {/* Play Button */}
                   <button
                     type="button"
                     className={`${styles.playBtn} ${
@@ -534,8 +504,6 @@ function ListeningSentenceManage() {
                     )}
                   </button>
                   <div>
-                    {" "}
-                    {/* Voice Selector */}
                     <PlaybackVoicePopup
                       voices={voices}
                       selectedVoice={selectedVoice}
@@ -543,7 +511,6 @@ function ListeningSentenceManage() {
                       showVoicePopup={showVoicePopup}
                       setShowVoicePopup={setShowVoicePopup}
                     />
-                    {/* Speed Selector */}
                     <PlaybackSpeedPopup
                       playbackSpeed={playbackSpeed}
                       setPlaybackSpeed={setPlaybackSpeed}
@@ -560,7 +527,6 @@ function ListeningSentenceManage() {
             )}
           </div>
 
-          {/* Quick Actions */}
           <div className={styles.quickActions}>
             <button
               className={`${styles.actionBtn} ${!canEdit ? styles.actionBtnDisabled : ""}`}
@@ -577,7 +543,6 @@ function ListeningSentenceManage() {
             </button>
           </div>
 
-          {/* Thông báo nếu không thể chỉnh sửa */}
           {!canEdit && (
             <div className={styles.lockedNotice}>
               <FontAwesomeIcon icon={faLock} />
@@ -590,7 +555,6 @@ function ListeningSentenceManage() {
           )}
         </div>
 
-        {/* RIGHT COLUMN - Sentences List */}
         <div className={styles.rightColumn}>
           <div className={styles.sentencesHeader}>
             <div className={styles.sentencesTitle}>
@@ -712,7 +676,6 @@ function ListeningSentenceManage() {
         </div>
       </div>
 
-      {/* MODAL - Chỉ hiện khi canEdit */}
       {showModal && canEdit && (
         <div className={styles.modalOverlay} onClick={closeModal}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>

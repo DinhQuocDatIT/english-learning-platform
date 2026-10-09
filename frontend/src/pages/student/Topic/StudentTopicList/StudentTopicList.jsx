@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import topicService from "../../../../services/topicService";
 import getImageUrl from "../../../../utils/imageUrl";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 import styles from "./StudentTopicList.module.css";
 
 function StudentTopicList() {
@@ -48,14 +49,7 @@ function StudentTopicList() {
   };
 
   if (loading) {
-    return (
-      <div className={styles.wrapper}>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang tải danh sách bài học...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải danh sách bài học..." />;
   }
 
   return (

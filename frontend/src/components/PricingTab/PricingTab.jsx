@@ -1,11 +1,11 @@
 // frontend/src/pages/admin/AIUsage/components/PricingTab.jsx
+
 import React, { useState } from "react";
 import {
   faDollarSign,
   faPlus,
   faLock,
   faUnlock,
-  faSpinner,
   faCheckCircle,
   faBan,
   faTriangleExclamation,
@@ -18,6 +18,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
 import pricingService from "../../services/pricingService";
+import Loading from "../common/Loading/Loading";
 import styles from "./PricingTab.module.css";
 
 const MODEL_LIST = {
@@ -127,10 +128,11 @@ function PricingTab({ pricings, loading, onRefresh }) {
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <FontAwesomeIcon icon={faSpinner} spin className={styles.spinnerIcon} />
-        <p>Đang tải danh sách giá...</p>
-      </div>
+      <Loading
+        size="large"
+        fullScreen={false}
+        text="Đang tải danh sách giá..."
+      />
     );
   }
 

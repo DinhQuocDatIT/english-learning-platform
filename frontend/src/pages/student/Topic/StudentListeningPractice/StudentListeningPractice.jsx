@@ -25,6 +25,7 @@ import listeningSentenceService from "../../../../services/listeningSentenceServ
 import listeningAnswerService from "../../../../services/listeningAnswerService";
 
 import { useLoading } from "../../../../contexts/LoadingContext";
+import Loading from "../../../../components/common/Loading/Loading";
 import PlaybackSpeedPopup from "../../../../components/PlaybackSpeedPopup/PlaybackSpeedPopup";
 import PlaybackVoicePopup from "../../../../components/PlaybackVoicePopup/PlaybackVoicePopup";
 
@@ -65,9 +66,6 @@ function StudentListeningPractice() {
   const getNumericSpeed = (speedStr) =>
     parseFloat(speedStr.replace("x", "")) || 1.0;
 
-  // ==========================================
-  // Load voices
-  // ==========================================
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
 
@@ -101,9 +99,6 @@ function StudentListeningPractice() {
     };
   }, []);
 
-  // ==========================================
-  // Fetch data
-  // ==========================================
   useEffect(() => {
     fetchData();
     return () => {
@@ -189,9 +184,6 @@ function StudentListeningPractice() {
     }
   };
 
-  // ==========================================
-  // HANDLE RESET LESSON
-  // ==========================================
   const handleResetLesson = async () => {
     if (!window.confirm("Bạn có chắc muốn làm lại bài học này?")) {
       return;
@@ -230,9 +222,6 @@ function StudentListeningPractice() {
     }
   };
 
-  // ==========================================
-  // Khi đổi câu
-  // ==========================================
   useEffect(() => {
     if (!sentences[currentSentenceIndex]) return;
 
@@ -258,9 +247,6 @@ function StudentListeningPractice() {
     }, 0);
   }, [currentSentenceIndex, sentences, sentenceInputs, completedSentences]);
 
-  // ==========================================
-  // Play sentence
-  // ==========================================
   const handlePlaySentence = (sentence, index) => {
     if (!sentence) return;
 
@@ -307,9 +293,6 @@ function StudentListeningPractice() {
     });
   };
 
-  // ==========================================
-  // CHECK RESULT
-  // ==========================================
   const handleCheckResult = async () => {
     const sentence = sentences[currentSentenceIndex];
 
@@ -387,9 +370,6 @@ function StudentListeningPractice() {
     }
   };
 
-  // ==========================================
-  // Input change
-  // ==========================================
   const handleInputChange = (e) => {
     const value = e.target.value;
     setUserInput(value);
@@ -401,9 +381,6 @@ function StudentListeningPractice() {
     setEarnedXP(0);
   };
 
-  // ==========================================
-  // Next / Prev sentence
-  // ==========================================
   const handleNextSentence = () => {
     if (currentSentenceIndex >= sentences.length - 1) {
       return;
@@ -442,17 +419,11 @@ function StudentListeningPractice() {
     setSpeakingId(null);
   };
 
-  // ==========================================
-  // Go back
-  // ==========================================
   const handleGoBack = () => {
     window.speechSynthesis.cancel();
     navigate(`/dashboard/student/topics/${topicId}/lessons`);
   };
 
-  // ==========================================
-  // Replay
-  // ==========================================
   const handleReplay = () => {
     const sentence = sentences[currentSentenceIndex];
     if (sentence) {
@@ -463,9 +434,6 @@ function StudentListeningPractice() {
     }
   };
 
-  // ==========================================
-  // Reveal one word
-  // ==========================================
   const toggleRevealWord = (wordIdx) => {
     setRevealedWordsMap((prev) => {
       const currentSentenceMap = prev[currentSentenceIndex] || {};
@@ -483,9 +451,6 @@ function StudentListeningPractice() {
     }
   };
 
-  // ==========================================
-  // Show / hide all words
-  // ==========================================
   const handleShowAllWords = () => {
     const nextState = !showAllWordsMap[currentSentenceIndex];
 
@@ -499,23 +464,11 @@ function StudentListeningPractice() {
     }
   };
 
-  // ==========================================
-  // Loading
-  // ==========================================
+  // ===== LOADING =====
   if (!sentences.length) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingWrapper}>
-          <div className={styles.loadingSpinner} />
-          <p>Đang tải bài học...</p>
-        </div>
-      </div>
-    );
+    return <Loading size="large" text="Đang tải bài học..." />;
   }
 
-  // ==========================================
-  // Current sentence
-  // ==========================================
   const currentSentence = sentences[currentSentenceIndex];
 
   const targetWords = currentSentence
@@ -538,14 +491,9 @@ function StudentListeningPractice() {
     ? completedSentences[currentSentence.id]
     : false;
 
-  // ==========================================
-  // Render
-  // ==========================================
   return (
     <div className={styles.container}>
-      {/* ====================================== */}
       {/* LEFT MAIN SECTION */}
-      {/* ====================================== */}
       <div className={styles.leftMainSection}>
         {/* Hero Header Banner */}
         <div
@@ -579,9 +527,7 @@ function StudentListeningPractice() {
           </div>
         </div>
 
-        {/* ==================================== */}
         {/* PLAYER BAR */}
-        {/* ==================================== */}
         <div className={styles.playerBar}>
           <div className={styles.playerControlsLeft}>
             <button
@@ -654,9 +600,7 @@ function StudentListeningPractice() {
           </div>
         </div>
 
-        {/* ==================================== */}
         {/* INPUT BOX */}
-        {/* ==================================== */}
         <div className={styles.inputBoxCard}>
           <div className={styles.inputLabelHeader}>
             GÕ NHỮNG GÌ BẠN NGHE ĐƯỢC:
@@ -691,9 +635,7 @@ function StudentListeningPractice() {
           </button>
         </div>
 
-        {/* ==================================== */}
         {/* WORD BOXES */}
-        {/* ==================================== */}
         {targetWords.length > 0 && (
           <div className={styles.wordBoxesContainer}>
             {targetWords.map((targetWord, idx) => {
@@ -746,9 +688,7 @@ function StudentListeningPractice() {
           {isCurrentAllShown ? "ẨN TẤT CẢ TỪ" : "HIỆN TẤT CẢ TỪ"}
         </button>
 
-        {/* ==================================== */}
         {/* RESULT BANNER */}
-        {/* ==================================== */}
         {showResult && (
           <div
             className={`${styles.resultBanner} ${
@@ -779,9 +719,7 @@ function StudentListeningPractice() {
           </div>
         )}
 
-        {/* ==================================== */}
         {/* ACTION BUTTONS */}
-        {/* ==================================== */}
         <div className={styles.actionButtons}>
           <button
             className={styles.checkButton}
@@ -808,9 +746,7 @@ function StudentListeningPractice() {
           )}
         </div>
 
-        {/* ==================================== */}
         {/* COMPLETE LESSON BANNER */}
-        {/* ==================================== */}
         {isLessonCompleted && (
           <div className={styles.completeLessonBanner}>
             <div className={styles.completeContent}>
@@ -836,9 +772,7 @@ function StudentListeningPractice() {
         )}
       </div>
 
-      {/* ====================================== */}
       {/* RIGHT SIDEBAR */}
-      {/* ====================================== */}
       <div className={styles.rightSidebar}>
         <div className={styles.sidebarHeader}>
           <span className={styles.sidebarTitle}>TIẾN ĐỘ</span>
@@ -856,9 +790,7 @@ function StudentListeningPractice() {
           />
         </div>
 
-        {/* ==================================== */}
         {/* TRANSCRIPT */}
-        {/* ==================================== */}
         <div className={styles.transcriptList}>
           {sentences.map((item, index) => {
             const isActive = index === currentSentenceIndex;
