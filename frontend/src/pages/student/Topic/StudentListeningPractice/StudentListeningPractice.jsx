@@ -33,6 +33,7 @@ import getImageUrl from "../../../../utils/imageUrl";
 
 import styles from "./StudentListeningPractice.module.css";
 import ListeningSentenceFeedback from "../../../../components/ListeningSentenceFeedback/ListeningSentenceFeedback";
+import DictWordDetailModal from "../../../../components/DictWordDetailModal/DictWordDetailModal";
 
 function StudentListeningPractice() {
   const navigate = useNavigate();
@@ -60,6 +61,9 @@ function StudentListeningPractice() {
   const [revealedWordsMap, setRevealedWordsMap] = useState({});
   const [showAllWordsMap, setShowAllWordsMap] = useState({});
   const [isLessonCompleted, setIsLessonCompleted] = useState(false);
+
+  // 👇 State cho modal tra từ điển
+  const [lookupWord, setLookupWord] = useState(null);
 
   const inputRef = useRef(null);
 
@@ -464,6 +468,12 @@ function StudentListeningPractice() {
     }
   };
 
+  // 👇 Handler mở modal tra từ
+  const handleWordClick = (cleanWord) => {
+    if (!cleanWord) return;
+    setLookupWord(cleanWord);
+  };
+
   // ===== LOADING =====
   if (!sentences.length) {
     return <Loading size="large" text="Đang tải bài học..." />;
@@ -655,11 +665,18 @@ function StudentListeningPractice() {
                 isTypedCorrectly ||
                 isCurrentCompleted;
 
+              // 👇 Chỉ cho click tra từ khi từ đã hiện
+              const canLookup = isShown && cleanTarget.length > 0;
+
               return (
                 <div key={idx} className={styles.wordBoxItem}>
                   <button
+                    type="button"
                     className={styles.wordEyeBtn}
-                    onClick={() => toggleRevealWord(idx)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleRevealWord(idx);
+                    }}
                     title="Hiện/ẩn từ này"
                   >
                     <FontAwesomeIcon icon={faEye} />
@@ -670,7 +687,11 @@ function StudentListeningPractice() {
                       isTypedCorrectly || isCurrentCompleted
                         ? styles.wordCorrect
                         : styles.wordNormal
-                    }`}
+                    } ${canLookup ? styles.wordClickable : ""}`}
+                    onClick={() => {
+                      if (canLookup) handleWordClick(cleanTarget);
+                    }}
+                    title={canLookup ? "Click để tra từ điển" : ""}
                   >
                     {isShown ? targetWord : "*".repeat(targetWord.length)}
                   </div>
@@ -689,7 +710,7 @@ function StudentListeningPractice() {
         </button>
 
         {/* RESULT BANNER */}
-        {showResult && (
+        {/* {showResult && (
           <div
             className={`${styles.resultBanner} ${
               isCorrect ? styles.resultCorrect : styles.resultIncorrect
@@ -717,7 +738,7 @@ function StudentListeningPractice() {
               </div>
             )}
           </div>
-        )}
+        )} */}
 
         {/* ACTION BUTTONS */}
         <div className={styles.actionButtons}>
@@ -848,6 +869,14 @@ function StudentListeningPractice() {
           })}
         </div>
       </div>
+
+      {/* 👇 MODAL TRA TỪ ĐIỂN */}
+      {lookupWord && (
+        <DictWordDetailModal
+          word={lookupWord}
+          onClose={() => setLookupWord(null)}
+        />
+      )}
     </div>
   );
 }

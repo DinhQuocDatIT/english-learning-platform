@@ -9,4 +9,5 @@ public interface DictionaryLookupService {
     WordLookupResponse lookup(String word);
 
     List<WordLookupResponse> search(String keyword, int limit);
+    List<WordLookupResponse> findExact(String word);
 }

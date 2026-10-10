@@ -87,4 +87,16 @@ public interface DictWordRepository extends JpaRepository<DictWord, Long> {
             @Param("kw") String kw,
             Pageable pageable
     );
+    @Query("""
+    SELECT w FROM DictWord w 
+    WHERE (:kw = '' OR LOWER(w.word) LIKE LOWER(CONCAT('%', :kw, '%')))
+    ORDER BY 
+        CASE WHEN LOWER(w.word) = LOWER(:kw) THEN 0 
+             WHEN LOWER(w.word) LIKE LOWER(CONCAT(:kw, '%')) THEN 1 
+             ELSE 2 END,
+        LENGTH(w.word),
+        w.word
+""")
+    Page<DictWord> searchWords(@Param("kw") String kw, Pageable pageable);
+
 }

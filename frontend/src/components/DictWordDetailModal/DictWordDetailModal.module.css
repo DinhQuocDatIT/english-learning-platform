@@ -1,0 +1,631 @@
+/* =========================================================
+   DICT WORD DETAIL MODAL - Modern Compact Styling
+   ========================================================= */
+
+.overlay,
+.overlay *,
+.overlay *::before,
+.overlay *::after,
+.modal,
+.modal *,
+.modal *::before,
+.modal *::after {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  box-sizing: border-box;
+}
+
+/* ================= OVERLAY ================= */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 16px;
+
+  background: rgba(15, 23, 42, 0.45);
+
+  animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ================= MODAL ================= */
+.modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 82vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+
+  box-shadow:
+    0 20px 40px -12px rgba(15, 23, 42, 0.25),
+    0 0 0 1px rgba(226, 232, 240, 0.8);
+
+  animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ================= HEADER ================= */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 18px;
+
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headerIconBox {
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: #e6f7f4;
+  color: #0d9488;
+
+  font-size: 12px;
+}
+
+.headerTitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.2px;
+}
+
+.closeBtn {
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  background: #f8fafc;
+  color: #64748b;
+
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+
+  transition: all 0.15s ease;
+}
+
+.closeBtn:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #dc2626;
+  transform: scale(1.04);
+}
+
+/* ================= BODY ================= */
+.body {
+  flex: 1;
+  min-height: 0;
+
+  padding: 16px 18px;
+
+  overflow-y: auto;
+
+  background: #ffffff;
+}
+
+.body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ================= LOADING ================= */
+.loadingBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+  min-height: 150px;
+
+  color: #0d9488;
+}
+
+.loadingBox svg {
+  font-size: 24px;
+}
+
+.loadingBox p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* ================= EMPTY ================= */
+.emptyBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+  min-height: 160px;
+
+  padding: 24px 16px;
+
+  text-align: center;
+}
+
+.emptyIconBox {
+  width: 46px;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #fff7ed;
+  color: #f59e0b;
+
+  font-size: 20px;
+
+  margin-bottom: 2px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.emptyText strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* ================= WORD HEADER CARD ================= */
+.wordHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 14px 16px;
+
+  background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%);
+  border: 1px solid #b2f5ea;
+  border-radius: 12px;
+
+  margin-bottom: 16px;
+}
+
+.wordInfo {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wordTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.wordTitle {
+  margin: 0;
+
+  font-size: 21px;
+  font-weight: 800;
+  color: #0f172a;
+
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+
+  word-break: break-word;
+}
+
+.pronunciation {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0d9488;
+
+  font-family: "Consolas", "Fira Code", monospace;
+  background: rgba(13, 148, 136, 0.08);
+  padding: 2px 7px;
+  border-radius: 6px;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.wordActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+/* ================= SPEAK BTN ================= */
+.speakBtn {
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #0ea792;
+  color: #ffffff;
+
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 8px rgba(14, 167, 146, 0.35);
+  flex-shrink: 0;
+}
+
+.speakBtn:hover {
+  background: #0c9484;
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.45);
+}
+
+.speakBtn:active {
+  transform: scale(0.95);
+}
+
+.speakBtn.speaking {
+  animation: pulseSpeak 0.6s infinite alternate;
+}
+
+@keyframes pulseSpeak {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(14, 167, 146, 0.6);
+  }
+  100% {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 8px rgba(14, 167, 146, 0);
+  }
+}
+
+/* ================= SAVE BTN ================= */
+.saveBtn {
+  height: 34px;
+  padding: 0 13px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  border: none;
+  border-radius: 17px;
+
+  background: #0ea792;
+  color: #ffffff;
+
+  font-size: 12.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 8px rgba(14, 167, 146, 0.35);
+  white-space: nowrap;
+}
+.saveBtn span {
+  color: #ffffff;
+
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.saveBtn:hover:not(:disabled) {
+  background: #0c9484;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.45);
+}
+
+.saveBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.saveBtnSaved {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  box-shadow: none;
+  cursor: default;
+}
+
+.saveBtnSaved:hover {
+  background: #f1f5f9;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ================= SECTION ================= */
+.section {
+  margin-bottom: 4px;
+}
+
+.sectionHeader {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.sectionHeader span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+/* ================= MEANING LIST ================= */
+.meaningList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.meaningItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  padding: 12px 14px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.18s ease;
+}
+
+.meaningItem:hover {
+  border-color: #99f6e4;
+  box-shadow: 0 3px 10px rgba(14, 167, 146, 0.06);
+  background: #fbfdfe;
+}
+
+.meaningMainBox {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.posTag {
+  flex-shrink: 0;
+
+  padding: 2px 7px;
+
+  background: #e6f7f4;
+  color: #0d9488;
+  border: 1px solid #b2f5ea;
+
+  border-radius: 5px;
+
+  font-size: 10.5px;
+  font-weight: 700;
+  font-style: italic;
+
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+
+  white-space: nowrap;
+}
+
+.meaningText {
+  flex: 1;
+  min-width: 0;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.45;
+
+  word-break: break-word;
+}
+
+/* ================= EXAMPLE ================= */
+.exampleBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  margin-top: 4px;
+  padding: 8px 12px;
+
+  background: #f8fafc;
+  border-left: 3px solid #0ea792;
+  border-radius: 6px;
+}
+
+.exampleText {
+  flex: 1;
+
+  font-size: 13px;
+  font-style: italic;
+  color: #475569;
+
+  line-height: 1.45;
+  cursor: pointer;
+
+  transition: color 0.15s ease;
+  word-break: break-word;
+}
+
+.exampleText:hover {
+  color: #0ea792;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.exampleSpeakBtn {
+  flex-shrink: 0;
+
+  width: 24px;
+  height: 24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #e6f7f4;
+  color: #0d9488;
+
+  font-size: 10px;
+  cursor: pointer;
+  padding: 0;
+
+  transition: all 0.15s ease;
+}
+
+.exampleSpeakBtn:hover {
+  background: #0ea792;
+  color: #ffffff;
+}
+
+.exampleSpeakBtn.speaking {
+  background: #0ea792;
+  color: #ffffff;
+  animation: pulseSpeak 0.6s infinite alternate;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 480px) {
+  .overlay {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: 100%;
+    max-height: 88vh;
+
+    border-radius: 18px 18px 0 0;
+
+    animation: slideUpMobile 0.22s ease;
+  }
+
+  @keyframes slideUpMobile {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .header {
+    padding: 10px 14px;
+  }
+
+  .body {
+    padding: 14px;
+  }
+
+  .wordHeader {
+    padding: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .wordActions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+
+  .wordTitle {
+    font-size: 19px;
+  }
+}

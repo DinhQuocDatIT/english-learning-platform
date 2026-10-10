@@ -21,6 +21,9 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
     private final DictPronunciationRepository pronunciationRepo;
     private final DictTranslationRepository translationRepo;
 
+    // ============================================================
+    // LOOKUP (fuzzy)
+    // ============================================================
     @Override
     public WordLookupResponse lookup(String word) {
         if (word == null || word.isBlank()) return null;
@@ -28,62 +31,9 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
         String normalized = Normalizer.normalize(word.trim(), Normalizer.Form.NFC);
 
         boolean isVietnamese = containsVietnameseChars(normalized);
-        System.out.println(">>> Lookup: [" + normalized + "] lang=" + (isVietnamese ? "vi" : "en"));
 
         if (isVietnamese) {
-            List<DictWord> viCandidates = wordRepo.findByWordAndLang(normalized, "vi");
-            if (viCandidates.isEmpty()) {
-                viCandidates = wordRepo.findAllByWordIgnoreCase(normalized);
-            }
-
-            Set<String> englishWords = new LinkedHashSet<>();
-            for (DictWord viWord : viCandidates) {
-                List<DictTranslation> translations = translationRepo.findByWordId(viWord.getId());
-                for (DictTranslation t : translations) {
-                    if (t.getTranslation() == null) continue;
-                    if (t.getLangCode() == null || !t.getLangCode().equalsIgnoreCase("en")) continue;
-                    String en = t.getTranslation().trim();
-                    if (!en.isEmpty()) englishWords.add(en);
-                }
-            }
-
-            if (!englishWords.isEmpty()) {
-                List<WordLookupResponse.WordLookupMeaning> mergedMeanings = new ArrayList<>();
-                String pronunciation = null;
-                String displayWord = normalized;
-
-                for (String en : englishWords) {
-                    WordLookupResponse enResp = lookupEnglish(en);
-                    if (enResp == null) continue;
-
-                    if (pronunciation == null && enResp.getPronunciation() != null) {
-                        pronunciation = enResp.getPronunciation();
-                    }
-                    if (displayWord.equals(normalized)) {
-                        displayWord = enResp.getWord();
-                    }
-                    mergedMeanings.addAll(enResp.getMeanings());
-
-                    if (mergedMeanings.size() >= 12) break;
-                }
-
-                if (!mergedMeanings.isEmpty()) {
-                    return WordLookupResponse.builder()
-                            .word(displayWord)
-                            .pronunciation(pronunciation)
-                            .meanings(mergedMeanings)
-                            .build();
-                }
-            }
-
-            for (DictWord candidate : viCandidates) {
-                WordLookupResponse response = buildResponse(candidate);
-                if (response != null && !response.getMeanings().isEmpty()) {
-                    return response;
-                }
-            }
-
-            return null;
+            return lookupVietnamese(normalized);
         }
 
         return lookupEnglish(normalized);
@@ -111,6 +61,132 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
         return null;
     }
 
+    private WordLookupResponse lookupVietnamese(String normalized) {
+        List<DictWord> viCandidates = wordRepo.findByWordAndLang(normalized, "vi");
+        if (viCandidates.isEmpty()) {
+            viCandidates = wordRepo.findAllByWordIgnoreCase(normalized);
+        }
+
+        Set<String> englishWords = new LinkedHashSet<>();
+        for (DictWord viWord : viCandidates) {
+            List<DictTranslation> translations = translationRepo.findByWordId(viWord.getId());
+            for (DictTranslation t : translations) {
+                if (t.getTranslation() == null) continue;
+                if (t.getLangCode() == null || !t.getLangCode().equalsIgnoreCase("en")) continue;
+                String en = t.getTranslation().trim();
+                if (!en.isEmpty()) englishWords.add(en);
+            }
+        }
+
+        if (!englishWords.isEmpty()) {
+            List<WordLookupResponse.WordLookupMeaning> mergedMeanings = new ArrayList<>();
+            String pronunciation = null;
+            String displayWord = normalized;
+
+            for (String en : englishWords) {
+                WordLookupResponse enResp = lookupEnglish(en);
+                if (enResp == null) continue;
+
+                if (pronunciation == null && enResp.getPronunciation() != null) {
+                    pronunciation = enResp.getPronunciation();
+                }
+                if (displayWord.equals(normalized)) {
+                    displayWord = enResp.getWord();
+                }
+                mergedMeanings.addAll(enResp.getMeanings());
+
+                if (mergedMeanings.size() >= 12) break;
+            }
+
+            if (!mergedMeanings.isEmpty()) {
+                return WordLookupResponse.builder()
+                        .word(displayWord)
+                        .pronunciation(pronunciation)
+                        .meanings(mergedMeanings)
+                        .build();
+            }
+        }
+
+        for (DictWord candidate : viCandidates) {
+            WordLookupResponse response = buildResponse(candidate);
+            if (response != null && !response.getMeanings().isEmpty()) {
+                return response;
+            }
+        }
+
+        return null;
+    }
+
+    // ============================================================
+    // FIND EXACT
+    // ============================================================
+    @Override
+    public List<WordLookupResponse> findExact(String word) {
+        if (word == null || word.isBlank()) return List.of();
+
+        String normalized = Normalizer.normalize(word.trim(), Normalizer.Form.NFC);
+        normalized = normalized.replaceAll("^[\\p{Punct}]+|[\\p{Punct}]+$", "").trim();
+
+        if (normalized.isEmpty()) return List.of();
+
+        List<DictWord> words = wordRepo.findAllByWordIgnoreCase(normalized);
+        if (words.isEmpty()) return List.of();
+
+        List<WordLookupResponse> results = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+
+        for (DictWord w : words) {
+            String key = w.getWord().toLowerCase() + "|" + w.getLangCode();
+            if (seen.contains(key)) continue;
+
+            WordLookupResponse response = buildResponse(w);
+            if (response != null && !response.getMeanings().isEmpty()) {
+                results.add(response);
+                seen.add(key);
+            }
+        }
+
+        return results;
+    }
+
+    // ============================================================
+    // SEARCH
+    // ============================================================
+    @Override
+    public List<WordLookupResponse> search(String keyword, int limit) {
+        if (keyword == null || keyword.isBlank()) return List.of();
+
+        int safeLimit = Math.min(limit, 6);
+
+        String normalized = Normalizer.normalize(keyword.trim(), Normalizer.Form.NFC);
+
+        List<DictWord> words = wordRepo.searchByKeywordExact(
+                normalized,
+                PageRequest.of(0, safeLimit * 3)
+        );
+
+        List<WordLookupResponse> results = new ArrayList<>();
+        Set<String> seenWords = new HashSet<>();
+
+        for (DictWord w : words) {
+            String wordKey = w.getWord().toLowerCase().trim();
+            if (seenWords.contains(wordKey)) continue;
+
+            WordLookupResponse lookup = lookup(w.getWord());
+            if (lookup != null && !lookup.getMeanings().isEmpty()) {
+                results.add(lookup);
+                seenWords.add(wordKey);
+            }
+
+            if (results.size() >= safeLimit) break;
+        }
+
+        return results;
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
     private boolean containsVietnameseChars(String text) {
         if (text == null) return false;
         String lower = text.toLowerCase();
@@ -145,6 +221,7 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
                     continue;
                 }
 
+                // 👇 pos "X" sẽ trả null → bị skip
                 String posFull = mapPartOfSpeech(def.getPos());
                 if (posFull == null || posFull.isBlank()) continue;
 
@@ -204,6 +281,7 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
 
         if (meaningMap.isEmpty()) return null;
 
+        // Giới hạn số nghĩa mỗi POS
         Map<String, Integer> posCount = new HashMap<>();
         Map<String, Integer> maxPerPos = new HashMap<>();
         maxPerPos.put("Danh từ", 4);
@@ -234,52 +312,42 @@ public class DictionaryLookupServiceImpl implements DictionaryLookupService {
                 .build();
     }
 
-    @Override
-    public List<WordLookupResponse> search(String keyword, int limit) {
-        if (keyword == null || keyword.isBlank()) return List.of();
-
-        int safeLimit = Math.min(limit, 6);
-
-        String normalized = Normalizer.normalize(keyword.trim(), Normalizer.Form.NFC);
-
-        List<DictWord> words = wordRepo.searchByKeywordExact(
-                normalized,
-                PageRequest.of(0, safeLimit * 3)
-        );
-
-        List<WordLookupResponse> results = new ArrayList<>();
-        Set<String> seenWords = new HashSet<>();
-
-        for (DictWord w : words) {
-            String wordKey = w.getWord().toLowerCase().trim();
-            if (seenWords.contains(wordKey)) continue;
-
-            WordLookupResponse lookup = lookup(w.getWord());
-            if (lookup != null && !lookup.getMeanings().isEmpty()) {
-                results.add(lookup);
-                seenWords.add(wordKey);
-            }
-
-            if (results.size() >= safeLimit) break;
-        }
-
-        return results;
-    }
-
+    /**
+     * Map POS codes (BabelNet/WordNet) sang tiếng Việt.
+     * DB dùng các code: N, V, A, X, D, P, O, S, E, M, Z, C, I, R
+     *
+     * 👇 "X" (Unknown) trả về null → bị filter bỏ hoàn toàn
+     */
     private String mapPartOfSpeech(String pos) {
         if (pos == null || pos.isBlank()) return null;
 
-        return switch (pos.trim().toUpperCase()) {
+        String code = pos.trim().toUpperCase();
+
+        return switch (code) {
+            // Cơ bản
             case "N", "NOUN" -> "Danh từ";
             case "V", "VERB" -> "Động từ";
             case "A", "ADJ", "ADJECTIVE" -> "Tính từ";
-            case "ADV", "ADVERB" -> "Trạng từ";
-            case "PRE", "PREPOSITION" -> "Giới từ";
-            case "CONJ", "CONJUNCTION" -> "Liên từ";
-            case "PRON", "PRONOUN" -> "Đại từ";
-            case "NUM", "NUMERAL" -> "Số từ";
-            case "ART", "ARTICLE" -> "Mạo từ";
-            case "INT", "INTERJECTION" -> "Thán từ";
+            case "R", "ADV", "ADVERB" -> "Trạng từ";
+
+            // Từ loại nhỏ
+            case "P", "PRON", "PRONOUN" -> "Đại từ";
+            case "D", "DET", "DETERMINER" -> "Hạn định từ";
+            case "M", "NUM", "NUMERAL" -> "Số từ";
+            case "C", "CONJ", "CONJUNCTION" -> "Liên từ";
+
+            // Giới từ (I = preposition, O = adposition)
+            case "I", "PRE", "PREPOSITION" -> "Giới từ";
+            case "O", "ADP", "ADPOSITION" -> "Giới từ";
+
+            // Khác
+            case "E", "INT", "INTERJECTION" -> "Thán từ";
+            case "S", "SUFFIX", "SATELLITE" -> "Hậu tố";
+            case "Z", "PHRASE", "MULTIWORD" -> "Cụm từ";
+
+            // 👇 ẨN: X = Unknown/Other → return null để bị filter bỏ
+            case "X", "UNKNOWN" -> null;
+
             default -> null;
         };
     }
