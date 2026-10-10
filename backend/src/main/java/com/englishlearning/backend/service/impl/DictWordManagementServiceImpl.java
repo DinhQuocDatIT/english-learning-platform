@@ -143,7 +143,7 @@ public class DictWordManagementServiceImpl implements DictWordManagementService 
                     continue;
                 }
 
-                // Bỏ qua nếu pos không map được
+                // 👇 pos "X" trả null → bị skip
                 String posFull = mapPos(def.getPos());
                 if (posFull == null || posFull.isBlank()) continue;
 
@@ -190,20 +190,33 @@ public class DictWordManagementServiceImpl implements DictWordManagementService 
                 .build();
     }
 
+    /**
+     * Map POS codes sang tiếng Việt.
+     * 👇 "X" (Unknown) → null để bị filter bỏ
+     */
     private String mapPos(String pos) {
         if (pos == null || pos.isBlank()) return null;
 
-        return switch (pos.trim().toUpperCase()) {
+        String code = pos.trim().toUpperCase();
+
+        return switch (code) {
             case "N", "NOUN" -> "Danh từ";
             case "V", "VERB" -> "Động từ";
             case "A", "ADJ", "ADJECTIVE" -> "Tính từ";
-            case "ADV", "ADVERB" -> "Trạng từ";
-            case "PRE", "PREPOSITION" -> "Giới từ";
-            case "CONJ", "CONJUNCTION" -> "Liên từ";
-            case "PRON", "PRONOUN" -> "Đại từ";
-            case "NUM", "NUMERAL" -> "Số từ";
-            case "ART", "ARTICLE" -> "Mạo từ";
-            case "INT", "INTERJECTION" -> "Thán từ";
+            case "R", "ADV", "ADVERB" -> "Trạng từ";
+            case "P", "PRON", "PRONOUN" -> "Đại từ";
+            case "D", "DET", "DETERMINER" -> "Hạn định từ";
+            case "M", "NUM", "NUMERAL" -> "Số từ";
+            case "C", "CONJ", "CONJUNCTION" -> "Liên từ";
+            case "I", "PRE", "PREPOSITION" -> "Giới từ";
+            case "O", "ADP", "ADPOSITION" -> "Giới từ";
+            case "E", "INT", "INTERJECTION" -> "Thán từ";
+            case "S", "SUFFIX", "SATELLITE" -> "Hậu tố";
+            case "Z", "PHRASE", "MULTIWORD" -> "Cụm từ";
+
+            // 👇 ẨN
+            case "X", "UNKNOWN" -> null;
+
             default -> null;
         };
     }

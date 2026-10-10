@@ -51,4 +51,17 @@ public class DictionaryLookupController {
                 results
         ));
     }
+    @GetMapping("/find")
+    public ResponseEntity<ApiResponse<List<WordLookupResponse>>> find(
+            @RequestParam String word
+    ) {
+        List<WordLookupResponse> results =
+                dictionaryLookupService.findExact(word);
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                200,
+                results.isEmpty() ? "Không tìm thấy từ: " + word : "Tìm thấy " + results.size() + " kết quả",
+                results
+        ));
+    }
 }

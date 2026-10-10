@@ -10,6 +10,11 @@ const dictWordService = {
   getDetail(id) {
     return axiosClient.get(`/v1/dict-words/${id}`);
   },
+  find(word) {
+    return axiosClient.get("/v1/dictionary/find", {
+      params: { word },
+    });
+  },
 };
 
 export default dictWordService;
