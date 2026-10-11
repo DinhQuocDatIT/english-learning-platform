@@ -68,6 +68,8 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<AIUsage> aiUsages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ChatConversation> chatConversations = new ArrayList<>();
     public void addExperience(int points) {
         if (this.experience == null) {
             this.experience = 0;
