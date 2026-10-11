@@ -56,6 +56,10 @@ import AdminAIUsage from "../pages/admin/AIUsage/AdminAIUsage";
 import StudentProfile from "../pages/student/StudentProfile/StudentProfile";
 import PaymentHistoryPage from "../pages/admin/membershipPackage/PaymentHistoryPage/PaymentHistoryPage";
 
+// ===== CONVERSATION — STUDENT =====
+import StudentConversation from "../pages/student/Conversation/StudentConversation/StudentConversation";
+import StudentConversationChat from "../pages/student/Conversation/StudentConversationChat/StudentConversationChat";
+
 // ===== LEADERBOARD — STUDENT =====
 import Leaderboard from "../pages/student/Leaderboard/Leaderboard";
 
@@ -139,6 +143,14 @@ function AppRoutes() {
               path="ai-practice/chat/:chatId"
               element={<StudentAIPracticeChat />}
             />
+
+            {/* ===== CONVERSATION — STUDENT ===== */}
+            <Route path="conversation" element={<StudentConversation />} />
+            <Route
+              path="conversation/chat/:conversationId"
+              element={<StudentConversationChat />}
+            />
+
             <Route path="profile" element={<StudentProfile />} />
 
             <Route path="leaderboard" element={<Leaderboard />} />
