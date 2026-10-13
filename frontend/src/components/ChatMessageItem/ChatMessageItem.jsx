@@ -299,7 +299,7 @@ function ChatMessageItem({
             </div>
           )}
 
-        <span className={styles.aiTime}>{formatTime(message.createdAt)}</span>
+        <div className={styles.aiTime}>{formatTime(message.createdAt)}</div>
       </div>
     </div>
   );
