@@ -17,7 +17,6 @@ public class ChatEndResponse {
 
     private Long id;
     private String level;
-    private String topic;
     private String status;
     private Integer messageCount;
     private LocalDateTime startedAt;

@@ -33,9 +33,6 @@ public class ChatConversation {
     @Column(nullable = false, length = 20)
     private ChatLevel level;
 
-    @Column(nullable = false, length = 50)
-    private String topic;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ChatStatus status = ChatStatus.ACTIVE;

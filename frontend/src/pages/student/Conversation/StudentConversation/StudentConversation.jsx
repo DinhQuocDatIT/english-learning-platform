@@ -18,7 +18,6 @@ import {
   faRobot,
   faRotate,
   faGraduationCap,
-  faChevronRight,
   faMicrophone,
   faWandMagicSparkles,
   faFire,
@@ -33,36 +32,7 @@ import {
   CONVERSATION_LEVELS,
   getLevelDisplay,
 } from "../../../../constants/conversationLevelConstants";
-import {
-  CONVERSATION_TOPICS,
-  getTopicDisplay,
-  getTopicIcon,
-} from "../../../../constants/conversationTopicConstants";
 import styles from "./StudentConversation.module.css";
-
-const TOPIC_STYLES = {
-  DAILY_CONVERSATION: {
-    color: "#0ea792",
-    bg: "#f2fbfa",
-    border: "rgba(14,167,146,.22)",
-  },
-  RESTAURANT: {
-    color: "#e07b39",
-    bg: "#fff7ed",
-    border: "rgba(224,123,57,.22)",
-  },
-  JOB_INTERVIEW: {
-    color: "#4c6ef5",
-    bg: "#eef2ff",
-    border: "rgba(76,110,245,.22)",
-  },
-  TRAVEL: { color: "#168a7c", bg: "#e6f7f4", border: "rgba(22,138,124,.22)" },
-  MAKING_FRIENDS: {
-    color: "#c2417d",
-    bg: "#fdf2f8",
-    border: "rgba(194,65,125,.22)",
-  },
-};
 
 const LEVEL_STYLES = {
   BEGINNER: { color: "#0ea792", bg: "#f2fbfa", border: "#bde9e2" },
@@ -97,7 +67,6 @@ function StudentConversation() {
   const [selectedLevelFilter, setSelectedLevelFilter] = useState("ALL");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState("BEGINNER");
-  const [selectedTopic, setSelectedTopic] = useState("DAILY_CONVERSATION");
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
@@ -126,7 +95,7 @@ function StudentConversation() {
     }
   };
 
-  const handleOpenCreateModal = (preselectedTopic) => {
+  const handleOpenCreateModal = () => {
     if (!hasMembership) {
       toast.warning(
         "Chức năng Chat AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!",
@@ -134,7 +103,6 @@ function StudentConversation() {
       );
       return;
     }
-    if (preselectedTopic) setSelectedTopic(preselectedTopic);
     setShowCreateModal(true);
   };
 
@@ -144,7 +112,6 @@ function StudentConversation() {
       showLoading();
       const response = await conversationService.createConversation({
         level: selectedLevel,
-        topic: selectedTopic,
       });
       const conversationId = response?.data?.data?.id;
       toast.success("Tạo cuộc hội thoại thành công!");
@@ -180,20 +147,9 @@ function StudentConversation() {
         return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
-        const topicObj = CONVERSATION_TOPICS.find(
-          (t) => t.value === item.topic,
-        );
-        const topicVi = topicObj?.labelVi?.toLowerCase() || "";
-        const topicEn = topicObj?.label?.toLowerCase() || "";
         const levelText = getLevelDisplay(item.level)?.toLowerCase() || "";
         const lastMsg = (item.lastMessage || "").toLowerCase();
-        if (
-          !topicVi.includes(q) &&
-          !topicEn.includes(q) &&
-          !levelText.includes(q) &&
-          !lastMsg.includes(q)
-        )
-          return false;
+        if (!levelText.includes(q) && !lastMsg.includes(q)) return false;
       }
       return true;
     });
@@ -233,8 +189,9 @@ function StudentConversation() {
           </h1>
 
           <p className={styles.heroSubtitle}>
-            Thực hành phản xạ đàm thoại 1-1 cùng AI thông minh theo chủ đề thực
-            tế. Được sửa lỗi ngữ pháp, gợi ý từ vựng và hỗ trợ song ngữ tức thì!
+            Thực hành phản xạ đàm thoại 1-1 cùng AI thông minh. Nói bất kỳ chủ
+            đề nào bạn muốn — AI sẽ sửa lỗi ngữ pháp, gợi ý từ vựng và hỗ trợ
+            song ngữ tức thì!
           </p>
 
           <div className={styles.heroChips}>
@@ -252,7 +209,7 @@ function StudentConversation() {
             </div>
             <div className={styles.chipItem}>
               <FontAwesomeIcon icon={faLightbulb} />
-              <span>5 tình huống đời sống</span>
+              <span>Hội thoại tự do</span>
             </div>
           </div>
 
@@ -292,7 +249,7 @@ function StudentConversation() {
           </div>
 
           <div className={styles.chatBubble}>
-            <span>"Hôm nay bạn muốn đàm thoại về chủ đề gì nào? ✨"</span>
+            <span>"Hôm nay bạn muốn trò chuyện về điều gì? ✨"</span>
           </div>
 
           <div className={styles.floatingCard1}>
@@ -351,49 +308,6 @@ function StudentConversation() {
         ))}
       </section>
 
-      {/* ================= QUICK TOPICS ================= */}
-      <section className={styles.quickTopicsSection}>
-        <div className={styles.quickTopicsHeader}>
-          <div>
-            <span className={styles.sectionEyebrow}>Khởi tạo nhanh</span>
-            <h3 className={styles.sectionTitle}>Chọn chủ đề để bắt đầu ngay</h3>
-          </div>
-          <span className={styles.quickTopicsHint}>Nhấn để bắt đầu với AI</span>
-        </div>
-
-        <div className={styles.quickTopicList}>
-          {CONVERSATION_TOPICS.map((topic) => {
-            const ts =
-              TOPIC_STYLES[topic.value] || TOPIC_STYLES.DAILY_CONVERSATION;
-            return (
-              <button
-                key={topic.value}
-                type="button"
-                className={styles.quickTopicPill}
-                onClick={() => handleOpenCreateModal(topic.value)}
-                style={{
-                  "--topic-color": ts.color,
-                  "--topic-bg": ts.bg,
-                  "--topic-border": ts.border,
-                }}
-              >
-                <span className={styles.quickTopicEmoji}>{topic.emoji}</span>
-                <div className={styles.quickTopicText}>
-                  <span className={styles.quickTopicLabel}>
-                    {topic.labelVi}
-                  </span>
-                  <span className={styles.quickTopicSub}>{topic.label}</span>
-                </div>
-                <FontAwesomeIcon
-                  icon={faChevronRight}
-                  className={styles.quickTopicArrow}
-                />
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
       {/* ================= TOOLBAR ================= */}
       <section className={styles.toolbarSection}>
         <div className={styles.searchBox}>
@@ -401,7 +315,7 @@ function StudentConversation() {
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Tìm kiếm theo chủ đề, cấp độ, nội dung tin nhắn..."
+            placeholder="Tìm kiếm theo cấp độ, nội dung tin nhắn..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -472,8 +386,8 @@ function StudentConversation() {
               Chào mừng bạn đến với English Buddy AI!
             </h3>
             <p className={styles.emptyDescription}>
-              Bạn chưa có cuộc trò chuyện nào. Hãy chọn một chủ đề thực tế và
-              bắt đầu luyện phản xạ đàm thoại tiếng Anh ngay bây giờ nhé!
+              Bạn chưa có cuộc trò chuyện nào. Hãy bắt đầu luyện phản xạ đàm
+              thoại tiếng Anh ngay bây giờ nhé!
             </p>
             <button
               className={styles.emptyActionBtn}
@@ -504,12 +418,6 @@ function StudentConversation() {
         ) : (
           <div className={styles.conversationGrid}>
             {filteredHistory.map((item) => {
-              const topicObj = CONVERSATION_TOPICS.find(
-                (t) => t.value === item.topic,
-              );
-              const topicIcon = getTopicIcon(item.topic);
-              const ts =
-                TOPIC_STYLES[item.topic] || TOPIC_STYLES.DAILY_CONVERSATION;
               const ls = LEVEL_STYLES[item.level] || LEVEL_STYLES.BEGINNER;
               const isActive = item.status === "ACTIVE";
 
@@ -518,33 +426,20 @@ function StudentConversation() {
                   key={item.id}
                   className={styles.conversationCard}
                   onClick={() => handleViewConversation(item.id)}
-                  style={{
-                    "--card-accent": ts.color,
-                    "--card-bg": ts.bg,
-                    "--card-border": ts.border,
-                  }}
                 >
                   <div className={styles.cardAccentBar} />
 
-                  {/* TOP: icon + title + status */}
                   <div className={styles.cardHeader}>
-                    <div
-                      className={styles.cardTopicIcon}
-                      style={{
-                        backgroundColor: ts.bg,
-                        color: ts.color,
-                        borderColor: ts.border,
-                      }}
-                    >
-                      <FontAwesomeIcon icon={topicIcon} />
+                    <div className={styles.cardTopicIcon}>
+                      <FontAwesomeIcon icon={faComments} />
                     </div>
 
                     <div className={styles.cardTopicInfo}>
                       <h3 className={styles.cardTopicTitle}>
-                        {topicObj?.labelVi || getTopicDisplay(item.topic)}
+                        Cuộc hội thoại #{item.id}
                       </h3>
                       <span className={styles.cardTopicSubtitle}>
-                        {topicObj?.label || item.topic}
+                        {item.messageCount || 0} tin nhắn
                       </span>
                     </div>
 
@@ -562,7 +457,6 @@ function StudentConversation() {
                     </div>
                   </div>
 
-                  {/* META: level + date + messages */}
                   <div className={styles.cardMetaRow}>
                     <span
                       className={styles.cardLevelChip}
@@ -584,16 +478,14 @@ function StudentConversation() {
                         {formatFriendlyDate(item.startedAt)}
                       </span>
                     </span>
-
-                    <span className={styles.cardMsgChip}>
-                      <FontAwesomeIcon icon={faComments} />
-                      <span className={styles.cardChipText}>
-                        {item.messageCount || 0} tin nhắn
-                      </span>
-                    </span>
                   </div>
 
-                  {/* FOOTER: action */}
+                  {/* {item.lastMessage && (
+                    <p className={styles.cardLastMessage}>
+                      "{item.lastMessage}"
+                    </p>
+                  )} */}
+
                   <div className={styles.cardFooter}>
                     <span className={styles.cardActionText}>
                       {isActive
@@ -631,8 +523,7 @@ function StudentConversation() {
                     Khởi tạo cuộc hội thoại AI
                   </h2>
                   <p className={styles.modalSubtitle}>
-                    Chọn trình độ và chủ đề bạn muốn luyện tập cùng English
-                    Buddy
+                    Chọn trình độ bạn muốn luyện tập cùng English Buddy
                   </p>
                 </div>
               </div>
@@ -647,11 +538,10 @@ function StudentConversation() {
             </div>
 
             <div className={styles.modalBody}>
-              {/* LEVEL */}
               <div className={styles.modalSection}>
                 <div className={styles.modalSectionHeader}>
                   <label className={styles.modalSectionLabel}>
-                    1. Chọn trình độ
+                    Chọn trình độ
                   </label>
                   <span className={styles.modalSectionHint}>
                     AI tự động điều chỉnh độ phức tạp
@@ -692,61 +582,6 @@ function StudentConversation() {
                         <p className={styles.levelDescription}>
                           {level.description}
                         </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* TOPIC */}
-              <div className={styles.modalSection}>
-                <div className={styles.modalSectionHeader}>
-                  <label className={styles.modalSectionLabel}>
-                    2. Chọn chủ đề
-                  </label>
-                  <span className={styles.modalSectionHint}>
-                    Luyện tập tình huống giao tiếp đời thực
-                  </span>
-                </div>
-                <div className={styles.topicCardGrid}>
-                  {CONVERSATION_TOPICS.map((topic) => {
-                    const isSelected = selectedTopic === topic.value;
-                    const si =
-                      TOPIC_STYLES[topic.value] ||
-                      TOPIC_STYLES.DAILY_CONVERSATION;
-                    return (
-                      <div
-                        key={topic.value}
-                        className={`${styles.topicCard} ${
-                          isSelected ? styles.topicCardActive : ""
-                        }`}
-                        onClick={() => setSelectedTopic(topic.value)}
-                        style={{
-                          "--topic-color": si.color,
-                          "--topic-bg": si.bg,
-                          "--topic-border": si.border,
-                        }}
-                      >
-                        <div className={styles.topicCardEmojiBox}>
-                          <span className={styles.topicCardEmoji}>
-                            {topic.emoji}
-                          </span>
-                        </div>
-                        <div className={styles.topicCardInfo}>
-                          <div className={styles.topicCardTitleRow}>
-                            <h4 className={styles.topicCardTitle}>
-                              {topic.labelVi}
-                            </h4>
-                            {isSelected && (
-                              <div className={styles.topicCheckMark}>
-                                <FontAwesomeIcon icon={faCheck} />
-                              </div>
-                            )}
-                          </div>
-                          <span className={styles.topicCardEnSubtitle}>
-                            {topic.label}
-                          </span>
-                        </div>
                       </div>
                     );
                   })}

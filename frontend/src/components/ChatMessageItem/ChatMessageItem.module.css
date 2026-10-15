@@ -2,9 +2,7 @@
    CHAT MESSAGE ITEM
    ============================================ */
 
-/* ============================================
-   RESET font cho element con
-   ============================================ */
+/* RESET font cho element con */
 .userRow :where(button, p, span, div),
 .aiRow :where(button, p, span, div, ul, li) {
   font-family: inherit;
@@ -227,7 +225,7 @@
 }
 
 /* ============================================
-   FEEDBACK CARD (màu vàng — semantic warning)
+   FEEDBACK CARD
    ============================================ */
 .feedbackCard {
   margin-top: 12px;
@@ -259,7 +257,6 @@
   border-radius: 6px;
 }
 
-/* Khi card ĐÓNG (không có .feedbackBody) → bỏ padding/border dư */
 .feedbackCard:not(:has(.feedbackBody)) .feedbackHeader {
   margin-bottom: 0;
   padding-bottom: 0;
@@ -377,13 +374,6 @@
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
-.feedbackBlockLabelGreen span span {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-accent);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
 .feedbackBlockLabelGreen svg {
   color: var(--color-primary);
   font-size: 11px;
@@ -439,6 +429,9 @@
   line-height: 1.5;
 }
 
+/* ============================================
+   FEEDBACK EXPLAIN — bullet list cho lỗi
+   ============================================ */
 .feedbackExplain {
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid #fef3c7;
@@ -448,28 +441,54 @@
   color: #78350f;
   line-height: 1.6;
 }
-.feedbackExplain span {
-  font-size: 13px;
-  font-weight: 400;
-  color: #78350f;
-  line-height: 1.6;
-  text-transform: none;
-}
 
 .feedbackExplainLabel {
   display: block;
   font-weight: 600;
   color: #92400e;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-size: 12px;
-}
-.feedbackExplainLabel span {
-  font-size: 12px;
-  font-weight: 600;
-  color: #92400e;
-  text-transform: none;
 }
 
+.feedbackExplainText {
+  font-size: 13px;
+  font-weight: 400;
+  color: #78350f;
+  line-height: 1.6;
+}
+
+.feedbackExplainList {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feedbackExplainItem {
+  font-size: 13px;
+  font-weight: 400;
+  color: #78350f;
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+}
+
+.feedbackExplainItem::before {
+  content: "•";
+  position: absolute;
+  left: 2px;
+  top: 0;
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+/* ============================================
+   GRAMMAR NOTES
+   ============================================ */
 .grammarNotes {
   padding-top: 4px;
 }
@@ -630,14 +649,11 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-
   padding: 0;
   background: transparent;
   border: none;
-
   cursor: pointer;
   width: fit-content;
-
   transition: color 0.15s ease;
 }
 .suggestedToggleBtn svg,
@@ -669,24 +685,25 @@
 .suggestedList {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .suggestedChip {
-  padding: 6px 12px;
+  padding: 8px 14px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  font-size: 12px;
+  border-radius: 999px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text-muted);
   cursor: pointer;
   transition: all 0.15s;
   font-family: inherit;
   text-align: left;
+  white-space: nowrap;
 }
 .suggestedChip span {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text-muted);
 }
@@ -734,7 +751,13 @@
   .feedbackTitle span {
     font-size: 11px;
   }
+
+  .suggestedChip {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 }
+
 /* ============================================
    AI AVATAR
    ============================================ */

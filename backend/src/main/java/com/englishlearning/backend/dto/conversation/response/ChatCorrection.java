@@ -18,6 +18,6 @@ public class ChatCorrection {
     private Boolean hasError;
     private String userOriginal;
     private String correctedText;
-    private String explanation;
+    private List<String> explanations;
     private List<String> grammarNotes;
 }

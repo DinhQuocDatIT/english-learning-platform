@@ -199,14 +199,25 @@ function ChatMessageItem({
                     </div>
                   )}
 
-                  {message.correction.explanation && (
-                    <div className={styles.feedbackExplain}>
-                      <span className={styles.feedbackExplainLabel}>
-                        Giải thích:
-                      </span>
-                      <span>{message.correction.explanation}</span>
-                    </div>
-                  )}
+                  {/* Explanations — array của các lỗi */}
+                  {message.correction.explanations &&
+                    message.correction.explanations.length > 0 && (
+                      <div className={styles.feedbackExplain}>
+                        <span className={styles.feedbackExplainLabel}>
+                          Giải thích:
+                        </span>
+                        <ul className={styles.feedbackExplainList}>
+                          {message.correction.explanations.map((exp, idx) => (
+                            <li
+                              key={idx}
+                              className={styles.feedbackExplainItem}
+                            >
+                              {exp}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
                   {message.correction.grammarNotes &&
                     message.correction.grammarNotes.length > 0 && (

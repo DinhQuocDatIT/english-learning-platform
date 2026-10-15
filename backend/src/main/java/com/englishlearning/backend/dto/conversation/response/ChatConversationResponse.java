@@ -19,7 +19,6 @@ public class ChatConversationResponse {
     private Long id;
     private String level;
     private String levelDisplay;
-    private String topic;
     private String status;
     private Integer messageCount;
     private LocalDateTime startedAt;

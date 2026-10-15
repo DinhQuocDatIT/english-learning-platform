@@ -271,6 +271,8 @@
    INPUT SECTION — FULL WIDTH
    ============================================ */
 .inputSection {
+  position: relative; /* ← THÊM */
+  z-index: 10; /* ← THÊM */
   background: var(--color-surface, #ffffff);
   border-top: 1px solid var(--color-border, #e2e8f0);
   padding: 12px 32px 16px;
@@ -316,6 +318,7 @@
 }
 
 .inputWrapper {
+  position: relative; /* ← THÊM */
   display: flex;
   gap: 8px;
   align-items: flex-end;

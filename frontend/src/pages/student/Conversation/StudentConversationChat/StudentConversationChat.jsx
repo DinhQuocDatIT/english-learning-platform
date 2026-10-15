@@ -7,7 +7,6 @@ import {
   faSpinner,
   faComments,
   faMicrophone,
-  faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import conversationService from "../../../../services/conversationService";
@@ -16,6 +15,8 @@ import Loading from "../../../../components/common/Loading/Loading";
 import ChatMessageItem from "../../../../components/ChatMessageItem/ChatMessageItem";
 import PlaybackSpeedPopup from "../../../../components/PlaybackSpeedPopup/PlaybackSpeedPopup";
 import PlaybackVoicePopup from "../../../../components/PlaybackVoicePopup/PlaybackVoicePopup";
+import SlashTopicMenu from "../../../../components/SlashTopicMenu/SlashTopicMenu";
+import { SLASH_TOPICS } from "../../../../constants/slashCommands";
 import { getLevelDisplay } from "../../../../constants/conversationLevelConstants";
 import styles from "./StudentConversationChat.module.css";
 
@@ -28,7 +29,6 @@ function StudentConversationChat() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const [ending, setEnding] = useState(false);
 
   // ===== SPEECH SETTINGS =====
   const [playbackSpeed, setPlaybackSpeed] = useState("1x");
@@ -36,6 +36,11 @@ function StudentConversationChat() {
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [showVoicePopup, setShowVoicePopup] = useState(false);
+
+  // ===== SLASH TOPICS =====
+  const [showTopicMenu, setShowTopicMenu] = useState(false);
+  const [highlightedTopicIndex, setHighlightedTopicIndex] = useState(0);
+  const [filteredTopics, setFilteredTopics] = useState(SLASH_TOPICS);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -124,6 +129,7 @@ function StudentConversationChat() {
     };
     setMessages((prev) => [...prev, tempUserMessage]);
     setInputMessage("");
+    setShowTopicMenu(false);
     setSending(true);
 
     try {
@@ -147,7 +153,64 @@ function StudentConversationChat() {
     }
   };
 
-  const handleKeyPress = (e) => {
+  // ===== INPUT CHANGE — DETECT "/" =====
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInputMessage(value);
+
+    // Nếu bắt đầu bằng "/" và chưa có space (chưa gõ args)
+    if (value.startsWith("/") && !value.includes(" ")) {
+      const query = value.slice(1).toLowerCase().trim();
+      const filter = SLASH_TOPICS.filter(
+        (topic) =>
+          topic.value.includes(query) ||
+          topic.labelVi.toLowerCase().includes(query),
+      );
+      setFilteredTopics(filter);
+      setShowTopicMenu(filter.length > 0);
+      setHighlightedTopicIndex(0);
+    } else {
+      setShowTopicMenu(false);
+    }
+  };
+
+  // ===== SELECT TOPIC TỪ MENU =====
+  const handleSelectTopic = (topic) => {
+    const message = `/topic ${topic.value}`;
+    setInputMessage("");
+    setShowTopicMenu(false);
+    setTimeout(() => handleSendMessage(message), 50);
+  };
+
+  // ===== KEY DOWN =====
+  const handleKeyDown = (e) => {
+    if (showTopicMenu && filteredTopics.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedTopicIndex((prev) =>
+          prev < filteredTopics.length - 1 ? prev + 1 : 0,
+        );
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedTopicIndex((prev) =>
+          prev > 0 ? prev - 1 : filteredTopics.length - 1,
+        );
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleSelectTopic(filteredTopics[highlightedTopicIndex]);
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setShowTopicMenu(false);
+        return;
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -157,25 +220,6 @@ function StudentConversationChat() {
   const handleSuggestionClick = (answer) => {
     setInputMessage(answer);
     inputRef.current?.focus();
-  };
-
-  const handleClearChat = async () => {
-    if (!window.confirm("Bạn có chắc muốn kết thúc cuộc hội thoại này?"))
-      return;
-
-    try {
-      setEnding(true);
-      await conversationService.endConversation(conversationId);
-      toast.success("Đã kết thúc cuộc hội thoại.");
-      await fetchConversation();
-    } catch (error) {
-      console.error("Lỗi kết thúc:", error);
-      toast.error(
-        error.response?.data?.message || "Không thể kết thúc cuộc hội thoại.",
-      );
-    } finally {
-      setEnding(false);
-    }
   };
 
   const handleBack = () => {
@@ -231,20 +275,6 @@ function StudentConversationChat() {
             setShowSpeedPopup={setShowSpeedPopup}
             onSpeedChange={() => inputRef.current?.focus()}
           />
-
-          {/* {isActive && (
-            <button
-              className={styles.clearBtn}
-              onClick={handleClearChat}
-              disabled={ending}
-            >
-              <FontAwesomeIcon
-                icon={ending ? faSpinner : faTrashAlt}
-                spin={ending}
-              />
-              <span>Đóng chat</span>
-            </button>
-          )} */}
         </div>
       </header>
 
@@ -280,6 +310,14 @@ function StudentConversationChat() {
       {isActive ? (
         <footer className={styles.inputSection}>
           <div className={styles.inputWrapper}>
+            {showTopicMenu && (
+              <SlashTopicMenu
+                topics={filteredTopics}
+                onSelect={handleSelectTopic}
+                highlightedIndex={highlightedTopicIndex}
+              />
+            )}
+
             <button className={styles.micBtn} title="Nhập bằng giọng nói">
               <FontAwesomeIcon icon={faMicrophone} />
             </button>
@@ -287,9 +325,9 @@ function StudentConversationChat() {
               ref={inputRef}
               rows={1}
               value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="Nói hoặc gõ bằng tiếng Anh hoặc tiếng Việt..."
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Nói hoặc gõ bằng tiếng Anh hoặc tiếng Việt... (gõ / để chọn chủ đề)"
               maxLength={2000}
               disabled={sending}
               className={styles.textarea}
@@ -308,7 +346,7 @@ function StudentConversationChat() {
 
           <p className={styles.inputHint}>
             Nhấn <strong>Enter</strong> để gửi, <strong>Shift + Enter</strong>{" "}
-            để xuống dòng
+            để xuống dòng · Gõ <strong>/</strong> để chọn chủ đề
           </p>
         </footer>
       ) : (

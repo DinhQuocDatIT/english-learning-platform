@@ -13,8 +13,5 @@ import lombok.Setter;
 public class CreateChatRequest {
 
     @NotBlank(message = "Level không được để trống")
-    private String level;
-
-    @NotBlank(message = "Topic không được để trống")
-    private String topic;
+    private String level; // BEGINNER, INTERMEDIATE, ADVANCED
 }
