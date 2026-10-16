@@ -20,6 +20,7 @@ import {
   faSpellCheck,
   faClipboardCheck,
   faTrophy,
+  faComments,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { ROLES } from "../constants/roles";
@@ -31,10 +32,11 @@ export const sidebarMenus = {
       name: "Từ vựng",
       icon: faBook,
     },
+
     {
-      path: "/dashboard/student/topics",
-      name: "Luyện nghe",
-      icon: faBookOpen,
+      path: "/dashboard/student/grammar",
+      name: "Ngữ pháp",
+      icon: faSpellCheck,
     },
     {
       path: "/dashboard/student/ai-practice",
@@ -42,10 +44,16 @@ export const sidebarMenus = {
       icon: faRobot,
     },
     {
-      path: "/dashboard/student/grammar",
-      name: "Ngữ pháp",
-      icon: faSpellCheck,
+      path: "/dashboard/student/conversation",
+      name: "Chat với AI",
+      icon: faComments,
     },
+    {
+      path: "/dashboard/student/topics",
+      name: "Luyện nghe",
+      icon: faBookOpen,
+    },
+
     {
       path: "/dashboard/student/leaderboard",
       name: "Bảng xếp hạng",

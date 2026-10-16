@@ -25,7 +25,7 @@
 
   --color-secondary: #1e293b;
   --color-tertiary: #d4f3ef;
-  --color-accent:#168a7c;
+  --color-accent: #168a7c;
   --color-background: #ffffff;
   --color-surface: #ffffff;
 
@@ -37,4 +37,7 @@
   --color-footer: #091426;
   /* --color-premium : #fad16b; */
   --color-premium: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+
+  --color-primary-lighter: #f2fbfa;
+  --color-mint-light: #bde9e2;
 }
