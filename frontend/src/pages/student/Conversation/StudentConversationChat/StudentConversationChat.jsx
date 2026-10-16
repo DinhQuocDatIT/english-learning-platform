@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
@@ -10,7 +10,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import conversationService from "../../../../services/conversationService";
+import streakService from "../../../../services/streakService";
 import { useLoading } from "../../../../contexts/LoadingContext";
+import { useXp } from "../../../../contexts/XpContext";
 import Loading from "../../../../components/common/Loading/Loading";
 import ChatMessageItem from "../../../../components/ChatMessageItem/ChatMessageItem";
 import PlaybackSpeedPopup from "../../../../components/PlaybackSpeedPopup/PlaybackSpeedPopup";
@@ -22,9 +24,12 @@ import styles from "./StudentConversationChat.module.css";
 
 function StudentConversationChat() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { conversationId } = useParams();
   const { showLoading, hideLoading } = useLoading();
+  const { showXpToast } = useXp();
 
+  const initialTopicHandledRef = useRef(false);
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -107,6 +112,23 @@ function StudentConversationChat() {
     }
   };
 
+  // ✅ Fetch streak và dispatch event để Header cập nhật
+  const refreshStreak = async () => {
+    try {
+      const res = await streakService.getMyStreak();
+      const data = res?.data?.data;
+      if (data?.currentStreak != null) {
+        window.dispatchEvent(
+          new CustomEvent("streak-updated", {
+            detail: { streak: data.currentStreak },
+          }),
+        );
+      }
+    } catch (err) {
+      console.error("Lỗi cập nhật streak:", err);
+    }
+  };
+
   const handleSendMessage = async (customMessage) => {
     const messageToSend =
       typeof customMessage === "string" ? customMessage : inputMessage;
@@ -133,10 +155,21 @@ function StudentConversationChat() {
     setSending(true);
 
     try {
-      await conversationService.sendMessage(conversationId, {
+      const response = await conversationService.sendMessage(conversationId, {
         message: trimmed,
       });
 
+      const aiData = response?.data?.data;
+
+      // ✅ Hiển thị XP toast nếu có
+      if (aiData?.experienceEarned && aiData.experienceEarned > 0) {
+        showXpToast(aiData.experienceEarned);
+      }
+
+      // ✅ Refresh streak ngay sau khi gửi tin nhắn
+      await refreshStreak();
+
+      // Reload conversation để lấy messages mới nhất
       const convResponse =
         await conversationService.getConversation(conversationId);
       const updatedData = convResponse?.data?.data;
@@ -153,12 +186,27 @@ function StudentConversationChat() {
     }
   };
 
+  // ✅ Tự động gửi lệnh /topic nếu được khởi tạo từ trang danh sách
+  useEffect(() => {
+    if (
+      conversation &&
+      conversation.status === "ACTIVE" &&
+      location.state?.initialTopic &&
+      !initialTopicHandledRef.current
+    ) {
+      initialTopicHandledRef.current = true;
+      const initialTopicVal = location.state.initialTopic;
+      setTimeout(() => {
+        handleSendMessage(`/topic ${initialTopicVal}`);
+      }, 350);
+    }
+  }, [conversation]);
+
   // ===== INPUT CHANGE — DETECT "/" =====
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInputMessage(value);
 
-    // Nếu bắt đầu bằng "/" và chưa có space (chưa gõ args)
     if (value.startsWith("/") && !value.includes(" ")) {
       const query = value.slice(1).toLowerCase().trim();
       const filter = SLASH_TOPICS.filter(

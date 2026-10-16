@@ -15,6 +15,7 @@ import com.englishlearning.backend.repository.ChatConversationRepository;
 import com.englishlearning.backend.repository.ChatMessageRepository;
 import com.englishlearning.backend.repository.StudentRepository;
 import com.englishlearning.backend.service.StudentMembershipService;
+import com.englishlearning.backend.service.StreakService;
 import com.englishlearning.backend.service.conversation.ChatConversationService;
 import com.englishlearning.backend.service.conversation.ConversationGeminiClient;
 import com.englishlearning.backend.util.CorrectionFixer;
@@ -46,6 +47,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     private final StudentRepository studentRepository;
     private final ConversationGeminiClient conversationGeminiClient;
     private final StudentMembershipService studentMembershipService;
+    private final StreakService streakService;
     private final ObjectMapper objectMapper;
 
     // ========================================
@@ -157,6 +159,25 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         // Validation: Kiểm tra và fix correction nếu AI cắt bớt
         correction = validateAndFixCorrection(correction, request.getMessage().trim());
 
+        // ✅ STREAK: Gửi tin nhắn → tính chuỗi (không cần biết đúng/sai)
+        Student student = conversation.getStudent();
+        streakService.recordActivity(student);
+
+        // ✅ XP: Nếu câu ĐÚNG → cộng XP dựa vào level
+        int xpEarned = 0;
+        boolean isCorrect = correction == null || !Boolean.TRUE.equals(correction.getHasError());
+        if (isCorrect) {
+            xpEarned = calculateChatXp(conversation.getLevel());
+            if (xpEarned > 0) {
+                student.addExperience(xpEarned);
+                log.info("✅ Cộng {} XP cho student {} (level {}, câu đúng)",
+                        xpEarned, student.getId(), conversation.getLevel());
+            }
+        } else {
+            log.info("ℹ️ Không cộng XP (câu có lỗi), student {}", student.getId());
+        }
+        studentRepository.save(student);
+
         ChatMessage aiMsg = new ChatMessage();
         aiMsg.setConversation(conversation);
         aiMsg.setRole("ASSISTANT");
@@ -174,9 +195,12 @@ public class ChatConversationServiceImpl implements ChatConversationService {
 
         studentMembershipService.incrementAIRequestCount(userId);
 
-        log.info("Message sent. conversationId={}, messageCount={}", conversationId, conversation.getMessageCount());
+        log.info("Message sent. conversationId={}, messageCount={}, xpEarned={}",
+                conversationId, conversation.getMessageCount(), xpEarned);
 
-        return buildMessageResponse(aiMsg, correction);
+        ChatMessageResponse response = buildMessageResponse(aiMsg, correction);
+        response.setExperienceEarned(xpEarned);
+        return response;
     }
 
     // ========================================
@@ -254,6 +278,20 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     // PRIVATE HELPERS
     // ========================================
 
+    /**
+     * Tính XP dựa vào level:
+     * - BEGINNER: 5 XP
+     * - INTERMEDIATE: 8 XP
+     * - ADVANCED: 12 XP
+     */
+    private int calculateChatXp(ChatLevel level) {
+        return switch (level) {
+            case BEGINNER -> 5;
+            case INTERMEDIATE -> 8;
+            case ADVANCED -> 12;
+        };
+    }
+
     private void checkMembership(Long userId) {
         if (!studentMembershipService.hasActiveMembership(userId)) {
             throw new BusinessException("Chức năng Chat AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!");
@@ -271,10 +309,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
     }
 
-    /**
-     * Kiểm tra correction từ AI. Nếu AI cắt bớt (userOriginal < 80% tin nhắn gốc)
-     * → override bằng tin nhắn gốc + tự sửa bằng regex.
-     */
     private ChatCorrection validateAndFixCorrection(ChatCorrection correction, String userMessage) {
         if (correction == null || !Boolean.TRUE.equals(correction.getHasError())) {
             return correction;
@@ -331,10 +365,8 @@ public class ChatConversationServiceImpl implements ChatConversationService {
 
         String userOriginal = node.path("userOriginal").asText("");
 
-        // Parse explanations array (fallback: nếu AI trả "explanation" string cũ → convert)
         List<String> explanations = parseStringList(node.path("explanations"));
 
-        // Fallback: nếu AI trả "explanation" (string cũ) → parse thành array
         if (explanations.isEmpty()) {
             String legacy = node.path("explanation").asText("");
             if (!legacy.isBlank()) {
@@ -342,10 +374,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
             }
         }
 
-        // ✅ Filter bỏ explanation nói về dấu cách / viết hoa
         explanations = filterMinorExplanations(explanations);
-
-        // ✅ Validation: log warning nếu AI bịa từ
         validateExplanations(explanations, userOriginal);
 
         return ChatCorrection.builder()
@@ -357,10 +386,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                 .build();
     }
 
-    /**
-     * Filter bỏ các explanation nói về lỗi dấu cách / viết hoa.
-     * Vì đây là lỗi nhỏ nhặt, không cần thiết hiển thị cho user.
-     */
     private List<String> filterMinorExplanations(List<String> explanations) {
         if (explanations == null || explanations.isEmpty()) return new ArrayList<>();
 
@@ -369,11 +394,9 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                     if (exp == null || exp.isBlank()) return false;
                     String lower = exp.toLowerCase();
 
-                    // Bỏ nếu nói về dấu cách
                     if (lower.contains("dấu cách")) return false;
                     if (lower.contains("khoảng trắng")) return false;
 
-                    // Bỏ nếu chỉ nói về viết hoa (không kèm ngữ pháp khác)
                     if (lower.contains("viết hoa")
                             && !lower.contains("hòa hợp")
                             && !lower.contains("thì")
@@ -386,10 +409,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Kiểm tra các từ trong dấu '...' của explanations có khớp với câu user không.
-     * Chỉ log warning để debug, không fix.
-     */
     private void validateExplanations(List<String> explanations, String userOriginal) {
         if (explanations == null || explanations.isEmpty()
                 || userOriginal == null || userOriginal.isBlank()) {
@@ -405,7 +424,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                 String quoted = matcher.group(1).toLowerCase().trim();
                 String cleaned = quoted.replaceAll("[.!?,;:]", "").trim();
 
-                // Chỉ check nếu quoted là 1 từ đơn (không có space)
                 if (!cleaned.isBlank() && !cleaned.contains(" ")) {
                     if (!lowerUser.contains(cleaned)) {
                         log.warn("⚠️ AI có thể bịa từ: '{}' không có trong câu user: '{}'",
@@ -416,9 +434,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
     }
 
-    /**
-     * Fallback: parse explanation string cũ "Có X lỗi: (1) ... (2) ..." thành array.
-     */
     private List<String> parseLegacyExplanation(String legacy) {
         List<String> result = new ArrayList<>();
         if (legacy == null || legacy.isBlank()) return result;
@@ -427,7 +442,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                 .replaceAll("(?i)^Có \\d+ lỗi:?\\s*", "")
                 .trim();
 
-        // Split theo (1), (2), (3)...
         String[] parts = cleaned.split("(?=\\(\\d+\\))");
         for (String part : parts) {
             String p = part.replaceAll("^\\(\\d+\\)\\s*", "").trim();

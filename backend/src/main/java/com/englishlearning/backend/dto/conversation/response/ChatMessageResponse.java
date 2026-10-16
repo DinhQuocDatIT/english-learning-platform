@@ -24,5 +24,6 @@ public class ChatMessageResponse {
     private String nextQuestionTranslation;
     private List<String> suggestedAnswers;
     private ChatCorrection correction;
+    private Integer experienceEarned;
     private LocalDateTime createdAt;
 }
