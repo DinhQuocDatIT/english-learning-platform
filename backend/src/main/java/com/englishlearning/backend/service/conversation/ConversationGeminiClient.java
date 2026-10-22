@@ -6,11 +6,13 @@ import com.englishlearning.backend.dto.request.gemini.GeminiPart;
 import com.englishlearning.backend.dto.request.gemini.GeminiRequest;
 import com.englishlearning.backend.dto.request.gemini.GenerationConfig;
 import com.englishlearning.backend.dto.response.gemini.GeminiResponse;
+import com.englishlearning.backend.dto.response.gemini.GeminiUsageMetadata;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -20,26 +22,28 @@ public class ConversationGeminiClient {
 
     private final RestTemplate restTemplate;
     private final String geminiApiUrl;
+    private final ObjectMapper objectMapper;
+    private final ThreadLocal<GeminiUsageMetadata> currentUsage = new ThreadLocal<>();
 
     public ConversationGeminiClient(RestTemplate restTemplate,
                                     GeminiConfig geminiConfig,
-                                    String geminiApiUrl) {
+                                    String geminiApiUrl,
+                                    ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.geminiApiUrl = geminiApiUrl;
+        this.objectMapper = objectMapper;
     }
 
-    /**
-     * Gọi Gemini API, trả về raw JSON string.
-     * Không track usage, không lưu AIUsage.
-     */
+    public GeminiUsageMetadata getCurrentUsage() {
+        return currentUsage.get();
+    }
+
     public String callGemini(String prompt) {
         GeminiRequest request = GeminiRequest.builder()
                 .contents(List.of(
                         GeminiContent.builder()
                                 .parts(List.of(
-                                        GeminiPart.builder()
-                                                .text(prompt)
-                                                .build()
+                                        GeminiPart.builder().text(prompt).build()
                                 ))
                                 .role("user")
                                 .build()
@@ -59,6 +63,17 @@ public class ConversationGeminiClient {
                 throw new BusinessException(ErrorCode.AI_SERVICE_ERROR);
             }
 
+            GeminiUsageMetadata usage = response.getUsageMetadata();
+            if (usage != null) {
+                currentUsage.set(usage);
+                log.info("✅ Conversation Gemini tokens - Input: {}, Output: {}, Total: {}",
+                        usage.getPromptTokenCount(),
+                        usage.getCandidatesTokenCount(),
+                        usage.getTotalTokenCount());
+            } else {
+                log.warn("⚠️ No usage metadata from Gemini (conversation)");
+            }
+
             return response.getCandidates().get(0).getContent().getParts().get(0).getText();
 
         } catch (BusinessException e) {
@@ -69,9 +84,6 @@ public class ConversationGeminiClient {
         }
     }
 
-    /**
-     * Gọi Gemini với retry. Nếu response không phải JSON hợp lệ → retry.
-     */
     public String callGeminiWithRetry(String prompt, int maxRetries) {
         int attempt = 0;
         String lastError = null;
@@ -80,9 +92,8 @@ public class ConversationGeminiClient {
             try {
                 String response = callGemini(prompt);
 
-                // Validate JSON
                 try {
-                    new tools.jackson.databind.ObjectMapper().readTree(response);
+                    objectMapper.readTree(response);
                     log.info("✅ Gemini response OK after {} attempt(s)", attempt + 1);
                     return response;
                 } catch (Exception e) {

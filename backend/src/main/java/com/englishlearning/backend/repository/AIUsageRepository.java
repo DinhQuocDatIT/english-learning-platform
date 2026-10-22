@@ -1,6 +1,7 @@
 package com.englishlearning.backend.repository;
 
 import com.englishlearning.backend.entity.AIUsage;
+import com.englishlearning.backend.enums.AIFeature;
 import com.englishlearning.backend.enums.RequestType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ public interface AIUsageRepository extends JpaRepository<AIUsage, Long> {
 
     List<AIUsage> findByStudentIdOrderByCreatedAtDesc(Long studentId);
 
-    List<AIUsage> findByPracticeChatId(Long practiceChatId);
+    List<AIUsage> findByFeatureAndReferenceId(AIFeature feature, Long referenceId);
 
     @Query("SELECT COUNT(u) FROM AIUsage u WHERE u.createdAt BETWEEN :start AND :end")
     long countByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);

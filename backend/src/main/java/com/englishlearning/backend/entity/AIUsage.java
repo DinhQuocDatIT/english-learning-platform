@@ -1,5 +1,6 @@
 package com.englishlearning.backend.entity;
 
+import com.englishlearning.backend.enums.AIFeature;
 import com.englishlearning.backend.enums.RequestType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "ai_usage")
+@Table(
+        name = "ai_usage",
+        indexes = {
+                @Index(name = "idx_ai_usage_feature_ref", columnList = "feature,reference_id"),
+                @Index(name = "idx_ai_usage_student_created", columnList = "student_id,created_at"),
+                @Index(name = "idx_ai_usage_request_type", columnList = "request_type")
+        }
+)
 public class AIUsage {
 
     @Id
@@ -27,12 +35,15 @@ public class AIUsage {
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "practice_chat_id")
-    private AIPracticeChat practiceChat;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private AIFeature feature;
+
+    @Column(name = "reference_id")
+    private Long referenceId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private RequestType requestType;
 
     @Column(nullable = false, length = 50)
@@ -62,9 +73,10 @@ public class AIUsage {
     @Column(columnDefinition = "TEXT")
     private String errorMessage;
 
+    private Double inputPricePerMillion;
+    private Double outputPricePerMillion;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
-    private Double inputPricePerMillion;
-    private Double outputPricePerMillion;
 }

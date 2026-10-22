@@ -77,8 +77,9 @@ public class AIPracticeChat {
     @OneToMany(mappedBy = "practiceChat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AIPracticeTurn> turns = new ArrayList<>();
 
-    @OneToMany(mappedBy = "practiceChat", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AIUsage> usages = new ArrayList<>();
+    // ❌ ĐÃ XÓA: @OneToMany List<AIUsage> usages
+    //    vì AIUsage không còn quan hệ @ManyToOne với AIPracticeChat.
+    //    Tracking giờ dùng feature + referenceId.
 
     @PrePersist
     protected void onCreate() {

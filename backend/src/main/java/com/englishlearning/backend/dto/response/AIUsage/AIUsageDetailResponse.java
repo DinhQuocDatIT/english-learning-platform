@@ -18,6 +18,8 @@ public class AIUsageDetailResponse {
     private Long id;
     private String studentName;
     private String studentEmail;
+    private String feature;         // ✅ NEW: PRACTICE / CONVERSATION / ...
+    private Long referenceId;       // ✅ NEW: id chat/conversation tương ứng
     private String requestType;
     private String provider;
     private String model;
