@@ -412,6 +412,8 @@ public class AIUsageServiceImpl implements AIUsageService {
                 .id(usage.getId())
                 .studentName(studentName)
                 .studentEmail(studentEmail)
+                .feature(usage.getFeature() != null ? usage.getFeature().name() : null)      // ✅ NEW
+                .referenceId(usage.getReferenceId())                                           // ✅ NEW
                 .requestType(usage.getRequestType() != null ? usage.getRequestType().name() : "")
                 .provider(usage.getProvider() != null ? usage.getProvider() : "")
                 .model(usage.getModel() != null ? usage.getModel() : "")

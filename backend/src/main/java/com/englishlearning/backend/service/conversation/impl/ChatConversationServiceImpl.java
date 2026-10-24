@@ -1,19 +1,27 @@
 package com.englishlearning.backend.service.conversation.impl;
 
+import com.englishlearning.backend.config.GeminiConfig;
 import com.englishlearning.backend.constant.ConversationPromptConstants;
 import com.englishlearning.backend.dto.conversation.request.CreateChatRequest;
 import com.englishlearning.backend.dto.conversation.request.SendChatMessageRequest;
 import com.englishlearning.backend.dto.conversation.response.*;
+import com.englishlearning.backend.dto.response.gemini.GeminiUsageMetadata;
+import com.englishlearning.backend.entity.AIModelPricing;
+import com.englishlearning.backend.entity.AIUsage;
 import com.englishlearning.backend.entity.ChatConversation;
 import com.englishlearning.backend.entity.ChatMessage;
 import com.englishlearning.backend.entity.Student;
+import com.englishlearning.backend.enums.AIFeature;
 import com.englishlearning.backend.enums.ChatLevel;
 import com.englishlearning.backend.enums.ChatStatus;
+import com.englishlearning.backend.enums.RequestType;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
+import com.englishlearning.backend.repository.AIUsageRepository;
 import com.englishlearning.backend.repository.ChatConversationRepository;
 import com.englishlearning.backend.repository.ChatMessageRepository;
 import com.englishlearning.backend.repository.StudentRepository;
+import com.englishlearning.backend.service.PricingService;
 import com.englishlearning.backend.service.StudentMembershipService;
 import com.englishlearning.backend.service.StreakService;
 import com.englishlearning.backend.service.conversation.ChatConversationService;
@@ -28,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -49,6 +58,11 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     private final StudentMembershipService studentMembershipService;
     private final StreakService streakService;
     private final ObjectMapper objectMapper;
+
+    // ✅ NEW: tracking AIUsage
+    private final AIUsageRepository aiUsageRepository;
+    private final PricingService pricingService;
+    private final GeminiConfig geminiConfig;
 
     // ========================================
     // 1. CREATE CONVERSATION
@@ -146,7 +160,15 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                 request.getMessage().trim()
         );
 
+        // ✅ Đo thời gian + gọi AI
+        long startTime = System.currentTimeMillis();
         String aiResponseJson = conversationGeminiClient.callGeminiWithRetry(prompt, 3);
+        long responseTime = System.currentTimeMillis() - startTime;
+
+        // ✅ Lấy usage metadata
+        GeminiUsageMetadata usage = conversationGeminiClient.getCurrentUsage();
+        String provider = geminiConfig.getProvider();
+        String model = geminiConfig.getModel();
 
         JsonNode root = objectMapper.readTree(aiResponseJson);
         String reply = root.path("reply").asText("");
@@ -156,14 +178,14 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         List<String> suggestedAnswers = parseStringList(root.path("suggestedAnswers"));
         ChatCorrection correction = parseCorrection(root.path("correction"));
 
-        // Validation: Kiểm tra và fix correction nếu AI cắt bớt
+        // Validation: Kiểm tra và fix correction nếu AI cắt bớt + Dọn rác
         correction = validateAndFixCorrection(correction, request.getMessage().trim());
 
         // ✅ STREAK: Gửi tin nhắn → tính chuỗi (không cần biết đúng/sai)
         Student student = conversation.getStudent();
         streakService.recordActivity(student);
 
-        // ✅ XP: Nếu câu ĐÚNG → cộng XP dựa vào level
+        // ✅ XP: Nếu câu ĐÚNG (hoặc correction bị hủy do rác) → cộng XP dựa vào level
         int xpEarned = 0;
         boolean isCorrect = correction == null || !Boolean.TRUE.equals(correction.getHasError());
         if (isCorrect) {
@@ -194,6 +216,9 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         conversationRepository.save(conversation);
 
         studentMembershipService.incrementAIRequestCount(userId);
+
+        // ✅ NEW: Lưu AIUsage cho conversation
+        saveChatAIUsage(student, conversation.getId(), provider, model, responseTime, usage);
 
         log.info("Message sent. conversationId={}, messageCount={}, xpEarned={}",
                 conversationId, conversation.getMessageCount(), xpEarned);
@@ -279,6 +304,63 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     // ========================================
 
     /**
+     * ✅ NEW: Lưu AIUsage cho chat conversation.
+     * Bọc try/catch để không làm hỏng flow chính nếu tracking lỗi.
+     */
+    private void saveChatAIUsage(Student student, Long conversationId,
+                                 String provider, String model,
+                                 long responseTimeMs, GeminiUsageMetadata usage) {
+        try {
+            AIUsage aiUsage = new AIUsage();
+            aiUsage.setStudent(student);
+            aiUsage.setFeature(AIFeature.CONVERSATION);
+            aiUsage.setReferenceId(conversationId);
+            aiUsage.setRequestType(RequestType.CHAT_MESSAGE);
+            aiUsage.setProvider(provider);
+            aiUsage.setModel(model);
+            aiUsage.setResponseTimeMs((int) responseTimeMs);
+            aiUsage.setSuccess(true);
+            aiUsage.setErrorMessage(null);
+
+            if (usage != null) {
+                int input = usage.getPromptTokenCount() != null ? usage.getPromptTokenCount() : 0;
+                int output = usage.getCandidatesTokenCount() != null ? usage.getCandidatesTokenCount() : 0;
+                int total = usage.getTotalTokenCount() != null ? usage.getTotalTokenCount() : 0;
+
+                aiUsage.setInputTokens(input);
+                aiUsage.setOutputTokens(output);
+                aiUsage.setTotalTokens(total);
+
+                BigDecimal cost = pricingService.calculateCost(provider, model, input, output);
+                aiUsage.setEstimatedCost(cost);
+
+                AIModelPricing pricing = pricingService.getCurrentPricing(provider, model);
+                if (pricing != null) {
+                    aiUsage.setInputPricePerMillion(pricing.getInputPricePerMillionTokens().doubleValue());
+                    aiUsage.setOutputPricePerMillion(pricing.getOutputPricePerMillionTokens().doubleValue());
+                } else {
+                    aiUsage.setInputPricePerMillion(0.0);
+                    aiUsage.setOutputPricePerMillion(0.0);
+                }
+            } else {
+                aiUsage.setInputTokens(0);
+                aiUsage.setOutputTokens(0);
+                aiUsage.setTotalTokens(0);
+                aiUsage.setInputPricePerMillion(0.0);
+                aiUsage.setOutputPricePerMillion(0.0);
+                aiUsage.setEstimatedCost(BigDecimal.ZERO);
+            }
+
+            aiUsageRepository.save(aiUsage);
+            log.info("✅ Chat AIUsage saved. feature=CONVERSATION, ref={}, tokens={}, cost={}",
+                    conversationId, aiUsage.getTotalTokens(), aiUsage.getEstimatedCost());
+        } catch (Exception e) {
+            log.error("❌ Lỗi lưu AIUsage cho chat conversation {}: {}",
+                    conversationId, e.getMessage(), e);
+        }
+    }
+
+    /**
      * Tính XP dựa vào level:
      * - BEGINNER: 5 XP
      * - INTERMEDIATE: 8 XP
@@ -309,6 +391,9 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
     }
 
+    /**
+     * ✅ ĐÃ NÂNG CẤP: Validate, Fix và DỌN RÁC correction từ AI.
+     */
     private ChatCorrection validateAndFixCorrection(ChatCorrection correction, String userMessage) {
         if (correction == null || !Boolean.TRUE.equals(correction.getHasError())) {
             return correction;
@@ -318,20 +403,45 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                 ? correction.getUserOriginal().trim() : "";
         String fullMessage = userMessage.trim();
 
+        // 1. Fix nếu AI cắt bớt câu
         boolean isTruncated = userOriginal.length() < fullMessage.length() * 0.8;
-
         if (isTruncated) {
-            log.warn("⚠️ AI cắt bớt userOriginal. AI='{}', Full='{}'",
-                    userOriginal, fullMessage);
-
+            log.warn("⚠️ AI cắt bớt userOriginal. AI='{}', Full='{}'", userOriginal, fullMessage);
             correction.setUserOriginal(fullMessage);
-
             String fixedText = CorrectionFixer.fixCommonErrors(fullMessage);
             correction.setCorrectedText(fixedText);
-
             if (correction.getExplanations() == null || correction.getExplanations().isEmpty()) {
                 correction.setExplanations(List.of("Câu đã được sửa lại (tự động)."));
             }
+        }
+
+        // 2. DỌN RÁC: Lọc bỏ các giải thích vô lý của AI
+        if (correction.getExplanations() != null) {
+            List<String> cleanExplanations = correction.getExplanations().stream()
+                    .filter(exp -> {
+                        if (exp == null || exp.isBlank()) return false;
+                        String lower = exp.toLowerCase();
+                        // Bỏ qua các lỗi bịa đặt về viết hoa / mạo từ vô lý
+                        if (lower.contains("viết hoa") && !lower.contains("hòa hợp")) return false;
+                        if (lower.contains("mạo từ 'the'") && !lower.contains("thiếu")) return false;
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+            correction.setExplanations(cleanExplanations);
+        }
+
+        // 3. Nếu explanations rỗng -> HỦY BỎ CORRECTION (coi như không có lỗi)
+        if (correction.getExplanations() == null || correction.getExplanations().isEmpty()) {
+            log.info("🧹 Đã xóa correction rác (explanations rỗng)");
+            return null;
+        }
+
+        // 4. Nếu câu gốc và câu sửa chỉ khác nhau mỗi chữ 'i' viết hoa -> HỦY BỎ
+        String originalLower = correction.getUserOriginal().toLowerCase();
+        String correctedLower = correction.getCorrectedText() != null ? correction.getCorrectedText().toLowerCase() : "";
+        if (originalLower.equals(correctedLower)) {
+            log.info("🧹 Đã xóa correction rác (chỉ khác biệt do viết hoa)");
+            return null;
         }
 
         return correction;

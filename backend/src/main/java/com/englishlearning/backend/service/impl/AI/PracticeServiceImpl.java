@@ -9,11 +9,7 @@ import com.englishlearning.backend.dto.request.SubmitAnswerRequest;
 import com.englishlearning.backend.dto.response.*;
 import com.englishlearning.backend.dto.response.gemini.GeminiUsageMetadata;
 import com.englishlearning.backend.entity.*;
-import com.englishlearning.backend.enums.ErrorCategory;
-import com.englishlearning.backend.enums.PracticeStatus;
-import com.englishlearning.backend.enums.RequestType;
-import com.englishlearning.backend.enums.SeverityLevel;
-import com.englishlearning.backend.enums.SentenceType;
+import com.englishlearning.backend.enums.*;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ErrorCode;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
@@ -103,6 +99,9 @@ public class PracticeServiceImpl implements PracticeService {
                 .forcedWords(forcedWords)
                 .build();
 
+        // ✅ Đo thời gian + gọi AI (bao gồm cả retry)
+        long startTime = System.currentTimeMillis();
+
         AIGenerateResponse aiResponse = aiService.generateSentence(aiRequest);
 
         // ✅ Validate + retry 3 lần
@@ -119,6 +118,18 @@ public class PracticeServiceImpl implements PracticeService {
                 log.error("❌ Hết retry. Chấp nhận câu hiện tại: {}",
                         aiResponse.getVietnameseSentence());
             }
+        }
+
+        long responseTime = System.currentTimeMillis() - startTime;
+
+        // ✅ Lấy usage metadata
+        GeminiUsageMetadata usage = null;
+        String modelName = "gemini-3.5-flash-lite";
+        String provider = "GEMINI";
+        if (aiService instanceof GeminiAIService geminiService) {
+            usage = geminiService.getCurrentUsage();
+            modelName = geminiService.getCurrentModel();
+            provider = geminiService.getCurrentProvider();
         }
 
         AIPracticeChat chat = new AIPracticeChat();
@@ -149,6 +160,11 @@ public class PracticeServiceImpl implements PracticeService {
 
         practiceChatRepository.save(chat);
         studentMembershipService.incrementAIRequestCount(userId);
+
+        // ✅ NEW: Lưu AIUsage cho lần generate câu 1
+        saveAIUsageWithTokens(studentId, chat, RequestType.GENERATE_SENTENCE,
+                provider, modelName, responseTime, true, null, usage);
+
         log.info("Practice created. Chat ID: {}, Turn ID: {}, questionCount: {}, usedVocab: {}",
                 chat.getId(), turn.getId(), chat.getQuestionCount(),
                 parseUsedVocabulary(turn.getUsedVocabulary()));
@@ -309,7 +325,7 @@ public class PracticeServiceImpl implements PracticeService {
         saveAIUsageWithTokens(studentId, chat, RequestType.GENERATE_AND_EVALUATE,
                 provider, modelName, responseTime, true, null, usage);
 
-        EvaluationResponse response = buildEvaluationResponse(aiResponse, chat, isCompleted, xpEarned,student);
+        EvaluationResponse response = buildEvaluationResponse(aiResponse, chat, isCompleted, xpEarned, student);
 
         if (!isCompleted && aiResponse.getNextQuestion() != null) {
             // ✅ ĐẾM SỐ TURN THỰC TẾ TRONG DB → tính order tiếp theo
@@ -845,7 +861,8 @@ public class PracticeServiceImpl implements PracticeService {
                                        GeminiUsageMetadata usage) {
         AIUsage aiUsage = new AIUsage();
         aiUsage.setStudent(studentRepository.getReferenceById(studentId));
-        aiUsage.setPracticeChat(chat);
+        aiUsage.setFeature(AIFeature.PRACTICE);
+        aiUsage.setReferenceId(chat.getId());
         aiUsage.setRequestType(requestType);
         aiUsage.setProvider(provider);
         aiUsage.setModel(model);
