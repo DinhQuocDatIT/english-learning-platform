@@ -178,14 +178,14 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         List<String> suggestedAnswers = parseStringList(root.path("suggestedAnswers"));
         ChatCorrection correction = parseCorrection(root.path("correction"));
 
-        // Validation: Kiểm tra và fix correction nếu AI cắt bớt
+        // Validation: Kiểm tra và fix correction nếu AI cắt bớt + Dọn rác
         correction = validateAndFixCorrection(correction, request.getMessage().trim());
 
         // ✅ STREAK: Gửi tin nhắn → tính chuỗi (không cần biết đúng/sai)
         Student student = conversation.getStudent();
         streakService.recordActivity(student);
 
-        // ✅ XP: Nếu câu ĐÚNG → cộng XP dựa vào level
+        // ✅ XP: Nếu câu ĐÚNG (hoặc correction bị hủy do rác) → cộng XP dựa vào level
         int xpEarned = 0;
         boolean isCorrect = correction == null || !Boolean.TRUE.equals(correction.getHasError());
         if (isCorrect) {
@@ -391,6 +391,9 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
     }
 
+    /**
+     * ✅ ĐÃ NÂNG CẤP: Validate, Fix và DỌN RÁC correction từ AI.
+     */
     private ChatCorrection validateAndFixCorrection(ChatCorrection correction, String userMessage) {
         if (correction == null || !Boolean.TRUE.equals(correction.getHasError())) {
             return correction;
@@ -400,20 +403,45 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                 ? correction.getUserOriginal().trim() : "";
         String fullMessage = userMessage.trim();
 
+        // 1. Fix nếu AI cắt bớt câu
         boolean isTruncated = userOriginal.length() < fullMessage.length() * 0.8;
-
         if (isTruncated) {
-            log.warn("⚠️ AI cắt bớt userOriginal. AI='{}', Full='{}'",
-                    userOriginal, fullMessage);
-
+            log.warn("⚠️ AI cắt bớt userOriginal. AI='{}', Full='{}'", userOriginal, fullMessage);
             correction.setUserOriginal(fullMessage);
-
             String fixedText = CorrectionFixer.fixCommonErrors(fullMessage);
             correction.setCorrectedText(fixedText);
-
             if (correction.getExplanations() == null || correction.getExplanations().isEmpty()) {
                 correction.setExplanations(List.of("Câu đã được sửa lại (tự động)."));
             }
+        }
+
+        // 2. DỌN RÁC: Lọc bỏ các giải thích vô lý của AI
+        if (correction.getExplanations() != null) {
+            List<String> cleanExplanations = correction.getExplanations().stream()
+                    .filter(exp -> {
+                        if (exp == null || exp.isBlank()) return false;
+                        String lower = exp.toLowerCase();
+                        // Bỏ qua các lỗi bịa đặt về viết hoa / mạo từ vô lý
+                        if (lower.contains("viết hoa") && !lower.contains("hòa hợp")) return false;
+                        if (lower.contains("mạo từ 'the'") && !lower.contains("thiếu")) return false;
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+            correction.setExplanations(cleanExplanations);
+        }
+
+        // 3. Nếu explanations rỗng -> HỦY BỎ CORRECTION (coi như không có lỗi)
+        if (correction.getExplanations() == null || correction.getExplanations().isEmpty()) {
+            log.info("🧹 Đã xóa correction rác (explanations rỗng)");
+            return null;
+        }
+
+        // 4. Nếu câu gốc và câu sửa chỉ khác nhau mỗi chữ 'i' viết hoa -> HỦY BỎ
+        String originalLower = correction.getUserOriginal().toLowerCase();
+        String correctedLower = correction.getCorrectedText() != null ? correction.getCorrectedText().toLowerCase() : "";
+        if (originalLower.equals(correctedLower)) {
+            log.info("🧹 Đã xóa correction rác (chỉ khác biệt do viết hoa)");
+            return null;
         }
 
         return correction;
