@@ -2,13 +2,18 @@ import styles from "./Logo.module.css";
 import mainlogo from "../../../assets/FPTP_English_Logo.png";
 
 function Logo({ color = "default" }) {
-  const titleColor =
-    color !== "default" ? styles.whiteTitle : styles.defaultTitle;
+  const isWhite = color !== "default";
 
   return (
     <a href="/" className={styles.logo}>
-      <img src={mainlogo} alt="English Learning Website Logo" />
-      <span className={titleColor}>English</span>
+      <div className={styles.logoBox}>
+        <img src={mainlogo} alt="FBTP English" />
+      </div>
+      <span
+        className={`${styles.brandText} ${isWhite ? styles.whiteText : ""}`}
+      >
+        FBTP <span className={styles.brandHighlight}>English</span>
+      </span>
     </a>
   );
 }
