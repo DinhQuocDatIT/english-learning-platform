@@ -1,225 +1,551 @@
+/* ============================================
+   WRAPPER
+   ============================================ */
 .hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 64px 24px;
-  gap: 48px;
-  width: 100%;
-  box-sizing: border-box;
-  background-color: transparent;
-}
-
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.title {
+  justify-content: center;
+  overflow: hidden;
+  isolation: isolate;
   font-family:
     "Quicksand",
     "Nunito",
-    "Segoe UI",
     system-ui,
     -apple-system,
     sans-serif;
-  font-size: 48px;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  margin: 0 0 20px 0;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-.highlight {
-  font-size: 48px;
-  color: var(--color-primary);
 }
 
-.description {
-  font-size: 16px;
-  color: var(--color-text-muted, #64748b);
-  line-height: 1.6;
-  margin: 0 0 32px 0;
-  max-width: 480px;
+/* ============================================
+   RESET TAG — chỉ scope trong .hero
+   ============================================ */
+.hero *,
+.hero *::before,
+.hero *::after {
+  box-sizing: border-box;
 }
 
-.actions {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 40px;
-}
-.loginLink {
-  background-color: var(--color-primary);
-  color: #ffffff;
-  font-weight: 600;
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-size: 15px;
-  transition: background-color 0.2s;
-}
-
-.loginLink:hover {
-  background-color: var(--color-primary-hover);
-}
-.outlineBtn {
-  background-color: transparent;
-  color: var(--color-text, #1e293b);
-  font-weight: 600;
-  padding: 10px 24px;
-  border-radius: 9999px;
-  border: 1px solid var(--color-border, #e2e8f0);
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.outlineBtn:hover {
-  border-color: var(--color-primary, #10b981);
-  color: var(--color-primary, #10b981);
-}
-
-.socialProof {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.avatars {
-  display: flex;
-}
-
-.avatarMock {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: var(--color-border, #e2e8f0);
-  border: 2px solid var(--color-background, #ffffff);
-  margin-left: -10px;
-}
-
-.avatarMock:first-child {
-  margin-left: 0;
-}
-
-.proofText {
-  font-size: 14px;
-  color: var(--color-text-muted, #64748b);
+.hero h1,
+.hero h2,
+.hero h3,
+.hero p,
+.hero span,
+.hero ul,
+.hero li,
+.hero a,
+.hero button {
   margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  list-style: none;
+  text-decoration: none;
+  line-height: inherit;
 }
 
-.boldText {
-  font-weight: 600;
-  color: var(--color-text, #1e293b);
+.hero button {
+  cursor: pointer;
+  font-family: inherit;
 }
 
-/* Phần hình ảnh minh họa bên phải */
-.imageWrapper {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  position: relative;
-}
-
-.imageCard {
-  background-color: var(--color-surface, #f8fafc);
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 24px;
-  padding: 10px;
-  width: 100%;
-  max-width: 520px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
-  position: relative;
-}
-
-.mainImage {
-  width: 100%;
-  height: auto;
-  border-radius: 16px;
-  display: block;
-}
-
-.floatingCard {
+/* ============================================
+   VIDEO BG
+   ============================================ */
+.hero .videoWrap {
   position: absolute;
-  bottom: -16px;
-  left: -24px;
-  background-color: var(--color-background, #ffffff);
-  border: 1px solid var(--color-border, #e2e8f0);
-  padding: 12px 16px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-  animation: float 3s ease-in-out infinite;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
 }
 
-.iconBox {
-  width: 36px;
-  height: 36px;
-  background-color: var(--color-primary, #10b981);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-size: 16px;
+.hero .video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.05);
+  filter: saturate(0.85) contrast(1.05);
 }
 
-.cardTitle {
+.hero .overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(9, 20, 38, 0.55) 0%,
+      rgba(9, 20, 38, 0.75) 50%,
+      rgba(9, 20, 38, 0.95) 100%
+    ),
+    radial-gradient(
+      ellipse at 50% 40%,
+      rgba(14, 167, 146, 0.25) 0%,
+      transparent 60%
+    );
+}
+
+.hero .grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  pointer-events: none;
+}
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+.hero .container {
+  position: relative;
+  z-index: 2;
+  max-width: 820px;
+  padding: 0 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ============================================
+   BADGE
+   ============================================ */
+.hero .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text, #1e293b);
-  margin: 0;
+  font-weight: 500;
+  margin-bottom: 32px;
 }
 
-.cardSubtitle {
-  font-size: 12px;
-  color: var(--color-text-muted, #64748b);
-  margin: 0;
+.hero .badge span {
+  display: inline-block;
+  line-height: 1.4;
 }
 
-/* --- RESPONSIVE --- */
-@media screen and (max-width: 992px) {
-  .hero {
-    flex-direction: column;
-    text-align: center;
-    padding: 40px 16px;
-  }
-
-  .content {
-    align-items: center;
-  }
-
-  .description {
-    max-width: 100%;
-  }
-
-  .title {
-    font-size: 36px;
-  }
-
-  .floatingCard {
-    left: 12px;
-  }
+.hero .badge .pulseDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+  animation: pulse 2s ease-out infinite;
 }
-/* Animation */
 
-@keyframes float {
+@keyframes pulse {
   0% {
-    transform: translateY(0px);
+    box-shadow: 0 0 0 0 rgba(14, 167, 146, 0.7);
   }
-  50% {
-    transform: translateY(-12px);
+  70% {
+    box-shadow: 0 0 0 12px rgba(14, 167, 146, 0);
   }
   100% {
-    transform: translateY(0px);
+    box-shadow: 0 0 0 0 rgba(14, 167, 146, 0);
+  }
+}
+
+/* ============================================
+   TITLE
+   ============================================ */
+.hero .title {
+  font-size: clamp(40px, 7vw, 84px);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin: 0 0 24px 0;
+  text-wrap: balance;
+  text-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
+}
+
+.hero .title span {
+  display: inline-block;
+  color: var(--color-mint-light);
+  position: relative;
+}
+
+.hero .title span svg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 6px;
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+/* ============================================
+   DESCRIPTION
+   ============================================ */
+.hero p {
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 620px;
+  margin: 0 0 40px 0;
+  text-wrap: pretty;
+}
+
+/* ============================================
+   ACTIONS
+   ============================================ */
+.hero .actions {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hero .actions a,
+.hero .actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 12px;
+  padding: 16px 28px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* primary (link) */
+.hero .actions a {
+  background: var(--color-primary);
+  color: #ffffff;
+  border: 1px solid transparent;
+  box-shadow:
+    0 8px 24px -6px rgba(14, 167, 146, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.hero .actions a:hover {
+  background: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 32px -6px rgba(14, 167, 146, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* ghost (button) */
+.hero .actions button {
+  background: rgba(255, 255, 255, 0.1);
+  /* XÓA DÒNG NÀY ĐỂ FIX LỖI ĐEN THUI: backdrop-filter: blur(12px); */
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 16px 28px; /* Sửa lại padding cho đều 2 bên */
+}
+
+.hero .actions button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* icon bên trong button/link */
+.hero .actions a svg,
+.hero .actions button svg {
+  font-size: 13px;
+  transition: transform 0.2s ease;
+}
+
+.hero .actions a:hover svg,
+.hero .actions button:hover svg {
+  transform: translateX(4px);
+}
+
+/* ============================================
+   TRUST ROW (ul > li)
+   ============================================ */
+.hero .trustRow {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hero .trustRow li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.4;
+}
+
+.hero .trustRow li svg {
+  color: var(--color-primary);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   FLOATING WIDGETS
+   ============================================ */
+.hero .widget {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #0f172a; /* Sửa thành màu đặc để không bị đen thui */
+  /* backdrop-filter: blur(16px); */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4);
+  z-index: 3;
+  animation: floatY 6s ease-in-out infinite;
+}
+
+.hero .widgetLeft {
+  top: 22%;
+  left: 6%;
+}
+
+.hero .widgetRight {
+  bottom: 24%;
+  right: 6%;
+  animation-delay: -3s;
+}
+
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.hero .widget > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.hero .widgetLeft > div:first-child {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-accent)
+  );
+  font-size: 16px;
+}
+
+.hero .widgetRight > div:first-child {
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--color-accent),
+    var(--color-secondary)
+  );
+  font-size: 15px;
+}
+
+.hero .widget p {
+  margin: 0;
+  line-height: 1.35;
+}
+
+.hero .widget p:first-child {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.hero .widget p:last-child {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* wave bars — span */
+.hero .waveBars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 16px;
+}
+
+.hero .waveBars span {
+  display: block;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--color-primary);
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+.hero .waveBars span:nth-child(1) {
+  height: 40%;
+  animation-delay: 0s;
+}
+.hero .waveBars span:nth-child(2) {
+  height: 80%;
+  animation-delay: 0.15s;
+}
+.hero .waveBars span:nth-child(3) {
+  height: 100%;
+  animation-delay: 0.3s;
+}
+.hero .waveBars span:nth-child(4) {
+  height: 70%;
+  animation-delay: 0.45s;
+}
+.hero .waveBars span:nth-child(5) {
+  height: 50%;
+  animation-delay: 0.6s;
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* ============================================
+   SCROLL CUE
+   ============================================ */
+.hero .scrollCue {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.hero .scrollCue span {
+  display: inline-block;
+}
+
+.hero .scrollCue > div {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    transparent 100%
+  );
+  animation: scrollDown 2s ease-in-out infinite;
+}
+
+@keyframes scrollDown {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  51% {
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 900px) {
+  .hero .widget {
+    display: none;
+  }
+
+  .hero .container {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    min-height: 100svh;
+  }
+
+  .hero .actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .hero .actions a,
+  .hero .actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero .trustRow {
+    gap: 12px 20px;
+  }
+
+  .hero .trustRow li {
+    font-size: 12px;
+  }
+
+  .hero .badge {
+    font-size: 12px;
+    padding: 6px 14px 6px 10px;
+  }
+
+  .hero .scrollCue {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero .video {
+    display: none;
+  }
+
+  .hero .widget,
+  .hero .badge .pulseDot,
+  .hero .waveBars span,
+  .hero .scrollCue > div {
+    animation: none;
+  }
+
+  .hero .videoWrap {
+    background: linear-gradient(180deg, #091426 0%, #0f2a3f 100%);
   }
 }

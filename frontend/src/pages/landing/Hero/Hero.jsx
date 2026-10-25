@@ -1,68 +1,103 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import Button from "../../../components/common/Button/Button";
 import styles from "./Hero.module.css";
-import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
-import mainImg from "../../../assets/mainHero.avif";
+import {
+  faMicrophone,
+  faArrowRight,
+  faCheck,
+  faWaveSquare,
+} from "@fortawesome/free-solid-svg-icons";
+
 function Hero() {
   return (
     <section className={styles.hero}>
-      <div className={styles.content}>
+      {/* Video background */}
+      <div className={styles.videoWrap}>
+        <video
+          className={styles.video}
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&auto=format&fit=crop&q=80"
+        >
+          <source src="/videos/hero_myweb.mp4" type="video/mp4" />
+        </video>
+        <div className={styles.overlay} />
+        <div className={styles.grain} />
+      </div>
+
+      {/* Content */}
+      <div className={styles.container}>
+        <div className={styles.badge}>
+          <span className={styles.pulseDot} />
+          <span>50,000+ học viên đang học mỗi ngày</span>
+        </div>
+
         <h1 className={styles.title}>
-          Làm Chủ Tiếng Anh <span className={styles.highlight}>Tự Nhiên</span>{" "}
-          Cùng AI
+          Học tiếng Anh
+          <br />
+          <span className={styles.titleAccent}>theo cách của bạn</span>
         </h1>
+
         <p className={styles.description}>
-          Trải nghiệm tương lai của việc học ngôn ngữ. Nhận phản hồi tức thì về
-          phát âm, từ vựng và ngữ pháp thông qua các cuộc hội thoại AI nhập vai.
+          Từ luyện nghe, dịch câu đến trò chuyện thực tế với AI. Hệ thống cá
+          nhân hóa giúp bạn phản xạ tự nhiên và tự tin giao tiếp.
         </p>
 
         <div className={styles.actions}>
-          <Link to={"/login"} className={styles.loginLink}>
-            Bắt đầu học ngay
+          <Link to={"/login"}>
+            Bắt đầu miễn phí
+            <FontAwesomeIcon icon={faArrowRight} />
           </Link>
-          <button
-            className={styles.outlineBtn}
-            onClick={() => console.log("Khám phá khóa học")}
-          >
-            Khám phá khóa học
+
+          {/* Nút dùng thẻ button, sẽ được CSS gốc bắt style */}
+          <button>
+            Tư vấn lộ trình
+            <FontAwesomeIcon icon={faArrowRight} />
           </button>
         </div>
 
-        <div className={styles.socialProof}>
-          <div className={styles.avatars}>
-            <div className={styles.avatarMock} />
-            <div className={styles.avatarMock} />
-            <div className={styles.avatarMock} />
-          </div>
-          <p className={styles.proofText}>
-            Tham gia cùng <span className={styles.boldText}>50,000+</span> học
-            viên hôm nay
-          </p>
-        </div>
+        <ul className={styles.trustRow}>
+          <li>
+            <FontAwesomeIcon icon={faCheck} /> Học mọi lúc, mọi nơi
+          </li>
+          <li>
+            <FontAwesomeIcon icon={faCheck} /> Không sợ sai, AI sửa ngay
+          </li>
+          <li>
+            <FontAwesomeIcon icon={faCheck} /> Phản hồi trong 24h
+          </li>
+        </ul>
       </div>
 
-      <div className={styles.imageWrapper}>
-        <div className={styles.imageCard}>
-          <img
-            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80"
-            alt="AI Learning Illustration"
-            className={styles.mainImage}
-          />
+      {/* Floating widgets */}
+      {/* <div className={`${styles.widget} ${styles.widgetLeft}`}>
+        <div className={styles.waveIcon}>
+          <FontAwesomeIcon icon={faWaveSquare} />
+        </div>
+        <div>
+          <p className={styles.widgetLabel}>Phát âm</p>
+          <p className={styles.widgetValue}>98% chính xác</p>
+        </div>
+      </div> */}
 
-          {/* Thẻ nổi phản hồi trực tiếp */}
-          <div className={styles.floatingCard}>
-            <div className={styles.iconBox}>
-              <FontAwesomeIcon icon={faMicrophone} />
-            </div>
-            <div>
-              <p className={styles.cardTitle}>Phản hồi trực tiếp</p>
-              <p className={styles.cardSubtitle}>
-                &quot;Phát âm rất tuyệt!&quot;
-              </p>
-            </div>
+      {/* <div className={`${styles.widget} ${styles.widgetRight}`}>
+        <div className={styles.widgetAvatar}>
+          <FontAwesomeIcon icon={faMicrophone} />
+        </div>
+        <div>
+          <p className={styles.widgetLabel}>AI đang nghe</p>
+          <div className={styles.waveBars}>
+            <span /> <span /> <span /> <span /> <span />
           </div>
         </div>
+      </div> */}
+
+      {/* Scroll cue */}
+      <div className={styles.scrollCue}>
+        <span>Cuộn xuống</span>
+        <div className={styles.scrollLine} />
       </div>
     </section>
   );

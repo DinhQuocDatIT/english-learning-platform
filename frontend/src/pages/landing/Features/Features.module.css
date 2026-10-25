@@ -1,7 +1,6 @@
 .section {
-  border-top: 1px solid rgb(235, 235, 235);
   margin: 0 auto;
-  padding: 80px 24px;
+  padding: 100px 24px;
   width: 100%;
   box-sizing: border-box;
   text-align: center;
@@ -9,62 +8,152 @@
   background-color: transparent;
 }
 
+/* ========== HEADER ========== */
 .header {
-  margin-bottom: 56px;
+  margin-bottom: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 14px;
+  background-color: var(--color-primary-lighter, #f2fbfa);
+  color: var(--color-primary, #0ea792);
+  border: 1px solid var(--color-mint-light, #bde9e2);
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
 }
 
 .title {
-  font-size: 30px;
+  font-family: "Quicksand", "Nunito", sans-serif;
+  font-size: 24px;
   font-weight: 700;
   color: var(--color-text, #1e293b);
-  margin: 0 0 12px 0;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
   font-size: 16px;
   color: var(--color-text-muted, #64748b);
   margin: 0;
+  max-width: 500px;
+  line-height: 1.6;
 }
 
-.grid {
+/* ========== STEPS CONTAINER ========== */
+.stepsContainer {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding-top: 20px;
 }
 
-.card {
+/* Đường kẻ nối các bước */
+.connectorLine {
+  position: absolute;
+  top: 60px; /* Căn giữa theo tâm của icon (80/2 + padding-top) */
+  left: 16%;
+  right: 16%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--color-mint-light, #bde9e2) 0,
+    var(--color-mint-light, #bde9e2) 8px,
+    transparent 8px,
+    transparent 16px
+  );
+  z-index: 0;
+}
+
+/* ========== STEP CARD ========== */
+.stepCard {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px;
+  background: transparent;
+  transition: transform 0.3s ease;
+  padding: 0 16px;
 }
 
+.stepCard:hover {
+  transform: translateY(-8px);
+}
+
+/* Icon Box */
 .iconBox {
+  position: relative;
   width: 80px;
   height: 80px;
-  border-radius: 12px;
+  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32px;
   margin-bottom: 24px;
+  background: #ffffff;
+  border: 1px solid var(--color-border, #e2e8f0);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
-/* Biến đổi màu nền và màu icon cho từng bước theo mẫu */
+/* Số thứ tự nhỏ gắn góc icon */
+.stepNumber {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 28px;
+  height: 28px;
+  background: var(--color-primary, #0ea792);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(14, 167, 146, 0.3);
+}
+
+/* Hiệu ứng màu sắc cho từng bước */
 .step1 {
-  background-color: var(--color-surface, #f8fafc);
-  border: 1px solid var(--color-border, #e2e8f0);
-  color: var(--color-text, #1e293b);
+  color: var(--color-primary);
+  background: var(--color-primary-lighter);
+  border-color: var(--color-mint-light);
 }
 
 .step2 {
-  background-color: var(--color-tertiary); /* Xanh nhạt */
-  color: var(--color-accent);
+  color: #0284c7; /* Màu xanh dương */
+  background: #e0f2fe;
+  border-color: #bae6fd;
 }
 
 .step3 {
-  background-color: var(--color-tertiary);
-  color: var(--color-accent);
+  color: #ea580c; /* Màu cam */
+  background: #ffedd5;
+  border-color: #fed7aa;
+}
+
+/* Hover vào card thì icon nổi bật lên */
+.stepCard:hover .iconBox {
+  box-shadow: 0 20px 30px -10px rgba(14, 167, 146, 0.2);
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+/* ========== TEXT CONTENT ========== */
+.textContent {
+  text-align: center;
 }
 
 .cardTitle {
@@ -79,21 +168,33 @@
   color: var(--color-text-muted, #64748b);
   line-height: 1.6;
   margin: 0;
-  max-width: 320px;
 }
 
-/* --- RESPONSIVE --- */
-@media screen and (max-width: 992px) {
-  .grid {
+/* ========== RESPONSIVE ========== */
+@media screen and (max-width: 900px) {
+  .stepsContainer {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 48px;
+  }
+
+  /* Đổi đường kẻ thành dọc cho mobile */
+  .connectorLine {
+    top: 40px;
+    bottom: 40px;
+    left: 50%;
+    width: 2px;
+    height: auto;
+    transform: translateX(-50%);
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-mint-light, #bde9e2) 0,
+      var(--color-mint-light, #bde9e2) 8px,
+      transparent 8px,
+      transparent 16px
+    );
   }
 
   .section {
-    padding: 40px 16px;
-  }
-
-  .title {
-    font-size: 28px;
+    padding: 60px 16px;
   }
 }

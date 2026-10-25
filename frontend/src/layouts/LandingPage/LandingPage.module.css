@@ -6,11 +6,15 @@
   min-height: 100vh;
   background-color: var(--color-background);
   box-sizing: border-box;
+  position: relative;
+  /* Đã xóa cursor: url(...) để giữ mũi tên mặc định */
 }
 
 .header {
   width: 100%;
   flex-shrink: 0;
+  z-index: 10;
+  position: relative;
 }
 
 .main {
@@ -18,20 +22,52 @@
   width: 100%;
   box-sizing: border-box;
   padding-top: 80px;
+  position: relative;
+  z-index: 1;
 }
-.hero {
-  background-color: transparent;
-}
-.features {
-  background-color: transparent;
-}
-.aiSection {
-  background-color: transparent;
-}
-.courseSection {
-  background-color: transparent;
-}
+
 .footer {
   width: 100%;
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+/* ============================================
+   QUẦNG SÁNG BÁM ĐUÔI CHUỘT
+   ============================================ */
+.glowOrb {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(14, 167, 146, 0.6) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 9998; /* Nằm dưới canvas nhưng trên web */
+  /* Hiệu ứng trễ để tạo vệt kéo dài */
+  transition: transform 0.15s ease-out;
+  mix-blend-mode: screen; /* Tạo hiệu ứng phát sáng hòa quyện */
+}
+
+.sparkleCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+@media (max-width: 768px) {
+  .glowOrb,
+  .sparkleCanvas {
+    display: none;
+  }
 }
