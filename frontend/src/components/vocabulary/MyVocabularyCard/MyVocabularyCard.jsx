@@ -1,32 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import styles from "./MyVocabularyCard.module.css";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faVolumeHigh,
-  faCircleCheck,
-  faCircle,
+  faCheck,
   faTrash,
+  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
-
 import { speakText } from "../../../utils/textToSpeech";
 import { getEnglishVoices } from "../../../utils/englishVoices";
 
 function MyVocabularyCard({ vocabulary, onChangeStatus, onDelete }) {
   const [ukVoice, setUkVoice] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const loadVoice = () => {
       const voices = getEnglishVoices();
       setUkVoice(voices.uk);
     };
-
     loadVoice();
-
     if ("speechSynthesis" in window) {
       window.speechSynthesis.addEventListener("voiceschanged", loadVoice);
     }
-
     return () => {
       if ("speechSynthesis" in window) {
         window.speechSynthesis.removeEventListener("voiceschanged", loadVoice);
@@ -34,96 +30,101 @@ function MyVocabularyCard({ vocabulary, onChangeStatus, onDelete }) {
     };
   }, []);
 
-  const handleSpeak = () => {
+  const handleSpeak = (e) => {
+    e.stopPropagation();
     if (!vocabulary?.word) return;
-
-    speakText(vocabulary.word, {
-      voice: ukVoice,
-      lang: "en-GB",
-      rate: 0.9,
-    });
+    speakText(vocabulary.word, { voice: ukVoice, lang: "en-GB", rate: 0.9 });
   };
 
   const isLearned = vocabulary.learningStatus === "LEARNED";
 
-  const handleChangeStatus = () => {
-    if (!vocabulary?.id) return;
-    onChangeStatus(vocabulary);
-  };
-
-  const handleDelete = () => {
-    if (!vocabulary?.id) return;
-    onDelete(vocabulary);
-  };
+  const groupedMeanings = useMemo(() => {
+    if (!vocabulary.meanings) return [];
+    const groups = {};
+    vocabulary.meanings.forEach((m) => {
+      const pos = m.partOfSpeech || "Khác";
+      if (!groups[pos]) groups[pos] = [];
+      groups[pos].push(m);
+    });
+    return Object.entries(groups).map(([pos, items]) => ({ pos, items }));
+  }, [vocabulary.meanings]);
 
   return (
-    <div className={styles.wordCard}>
+    <div
+      className={`${styles.card} ${isExpanded ? styles.isExpanded : ""} ${isLearned ? styles.isLearned : ""}`}
+    >
       {/* HEADER */}
-      <div className={styles.cardHeader}>
-        <div className={styles.wordInfo}>
-          <h2 className={styles.wordTitle}>{vocabulary.word}</h2>
-
+      <div className={styles.header} onClick={() => setIsExpanded(!isExpanded)}>
+        <div className={styles.titleArea}>
+          <h2 className={styles.word}>{vocabulary.word}</h2>
           {vocabulary.pronunciation && (
             <span className={styles.pronunciation}>
-              {vocabulary.pronunciation}
+              /{vocabulary.pronunciation}/
             </span>
           )}
         </div>
 
-        <div className={styles.headerActions}>
+        <div className={styles.actions}>
           <button
-            type="button"
             className={styles.speakBtn}
             onClick={handleSpeak}
-            title="Nghe phát âm"
+            title="Nghe"
           >
             <FontAwesomeIcon icon={faVolumeHigh} />
           </button>
-
           <button
-            type="button"
-            className={`${styles.statusBtn} ${
-              isLearned ? styles.statusLearned : styles.statusUnlearned
-            }`}
-            onClick={handleChangeStatus}
-            title={isLearned ? "Đánh dấu chưa học" : "Đánh dấu đã học"}
+            className={`${styles.statusBtn} ${isLearned ? styles.statusLearned : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onChangeStatus(vocabulary);
+            }}
+            title={isLearned ? "Đã học" : "Chưa học"}
           >
-            <FontAwesomeIcon icon={isLearned ? faCircleCheck : faCircle} />
-            <span>{isLearned ? "Đã học" : "Chưa học"}</span>
+            <FontAwesomeIcon icon={faCheck} />
           </button>
-
           <button
-            type="button"
             className={styles.deleteBtn}
-            onClick={handleDelete}
-            title="Xóa từ vựng"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(vocabulary);
+            }}
+            title="Xóa"
           >
             <FontAwesomeIcon icon={faTrash} />
           </button>
+          <div
+            className={`${styles.expandIcon} ${isExpanded ? styles.rotate : ""}`}
+          >
+            <FontAwesomeIcon icon={faChevronDown} />
+          </div>
         </div>
       </div>
 
-      {/* MEANINGS */}
-      <div className={styles.meaningsContainer}>
-        {vocabulary.meanings?.length > 0 ? (
-          vocabulary.meanings.map((meaning, index) => (
-            <div key={index} className={styles.meaningItem}>
-              {meaning.partOfSpeech && (
-                <span className={styles.posTag}>{meaning.partOfSpeech}</span>
-              )}
-
-              <div className={styles.meaningContent}>
-                <p className={styles.meaningText}>{meaning.meaning}</p>
-
-                {meaning.example && (
-                  <p className={styles.exampleText}>{meaning.example}</p>
-                )}
+      {/* BODY */}
+      <div className={`${styles.body} ${isExpanded ? styles.open : ""}`}>
+        <div className={styles.innerBody}>
+          {groupedMeanings.length > 0 ? (
+            groupedMeanings.map((group, idx) => (
+              <div key={idx} className={styles.meaningGroup}>
+                <span className={styles.pos}>{group.pos}</span>
+                <ul className={styles.meaningList}>
+                  {group.items.map((m, i) => (
+                    <li key={i} className={styles.meaningItem}>
+                      <span className={styles.meaningText}>{m.meaning}</span>
+                      {m.example && (
+                        <span className={styles.exampleText}>
+                          VD: {m.example}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-          ))
-        ) : (
-          <p className={styles.noMeaning}>Chưa có nghĩa cho từ này.</p>
-        )}
+            ))
+          ) : (
+            <p className={styles.noMeaning}>Chưa có nghĩa cho từ này.</p>
+          )}
+        </div>
       </div>
     </div>
   );
