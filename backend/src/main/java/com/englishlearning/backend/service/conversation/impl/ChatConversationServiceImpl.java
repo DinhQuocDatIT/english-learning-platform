@@ -78,13 +78,8 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy học viên"));
 
-        conversationRepository.findByStudentIdAndStatus(student.getId(), ChatStatus.ACTIVE)
-                .ifPresent(old -> {
-                    old.setStatus(ChatStatus.ENDED);
-                    old.setEndedAt(LocalDateTime.now());
-                    conversationRepository.save(old);
-                    log.info("Auto-ended old conversation: {}", old.getId());
-                });
+        // ✅ Cho phép nhiều conversation ACTIVE song song (giống ChatGPT)
+        // Không auto-END conversation cũ khi tạo mới
 
         ChatConversation conversation = new ChatConversation();
         conversation.setStudent(student);

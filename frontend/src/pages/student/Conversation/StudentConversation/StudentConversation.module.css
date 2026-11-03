@@ -31,10 +31,10 @@
 }
 
 /* =================================================================
-   SIDEBAR (LEFT COLUMN) — COMPACT
+   SIDEBAR (LEFT COLUMN) — WIDER
    ================================================================= */
 .sidebar {
-  width: 240px;
+  width: 300px;
   border-right: 1px solid var(--color-border);
   background: var(--color-surface);
   display: flex;
@@ -78,6 +78,14 @@
   font-size: 15px;
   box-shadow: 0 3px 8px rgba(14, 167, 146, 0.25);
   flex-shrink: 0;
+  overflow: hidden; /* Thêm để ảnh không tràn viền */
+}
+
+/* ✅ Class mới cho ảnh sidebar */
+.sidebarLogoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sidebarBrandMeta {
@@ -229,7 +237,7 @@
 }
 
 /* =================================================================
-   CONVERSATION ITEM — COMPACT
+   CONVERSATION ITEM — COMPACT (preview tin nhắn mới nhất)
    ================================================================= */
 .conversationItem {
   display: flex;
@@ -264,17 +272,18 @@
   gap: 2px;
 }
 
-.itemLevel {
+.itemPreview {
   font-size: 13px;
   font-weight: 600;
   color: var(--color-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.3;
+  line-height: 1.35;
+  display: block;
 }
 
-.conversationItemActive .itemLevel {
+.conversationItemActive .itemPreview {
   color: var(--color-accent);
   font-weight: 700;
 }
@@ -409,6 +418,14 @@
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  overflow: hidden; /* Thêm để ảnh không tràn viền */
+}
+
+/* ✅ Class mới cho ảnh modal */
+.modalHeaderImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .modalTitle {
@@ -590,4 +607,31 @@
 .modalConfirmBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* =================================================================
+   INFINITE SCROLL — sentinel + end state
+   ================================================================= */
+.loadMoreSentinel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  min-height: 36px;
+}
+
+.loadMoreSentinel svg {
+  font-size: 11px;
+}
+
+.listEndState {
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+  font-style: italic;
 }

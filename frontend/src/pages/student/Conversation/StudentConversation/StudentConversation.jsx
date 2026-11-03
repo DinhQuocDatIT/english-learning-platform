@@ -1,10 +1,15 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
   faSearch,
-  faRobot,
   faBars,
   faSpinner,
   faTimes,
@@ -23,6 +28,8 @@ import {
 import StudentConversationChat from "../StudentConversationChat/StudentConversationChat";
 import styles from "./StudentConversation.module.css";
 
+const PAGE_SIZE = 10;
+
 function StudentConversation() {
   const { conversationId: routeId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,6 +45,12 @@ function StudentConversation() {
     routeId || queryId || null,
   );
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Phân trang lịch sử
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const loadMoreRef = useRef(null);
 
   // Modal tạo mới
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -64,7 +77,7 @@ function StudentConversation() {
 
       const [membershipResponse, historyResponse] = await Promise.allSettled([
         studentMembershipService.getCurrentMembership(),
-        conversationService.getConversationHistory(0, 50),
+        conversationService.getConversationHistory(0, PAGE_SIZE),
       ]);
 
       const membershipData =
@@ -73,11 +86,15 @@ function StudentConversation() {
           : null;
       setHasMembership(!!membershipData);
 
-      const historyData =
+      const pageData =
         historyResponse.status === "fulfilled"
-          ? historyResponse.value?.data?.data?.content || []
-          : [];
+          ? historyResponse.value?.data?.data
+          : null;
+      const historyData = pageData?.content || [];
+
       setHistory(historyData);
+      setPage(0);
+      setHasMore(pageData ? !pageData.last : false);
 
       // Nếu chưa có ID nào được chọn, tự động chọn cuộc hội thoại đầu tiên
       const currentSelected = routeId || searchParams.get("id");
@@ -90,11 +107,60 @@ function StudentConversation() {
       console.error("Lỗi lấy dữ liệu:", error);
       toast.error(error.response?.data?.message || "Không thể tải dữ liệu.");
       setHistory([]);
+      setHasMore(false);
     } finally {
       setLoading(false);
       hideLoading();
     }
   };
+
+  // Load thêm trang tiếp theo
+  const loadMoreHistory = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    try {
+      setLoadingMore(true);
+      const nextPage = page + 1;
+      const response = await conversationService.getConversationHistory(
+        nextPage,
+        PAGE_SIZE,
+      );
+      const pageData = response?.data?.data;
+      const newItems = pageData?.content || [];
+
+      // Dedupe theo id (phòng trường hợp có conversation mới tạo chen ngang)
+      setHistory((prev) => {
+        const existingIds = new Set(prev.map((x) => String(x.id)));
+        const filtered = newItems.filter((x) => !existingIds.has(String(x.id)));
+        return [...prev, ...filtered];
+      });
+      setPage(nextPage);
+      setHasMore(pageData ? !pageData.last : false);
+    } catch (error) {
+      console.error("Lỗi tải thêm lịch sử:", error);
+      toast.error("Không thể tải thêm lịch sử.");
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, page]);
+
+  // IntersectionObserver: khi sentinel hiện ra → load more
+  useEffect(() => {
+    if (!hasMore || loadingMore) return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMoreHistory();
+        }
+      },
+      { root: el.parentElement, rootMargin: "80px", threshold: 0 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loadMoreHistory]);
 
   // Chọn cuộc hội thoại
   const handleSelectConversation = (id) => {
@@ -203,10 +269,14 @@ function StudentConversation() {
           <div className={styles.sidebarHeader}>
             <div className={styles.sidebarBrand}>
               <div className={styles.sidebarLogoSquare}>
-                <FontAwesomeIcon icon={faRobot} />
+                <img
+                  src="/assets/buddy/buddy_ai.png"
+                  alt="Buddy"
+                  className={styles.sidebarLogoImg}
+                />
               </div>
               <div className={styles.sidebarBrandMeta}>
-                <h2 className={styles.sidebarBrandTitle}>English Buddy</h2>
+                <h2 className={styles.sidebarBrandTitle}>Buddy</h2>
                 <span className={styles.sidebarBrandSubtitle}>
                   AI Conversation
                 </span>
@@ -256,32 +326,56 @@ function StudentConversation() {
                   : "Chưa có cuộc trò chuyện nào."}
               </div>
             ) : (
-              filteredHistory.map((item) => {
-                const isSelected =
-                  String(item.id) === String(selectedConversationId);
-                const levelText = getLevelDisplay(item.level) || item.level;
-                const msgCount = item.messageCount || 0;
+              <>
+                {filteredHistory.map((item) => {
+                  const isSelected =
+                    String(item.id) === String(selectedConversationId);
+                  const levelText = getLevelDisplay(item.level) || item.level;
+                  const preview = item.lastMessage?.trim()
+                    ? item.lastMessage.trim()
+                    : "Chưa có tin nhắn";
 
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`${styles.conversationItem} ${
-                      isSelected ? styles.conversationItemActive : ""
-                    }`}
-                    onClick={() => handleSelectConversation(item.id)}
-                  >
-                    <div className={styles.itemMeta}>
-                      <span className={styles.itemLevel}>{levelText}</span>
-                      <span className={styles.itemSubtitle}>
-                        {msgCount} tin nhắn
-                      </span>
-                    </div>
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`${styles.conversationItem} ${
+                        isSelected ? styles.conversationItemActive : ""
+                      }`}
+                      onClick={() => handleSelectConversation(item.id)}
+                      title={preview}
+                    >
+                      <div className={styles.itemMeta}>
+                        <span className={styles.itemPreview}>{preview}</span>
+                        <span className={styles.itemSubtitle}>{levelText}</span>
+                      </div>
 
-                    {isSelected && <span className={styles.itemActiveDot} />}
-                  </button>
-                );
-              })
+                      {isSelected && <span className={styles.itemActiveDot} />}
+                    </button>
+                  );
+                })}
+
+                {/* Sentinel để trigger load more */}
+                {hasMore && !searchQuery && (
+                  <div ref={loadMoreRef} className={styles.loadMoreSentinel}>
+                    {loadingMore ? (
+                      <>
+                        <FontAwesomeIcon icon={faSpinner} spin />
+                        <span>Đang tải thêm...</span>
+                      </>
+                    ) : (
+                      <span>Cuộn để xem thêm</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Hết dữ liệu */}
+                {!hasMore && !searchQuery && history.length > 0 && (
+                  <div className={styles.listEndState}>
+                    Đã hiển thị tất cả lịch sử
+                  </div>
+                )}
+              </>
             )}
           </div>
         </aside>
@@ -321,7 +415,11 @@ function StudentConversation() {
             <div className={styles.modalHeader}>
               <div className={styles.modalHeaderLeft}>
                 <div className={styles.modalHeaderIcon}>
-                  <FontAwesomeIcon icon={faRobot} />
+                  <img
+                    src="/assets/buddy/buddy_ai.png"
+                    alt="Buddy"
+                    className={styles.modalHeaderImg}
+                  />
                 </div>
                 <div>
                   <h3 className={styles.modalTitle}>

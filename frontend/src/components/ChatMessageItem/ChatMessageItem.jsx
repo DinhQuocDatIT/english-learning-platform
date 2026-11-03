@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faRobot,
   faVolumeHigh,
   faVolumeXmark,
   faLanguage,
@@ -77,16 +76,20 @@ function ChatMessageItem({
   // ===== AI MESSAGE =====
   return (
     <div className={styles.aiRow}>
-      {/* Avatar AI (robot tròn) */}
+      {/* Avatar AI (Buddy) */}
       <div className={styles.aiAvatar}>
-        <FontAwesomeIcon icon={faRobot} />
+        <img
+          src="/assets/buddy/buddy_ai.png"
+          alt="Buddy"
+          className={styles.aiAvatarImg}
+        />
       </div>
 
       <div className={styles.aiContent}>
         <div className={styles.bubble}>
           {/* Header bar */}
           <div className={styles.bubbleHeader}>
-            <span className={styles.buddyName}>Gia sư AI</span>
+            <span className={styles.buddyName}>Buddy</span>
             <div className={styles.actionsBar}>
               <button
                 className={`${styles.actionBtn} ${
