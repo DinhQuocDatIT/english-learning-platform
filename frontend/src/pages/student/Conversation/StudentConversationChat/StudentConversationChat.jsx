@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowLeft,
   faPaperPlane,
   faSpinner,
-  faComments,
   faMicrophone,
+  faRobot,
+  faVolumeHigh,
+  faHeadphones,
+  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import conversationService from "../../../../services/conversationService";
 import streakService from "../../../../services/streakService";
-import { useLoading } from "../../../../contexts/LoadingContext";
 import { useXp } from "../../../../contexts/XpContext";
 import Loading from "../../../../components/common/Loading/Loading";
 import ChatMessageItem from "../../../../components/ChatMessageItem/ChatMessageItem";
@@ -22,18 +23,26 @@ import { SLASH_TOPICS } from "../../../../constants/slashCommands";
 import { getLevelDisplay } from "../../../../constants/conversationLevelConstants";
 import styles from "./StudentConversationChat.module.css";
 
-function StudentConversationChat() {
-  const navigate = useNavigate();
+function StudentConversationChat({
+  conversationId: propConversationId,
+  onConversationUpdated,
+  onNewConversation,
+}) {
   const location = useLocation();
-  const { conversationId } = useParams();
-  const { showLoading, hideLoading } = useLoading();
+  const { conversationId: routeConversationId } = useParams();
+  const conversationId = propConversationId || routeConversationId;
+
   const { showXpToast } = useXp();
 
   const initialTopicHandledRef = useRef(false);
+  const recognitionRef = useRef(null);
+
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [loadingConv, setLoadingConv] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   // ===== SPEECH SETTINGS =====
   const [playbackSpeed, setPlaybackSpeed] = useState("1x");
@@ -50,7 +59,7 @@ function StudentConversationChat() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Load voices
+  // Load voices for Web Speech Synthesis
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
 
@@ -80,39 +89,57 @@ function StudentConversationChat() {
     };
   }, []);
 
+  // Fetch conversation when conversationId changes
   useEffect(() => {
-    fetchConversation();
-    return () => window.speechSynthesis.cancel();
+    if (!conversationId) {
+      setConversation(null);
+      setMessages([]);
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadConv = async () => {
+      try {
+        setLoadingConv(true);
+        const response =
+          await conversationService.getConversation(conversationId);
+        if (!isMounted) return;
+        const data = response?.data?.data;
+        setConversation(data);
+        setMessages(data?.messages || []);
+      } catch (error) {
+        if (!isMounted) return;
+        console.error("Lỗi lấy cuộc hội thoại:", error);
+        toast.error(
+          error.response?.data?.message || "Không thể tải cuộc hội thoại.",
+        );
+      } finally {
+        if (isMounted) setLoadingConv(false);
+      }
+    };
+
+    loadConv();
+
+    return () => {
+      isMounted = false;
+      window.speechSynthesis.cancel();
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // ignore
+        }
+      }
+    };
   }, [conversationId]);
 
+  // Auto scroll to bottom
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, [messages, sending]);
 
-  const fetchConversation = async () => {
-    try {
-      showLoading();
-      const response =
-        await conversationService.getConversation(conversationId);
-      const data = response?.data?.data;
-      setConversation(data);
-      setMessages(data?.messages || []);
-    } catch (error) {
-      console.error("Lỗi lấy cuộc hội thoại:", error);
-      toast.error(
-        error.response?.data?.message || "Không thể tải cuộc hội thoại.",
-      );
-      navigate("/dashboard/student/conversation");
-    } finally {
-      hideLoading();
-    }
-  };
-
-  // ✅ Fetch streak và dispatch event để Header cập nhật
+  // Streak update event
   const refreshStreak = async () => {
     try {
       const res = await streakService.getMyStreak();
@@ -129,64 +156,85 @@ function StudentConversationChat() {
     }
   };
 
-  const handleSendMessage = async (customMessage) => {
-    const messageToSend =
-      typeof customMessage === "string" ? customMessage : inputMessage;
-    const trimmed = messageToSend.trim();
-    if (!trimmed) {
-      toast.warning("Vui lòng nhập tin nhắn.");
-      return;
-    }
-    if (sending) return;
-    if (conversation?.status !== "ACTIVE") {
-      toast.warning("Cuộc hội thoại đã kết thúc.");
-      return;
-    }
-
-    const tempUserMessage = {
-      id: `temp-${Date.now()}`,
-      role: "USER",
-      content: trimmed,
-      createdAt: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, tempUserMessage]);
-    setInputMessage("");
-    setShowTopicMenu(false);
-    setSending(true);
-
-    try {
-      const response = await conversationService.sendMessage(conversationId, {
-        message: trimmed,
-      });
-
-      const aiData = response?.data?.data;
-
-      // ✅ Hiển thị XP toast nếu có
-      if (aiData?.experienceEarned && aiData.experienceEarned > 0) {
-        showXpToast(aiData.experienceEarned);
+  // Send message handler
+  const handleSendMessage = useCallback(
+    async (customMessage) => {
+      const messageToSend =
+        typeof customMessage === "string" ? customMessage : inputMessage;
+      const trimmed = messageToSend.trim();
+      if (!trimmed) {
+        toast.warning("Vui lòng nhập tin nhắn.");
+        return;
+      }
+      if (sending) return;
+      if (conversation?.status !== "ACTIVE") {
+        toast.warning("Cuộc hội thoại đã kết thúc.");
+        return;
       }
 
-      // ✅ Refresh streak ngay sau khi gửi tin nhắn
-      await refreshStreak();
+      const tempUserMessage = {
+        id: `temp-${Date.now()}`,
+        role: "USER",
+        content: trimmed,
+        createdAt: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, tempUserMessage]);
+      setInputMessage("");
+      setShowTopicMenu(false);
+      setSending(true);
 
-      // Reload conversation để lấy messages mới nhất
-      const convResponse =
-        await conversationService.getConversation(conversationId);
-      const updatedData = convResponse?.data?.data;
-      setConversation(updatedData);
-      setMessages(updatedData?.messages || []);
-    } catch (error) {
-      console.error("Lỗi gửi tin nhắn:", error);
-      toast.error(error.response?.data?.message || "Không thể gửi tin nhắn.");
-      setMessages((prev) => prev.filter((m) => m.id !== tempUserMessage.id));
-      setInputMessage(trimmed);
-    } finally {
-      setSending(false);
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
-  };
+      try {
+        const response = await conversationService.sendMessage(conversationId, {
+          message: trimmed,
+        });
 
-  // ✅ Tự động gửi lệnh /topic nếu được khởi tạo từ trang danh sách
+        const aiData = response?.data?.data;
+
+        // Hiển thị XP toast nếu có
+        if (aiData?.experienceEarned && aiData.experienceEarned > 0) {
+          showXpToast(aiData.experienceEarned);
+        }
+
+        // Refresh streak
+        await refreshStreak();
+
+        // Reload conversation để lấy messages mới nhất kèm phân tích lỗi
+        const convResponse =
+          await conversationService.getConversation(conversationId);
+        const updatedData = convResponse?.data?.data;
+        setConversation(updatedData);
+        const updatedMsgs = updatedData?.messages || [];
+        setMessages(updatedMsgs);
+
+        // Notify parent sidebar
+        if (onConversationUpdated) {
+          onConversationUpdated({
+            conversationId,
+            lastMessage: trimmed,
+            messageCount: updatedMsgs.length,
+          });
+        }
+      } catch (error) {
+        console.error("Lỗi gửi tin nhắn:", error);
+        toast.error(error.response?.data?.message || "Không thể gửi tin nhắn.");
+        setMessages((prev) => prev.filter((m) => m.id !== tempUserMessage.id));
+        setInputMessage(trimmed);
+      } finally {
+        setSending(false);
+        setTimeout(() => inputRef.current?.focus(), 100);
+      }
+    },
+    [
+      inputMessage,
+      sending,
+      conversation,
+      conversationId,
+      showXpToast,
+      onConversationUpdated,
+    ],
+  );
+
+  // Auto handle /topic if passed via router state
   useEffect(() => {
     if (
       conversation &&
@@ -200,9 +248,72 @@ function StudentConversationChat() {
         handleSendMessage(`/topic ${initialTopicVal}`);
       }, 350);
     }
-  }, [conversation]);
+  }, [conversation, location.state, handleSendMessage]);
 
-  // ===== INPUT CHANGE — DETECT "/" =====
+  // Speech-To-Text (Microphone)
+  const toggleSpeechRecognition = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.info(
+        "Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói trực tiếp. Vui lòng sử dụng Google Chrome hoặc Edge.",
+      );
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // ignore
+        }
+      }
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setInputMessage((prev) =>
+            prev.trim() ? `${prev.trim()} ${transcript}` : transcript,
+          );
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.warn("Speech recognition error:", event.error);
+        setIsListening(false);
+        if (event.error === "not-allowed") {
+          toast.error("Vui lòng cho phép quyền truy cập Micro để nói.");
+        }
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error("Speech recognition start failed:", err);
+      setIsListening(false);
+    }
+  };
+
+  // Input change
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInputMessage(value);
@@ -222,7 +333,7 @@ function StudentConversationChat() {
     }
   };
 
-  // ===== SELECT TOPIC TỪ MENU =====
+  // Topic select
   const handleSelectTopic = (topic) => {
     const message = `/topic ${topic.value}`;
     setInputMessage("");
@@ -230,7 +341,7 @@ function StudentConversationChat() {
     setTimeout(() => handleSendMessage(message), 50);
   };
 
-  // ===== KEY DOWN =====
+  // Key down
   const handleKeyDown = (e) => {
     if (showTopicMenu && filteredTopics.length > 0) {
       if (e.key === "ArrowDown") {
@@ -270,41 +381,62 @@ function StudentConversationChat() {
     inputRef.current?.focus();
   };
 
-  const handleBack = () => {
-    navigate("/dashboard/student/conversation");
-  };
-
-  if (!conversation) {
-    return <Loading size="large" text="Đang tải cuộc hội thoại..." />;
+  // If no conversation selected or history empty
+  if (!conversationId) {
+    return (
+      <div className={styles.emptyChatState}>
+        <div className={styles.emptyRobotOrb}>
+          <FontAwesomeIcon icon={faRobot} />
+        </div>
+        <h3 className={styles.emptyTitle}>
+          Chào mừng đến với English Buddy AI!
+        </h3>
+        <p className={styles.emptyDesc}>
+          Chọn một cuộc trò chuyện từ danh sách bên trái hoặc bắt đầu cuộc trò
+          chuyện mới để cùng luyện phản xạ tiếng Anh tự nhiên ngay hôm nay.
+        </p>
+        {onNewConversation && (
+          <button className={styles.emptyStartBtn} onClick={onNewConversation}>
+            <FontAwesomeIcon icon={faPlus} />
+            <span>Bắt đầu cuộc trò chuyện mới</span>
+          </button>
+        )}
+      </div>
+    );
   }
 
-  const isActive = conversation.status === "ACTIVE";
+  if (loadingConv && !conversation) {
+    return (
+      <div className={styles.chatContainer}>
+        <Loading size="large" text="Đang tải cuộc hội thoại..." />
+      </div>
+    );
+  }
+
+  const isActive = conversation?.status === "ACTIVE";
 
   return (
-    <div className={styles.container}>
+    <div className={styles.chatContainer}>
       {/* HEADER */}
-      <header className={styles.header}>
+      <header className={styles.chatHeader}>
         <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={handleBack}>
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </button>
-          <div className={styles.headerAvatar}>
-            <FontAwesomeIcon icon={faComments} />
+          {/* <div className={styles.headerAvatarSquare}>
+            <FontAwesomeIcon icon={faRobot} />
           </div>
-          <div className={styles.headerText}>
-            <div className={styles.headerTitleRow}>
-              <h2 className={styles.headerTitle}>Gia sư AI</h2>
-              <span className={styles.liveBadge}>Live Coach</span>
+          <div className={styles.headerMeta}>
+            <div className={styles.headerTitleLine}>
+              <h2 className={styles.headerTitle}>Buddy</h2>
+              <span className={styles.liveCoachBadge}>Live Coach</span>
             </div>
             <p className={styles.headerSubtitle}>
               Luyện giao tiếp tiếng Anh tự nhiên & sửa lỗi tức thì
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className={styles.headerRight}>
-          <span className={styles.levelBadge}>
-            {getLevelDisplay(conversation.level)}
+          <span className={styles.levelBadgePill}>
+            {getLevelDisplay(conversation?.level || "BEGINNER")}
           </span>
 
           <PlaybackVoicePopup
@@ -323,11 +455,29 @@ function StudentConversationChat() {
             setShowSpeedPopup={setShowSpeedPopup}
             onSpeedChange={() => inputRef.current?.focus()}
           />
+
+          <button
+            className={styles.iconActionBtn}
+            title="Luyện nghe tai nghe"
+            onClick={() => {
+              toast.info("Đã kết nối chế độ nghe phát âm chuẩn bản xứ!");
+            }}
+          >
+            <FontAwesomeIcon icon={faHeadphones} />
+          </button>
         </div>
       </header>
 
-      {/* MESSAGES */}
+      {/* MESSAGES CONTAINER */}
       <main className={styles.messagesContainer}>
+        {/* Date Divider */}
+        {messages.length > 0 && (
+          <div className={styles.dateDivider}>
+            <span className={styles.dateBadge}>HÔM NAY</span>
+          </div>
+        )}
+
+        {/* Message Items (Giữ nguyên toàn bộ giao diện phân tích lỗi, dịch, suggestions) */}
         {messages.map((msg) => (
           <ChatMessageItem
             key={msg.id}
@@ -338,10 +488,11 @@ function StudentConversationChat() {
           />
         ))}
 
+        {/* Typing Indicator */}
         {sending && (
           <div className={styles.typingIndicator}>
             <div className={styles.typingAvatar}>
-              <FontAwesomeIcon icon={faComments} />
+              <FontAwesomeIcon icon={faRobot} />
             </div>
             <div className={styles.typingBubble}>
               <span></span>
@@ -357,7 +508,7 @@ function StudentConversationChat() {
       {/* INPUT SECTION */}
       {isActive ? (
         <footer className={styles.inputSection}>
-          <div className={styles.inputWrapper}>
+          <div className={styles.inputWrapperPill}>
             {showTopicMenu && (
               <SlashTopicMenu
                 topics={filteredTopics}
@@ -366,24 +517,39 @@ function StudentConversationChat() {
               />
             )}
 
-            <button className={styles.micBtn} title="Nhập bằng giọng nói">
+            <button
+              type="button"
+              className={`${styles.micBtn} ${
+                isListening ? styles.micBtnListening : ""
+              }`}
+              onClick={toggleSpeechRecognition}
+              title={
+                isListening
+                  ? "Đang nghe... Nhấp để dừng"
+                  : "Nói để nhập tin nhắn"
+              }
+            >
               <FontAwesomeIcon icon={faMicrophone} />
             </button>
+
             <textarea
               ref={inputRef}
               rows={1}
               value={inputMessage}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder="Nói hoặc gõ bằng tiếng Anh hoặc tiếng Việt... (gõ / để chọn chủ đề)"
+              placeholder="Nói hoặc gõ bằng tiếng Anh hoặc tiếng Việt..."
               maxLength={2000}
               disabled={sending}
               className={styles.textarea}
             />
+
             <button
+              type="button"
               className={styles.sendBtn}
               onClick={() => handleSendMessage()}
               disabled={sending || !inputMessage.trim()}
+              title="Gửi tin nhắn"
             >
               <FontAwesomeIcon
                 icon={sending ? faSpinner : faPaperPlane}
@@ -392,23 +558,24 @@ function StudentConversationChat() {
             </button>
           </div>
 
-          <p className={styles.inputHint}>
-            Nhấn <strong>Enter</strong> để gửi, <strong>Shift + Enter</strong>{" "}
-            để xuống dòng · Gõ <strong>/</strong> để chọn chủ đề
-          </p>
+          {/* <p className={styles.inputHint}>
+            Enter để gửi · Shift + Enter để xuống dòng · Gõ / để chọn chủ đề
+          </p> */}
         </footer>
       ) : (
         <footer className={styles.endedFooter}>
           <p>
-            Cuộc hội thoại đã kết thúc. Bạn có thể xem lại lịch sử hoặc bắt đầu
+            Cuộc hội thoại đã kết thúc. Bạn có thể xem lại tin nhắn hoặc bắt đầu
             cuộc mới.
           </p>
-          <button
-            className={styles.newConversationBtn}
-            onClick={() => navigate("/dashboard/student/conversation")}
-          >
-            Bắt đầu cuộc mới
-          </button>
+          {onNewConversation && (
+            <button
+              className={styles.newConversationBtn}
+              onClick={onNewConversation}
+            >
+              Bắt đầu cuộc mới
+            </button>
+          )}
         </footer>
       )}
     </div>

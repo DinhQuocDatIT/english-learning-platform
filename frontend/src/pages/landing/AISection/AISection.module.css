@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 64px;
+  gap: 100px; /* ✅ Tăng khoảng cách để nhường chỗ cho con AI lọt thỏm vào giữa */
   background-color: transparent;
   font-family: "Quicksand", "Nunito", "Segoe UI", sans-serif;
 }
@@ -27,9 +27,10 @@
     0 0 0 1px rgba(14, 167, 146, 0.05);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible; /* ✅ Đổi thành visible để con AI không bị cắt */
   position: relative;
   transform: translateY(-10px);
+  z-index: 1;
 }
 
 .chatMockup::before {
@@ -46,6 +47,37 @@
   border-radius: 20px;
 }
 
+/* ✅ CON AI ANIMATION ĐẨY HẲN RA NGOÀI BÊN PHẢI */
+.floatingBuddy {
+  position: absolute;
+  bottom: 20px;
+  right: -135px; /* ✅ Đẩy xa ra ngoài */
+  width: 250px;
+  height: 250px;
+  z-index: 10;
+  animation: floatUpDown 3.5s ease-in-out infinite;
+  filter: drop-shadow(0px 20px 30px rgba(14, 167, 146, 0.4));
+  pointer-events: none;
+}
+
+.floatingBuddy img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@keyframes floatUpDown {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-25px) rotate(4deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
 /* --- HEADER --- */
 .chatHeader {
   display: flex;
@@ -54,6 +86,8 @@
   padding: 16px 20px;
   background: var(--color-surface, #f8fafc);
   border-bottom: 1px solid var(--color-border, #e2e8f0);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
 }
 
 .headerLeft {
@@ -73,6 +107,13 @@
   justify-content: center;
   font-size: 18px;
   box-shadow: 0 2px 8px rgba(14, 167, 146, 0.3);
+  overflow: hidden;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .headerText {
@@ -157,6 +198,7 @@
   justify-content: center;
   font-size: 14px;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .typingBubble {
@@ -238,6 +280,8 @@
   padding: 16px 20px;
   background: var(--color-surface, #f8fafc);
   border-top: 1px solid var(--color-border, #e2e8f0);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 .inputWrapper {
@@ -353,7 +397,7 @@
   flex-direction: column;
   gap: 24px;
   width: 100%;
-  margin-bottom: 40px; /* Thêm margin bottom để tách khỏi nút CTA */
+  margin-bottom: 40px;
 }
 
 .featureItem {
@@ -444,6 +488,11 @@
   }
 
   .chatMockup::before {
+    display: none;
+  }
+
+  /* Trên mobile ẩn con AI đi để không bị tràn màn hình */
+  .floatingBuddy {
     display: none;
   }
 

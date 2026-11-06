@@ -58,7 +58,6 @@ import PaymentHistoryPage from "../pages/admin/membershipPackage/PaymentHistoryP
 
 // ===== CONVERSATION — STUDENT =====
 import StudentConversation from "../pages/student/Conversation/StudentConversation/StudentConversation";
-import StudentConversationChat from "../pages/student/Conversation/StudentConversationChat/StudentConversationChat";
 
 // ===== LEADERBOARD — STUDENT =====
 import Leaderboard from "../pages/student/Leaderboard/Leaderboard";
@@ -147,8 +146,12 @@ function AppRoutes() {
             {/* ===== CONVERSATION — STUDENT ===== */}
             <Route path="conversation" element={<StudentConversation />} />
             <Route
+              path="conversation/:conversationId"
+              element={<StudentConversation />}
+            />
+            <Route
               path="conversation/chat/:conversationId"
-              element={<StudentConversationChat />}
+              element={<StudentConversation />}
             />
 
             <Route path="profile" element={<StudentProfile />} />

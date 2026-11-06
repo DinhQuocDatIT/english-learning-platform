@@ -7,7 +7,6 @@ import {
   faCircleCheck,
 } from "@fortawesome/free-regular-svg-icons";
 import {
-  faRobot,
   faMicrophoneLines,
   faWandMagicSparkles,
   faPaperPlane,
@@ -22,14 +21,23 @@ function AISection() {
     <section className={styles.section}>
       {/* Cột trái: Khung Chat giả lập */}
       <div className={styles.chatMockup}>
+        {/* ✅ CON AI ANIMATION BAY LƠ LỬNG */}
+        <div className={styles.floatingBuddy}>
+          <img src="/assets/buddy/buddy_ai_alpha.png" alt="Buddy Animation" />
+        </div>
+
         <div className={styles.chatHeader}>
           <div className={styles.headerLeft}>
             <div className={styles.headerAvatar}>
-              <FontAwesomeIcon icon={faRobot} />
+              <img
+                src="/assets/buddy/buddy_ai.png"
+                alt="Buddy"
+                className={styles.avatarImg}
+              />
             </div>
             <div className={styles.headerText}>
               <div className={styles.headerTitleRow}>
-                <h2 className={styles.headerTitle}>Gia sư AI</h2>
+                <h2 className={styles.headerTitle}>Buddy</h2>
                 <span className={styles.liveBadge}>Live Coach</span>
               </div>
               <p className={styles.headerSubtitle}>Đang hoạt động</p>
@@ -45,7 +53,11 @@ function AISection() {
 
           <div className={styles.typingIndicator}>
             <div className={styles.typingAvatar}>
-              <FontAwesomeIcon icon={faRobot} />
+              <img
+                src="/assets/buddy/buddy_ai.png"
+                alt="Buddy"
+                className={styles.avatarImg}
+              />
             </div>
             <div className={styles.typingBubble}>
               <span></span>
@@ -84,18 +96,14 @@ function AISection() {
               <FontAwesomeIcon icon={faPaperPlane} />
             </button>
           </div>
-          {/* <p className={styles.inputHint}>
-            Nhấn <strong>Enter</strong> để gửi
-          </p> */}
         </div>
       </div>
 
       {/* Cột phải: Nội dung + Nút CTA */}
       <div className={styles.content}>
-        {/* <span className={styles.badge}>Gia sư AI</span> */}
         <h2 className={styles.title}>Đừng Sợ Mắc Lỗi</h2>
         <p className={styles.description}>
-          AI của chúng tôi đóng vai trò như một người cố vấn tinh tế. Chúng tôi
+          Buddy đóng vai trò như một người bạn đồng hành tinh tế. Chúng tôi
           không chỉ sửa lỗi; chúng tôi giải thích lý do và cung cấp các lựa chọn
           thay thế tự nhiên mà người bản xứ hay dùng.
         </p>
@@ -140,7 +148,7 @@ function AISection() {
           </div>
         </div>
 
-        {/* Nút CTA thêm vào đây */}
+        {/* Nút CTA */}
         <button
           className={styles.ctaBtn}
           onClick={() => navigate("/dashboard/student/conversation")}

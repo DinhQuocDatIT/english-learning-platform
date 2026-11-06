@@ -32,20 +32,20 @@
 }
 .userBubble {
   background: var(--color-primary);
-  color: var(--color-text-white);
-  padding: 12px 16px;
+  color: #ffffff;
+  padding: 12px 18px;
   border-radius: 18px;
   border-top-right-radius: 4px;
   font-size: 14px;
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
-  box-shadow: 0 2px 8px rgba(14, 167, 146, 0.15);
+  box-shadow: 0 2px 8px rgba(93, 80, 230, 0.2);
 }
 .userBubble span {
   font-size: 14px;
   font-weight: 400;
-  color: var(--color-text-white);
+  color: #ffffff;
 }
 
 .userTime {
@@ -65,8 +65,32 @@
 .aiRow {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   margin: 16px 0;
+}
+
+/* ✅ Đã gộp: Avatar AI (Buddy) */
+.aiAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-tertiary);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  box-shadow: 0 2px 6px rgba(14, 167, 146, 0.25);
+  overflow: hidden; /* Thêm để ảnh bo tròn không tràn */
+}
+
+/* ✅ Class mới cho ảnh Avatar */
+.aiAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .aiContent {
@@ -756,22 +780,4 @@
     padding: 6px 12px;
     font-size: 12px;
   }
-}
-
-/* ============================================
-   AI AVATAR
-   ============================================ */
-.aiAvatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--color-tertiary);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(14, 167, 146, 0.25);
-  margin-right: 10px;
 }

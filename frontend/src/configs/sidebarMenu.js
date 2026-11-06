@@ -45,7 +45,7 @@ export const sidebarMenus = {
     },
     {
       path: "/dashboard/student/conversation",
-      name: "Chat với AI",
+      name: "Giao tiếp cùng Buddy",
       icon: faComments,
     },
     {
