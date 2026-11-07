@@ -23,6 +23,7 @@ import { speakText } from "../../../../utils/textToSpeech";
 import listeningLessonService from "../../../../services/listeningLessonService";
 import listeningSentenceService from "../../../../services/listeningSentenceService";
 import listeningAnswerService from "../../../../services/listeningAnswerService";
+import useSpeechRecognition from "../../../../hooks/useSpeechRecognition";
 
 import { useLoading } from "../../../../contexts/LoadingContext";
 import Loading from "../../../../components/common/Loading/Loading";
@@ -64,6 +65,12 @@ function StudentListeningPractice() {
 
   // 👇 State cho modal tra từ điển
   const [lookupWord, setLookupWord] = useState(null);
+
+  // ✅ Gọi hook nhận diện giọng nói
+  const { isListening, toggleListening, stopListening } = useSpeechRecognition({
+    text: userInput,
+    setText: setUserInput,
+  });
 
   const inputRef = useRef(null);
 
@@ -107,8 +114,9 @@ function StudentListeningPractice() {
     fetchData();
     return () => {
       window.speechSynthesis.cancel();
+      stopListening();
     };
-  }, [lessonId]);
+  }, [lessonId, stopListening]);
 
   const fetchData = async () => {
     try {
@@ -298,6 +306,8 @@ function StudentListeningPractice() {
   };
 
   const handleCheckResult = async () => {
+    stopListening(); // ✅ Dừng thu âm
+
     const sentence = sentences[currentSentenceIndex];
 
     if (!sentence || !userInput.trim()) {
@@ -386,6 +396,7 @@ function StudentListeningPractice() {
   };
 
   const handleNextSentence = () => {
+    stopListening(); // ✅ Dừng thu âm
     if (currentSentenceIndex >= sentences.length - 1) {
       return;
     }
@@ -405,6 +416,7 @@ function StudentListeningPractice() {
   };
 
   const handlePrevSentence = () => {
+    stopListening(); // ✅ Dừng thu âm
     if (currentSentenceIndex <= 0) {
       return;
     }
@@ -424,6 +436,7 @@ function StudentListeningPractice() {
   };
 
   const handleGoBack = () => {
+    stopListening(); // ✅ Dừng thu âm
     window.speechSynthesis.cancel();
     navigate(`/dashboard/student/topics/${topicId}/lessons`);
   };
@@ -626,20 +639,27 @@ function StudentListeningPractice() {
             className={`${styles.textareaField} ${
               isCurrentCompleted ? styles.textareaCompleted : ""
             }`}
-            placeholder="Gõ câu trả lời của bạn ở đây..."
+            placeholder={
+              isListening
+                ? "Đang nghe... Hãy nói vào micro"
+                : "Gõ câu trả lời của bạn ở đây..."
+            }
             value={userInput}
             onChange={handleInputChange}
             disabled={isSubmitting}
             rows={3}
           />
 
+          {/* ✅ Nút Mic đã được gắn sự kiện */}
           <button
-            className={styles.micButtonAbsolute}
+            className={`${styles.micButtonAbsolute} ${
+              isListening ? styles.micBtnActive : ""
+            }`}
             disabled={isSubmitting}
-            title="Nhập bằng giọng nói (đang phát triển)"
-            onClick={() =>
-              toast.info("🎤 Tính năng nhập bằng giọng nói đang phát triển!")
+            title={
+              isListening ? "Đang nghe... Nhấp để dừng" : "Nhập bằng giọng nói"
             }
+            onClick={toggleListening}
           >
             <FontAwesomeIcon icon={faMicrophone} />
           </button>
@@ -708,37 +728,6 @@ function StudentListeningPractice() {
         >
           {isCurrentAllShown ? "ẨN TẤT CẢ TỪ" : "HIỆN TẤT CẢ TỪ"}
         </button>
-
-        {/* RESULT BANNER */}
-        {/* {showResult && (
-          <div
-            className={`${styles.resultBanner} ${
-              isCorrect ? styles.resultCorrect : styles.resultIncorrect
-            }`}
-          >
-            <div className={styles.resultIconWrapper}>
-              <FontAwesomeIcon icon={isCorrect ? faCircleCheck : faXmark} />
-            </div>
-
-            <div className={styles.resultContent}>
-              <div className={styles.resultTitle}>
-                {isCorrect ? "CHÍNH XÁC!" : "CHƯA CHÍNH XÁC"}
-              </div>
-              <div className={styles.resultSubtitle}>
-                {isCorrect
-                  ? "Bạn đã nghe và gõ chính xác câu này!"
-                  : "Hãy nghe lại và thử một lần nữa nhé!"}
-              </div>
-            </div>
-
-            {isCorrect && earnedXP > 0 && (
-              <div className={styles.resultXPBadge}>
-                <FontAwesomeIcon icon={faStar} style={{ marginRight: "4px" }} />
-                +{earnedXP} XP
-              </div>
-            )}
-          </div>
-        )} */}
 
         {/* ACTION BUTTONS */}
         <div className={styles.actionButtons}>
@@ -827,6 +816,7 @@ function StudentListeningPractice() {
                   isActive ? styles.sentenceActive : ""
                 } ${isCompleted ? styles.sentenceCompleted : ""}`}
                 onClick={() => {
+                  stopListening(); // Dừng thu âm khi đổi câu
                   setSentenceInputs((prev) => ({
                     ...prev,
                     [currentSentenceIndex]: userInput,

@@ -3230,3 +3230,28 @@
 .aiBarDanger {
   background: var(--color-danger) !important;
 }
+/* Hiệu ứng khi đang thu âm */
+.micBtnActive {
+  padding: 10px;
+  color: #ef4444 !important; /* Màu đỏ */
+  border-color: #ef4444 !important;
+  background-color: #fee2e2 !important; /* Nền hồng nhạt */
+  animation: pulseMic 1.2s infinite;
+}
+
+.micBtnActive span,
+.micBtnActive svg {
+  color: #ef4444 !important;
+}
+
+@keyframes pulseMic {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}

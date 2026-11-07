@@ -357,7 +357,7 @@ function StudentConversationChat({
 
   const getPlaceholder = () => {
     if (isListening) {
-      return "Đang lắng nghe... Hãy nói vào micro (Tiếng Anh hoặc Tiếng Việt)";
+      return "Đang lắng nghe... Hãy nói vào micro";
     }
     return "Nói hoặc gõ bằng tiếng Anh hoặc tiếng Việt...";
   };

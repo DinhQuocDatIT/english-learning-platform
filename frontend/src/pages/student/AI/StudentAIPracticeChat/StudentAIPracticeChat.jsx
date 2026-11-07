@@ -35,6 +35,7 @@ import {
   getTopicDisplayName,
   getTopicIcon,
 } from "../../../../constants/topicConstants";
+import useSpeechRecognition from "../../../../hooks/useSpeechRecognition";
 import styles from "./StudentAIPracticeChat.module.css";
 import { useXp } from "../../../../contexts/XpContext";
 
@@ -61,6 +62,12 @@ function StudentAIPracticeChat() {
 
   const [expandedErrorKey, setExpandedErrorKey] = useState(null);
   const [expandedResultErrorKey, setExpandedResultErrorKey] = useState(null);
+
+  // ✅ Gọi hook nhận diện giọng nói
+  const { isListening, toggleListening, stopListening } = useSpeechRecognition({
+    text: answer,
+    setText: setAnswer,
+  });
 
   const chatEndRef = useRef(null);
   const feedbackRef = useRef(null);
@@ -171,6 +178,8 @@ function StudentAIPracticeChat() {
   };
 
   const handleSubmitAnswer = async () => {
+    stopListening(); // ✅ Dừng thu âm nếu đang nghe
+
     if (!hasMembership) {
       toast.warning(
         "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để tiếp tục!",
@@ -615,7 +624,11 @@ function StudentAIPracticeChat() {
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  placeholder="Nhập bản dịch tiếng Anh của bạn..."
+                  placeholder={
+                    isListening
+                      ? "Đang nghe... Hãy nói vào micro"
+                      : "Nhập bản dịch tiếng Anh của bạn..."
+                  }
                   maxLength={500}
                   disabled={isSubmitting}
                   autoFocus
@@ -624,9 +637,16 @@ function StudentAIPracticeChat() {
               </div>
 
               <div className={styles.inputFooter}>
-                <button type="button" className={styles.micBtn}>
+                {/* ✅ Nút Mic đã được gắn sự kiện */}
+                <button
+                  type="button"
+                  className={`${styles.micBtn} ${isListening ? styles.micBtnActive : ""}`}
+                  onClick={toggleListening}
+                >
                   <FontAwesomeIcon icon={faMicrophone} />
-                  <span>Nhập bằng giọng nói</span>
+                  <span>
+                    {isListening ? "Đang thu âm..." : "Nhập bằng giọng nói"}
+                  </span>
                 </button>
                 <button
                   type="submit"
