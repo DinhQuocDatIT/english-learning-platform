@@ -6,7 +6,6 @@ import {
   faSpinner,
   faMicrophone,
   faRobot,
-  faVolumeHigh,
   faHeadphones,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
@@ -21,6 +20,7 @@ import PlaybackVoicePopup from "../../../../components/PlaybackVoicePopup/Playba
 import SlashTopicMenu from "../../../../components/SlashTopicMenu/SlashTopicMenu";
 import { SLASH_TOPICS } from "../../../../constants/slashCommands";
 import { getLevelDisplay } from "../../../../constants/conversationLevelConstants";
+import useSpeechRecognition from "../../../../hooks/useSpeechRecognition";
 import styles from "./StudentConversationChat.module.css";
 
 function StudentConversationChat({
@@ -35,14 +35,18 @@ function StudentConversationChat({
   const { showXpToast } = useXp();
 
   const initialTopicHandledRef = useRef(false);
-  const recognitionRef = useRef(null);
 
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [loadingConv, setLoadingConv] = useState(false);
-  const [isListening, setIsListening] = useState(false);
+
+  // Hook nhận diện giọng nói dùng chung
+  const { isListening, toggleListening, stopListening } = useSpeechRecognition({
+    text: inputMessage,
+    setText: setInputMessage,
+  });
 
   // ===== SPEECH SETTINGS =====
   const [playbackSpeed, setPlaybackSpeed] = useState("1x");
@@ -124,15 +128,9 @@ function StudentConversationChat({
     return () => {
       isMounted = false;
       window.speechSynthesis.cancel();
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {
-          // ignore
-        }
-      }
+      stopListening();
     };
-  }, [conversationId]);
+  }, [conversationId, stopListening]);
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -159,6 +157,9 @@ function StudentConversationChat({
   // Send message handler
   const handleSendMessage = useCallback(
     async (customMessage) => {
+      // Dừng nhận diện giọng nói nếu đang mở
+      stopListening();
+
       const messageToSend =
         typeof customMessage === "string" ? customMessage : inputMessage;
       const trimmed = messageToSend.trim();
@@ -231,6 +232,7 @@ function StudentConversationChat({
       conversationId,
       showXpToast,
       onConversationUpdated,
+      stopListening,
     ],
   );
 
@@ -249,69 +251,6 @@ function StudentConversationChat({
       }, 350);
     }
   }, [conversation, location.state, handleSendMessage]);
-
-  // Speech-To-Text (Microphone)
-  const toggleSpeechRecognition = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      toast.info(
-        "Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói trực tiếp. Vui lòng sử dụng Google Chrome hoặc Edge.",
-      );
-      return;
-    }
-
-    if (isListening) {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {
-          // ignore
-        }
-      }
-      setIsListening(false);
-      return;
-    }
-
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.lang = "en-US";
-      recognition.interimResults = false;
-      recognition.continuous = false;
-
-      recognition.onstart = () => {
-        setIsListening(true);
-      };
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        if (transcript) {
-          setInputMessage((prev) =>
-            prev.trim() ? `${prev.trim()} ${transcript}` : transcript,
-          );
-        }
-      };
-
-      recognition.onerror = (event) => {
-        console.warn("Speech recognition error:", event.error);
-        setIsListening(false);
-        if (event.error === "not-allowed") {
-          toast.error("Vui lòng cho phép quyền truy cập Micro để nói.");
-        }
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
-    } catch (err) {
-      console.error("Speech recognition start failed:", err);
-      setIsListening(false);
-    }
-  };
 
   // Input change
   const handleInputChange = (e) => {
@@ -377,6 +316,7 @@ function StudentConversationChat({
   };
 
   const handleSuggestionClick = (answer) => {
+    stopListening();
     setInputMessage(answer);
     inputRef.current?.focus();
   };
@@ -414,6 +354,13 @@ function StudentConversationChat({
   }
 
   const isActive = conversation?.status === "ACTIVE";
+
+  const getPlaceholder = () => {
+    if (isListening) {
+      return "Đang lắng nghe... Hãy nói vào micro (Tiếng Anh hoặc Tiếng Việt)";
+    }
+    return "Nói hoặc gõ bằng tiếng Anh hoặc tiếng Việt...";
+  };
 
   return (
     <div className={styles.chatContainer}>
@@ -522,11 +469,11 @@ function StudentConversationChat({
               className={`${styles.micBtn} ${
                 isListening ? styles.micBtnListening : ""
               }`}
-              onClick={toggleSpeechRecognition}
+              onClick={toggleListening}
               title={
                 isListening
-                  ? "Đang nghe... Nhấp để dừng"
-                  : "Nói để nhập tin nhắn"
+                  ? "Đang nghe... Nhấp để dừng thu âm"
+                  : "Nói để nhập tin nhắn (Tiếng Anh & Tiếng Việt)"
               }
             >
               <FontAwesomeIcon icon={faMicrophone} />
@@ -538,7 +485,7 @@ function StudentConversationChat({
               value={inputMessage}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder="Nói hoặc gõ bằng tiếng Anh hoặc tiếng Việt..."
+              placeholder={getPlaceholder()}
               maxLength={2000}
               disabled={sending}
               className={styles.textarea}
