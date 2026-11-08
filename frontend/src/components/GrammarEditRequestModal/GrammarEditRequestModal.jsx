@@ -16,8 +16,6 @@ const DEFAULT_REASON_TAGS = [
   "Sửa lỗi chính tả / ngữ pháp",
   "Cập nhật công thức chưa chính xác",
   "Bổ sung thêm dạng bài tập",
-  "Điều chỉnh nội dung cho phù hợp cấp độ",
-  "Thêm phần giải thích chi tiết",
 ];
 
 function GrammarEditRequestModal({
@@ -89,12 +87,12 @@ function GrammarEditRequestModal({
 
         <div className={styles.modalBody}>
           {/* TOPIC INFO */}
-          {topicName && (
+          {/* {topicName && (
             <div className={styles.topicInfo}>
               <span className={styles.topicLabel}>Chủ điểm</span>
               <strong className={styles.topicName}>{topicName}</strong>
             </div>
-          )}
+          )} */}
 
           {/* TAGS GỢI Ý */}
           <div className={styles.formGroup}>

@@ -149,10 +149,6 @@ function TeacherGrammarTopicList() {
       >
         <span className={styles.orderBadge}>{orderNumber}</span>
 
-        <span className={styles.iconBox}>
-          <FontAwesomeIcon icon={faBookOpen} />
-        </span>
-
         <div className={styles.info}>
           <div className={styles.nameRow}>
             <span className={styles.name} title={topic.name}>
@@ -259,13 +255,13 @@ function TeacherGrammarTopicList() {
         style={{ "--topic-color": roadmap?.color || "#0ea792" }}
       >
         <div className={styles.headerLeft}>
-          <span className={styles.levelLabel}>
+          {/* <span className={styles.levelLabel}>
             <FontAwesomeIcon icon={faLayerGroup} />
             {roadmap?.levelLabel || "Lộ trình"}
           </span>
           <h1 style={{ color: roadmap?.color || "#0ea792" }}>
             {roadmap?.name}
-          </h1>
+          </h1> */}
         </div>
         <button
           className={styles.createBtn}

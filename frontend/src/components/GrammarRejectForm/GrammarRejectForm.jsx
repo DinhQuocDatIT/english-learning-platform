@@ -19,7 +19,7 @@ const DEFAULT_REASON_TAGS = [
   "Sai chính tả / lỗi ngữ pháp",
   "Nội dung không đúng chủ đề",
   "Cần bổ sung thêm dạng bài tập",
-  "Độ khó không phù hợp với cấp độ",
+ 
 ];
 
 function GrammarRejectForm({

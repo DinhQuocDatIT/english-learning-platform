@@ -69,7 +69,7 @@
 
 .modalHeader h2 {
   font-size: 17px;
-  font-weight: 800;
+  font-weight:600;
   color: var(--color-secondary, #0f172a);
   margin: 0;
   display: flex;

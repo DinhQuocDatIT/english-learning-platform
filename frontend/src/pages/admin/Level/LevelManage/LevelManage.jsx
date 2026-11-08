@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import styles from "./LevelManage.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,9 +14,6 @@ import {
   faSearch,
   faSort,
   faClock,
-  faTag,
-  faShieldAlt,
-  faCheckCircle,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import AddLevelModal from "../../../../components/level/AddLevelModal/AddLevelModal";
@@ -28,7 +25,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 function LevelManage() {
   const [levels, setLevels] = useState([]);
-  const [filteredLevels, setFilteredLevels] = useState([]);
   const [error, setError] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
@@ -41,6 +37,10 @@ function LevelManage() {
   const [refreshing, setRefreshing] = useState(false);
   const { showLoading, hideLoading } = useLoading();
 
+  const isLocked = (level) => {
+    return level.deletedAt !== null && level.deletedAt !== undefined;
+  };
+
   const fetchLevels = async () => {
     try {
       showLoading();
@@ -49,7 +49,6 @@ function LevelManage() {
       const response = await levelService.getAll();
       const data = response.data?.data ?? [];
       setLevels(data);
-      applyFiltersAndSort(data, searchTerm, filterStatus, sortOrder);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách level:", err);
       setError(
@@ -60,50 +59,86 @@ function LevelManage() {
     }
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadData = async () => {
+      try {
+        showLoading();
+
+        const response = await levelService.getAll();
+        const data = response.data?.data ?? [];
+
+        if (isMounted) {
+          setLevels(data);
+          setError("");
+        }
+      } catch (err) {
+        console.error("Lỗi khi lấy danh sách level:", err);
+        if (isMounted) {
+          setError(
+            err.response?.data?.message || "Không thể tải danh sách cấp độ.",
+          );
+        }
+      } finally {
+        hideLoading();
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Lọc + sắp xếp bằng useMemo thay vì state riêng
+  const filteredLevels = useMemo(() => {
+    let result = [...levels];
+
+    // Tìm kiếm
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase().trim();
+      result = result.filter(
+        (level) =>
+          level.name.toLowerCase().includes(q) ||
+          (level.description && level.description.toLowerCase().includes(q)),
+      );
+    }
+
+    // Lọc trạng thái
+    if (filterStatus === "active") {
+      result = result.filter((level) => !isLocked(level));
+    } else if (filterStatus === "locked") {
+      result = result.filter((level) => isLocked(level));
+    }
+
+    // Sắp xếp
+    result.sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+      return sortOrder === "asc"
+        ? nameA.localeCompare(nameB)
+        : nameB.localeCompare(nameA);
+    });
+
+    return result;
+  }, [levels, searchTerm, filterStatus, sortOrder]);
+
+  // Thống kê
+  const stats = useMemo(() => {
+    const active = levels.filter((l) => !isLocked(l)).length;
+    const locked = levels.filter((l) => isLocked(l)).length;
+    return { total: levels.length, active, locked };
+  }, [levels]);
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchLevels();
     toast.info("Đã làm mới danh sách!");
     setTimeout(() => setRefreshing(false), 500);
   };
-
-  const applyFiltersAndSort = (data, search, status, sort) => {
-    let result = [...data];
-
-    if (search.trim()) {
-      const searchLower = search.toLowerCase();
-      result = result.filter(
-        (level) =>
-          level.name.toLowerCase().includes(searchLower) ||
-          (level.description &&
-            level.description.toLowerCase().includes(searchLower)),
-      );
-    }
-
-    if (status === "active") {
-      result = result.filter((level) => !isLocked(level));
-    } else if (status === "locked") {
-      result = result.filter((level) => isLocked(level));
-    }
-
-    result.sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
-      return sort === "asc"
-        ? nameA.localeCompare(nameB)
-        : nameB.localeCompare(nameA);
-    });
-
-    setFilteredLevels(result);
-  };
-
-  useEffect(() => {
-    fetchLevels();
-  }, []);
-
-  useEffect(() => {
-    applyFiltersAndSort(levels, searchTerm, filterStatus, sortOrder);
-  }, [searchTerm, filterStatus, sortOrder, levels]);
 
   const handleCreate = () => {
     setAddModalOpen(true);
@@ -266,124 +301,78 @@ function LevelManage() {
     }
   };
 
-  const isLocked = (level) => {
-    return level.deletedAt !== null && level.deletedAt !== undefined;
-  };
-
-  const getStatusCount = () => {
-    const active = levels.filter((l) => !isLocked(l)).length;
-    const locked = levels.filter((l) => isLocked(l)).length;
-    return { total: levels.length, active, locked };
-  };
-
-  const statusCount = getStatusCount();
-
   return (
     <div className={styles.wrapper}>
-      {/* Hero Banner */}
-      <section className={styles.heroSection}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroTag}>
-            <FontAwesomeIcon icon={faLayerGroup} />
-            <span>Quản lý Cấp độ</span>
-          </div>
-          <h1 className={styles.heroTitle}>
-            Quản lý hệ thống cấp độ tiếng Anh
-          </h1>
-          <p className={styles.heroSubtitle}>
-            Tạo mới, chỉnh sửa, khóa/mở khóa và xóa các cấp độ học tập. Mỗi cấp
-            độ đại diện cho một trình độ tiếng Anh theo chuẩn CEFR.
-          </p>
-          <div className={styles.heroActions}>
-            <button className={styles.heroCreateBtn} onClick={handleCreate}>
-              <FontAwesomeIcon icon={faPlus} />
-              <span>Thêm cấp độ mới</span>
-            </button>
-            <div className={styles.heroBadges}>
-              <span className={styles.heroBadgeItem}>
-                <FontAwesomeIcon icon={faCheckCircle} /> {statusCount.active}{" "}
-                đang hoạt động
-              </span>
-              <span className={styles.heroBadgeItem}>
-                <FontAwesomeIcon icon={faLock} /> {statusCount.locked} đã khóa
-              </span>
-            </div>
-          </div>
+      {/* Page Header — compact */}
+      <header className={styles.pageHeader}>
+        <div className={styles.headerLeft}>
+        
+         
         </div>
-
-        <div className={styles.heroIllustration}>
-          <div className={styles.heroFloatingCard}>
-            <div className={styles.floatingHeader}>
-              <div className={styles.floatingAvatar}>
-                <FontAwesomeIcon icon={faLayerGroup} />
-              </div>
-              <div>
-                <h4>Hệ thống cấp độ</h4>
-                <p>Tổng cộng {statusCount.total} cấp độ</p>
-              </div>
-            </div>
-            <div className={styles.floatingStats}>
-              <div className={styles.floatingStatItem}>
-                <FontAwesomeIcon icon={faCircle} className={styles.activeDot} />
-                <span>Đang hoạt động: {statusCount.active}</span>
-              </div>
-              <div className={styles.floatingStatItem}>
-                <FontAwesomeIcon icon={faBan} className={styles.lockedDot} />
-                <span>Đã khóa: {statusCount.locked}</span>
-              </div>
-            </div>
-            <div className={styles.floatingFooter}>
-              <FontAwesomeIcon icon={faShieldAlt} />
-              <span>Quản lý linh hoạt, bảo mật cao</span>
-            </div>
-          </div>
+        <div className={styles.headerRight}>
+          <button className={styles.createBtn} onClick={handleCreate}>
+            <FontAwesomeIcon icon={faPlus} />
+            <span>Thêm cấp độ</span>
+          </button>
         </div>
-      </section>
+      </header>
 
-      {/* Stats Bar */}
+      {/* Stats chips */}
+      <div className={styles.statsRow}>
+        <span className={`${styles.statChip} ${styles.statChipTotal}`}>
+          <FontAwesomeIcon icon={faLayerGroup} />
+          Tổng cộng: {stats.total}
+        </span>
+        <span className={`${styles.statChip} ${styles.statChipActive}`}>
+          <FontAwesomeIcon icon={faCircle} />
+          Hoạt động: {stats.active}
+        </span>
+        <span className={`${styles.statChip} ${styles.statChipLocked}`}>
+          <FontAwesomeIcon icon={faLock} />
+          Đã khóa: {stats.locked}
+        </span>
+      </div>
 
-      {/* Filter & Search Section */}
-      <section className={styles.filterSection}>
+      {/* Toolbar */}
+      <div className={styles.toolbar}>
         <div className={styles.searchWrapper}>
           <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Tìm kiếm cấp độ..."
+            placeholder="Tìm kiếm theo tên, mô tả..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className={styles.searchInput}
           />
         </div>
-        <div className={styles.filterControls}>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="all">Tất cả</option>
-            <option value="active">Đang hoạt động</option>
-            <option value="locked">Đã khóa</option>
-          </select>
-          <button
-            type="button"
-            className={styles.sortBtn}
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          >
-            <FontAwesomeIcon icon={faSort} />
-            <span>{sortOrder === "asc" ? "A-Z" : "Z-A"}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.refreshBtn} ${refreshing ? styles.refreshing : ""}`}
-            onClick={handleRefresh}
-            disabled={refreshing}
-          >
-            <FontAwesomeIcon icon={faSync} spin={refreshing} />
-          </button>
-        </div>
-      </section>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className={styles.filterSelect}
+        >
+          <option value="all">Tất cả</option>
+          <option value="active">Đang hoạt động</option>
+          <option value="locked">Đã khóa</option>
+        </select>
+        <button
+          type="button"
+          className={styles.sortBtn}
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+        >
+          <FontAwesomeIcon icon={faSort} />
+          <span>{sortOrder === "asc" ? "A → Z" : "Z → A"}</span>
+        </button>
+        <button
+          type="button"
+          className={`${styles.refreshBtn} ${refreshing ? styles.refreshing : ""}`}
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <FontAwesomeIcon icon={faSync} spin={refreshing} />
+        </button>
+      </div>
 
-      {/* Error Message */}
+      {/* Error */}
       {error && (
         <div className={styles.errorMessage}>
           <FontAwesomeIcon icon={faTimesCircle} />
@@ -391,7 +380,7 @@ function LevelManage() {
         </div>
       )}
 
-      {/* Level Grid */}
+      {/* Empty State */}
       {!error && filteredLevels.length === 0 && (
         <div className={styles.emptyState}>
           <div className={styles.emptyIconCircle}>
@@ -399,8 +388,8 @@ function LevelManage() {
           </div>
           <h3>Chưa có cấp độ nào</h3>
           <p>
-            Bắt đầu bằng cách tạo cấp độ đầu tiên cho hệ thống. Mỗi cấp độ sẽ có
-            tên, mô tả và màu sắc riêng.
+            Bắt đầu bằng cách tạo cấp độ đầu tiên. Mỗi cấp độ sẽ có tên, mô
+            tả và màu sắc riêng.
           </p>
           <button className={styles.emptyStartBtn} onClick={handleCreate}>
             <FontAwesomeIcon icon={faPlus} />
@@ -409,107 +398,96 @@ function LevelManage() {
         </div>
       )}
 
+      {/* Level list / table */}
       {!error && filteredLevels.length > 0 && (
-        <div className={styles.levelGrid}>
+        <div className={styles.levelTable}>
           {filteredLevels.map((level) => {
             const locked = isLocked(level);
 
             return (
               <div
                 key={level.id}
-                className={`${styles.levelCard} ${locked ? styles.cardLocked : styles.cardActive}`}
+                className={`${styles.levelRow} ${locked ? styles.rowLocked : ""}`}
               >
-                <div className={styles.cardHeader}>
-                  <div className={styles.cardTopicBadge}>
-                    <span
-                      className={styles.topicIconBox}
-                      style={{
-                        background: `${level.color}20`,
-                        color: level.color,
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faTag} />
+                {/* Color dot */}
+                <span
+                  className={styles.levelColorDot}
+                  style={{ backgroundColor: level.color, color: level.color }}
+                />
+
+                {/* Name + description */}
+                <div className={styles.levelMainInfo}>
+                  <span className={styles.levelName}>{level.name}</span>
+                  {level.description && (
+                    <span className={styles.levelDesc}>
+                      {level.description}
                     </span>
-                    <span className={styles.topicName}>{level.name}</span>
-                  </div>
-
-                  <span
-                    className={`${styles.statusPill} ${
-                      locked ? styles.statusLocked : styles.statusActive
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={locked ? faBan : faCircle} />
-                    <span>{locked ? "Đã khóa" : "Hoạt động"}</span>
-                  </span>
+                  )}
                 </div>
 
-                <div className={styles.cardBody}>
-                  <p className={styles.levelDescription}>
-                    {level.description || "Chưa có mô tả cho cấp độ này."}
-                  </p>
-                </div>
+                {/* Status */}
+                <span
+                  className={`${styles.statusBadge} ${locked ? styles.badgeLocked : styles.badgeActive}`}
+                >
+                  <FontAwesomeIcon icon={locked ? faBan : faCircle} />
+                  {locked ? "Đã khóa" : "Hoạt động"}
+                </span>
 
-                <div className={styles.cardMetaRow}>
-                  <span className={styles.levelId}>
-                    <FontAwesomeIcon icon={faTag} />
-                    ID: {level.id}
-                  </span>
-                  <span className={styles.cardDate}>
-                    <FontAwesomeIcon icon={faClock} />
-                    {locked
-                      ? `Đã khóa ${new Date(level.deletedAt).toLocaleDateString("vi-VN")}`
-                      : level.createdAt
-                        ? `Tạo ${new Date(level.createdAt).toLocaleDateString("vi-VN")}`
-                        : ""}
-                  </span>
-                </div>
+                {/* Date */}
+                <span className={styles.levelDate}>
+                  <FontAwesomeIcon icon={faClock} />
+                  {locked
+                    ? new Date(level.deletedAt).toLocaleDateString("vi-VN")
+                    : level.createdAt
+                      ? new Date(level.createdAt).toLocaleDateString("vi-VN")
+                      : "—"}
+                </span>
 
-                <div className={styles.cardFooter}>
+                {/* Actions */}
+                <div className={styles.rowActions}>
                   <button
                     type="button"
-                    className={`${styles.actionBtn} ${styles.editBtn}`}
+                    className={`${styles.iconBtn} ${styles.iconBtnEdit}`}
                     onClick={() => handleEdit(level)}
                     disabled={locked}
+                    title="Chỉnh sửa"
                   >
                     <FontAwesomeIcon icon={faPen} />
-                    Sửa
                   </button>
-                  <button
-                    type="button"
-                    className={`${styles.actionBtn} ${styles.deleteBtn}`}
-                    onClick={() => handleDelete(level)}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                    Xóa
-                  </button>
+
+                  <span className={styles.actionDivider} />
+
                   {locked ? (
                     <button
                       type="button"
-                      className={`${styles.actionBtn} ${styles.unlockBtn}`}
+                      className={`${styles.iconBtn} ${styles.iconBtnUnlock}`}
                       onClick={() => handleUnlock(level)}
+                      title="Mở khóa"
                     >
                       <FontAwesomeIcon icon={faUnlock} />
-                      Mở khóa
                     </button>
                   ) : (
                     <button
                       type="button"
-                      className={`${styles.actionBtn} ${styles.lockBtn}`}
+                      className={`${styles.iconBtn} ${styles.iconBtnLock}`}
                       onClick={() => handleLock(level)}
+                      title="Khóa"
                     >
                       <FontAwesomeIcon icon={faLock} />
-                      Khóa
                     </button>
                   )}
-                </div>
 
-                {/* Bỏ overlay này đi vì đã có status badge rồi */}
-                {/* {locked && (
-    <div className={styles.lockedOverlay}>
-      <FontAwesomeIcon icon={faLock} />
-      <span>Đã khóa</span>
-    </div>
-  )} */}
+                  <span className={styles.actionDivider} />
+
+                  <button
+                    type="button"
+                    className={`${styles.iconBtn} ${styles.iconBtnDelete}`}
+                    onClick={() => handleDelete(level)}
+                    title="Xóa"
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </button>
+                </div>
               </div>
             );
           })}

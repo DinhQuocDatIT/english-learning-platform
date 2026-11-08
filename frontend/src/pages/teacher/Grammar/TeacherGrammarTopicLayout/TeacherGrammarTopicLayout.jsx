@@ -84,9 +84,9 @@ function TeacherGrammarTopicLayout() {
         <div className={styles.headerLeft}>
           <h1>{topic?.name}</h1>
           <div className={styles.metaRow}>
-            {topic?.slug && (
+            {/* {topic?.slug && (
               <code className={styles.topicSlug}>/{topic.slug}</code>
-            )}
+            )} */}
             {topic?.status && (
               <span
                 className={styles.statusBadge}
