@@ -59,7 +59,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     private final StreakService streakService;
     private final ObjectMapper objectMapper;
 
-    // ✅ NEW: tracking AIUsage
     private final AIUsageRepository aiUsageRepository;
     private final PricingService pricingService;
     private final GeminiConfig geminiConfig;
@@ -77,9 +76,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
 
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy học viên"));
-
-        // ✅ Cho phép nhiều conversation ACTIVE song song (giống ChatGPT)
-        // Không auto-END conversation cũ khi tạo mới
 
         ChatConversation conversation = new ChatConversation();
         conversation.setStudent(student);
@@ -115,7 +111,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     }
 
     // ========================================
-    // 2. SEND MESSAGE
+    // 2. SEND MESSAGE (TÁCH 2 CALL: CHAT → EVALUATE)
     // ========================================
     @Override
     public ChatMessageResponse sendMessage(Long userId, Long conversationId, SendChatMessageRequest request) {
@@ -134,12 +130,14 @@ public class ChatConversationServiceImpl implements ChatConversationService {
             throw new BusinessException("Cuộc hội thoại đã kết thúc");
         }
 
+        // Lưu tin nhắn của user
         ChatMessage userMsg = new ChatMessage();
         userMsg.setConversation(conversation);
         userMsg.setRole("USER");
         userMsg.setContent(request.getMessage().trim());
         messageRepository.save(userMsg);
 
+        // Lấy lịch sử chat
         List<ChatMessage> history = messageRepository
                 .findByConversationIdOrderByCreatedAtAsc(conversationId);
 
@@ -148,39 +146,82 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                 .collect(Collectors.toList());
 
         String historyText = buildHistoryText(historyForPrompt);
+        String userMsgText = request.getMessage().trim();
 
-        String prompt = ConversationPromptConstants.buildChatPrompt(
+        // ========================================
+        // CALL 1: CHAT (Chỉ trò chuyện)
+        // ========================================
+        String chatPrompt = ConversationPromptConstants.buildChatPrompt(
                 conversation.getLevel().name(),
                 historyText,
-                request.getMessage().trim()
+                userMsgText
         );
 
-        // ✅ Đo thời gian + gọi AI
-        long startTime = System.currentTimeMillis();
-        String aiResponseJson = conversationGeminiClient.callGeminiWithRetry(prompt, 3);
-        long responseTime = System.currentTimeMillis() - startTime;
+        long chatStart = System.currentTimeMillis();
+        String chatResponseJson = conversationGeminiClient.callGeminiWithRetry(chatPrompt, 3);
+        long chatResponseTime = System.currentTimeMillis() - chatStart;
 
-        // ✅ Lấy usage metadata
-        GeminiUsageMetadata usage = conversationGeminiClient.getCurrentUsage();
+        JsonNode chatRoot = objectMapper.readTree(chatResponseJson);
+        String reply = chatRoot.path("reply").asText("");
+        String replyTranslation = chatRoot.path("replyTranslation").asText("");
+        String nextQuestion = chatRoot.path("nextQuestion").asText("");
+        String nextQuestionTranslation = chatRoot.path("nextQuestionTranslation").asText("");
+        List<String> suggestedAnswers = parseStringList(chatRoot.path("suggestedAnswers"));
+
+        // ✅ Lấy usage của Call 1
+        GeminiUsageMetadata usage1 = conversationGeminiClient.getCurrentUsage();
         String provider = geminiConfig.getProvider();
         String model = geminiConfig.getModel();
 
-        JsonNode root = objectMapper.readTree(aiResponseJson);
-        String reply = root.path("reply").asText("");
-        String replyTranslation = root.path("replyTranslation").asText("");
-        String nextQuestion = root.path("nextQuestion").asText("");
-        String nextQuestionTranslation = root.path("nextQuestionTranslation").asText("");
-        List<String> suggestedAnswers = parseStringList(root.path("suggestedAnswers"));
-        ChatCorrection correction = parseCorrection(root.path("correction"));
+        // ========================================
+        // CALL 2: EVALUATE (Chỉ chấm lỗi)
+        // ========================================
+        String evalPrompt = ConversationPromptConstants.buildEvaluatePrompt(
+                conversation.getLevel().name(),
+                historyText,
+                userMsgText
+        );
 
-        // Validation: Kiểm tra và fix correction nếu AI cắt bớt + Dọn rác
-        correction = validateAndFixCorrection(correction, request.getMessage().trim());
+        ChatCorrection correction = null;
+        GeminiUsageMetadata usage2 = null;
+        try {
+            String evalResponseJson = conversationGeminiClient.callGeminiWithRetry(evalPrompt, 3);
+            // ✅ Lấy usage của Call 2
+            usage2 = conversationGeminiClient.getCurrentUsage();
 
-        // ✅ STREAK: Gửi tin nhắn → tính chuỗi (không cần biết đúng/sai)
+            JsonNode evalRoot = objectMapper.readTree(evalResponseJson);
+            correction = parseCorrection(evalRoot);
+            correction = validateAndFixCorrection(correction, userMsgText);
+        } catch (Exception e) {
+            log.error("Lỗi khi chấm điểm bài chat: {}", e.getMessage(), e);
+            // Nếu lỗi chấm điểm thì bỏ qua, vẫn cho user chat bình thường
+        }
+
+        // ========================================
+        // CỘNG DỒN TOKEN CỦA CẢ 2 CALL
+        // ========================================
+        GeminiUsageMetadata finalUsage = usage1;
+        if (usage1 != null && usage2 != null) {
+            int totalInput = (usage1.getPromptTokenCount() != null ? usage1.getPromptTokenCount() : 0)
+                    + (usage2.getPromptTokenCount() != null ? usage2.getPromptTokenCount() : 0);
+            int totalOutput = (usage1.getCandidatesTokenCount() != null ? usage1.getCandidatesTokenCount() : 0)
+                    + (usage2.getCandidatesTokenCount() != null ? usage2.getCandidatesTokenCount() : 0);
+            int totalTokens = (usage1.getTotalTokenCount() != null ? usage1.getTotalTokenCount() : 0)
+                    + (usage2.getTotalTokenCount() != null ? usage2.getTotalTokenCount() : 0);
+
+            finalUsage = GeminiUsageMetadata.builder()
+                    .promptTokenCount(totalInput)
+                    .candidatesTokenCount(totalOutput)
+                    .totalTokenCount(totalTokens)
+                    .build();
+        }
+
+        // ========================================
+        // STREAK & XP
+        // ========================================
         Student student = conversation.getStudent();
         streakService.recordActivity(student);
 
-        // ✅ XP: Nếu câu ĐÚNG (hoặc correction bị hủy do rác) → cộng XP dựa vào level
         int xpEarned = 0;
         boolean isCorrect = correction == null || !Boolean.TRUE.equals(correction.getHasError());
         if (isCorrect) {
@@ -195,6 +236,9 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
         studentRepository.save(student);
 
+        // ========================================
+        // LƯU TIN NHẮN AI TRẢ VỀ
+        // ========================================
         ChatMessage aiMsg = new ChatMessage();
         aiMsg.setConversation(conversation);
         aiMsg.setRole("ASSISTANT");
@@ -212,8 +256,8 @@ public class ChatConversationServiceImpl implements ChatConversationService {
 
         studentMembershipService.incrementAIRequestCount(userId);
 
-        // ✅ NEW: Lưu AIUsage cho conversation
-        saveChatAIUsage(student, conversation.getId(), provider, model, responseTime, usage);
+        // ✅ Lưu AIUsage với tổng token của cả 2 Call
+        saveChatAIUsage(student, conversation.getId(), provider, model, chatResponseTime, finalUsage);
 
         log.info("Message sent. conversationId={}, messageCount={}, xpEarned={}",
                 conversationId, conversation.getMessageCount(), xpEarned);
@@ -298,10 +342,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
     // PRIVATE HELPERS
     // ========================================
 
-    /**
-     * ✅ NEW: Lưu AIUsage cho chat conversation.
-     * Bọc try/catch để không làm hỏng flow chính nếu tracking lỗi.
-     */
     private void saveChatAIUsage(Student student, Long conversationId,
                                  String provider, String model,
                                  long responseTimeMs, GeminiUsageMetadata usage) {
@@ -355,12 +395,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
     }
 
-    /**
-     * Tính XP dựa vào level:
-     * - BEGINNER: 5 XP
-     * - INTERMEDIATE: 8 XP
-     * - ADVANCED: 12 XP
-     */
     private int calculateChatXp(ChatLevel level) {
         return switch (level) {
             case BEGINNER -> 5;
@@ -386,9 +420,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         }
     }
 
-    /**
-     * ✅ ĐÃ NÂNG CẤP: Validate, Fix và DỌN RÁC correction từ AI.
-     */
     private ChatCorrection validateAndFixCorrection(ChatCorrection correction, String userMessage) {
         if (correction == null || !Boolean.TRUE.equals(correction.getHasError())) {
             return correction;
@@ -416,7 +447,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                     .filter(exp -> {
                         if (exp == null || exp.isBlank()) return false;
                         String lower = exp.toLowerCase();
-                        // Bỏ qua các lỗi bịa đặt về viết hoa / mạo từ vô lý
                         if (lower.contains("viết hoa") && !lower.contains("hòa hợp")) return false;
                         if (lower.contains("mạo từ 'the'") && !lower.contains("thiếu")) return false;
                         return true;
@@ -425,7 +455,7 @@ public class ChatConversationServiceImpl implements ChatConversationService {
             correction.setExplanations(cleanExplanations);
         }
 
-        // 3. Nếu explanations rỗng -> HỦY BỎ CORRECTION (coi như không có lỗi)
+        // 3. Nếu explanations rỗng -> HỦY BỎ CORRECTION
         if (correction.getExplanations() == null || correction.getExplanations().isEmpty()) {
             log.info("🧹 Đã xóa correction rác (explanations rỗng)");
             return null;
@@ -469,7 +499,6 @@ public class ChatConversationServiceImpl implements ChatConversationService {
         if (!hasError) return null;
 
         String userOriginal = node.path("userOriginal").asText("");
-
         List<String> explanations = parseStringList(node.path("explanations"));
 
         if (explanations.isEmpty()) {
@@ -498,17 +527,14 @@ public class ChatConversationServiceImpl implements ChatConversationService {
                 .filter(exp -> {
                     if (exp == null || exp.isBlank()) return false;
                     String lower = exp.toLowerCase();
-
                     if (lower.contains("dấu cách")) return false;
                     if (lower.contains("khoảng trắng")) return false;
-
                     if (lower.contains("viết hoa")
                             && !lower.contains("hòa hợp")
                             && !lower.contains("thì")
                             && !lower.contains("ngôi")) {
                         return false;
                     }
-
                     return true;
                 })
                 .collect(Collectors.toList());
