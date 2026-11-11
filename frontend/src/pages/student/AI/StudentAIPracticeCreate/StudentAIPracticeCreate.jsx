@@ -12,10 +12,15 @@ import {
   faLightbulb,
   faPlus,
   faTimes,
+  faMagnifyingGlass,
+  faCircleCheck,
+  faFolderOpen,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import practiceService from "../../../../services/practiceService";
 import studentMembershipService from "../../../../services/studentMembershipService";
+import vocabularyService from "../../../../services/vocabularyService";
+import studentVocabularyService from "../../../../services/studentVocabularyService"; // ✅ Thêm API kho từ
 import { useLoading } from "../../../../contexts/LoadingContext";
 import {
   TOPIC_DISPLAY,
@@ -34,15 +39,25 @@ function StudentAIPracticeCreate() {
     sentenceType: "RANDOM",
     topic: "TRAVEL",
     questionLimit: 20,
-    vocabularyWords: [],
+    vocabularyWords: [], 
   });
 
-  const [vocabInputs, setVocabInputs] = useState([""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [aiUsage, setAiUsage] = useState(null);
-
   const [suggestions, setSuggestions] = useState([]);
+
+  // ✅ State cho phần Tìm kiếm / Kho từ vựng
+  const [vocabSourceTab, setVocabSourceTab] = useState("search"); // "search" | "saved"
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+
+  const [savedWords, setSavedWords] = useState([]);
+  const [loadingSaved, setLoadingSaved] = useState(false);
+  const [savedSearchQuery, setSavedSearchQuery] = useState(""); // Tìm kiếm nhanh trong kho đã lưu
+
+  const MAX_VOCAB_WORDS = 5;
 
   useEffect(() => {
     checkMembershipAndLoad();
@@ -51,14 +66,71 @@ function StudentAIPracticeCreate() {
   useEffect(() => {
     const list = getRandomVocabSuggestions(formData.topic, formData.level, 20);
     setSuggestions(list);
-    setVocabInputs([""]);
   }, [formData.topic, formData.level]);
+
+  // ✅ Gọi API lấy Kho từ vựng khi chuyển Tab
+  useEffect(() => {
+    if (vocabSourceTab === "saved" && savedWords.length === 0) {
+      fetchSavedWords();
+    }
+  }, [vocabSourceTab]);
+
+  const fetchSavedWords = async () => {
+    try {
+      setLoadingSaved(true);
+      const response = await studentVocabularyService.getAll();
+      const data = response?.data?.data ?? [];
+      setSavedWords(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Lỗi lấy kho từ vựng:", error);
+      toast.error("Không thể tải kho từ vựng.");
+    } finally {
+      setLoadingSaved(false);
+    }
+  };
+
+  // ✅ Debounce Tìm kiếm API bên ngoài
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (vocabSourceTab === "search") {
+        handleSearch();
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery, vocabSourceTab]);
+
+  const handleSearch = async () => {
+    const keyword = searchQuery.trim();
+    if (!keyword) {
+      setSearchResults([]);
+      return;
+    }
+    try {
+      setSearching(true);
+      const response = await vocabularyService.lookup(keyword);
+      const data = response?.data?.data;
+      if (data) {
+        const resultsArray = Array.isArray(data) ? data : [data];
+        const formattedResults = resultsArray.map((item) => ({
+          ...item,
+          id: item.id || `lookup-${item.word}`,
+        }));
+        setSearchResults(formattedResults);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error("Lỗi tìm kiếm từ vựng:", error);
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
+  };
 
   const checkMembershipAndLoad = async () => {
     try {
       showLoading();
       setIsCheckingAccess(true);
-
       const [membershipResponse, usageResponse] = await Promise.all([
         studentMembershipService.getCurrentMembership(),
         studentMembershipService.getAIUsage(),
@@ -68,23 +140,15 @@ function StudentAIPracticeCreate() {
       const usageInfo = usageResponse?.data?.data;
 
       if (!membershipInfo) {
-        toast.warning(
-          "Chức năng Luyện tập AI yêu cầu gói Premium. Vui lòng đăng ký để sử dụng!",
-          { position: "top-center", autoClose: 5000 },
-        );
+        toast.warning("Chức năng Luyện tập AI yêu cầu gói Premium.", { position: "top-center" });
         navigate("/dashboard/student/ai-practice");
         return;
       }
-
       if (usageInfo && !usageInfo.canMakeRequest) {
-        toast.warning(
-          "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai!",
-          { position: "top-center", autoClose: 5000 },
-        );
+        toast.warning("Bạn đã hết lượt sử dụng AI hôm nay.", { position: "top-center" });
         navigate("/dashboard/student/ai-practice");
         return;
       }
-
       setAiUsage(usageInfo);
       setIsCheckingAccess(false);
     } catch (error) {
@@ -104,18 +168,15 @@ function StudentAIPracticeCreate() {
     { value: "C1", label: "C1 - Cao cấp", color: "#ef4444" },
     { value: "C2", label: "C2 - Thành thạo", color: "#8b5cf6" },
   ];
-
   const SENTENCE_TYPES = [
     { value: "QUESTION", label: "Câu hỏi" },
     { value: "ANSWER", label: "Câu trả lời" },
     { value: "RANDOM", label: "Ngẫu nhiên" },
   ];
-
   const TOPICS = Object.entries(TOPIC_DISPLAY).map(([value, label]) => ({
     value,
     label: `${getTopicIcon(value)} ${label}`,
   }));
-
   const QUESTION_LIMITS = [
     { value: 10, label: "10 câu" },
     { value: 20, label: "20 câu" },
@@ -123,210 +184,131 @@ function StudentAIPracticeCreate() {
     { value: 50, label: "50 câu" },
   ];
 
-  const MAX_VOCAB_WORDS = 5;
-
-  const getValidVocabWords = () => {
-    return vocabInputs
-      .map((word) => word.trim())
-      .filter((word) => word.length > 0);
+  const getWordId = (wordObj) => wordObj.id || wordObj.word;
+  
+  const isWordSelected = (wordObj) => {
+    return formData.vocabularyWords.some(
+      (w) => w.word.toLowerCase() === wordObj.word.toLowerCase()
+    );
   };
 
-  const getFilledCount = () => getValidVocabWords().length;
-
-  const handleVocabChange = (index, value) => {
-    const newInputs = [...vocabInputs];
-    newInputs[index] = value;
-    setVocabInputs(newInputs);
-  };
-
-  const addVocabInput = () => {
-    if (vocabInputs.length >= MAX_VOCAB_WORDS) {
-      toast.warning(`Chỉ được nhập tối đa ${MAX_VOCAB_WORDS} từ vựng`);
-      return;
-    }
-    setVocabInputs([...vocabInputs, ""]);
-  };
-
-  const removeVocabInput = (index) => {
-    if (vocabInputs.length <= 1) {
-      setVocabInputs([""]);
-      return;
-    }
-    const newInputs = vocabInputs.filter((_, i) => i !== index);
-    setVocabInputs(newInputs);
-  };
-
-  const handleSelectSuggestion = (wordObj) => {
-    const wordEn = wordObj.en;
-    const currentWords = getValidVocabWords();
-
-    if (currentWords.includes(wordEn)) {
-      return;
-    }
-
-    if (currentWords.length >= MAX_VOCAB_WORDS) {
+  const handleAddWord = (wordObj) => {
+    if (isWordSelected(wordObj)) return;
+    if (formData.vocabularyWords.length >= MAX_VOCAB_WORDS) {
       toast.warning(`Chỉ được chọn tối đa ${MAX_VOCAB_WORDS} từ vựng`);
       return;
     }
-
-    const emptyIndex = vocabInputs.findIndex((w) => !w.trim());
-    if (emptyIndex !== -1) {
-      const newInputs = [...vocabInputs];
-      newInputs[emptyIndex] = wordEn;
-      setVocabInputs(newInputs);
-    } else {
-      if (vocabInputs.length < MAX_VOCAB_WORDS) {
-        setVocabInputs([...vocabInputs, wordEn]);
-      } else {
-        toast.warning(`Chỉ được chọn tối đa ${MAX_VOCAB_WORDS} từ vựng`);
-      }
-    }
+    setFormData((prev) => ({
+      ...prev,
+      vocabularyWords: [...prev.vocabularyWords, wordObj]
+    }));
+    setSearchQuery("");
+    setSearchResults([]);
   };
 
-  const handleRemoveSuggestion = (wordObj) => {
-    const wordEn = wordObj.en;
-    const newInputs = vocabInputs.filter((w) => w.trim() !== wordEn);
-    setVocabInputs(newInputs.length > 0 ? newInputs : [""]);
+  const handleRemoveWord = (wordObj) => {
+    setFormData((prev) => ({
+      ...prev,
+      vocabularyWords: prev.vocabularyWords.filter(
+        (w) => w.word.toLowerCase() !== wordObj.word.toLowerCase()
+      )
+    }));
   };
 
-  const isSuggestionSelected = (wordObj) => {
-    return getValidVocabWords().includes(wordObj.en);
+  const handleSelectSuggestion = (suggestionObj) => {
+    const wordObj = { word: suggestionObj.en, meanings: [{ meaning: suggestionObj.vi }] };
+    if (!isWordSelected(wordObj)) handleAddWord(wordObj);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.topic) {
       toast.warning("Vui lòng chọn chủ đề.");
       return;
     }
-
     if (aiUsage && !aiUsage.canMakeRequest) {
-      toast.warning(
-        "Bạn đã hết lượt sử dụng AI hôm nay. Vui lòng quay lại vào ngày mai!",
-      );
+      toast.warning("Bạn đã hết lượt sử dụng AI hôm nay.");
       return;
     }
-
-    const vocabularyWords = getValidVocabWords();
-
-    if (vocabularyWords.length > MAX_VOCAB_WORDS) {
-      toast.warning(`Chỉ được nhập tối đa ${MAX_VOCAB_WORDS} từ vựng`);
-      return;
-    }
-
     try {
       setIsSubmitting(true);
       showLoading();
 
+      const wordStrings = formData.vocabularyWords.map((w) => w.word);
       const payload = {
         level: formData.level,
         sentenceType: formData.sentenceType,
         topic: formData.topic,
         questionLimit: formData.questionLimit,
-        vocabularyWords: vocabularyWords,
+        vocabularyWords: wordStrings,
       };
-
-      console.log("📤 Payload gửi lên backend:", payload);
 
       const response = await practiceService.createPractice(payload);
       const data = response?.data?.data;
-
       toast.success("🎉 Tạo bài luyện tập thành công!");
       navigate(`/dashboard/student/ai-practice/chat/${data.id}`);
     } catch (error) {
       console.error("❌ Lỗi tạo practice:", error);
-
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.data?.message ||
-        "Không thể tạo bài luyện tập. Vui lòng thử lại.";
-      toast.error(errorMessage);
+      toast.error(error.response?.data?.message || "Không thể tạo bài luyện tập.");
     } finally {
       setIsSubmitting(false);
       hideLoading();
     }
   };
 
-  const handleBack = () => {
-    navigate("/dashboard/student/ai-practice");
-  };
-
+  const handleBack = () => navigate("/dashboard/student/ai-practice");
   const isFormValid = formData.level && formData.topic && formData.sentenceType;
 
-  if (isCheckingAccess) {
-    return <Loading size="large" text="Đang kiểm tra quyền truy cập..." />;
-  }
+  if (isCheckingAccess) return <Loading size="large" text="Đang kiểm tra quyền truy cập..." />;
+
+  // Lọc danh sách kho từ vựng dựa trên thanh tìm kiếm nhanh
+  const filteredSavedWords = savedWords.filter(item => 
+    item.word.toLowerCase().includes(savedSearchQuery.toLowerCase())
+  );
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
         <button className={styles.backBtn} onClick={handleBack}>
-          <FontAwesomeIcon icon={faArrowLeft} />
-          Quay lại
+          <FontAwesomeIcon icon={faArrowLeft} /> Quay lại
         </button>
-        <h1 className={styles.headerTitle}>
-          <FontAwesomeIcon icon={faRobot} className={styles.headerIcon} />
-          Tạo bài luyện tập
-        </h1>
+       
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.formGrid}>
-          {/* Level */}
+          {/* LEVEL */}
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <FontAwesomeIcon icon={faBookOpen} />
-              Trình độ
-            </label>
+            <label className={styles.formLabel}><FontAwesomeIcon icon={faBookOpen} /> Trình độ</label>
             <div className={styles.levelOptions}>
               {LEVELS.map((level) => (
                 <button
                   key={level.value}
                   type="button"
-                  className={`${styles.levelOption} ${
-                    formData.level === level.value ? styles.active : ""
-                  }`}
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, level: level.value }))
-                  }
+                  className={`${styles.levelOption} ${formData.level === level.value ? styles.active : ""}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, level: level.value }))}
                   style={{
-                    borderColor:
-                      formData.level === level.value ? level.color : "",
-                    backgroundColor:
-                      formData.level === level.value ? `${level.color}15` : "",
+                    borderColor: formData.level === level.value ? level.color : "",
+                    backgroundColor: formData.level === level.value ? `${level.color}15` : "",
                   }}
                 >
-                  <span
-                    className={styles.levelDot}
-                    style={{ backgroundColor: level.color }}
-                  />
+                  <span className={styles.levelDot} style={{ backgroundColor: level.color }} />
                   {level.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Sentence Type */}
+          {/* SENTENCE TYPE */}
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <FontAwesomeIcon icon={faList} />
-              Loại câu
-            </label>
+            <label className={styles.formLabel}><FontAwesomeIcon icon={faList} /> Loại câu</label>
             <div className={styles.typeOptions}>
               {SENTENCE_TYPES.map((type) => (
                 <button
                   key={type.value}
                   type="button"
-                  className={`${styles.typeOption} ${
-                    formData.sentenceType === type.value ? styles.active : ""
-                  }`}
-                  onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      sentenceType: type.value,
-                    }))
-                  }
+                  className={`${styles.typeOption} ${formData.sentenceType === type.value ? styles.active : ""}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, sentenceType: type.value }))}
                 >
                   {type.label}
                 </button>
@@ -334,23 +316,16 @@ function StudentAIPracticeCreate() {
             </div>
           </div>
 
-          {/* Topic */}
+          {/* TOPIC */}
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              <FontAwesomeIcon icon={faTags} />
-              Chủ đề
-            </label>
+            <label className={styles.formLabel}><FontAwesomeIcon icon={faTags} /> Chủ đề</label>
             <div className={styles.topicOptions}>
               {TOPICS.map((topic) => (
                 <button
                   key={topic.value}
                   type="button"
-                  className={`${styles.topicOption} ${
-                    formData.topic === topic.value ? styles.active : ""
-                  }`}
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, topic: topic.value }))
-                  }
+                  className={`${styles.topicOption} ${formData.topic === topic.value ? styles.active : ""}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, topic: topic.value }))}
                 >
                   {topic.label}
                 </button>
@@ -358,7 +333,7 @@ function StudentAIPracticeCreate() {
             </div>
           </div>
 
-          {/* Question Limit */}
+          {/* QUESTION LIMIT */}
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Số câu</label>
             <div className={styles.limitOptions}>
@@ -366,15 +341,8 @@ function StudentAIPracticeCreate() {
                 <button
                   key={limit.value}
                   type="button"
-                  className={`${styles.limitOption} ${
-                    formData.questionLimit === limit.value ? styles.active : ""
-                  }`}
-                  onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      questionLimit: limit.value,
-                    }))
-                  }
+                  className={`${styles.limitOption} ${formData.questionLimit === limit.value ? styles.active : ""}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, questionLimit: limit.value }))}
                 >
                   {limit.label}
                 </button>
@@ -385,42 +353,146 @@ function StudentAIPracticeCreate() {
           {/* VOCABULARY */}
           <div className={styles.formGroupFull}>
             <label className={styles.formLabel}>
-              <FontAwesomeIcon icon={faLightbulb} />
-              Từ vựng (không bắt buộc)
+              <FontAwesomeIcon icon={faLightbulb} /> Từ vựng (không bắt buộc)
             </label>
             <p className={styles.formHint}>
-              Chọn từ gợi ý bên dưới hoặc nhập tay (tối đa {MAX_VOCAB_WORDS} từ)
+              Tìm kiếm từ mới hoặc chọn từ trong kho của bạn (tối đa {MAX_VOCAB_WORDS} từ)
             </p>
 
+            {/* TAB CHUYỂN ĐỔI NGUỒN TỪ VỰNG */}
+            <div className={styles.vocabTabs}>
+              <button
+                type="button"
+                className={`${styles.vocabTabBtn} ${vocabSourceTab === "search" ? styles.vocabTabActive : ""}`}
+                onClick={() => setVocabSourceTab("search")}
+              >
+                <FontAwesomeIcon icon={faMagnifyingGlass} /> Tìm từ mới
+              </button>
+              <button
+                type="button"
+                className={`${styles.vocabTabBtn} ${vocabSourceTab === "saved" ? styles.vocabTabActive : ""}`}
+                onClick={() => setVocabSourceTab("saved")}
+              >
+                <FontAwesomeIcon icon={faFolderOpen} /> Kho từ vựng của tôi
+              </button>
+            </div>
+
+            {/* TAB 1: TÌM KIẾM TỪ MỚI */}
+            {vocabSourceTab === "search" && (
+              <div className={styles.tabContent}>
+                <div className={styles.searchBoxWrapper}>
+                  <FontAwesomeIcon icon={faMagnifyingGlass} className={styles.searchIconInline} />
+                  <input
+                    type="text"
+                    placeholder="Nhập từ tiếng Anh để tìm (vd: travel, hotel...)"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={styles.searchInputInline}
+                  />
+                </div>
+                {searchQuery.trim() && (
+                  <div className={styles.searchResults}>
+                    {searching && <p>Đang tìm kiếm...</p>}
+                    {!searching && searchResults.length === 0 && <p>Không tìm thấy từ vựng.</p>}
+                    {!searching && searchResults.map((wordObj) => {
+                      const isSelected = isWordSelected(wordObj);
+                      const isFull = formData.vocabularyWords.length >= MAX_VOCAB_WORDS;
+                      return (
+                        <div key={getWordId(wordObj)} className={styles.searchResultItem}>
+                          <div>
+                            <strong>{wordObj.word}</strong>
+                            {wordObj.pronunciation && <span>{wordObj.pronunciation}</span>}
+                            <small>{wordObj.meanings?.[0]?.meaning || "Chưa có nghĩa"}</small>
+                          </div>
+                          <button type="button" disabled={isSelected || isFull} onClick={() => handleAddWord(wordObj)}>
+                            <FontAwesomeIcon icon={isSelected ? faCircleCheck : faPlus} />
+                            {isSelected ? "Đã thêm" : isFull ? "Đã đủ" : "Thêm"}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 2: KHO TỪ VỰNG CÁ NHÂN */}
+            {vocabSourceTab === "saved" && (
+              <div className={styles.tabContent}>
+                <div className={styles.searchBoxWrapper}>
+                  <FontAwesomeIcon icon={faMagnifyingGlass} className={styles.searchIconInline} />
+                  <input
+                    type="text"
+                    placeholder="Lọc nhanh trong kho từ vựng..."
+                    value={savedSearchQuery}
+                    onChange={(e) => setSavedSearchQuery(e.target.value)}
+                    className={styles.searchInputInline}
+                  />
+                </div>
+                {loadingSaved ? (
+                  <p className={styles.loadingText}>Đang tải kho từ vựng...</p>
+                ) : filteredSavedWords.length === 0 ? (
+                  <p className={styles.loadingText}>Chưa có từ vựng nào trong kho.</p>
+                ) : (
+                  <div className={styles.searchResults}>
+                    {filteredSavedWords.map((wordObj) => {
+                      const isSelected = isWordSelected(wordObj);
+                      const isFull = formData.vocabularyWords.length >= MAX_VOCAB_WORDS;
+                      return (
+                        <div key={wordObj.id} className={styles.searchResultItem}>
+                          <div>
+                            <strong>{wordObj.word}</strong>
+                            {wordObj.pronunciation && <span>{wordObj.pronunciation}</span>}
+                            <small>{wordObj.meanings?.[0]?.meaning || "Chưa có nghĩa"}</small>
+                          </div>
+                          <button type="button" disabled={isSelected || isFull} onClick={() => handleAddWord(wordObj)}>
+                            <FontAwesomeIcon icon={isSelected ? faCircleCheck : faPlus} />
+                            {isSelected ? "Đã thêm" : isFull ? "Đã đủ" : "Thêm"}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TỪ VỰNG ĐÃ CHỌN */}
+            {formData.vocabularyWords.length > 0 && (
+              <div className={styles.selectedWordsBox}>
+                <div className={styles.selectedWordsLabel}>Từ vựng đã chọn:</div>
+                <div className={styles.selectedWordsTags}>
+                  {formData.vocabularyWords.map((wordObj, idx) => (
+                    <div key={idx} className={styles.selectedWordTag}>
+                      <span>{wordObj.word}</span>
+                      <button type="button" onClick={() => handleRemoveWord(wordObj)}>
+                        <FontAwesomeIcon icon={faTimes} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* GỢI Ý TỪ VỰNG */}
             {suggestions.length > 0 && (
               <div className={styles.suggestionSection}>
-                <div className={styles.suggestionLabel}>
-                  Gợi ý cho chủ đề & trình độ này:
-                </div>
+                <div className={styles.suggestionLabel}>Gợi ý cho chủ đề & trình độ này:</div>
                 <div className={styles.suggestionChips}>
                   {suggestions.map((wordObj, idx) => {
-                    const isSelected = isSuggestionSelected(wordObj);
+                    const wordObjFormatted = { word: wordObj.en, meanings: [{ meaning: wordObj.vi }] };
+                    const isSelected = isWordSelected(wordObjFormatted);
                     return (
-                      <div
-                        key={`${wordObj.en}-${idx}`}
-                        className={styles.chipWrapper}
-                      >
+                      <div key={`${wordObj.en}-${idx}`} className={styles.chipWrapper}>
                         <button
                           type="button"
-                          className={`${styles.suggestionChip} ${
-                            isSelected ? styles.suggestionChipActive : ""
-                          }`}
+                          className={`${styles.suggestionChip} ${isSelected ? styles.suggestionChipActive : ""}`}
                           onClick={() =>
-                            isSelected
-                              ? handleRemoveSuggestion(wordObj)
-                              : handleSelectSuggestion(wordObj)
+                            isSelected ? handleRemoveWord(wordObjFormatted) : handleSelectSuggestion(wordObj)
                           }
-                          disabled={
-                            !isSelected && getFilledCount() >= MAX_VOCAB_WORDS
-                          }
+                          disabled={!isSelected && formData.vocabularyWords.length >= MAX_VOCAB_WORDS}
                         >
-                          {isSelected && "✓ "}
-                          {wordObj.en}
+                          {isSelected && "✓ "} {wordObj.en}
                         </button>
                         <span className={styles.tooltip}>{wordObj.vi}</span>
                       </div>
@@ -430,78 +502,19 @@ function StudentAIPracticeCreate() {
               </div>
             )}
 
-            <div className={styles.vocabInputContainer}>
-              {vocabInputs.map((word, index) => (
-                <div key={index} className={styles.vocabInputWrapper}>
-                  <input
-                    type="text"
-                    className={styles.vocabInput}
-                    placeholder={`Nhập từ cần luyện`}
-                    value={word}
-                    onChange={(e) => handleVocabChange(index, e.target.value)}
-                    maxLength={50}
-                  />
-                  {vocabInputs.length > 1 && (
-                    <button
-                      type="button"
-                      className={styles.vocabRemoveBtn}
-                      onClick={() => removeVocabInput(index)}
-                      title="Xóa từ này"
-                    >
-                      <FontAwesomeIcon icon={faTimes} />
-                    </button>
-                  )}
-                </div>
-              ))}
-
-              {vocabInputs.length < MAX_VOCAB_WORDS && (
-                <button
-                  type="button"
-                  className={styles.vocabAddBtn}
-                  onClick={addVocabInput}
-                >
-                  <FontAwesomeIcon icon={faPlus} />
-                  Thêm từ
-                </button>
-              )}
-            </div>
-
             <div className={styles.vocabCounter}>
-              <span>
-                Đã nhập: {getFilledCount()} / {MAX_VOCAB_WORDS} từ
-              </span>
-              {getFilledCount() > 0 && (
-                <span className={styles.vocabPreview}>
-                  ({getValidVocabWords().join(", ")})
-                </span>
-              )}
+              <span>Đã chọn: {formData.vocabularyWords.length} / {MAX_VOCAB_WORDS} từ</span>
             </div>
           </div>
         </div>
 
         <div className={styles.formActions}>
-          <button
-            type="button"
-            className={styles.cancelBtn}
-            onClick={handleBack}
-          >
-            Hủy
-          </button>
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={isSubmitting || !isFormValid}
-          >
+          <button type="button" className={styles.cancelBtn} onClick={handleBack}>Hủy</button>
+          <button type="submit" className={styles.submitBtn} disabled={isSubmitting || !isFormValid}>
             {isSubmitting ? (
-              <>
-                <FontAwesomeIcon icon={faSpinner} spin />
-                Đang tạo...
-              </>
+              <><FontAwesomeIcon icon={faSpinner} spin /> Đang tạo...</>
             ) : (
-              <>
-                <FontAwesomeIcon icon={faPlay} />
-                Bắt đầu luyện tập
-              </>
+              <><FontAwesomeIcon icon={faPlay} /> Bắt đầu luyện tập</>
             )}
           </button>
         </div>
