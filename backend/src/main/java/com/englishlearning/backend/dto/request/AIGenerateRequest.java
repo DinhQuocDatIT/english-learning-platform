@@ -20,7 +20,7 @@ public class AIGenerateRequest {
     private String sentenceType;
     private String topic;
     private List<String> vocabularyWords;
-    private List<String> weaknesses;
+
     private List<String> previousSentences;
 
     @Builder.Default

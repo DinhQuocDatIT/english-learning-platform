@@ -60,7 +60,7 @@ public class GeminiAIService implements AIService {
     }
 
     // ========================================
-    // GENERATE SENTENCE
+    // GENERATE SENTENCE (dùng cho cả câu 1 và câu tiếp theo)
     // ========================================
     @Override
     public AIGenerateResponse generateSentence(AIGenerateRequest request) {
@@ -69,14 +69,10 @@ public class GeminiAIService implements AIService {
                 request.getForcedWords());
 
         try {
-            String weaknessesStr = request.getWeaknesses() != null ?
-                    String.join(", ", request.getWeaknesses()) : null;
-
             String prompt = PromptConstants.formatGeneratePrompt(
                     request.getLevel(),
                     request.getTopic(),
                     request.getSentenceType(),
-                    weaknessesStr,
                     request.getPreviousSentences(),
                     request.getForcedWords()
             );
@@ -90,7 +86,7 @@ public class GeminiAIService implements AIService {
     }
 
     // ========================================
-    // EVALUATE ANSWER
+    // EVALUATE ANSWER (chỉ chấm, không sinh câu)
     // ========================================
     @Override
     public AIEvaluateResponse evaluateAnswer(AIEvaluateRequest request) {
@@ -108,40 +104,6 @@ public class GeminiAIService implements AIService {
             return parseEvaluateResponse(response);
         } catch (Exception e) {
             log.error("Lỗi đánh giá câu trả lời: {}", e.getMessage());
-            throw new BusinessException(ErrorCode.AI_SERVICE_ERROR);
-        }
-    }
-
-    // ========================================
-    // EVALUATE AND GENERATE
-    // ========================================
-    @Override
-    public AIEvaluateResponse evaluateAndGenerate(AIEvaluateRequest request) {
-        log.info("Đang đánh giá và tạo câu tiếp theo. forcedWords: {}",
-                request.getForcedWords());
-
-        try {
-            String weaknessesStr = formatWeaknesses(request.getWeaknesses());
-
-            String prompt = PromptConstants.formatEvaluateAndGeneratePrompt(
-                    request.getVietnameseSentence(),
-                    request.getStudentAnswer(),
-                    request.getExpectedAnswer(),
-                    request.getLevel(),
-                    request.getTopic(),
-                    weaknessesStr,
-                    request.getSentenceType(),
-                    request.getPreviousSentences(),
-                    request.getForcedWords()
-            );
-
-            log.info("📤 [EVALUATE_AND_GENERATE] forcedWords: {}",
-                    request.getForcedWords());
-
-            String response = callGeminiWithRetry(prompt, 3);
-            return parseEvaluateAndGenerateResponse(response);
-        } catch (Exception e) {
-            log.error("Lỗi đánh giá và tạo câu tiếp theo: {}", e.getMessage());
             throw new BusinessException(ErrorCode.AI_SERVICE_ERROR);
         }
     }
@@ -236,43 +198,6 @@ public class GeminiAIService implements AIService {
         }
     }
 
-    private AIEvaluateResponse parseEvaluateAndGenerateResponse(String response) {
-        try {
-            JsonNode root = objectMapper.readTree(response);
-            AIEvaluateResponse evaluateResponse = parseEvaluateResponseRoot(root);
-
-            JsonNode nextQuestion = root.path("nextQuestion");
-            if (!nextQuestion.isMissingNode() && !nextQuestion.isNull()) {
-
-                List<String> usedVocab = new ArrayList<>();
-                JsonNode usedNode = nextQuestion.path("usedVocabulary");
-                if (usedNode.isArray()) {
-                    for (JsonNode n : usedNode) {
-                        String v = n.asText();
-                        if (v != null && !v.isEmpty()) {
-                            usedVocab.add(v.toLowerCase().trim());
-                        }
-                    }
-                }
-
-                AIGenerateResponse next = AIGenerateResponse.builder()
-                        .vietnameseSentence(nextQuestion.path("vietnameseSentence").asText())
-                        .expectedAnswer(nextQuestion.path("expectedAnswer").asText())
-                        .sentenceType(nextQuestion.path("sentenceType").asText())
-                        .usedVocabulary(usedVocab)
-                        .build();
-                evaluateResponse.setNextQuestion(next);
-
-                log.info("✅ Next question parsed. usedVocabulary: {}", usedVocab);
-            }
-
-            return evaluateResponse;
-        } catch (Exception e) {
-            log.error("Lỗi parse phản hồi evaluate and generate: {}", e.getMessage());
-            throw new BusinessException(ErrorCode.AI_RESPONSE_PARSE_ERROR);
-        }
-    }
-
     private AIEvaluateResponse parseEvaluateResponseRoot(JsonNode root) {
         boolean isCorrect = root.path("isCorrect").asBoolean(false);
         int score = root.path("score").asInt(0);
@@ -326,13 +251,6 @@ public class GeminiAIService implements AIService {
             }
         }
 
-        if (betterAnswers.isEmpty()) {
-            String expected = root.path("expectedAnswer").asText();
-            if (expected != null && !expected.isEmpty()) {
-                betterAnswers.add(expected);
-            }
-        }
-
         return AIEvaluateResponse.builder()
                 .isCorrect(isCorrect)
                 .score(score)
@@ -379,23 +297,5 @@ public class GeminiAIService implements AIService {
         log.error("❌ All {} retry attempts failed. Last error: {}", maxRetries, lastError);
         throw new BusinessException(ErrorCode.AI_SERVICE_ERROR,
                 "AI service failed after " + maxRetries + " retries: " + lastError);
-    }
-
-    private String formatWeaknesses(List<String> weaknesses) {
-        if (weaknesses == null || weaknesses.isEmpty()) {
-            return "Không có";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < weaknesses.size(); i++) {
-            sb.append(i + 1).append(". ").append(weaknesses.get(i));
-            if (i == 0) {
-                sb.append(" ← ƯU TIÊN");
-            }
-            if (i < weaknesses.size() - 1) {
-                sb.append("\n");
-            }
-        }
-        return sb.toString();
     }
 }

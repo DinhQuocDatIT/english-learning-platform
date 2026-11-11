@@ -21,4 +21,6 @@ public interface AIPracticeTurnRepository extends JpaRepository<AIPracticeTurn, 
     @Query("SELECT t.usedVocabulary FROM AIPracticeTurn t " +
             "WHERE t.practiceChat.id = :chatId AND t.usedVocabulary IS NOT NULL")
     List<String> findUsedVocabularyByChatId(@Param("chatId") Long chatId);
+    @Query("SELECT COALESCE(MAX(t.questionOrder), 0) FROM AIPracticeTurn t WHERE t.practiceChat.id = :chatId")
+    int findMaxQuestionOrder(@Param("chatId") Long chatId);
 }

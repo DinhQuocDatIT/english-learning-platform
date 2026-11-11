@@ -544,13 +544,11 @@ function StudentAIPracticeChat() {
                 </span>
               ) : isSubmitting ? (
                 <span className={styles.evaluatingBadge}>
-                  <FontAwesomeIcon icon={faSpinner} spin />
-                  <span>AI đang chấm điểm...</span>
+                 
                 </span>
               ) : (
                 <span className={styles.waitingBadge}>
-                  <span className={styles.waitingDot} />
-                  <span>Đang chờ trả lời</span>
+                  
                 </span>
               )}
             </div>

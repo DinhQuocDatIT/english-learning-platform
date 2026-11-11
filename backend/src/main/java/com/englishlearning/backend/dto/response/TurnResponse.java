@@ -22,4 +22,5 @@ public class TurnResponse {
     private LocalDateTime createdAt;
     @Builder.Default
     private List<String> usedVocabulary = new ArrayList<>();
+    private List<String> forcedWords;
 }

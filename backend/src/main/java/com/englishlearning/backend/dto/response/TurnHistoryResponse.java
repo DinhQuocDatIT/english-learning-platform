@@ -24,4 +24,6 @@ public class TurnHistoryResponse {
     private Integer naturalnessScore;
     private List<ErrorDetail> errors;
     private List<String> betterAnswers;
+    private List<String> usedVocabulary;  // ✅ PHẢI CÓ
+    private List<String> forcedWords;
 }

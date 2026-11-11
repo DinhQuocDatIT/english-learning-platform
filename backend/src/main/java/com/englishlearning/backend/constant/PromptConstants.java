@@ -14,146 +14,98 @@ public class PromptConstants {
     // 1. LEVEL DESCRIPTIONS
     // ========================================
     public static final Map<String, String> LEVEL = Map.of(
-            "A1", """
-            TRÌNH ĐỘ A1 (Sơ cấp):
-            - Thì: Hiện tại đơn, To be
-            - Câu: Đơn giản, không mệnh đề phụ
-            - Từ vựng: Gia đình, thức ăn, trường học
-            - Độ dài: 5-8 từ
-            """,
-            "A2", """
-            TRÌNH ĐỘ A2 (Sơ cấp+):
-            - Thì: Hiện tại tiếp diễn, Quá khứ đơn
-            - Câu: Ghép đơn giản (and, but, because)
-            - Từ vựng: Du lịch, mua sắm, thói quen
-            - Độ dài: 8-12 từ
-            """,
-            "B1", """
-            TRÌNH ĐỘ B1 (Trung cấp):
-            - Thì: Hiện tại hoàn thành, Quá khứ hoàn thành
-            - Câu: Phức (when, if, although)
-            - Từ vựng: Công việc, sức khỏe, giáo dục
-            - Độ dài: 12-15 từ
-            """,
-            "B2", """
-            TRÌNH ĐỘ B2 (Trung cấp+):
-            - Thì: Tương lai hoàn thành, Quá khứ tiếp diễn
-            - Câu: Bị động, điều kiện loại 2
-            - Từ vựng: Học thuật, môi trường, xã hội
-            - Độ dài: 15-18 từ
-            """,
-            "C1", """
-            TRÌNH ĐỘ C1 (Cao cấp):
-            - Thì: Đảo ngữ, câu chẻ
-            - Câu: Điều kiện hỗn hợp
-            - Từ vựng: Thành ngữ, collocations
-            - Độ dài: 18-20 từ
-            """,
-            "C2", """
-            TRÌNH ĐỘ C2 (Thành thạo):
-            - Thì: Subjunctive, inversion
-            - Câu: Cấu trúc học thuật
-            - Từ vựng: Chuyên ngành, idioms
-            - Độ dài: 20-25 từ
-            """
+            "A1", "Trình độ A1: Hiện tại đơn, \"to be\". Câu đơn, không mệnh đề phụ. Độ dài 5-8 từ.",
+            "A2", "Trình độ A2: Quá khứ đơn, hiện tại tiếp diễn. Câu ghép (and, but, because). Độ dài 8-12 từ.",
+            "B1", "Trình độ B1: Hiện tại hoàn thành, quá khứ hoàn thành. Câu phức (when, if, although). Độ dài 12-15 từ.",
+            "B2", "Trình độ B2: Tương lai hoàn thành, bị động, điều kiện loại 2. Độ dài 15-18 từ.",
+            "C1", "Trình độ C1: Đảo ngữ, câu chẻ, điều kiện hỗn hợp. Độ dài 18-20 từ.",
+            "C2", "Trình độ C2: Subjunctive, inversion, cấu trúc học thuật. Độ dài 20-25 từ."
     );
 
     // ========================================
     // 2. TOPIC DESCRIPTIONS
     // ========================================
     public static final Map<String, String> TOPIC = Map.ofEntries(
-            Map.entry("FAMILY", """
-            CHỦ ĐỀ: GIA ĐÌNH
-            Từ vựng: parents, children, siblings, grandparents, relatives
-            Cấu trúc: describe family members, family activities
-            Ví dụ: "My family has 4 members."
-            """),
-            Map.entry("WORK", """
-            CHỦ ĐỀ: CÔNG VIỆC
-            Từ vựng: job, career, office, colleague, boss, salary
-            Cấu trúc: describe daily work, job responsibilities
-            Ví dụ: "I work as a software engineer."
-            """),
-            Map.entry("TRAVEL", """
-            CHỦ ĐỀ: DU LỊCH
-            Từ vựng: hotel, flight, ticket, reservation, airport, luggage
-            Cấu trúc: make reservations, ask for directions
-            Ví dụ: "I have booked a room at the hotel."
-            """),
-            Map.entry("SHOPPING", """
-            CHỦ ĐỀ: MUA SẮM
-            Từ vựng: supermarket, price, discount, receipt, cash
-            Cấu trúc: ask for prices, describe products
-            Ví dụ: "How much does this cost?"
-            """),
-            Map.entry("FOOD", """
-            CHỦ ĐỀ: ĐỒ ĂN
-            Từ vựng: restaurant, menu, delicious, cook, ingredients
-            Cấu trúc: order food, describe cooking
-            Ví dụ: "I would like to order a pizza."
-            """),
-            Map.entry("HEALTH", """
-            CHỦ ĐỀ: SỨC KHỎE
-            Từ vựng: doctor, hospital, medicine, exercise, healthy
-            Cấu trúc: describe symptoms, give advice
-            Ví dụ: "I have a headache."
-            """),
-            Map.entry("EDUCATION", """
-            CHỦ ĐỀ: GIÁO DỤC
-            Từ vựng: school, university, teacher, student, exam
-            Cấu trúc: talk about studies, describe school life
-            Ví dụ: "I am studying English."
-            """),
-            Map.entry("TECHNOLOGY", """
-            CHỦ ĐỀ: CÔNG NGHỆ
-            Từ vựng: computer, smartphone, internet, software, app
-            Cấu trúc: describe using technology, talk about gadgets
-            Ví dụ: "I use my smartphone every day."
-            """),
-            Map.entry("HOBBIES", """
-            CHỦ ĐỀ: SỞ THÍCH
-            Từ vựng: hobby, sport, music, reading, painting
-            Cấu trúc: describe free time activities
-            Ví dụ: "I enjoy reading books."
-            """),
-            Map.entry("DAILY_ROUTINE", """
-            CHỦ ĐỀ: THÓI QUEN HÀNG NGÀY
-            Từ vựng: morning, afternoon, evening, breakfast, work
-            Cấu trúc: describe daily schedule
-            Ví dụ: "I wake up at 6 AM."
-            """),
-            Map.entry("DAILY_CONVERSATION", """
-            CHỦ ĐỀ: HỘI THOẠI HÀNG NGÀY
-            Phạm vi: Chào hỏi, giới thiệu, cảm ơn, xin lỗi, hỏi thăm, tạm biệt
-            Từ vựng gợi ý: hello, goodbye, thank you, sorry, please, excuse me
-            Cấu trúc câu:
-              - Chào hỏi: "Xin chào, bạn khỏe không?"
-              - Giới thiệu: "Tên tôi là Nam, rất vui được gặp bạn."
-              - Cảm ơn: "Cảm ơn bạn rất nhiều vì đã giúp tôi."
-              - Xin lỗi: "Xin lỗi, tôi đến muộn."
-              - Hỏi thăm: "Bạn có khỏe không?"
-              - Tạm biệt: "Hẹn gặp lại bạn ngày mai."
+            Map.entry("FAMILY",
+                    "Gia đình: giới thiệu các thành viên, công việc của bố mẹ, anh chị em, " +
+                            "các hoạt động gia đình, thói quen sinh hoạt, tình cảm gia đình, " +
+                            "những sự kiện thường gặp trong gia đình. " +
+                            "TRÁNH: liệt kê dài dòng, 'đang có', câu quá formal."),
 
-            KHÔNG BAO GỒM: nấu ăn, mua sắm, miêu tả thời tiết, kể chuyện
-            """),
-            Map.entry("RESTAURANT", """
-            CHỦ ĐỀ: NHÀ HÀNG
-            Từ vựng: menu, order, bill, waiter, table, reservation, dish, drink
-            Cấu trúc: ordering food, asking about menu, paying bill
-            Ví dụ: "I would like to order a steak."
-            """),
-            Map.entry("SCHOOL", """
-            CHỦ ĐỀ: TRƯỜNG HỌC
-            Từ vựng: classroom, teacher, student, homework, exam, lesson, subject
-            Cấu trúc: talking about school subjects, daily school routine
-            Ví dụ: "I have Math class at 8 AM."
-            """),
-            Map.entry("FRIENDS", """
-            CHỦ ĐỀ: BẠN BÈ
-            Từ vựng: friend, friendship, hang out, chat, socialize, trust, share
-            Cấu trúc: describing friends, talking about activities with friends
-            Ví dụ: "My best friend is very kind."
-            """)
+            Map.entry("WORK",
+                    "Công việc: nghề nghiệp, môi trường làm việc, đồng nghiệp, cấp trên, " +
+                            "công việc hằng ngày, cuộc họp, nhiệm vụ, lịch làm việc, áp lực công việc, " +
+                            "định hướng nghề nghiệp. " +
+                            "TRÁNH: câu quá formal, 'đang làm việc', liệt kê nhiệm vụ dài dòng."),
+
+            Map.entry("TRAVEL",
+                    "Du lịch: địa điểm du lịch, kế hoạch chuyến đi, phương tiện di chuyển, " +
+                            "đặt vé, đặt khách sạn, tham quan, trải nghiệm du lịch, kỳ nghỉ, " +
+                            "những tình huống thường gặp khi đi du lịch. " +
+                            "TRÁNH: liệt kê địa điểm dài dòng, 'đang đi du lịch'."),
+
+            Map.entry("SHOPPING",
+                    "Mua sắm: mua quần áo, giày dép, đồ điện tử, lựa chọn sản phẩm, " +
+                            "hỏi giá, mặc cả, giảm giá, thanh toán, mua sắm trực tuyến, " +
+                            "trao đổi với nhân viên bán hàng. " +
+                            "TRÁNH: 'đang mua', câu quá dài, liệt kê sản phẩm."),
+
+            Map.entry("FOOD",
+                    "Đồ ăn và thức uống: món yêu thích, ăn sáng/trưa/tối, đi nhà hàng, " +
+                            "gọi món, nấu ăn đơn giản, khen chê món, thói quen ăn uống, chọn món. " +
+                            "TRÁNH: liệt kê nguyên liệu/công thức dài dòng, 'đang nấu ăn'."),
+
+            Map.entry("HEALTH",
+                    "Sức khỏe: tình trạng sức khỏe, triệu chứng bệnh, thói quen lành mạnh, " +
+                            "chế độ ăn uống, tập thể dục, nghỉ ngơi, khám bệnh, bệnh viện, bác sĩ, " +
+                            "chăm sóc sức khỏe. " +
+                            "TRÁNH: 'đang bị bệnh', câu quá dài, liệt kê triệu chứng."),
+
+            Map.entry("EDUCATION",
+                    "Giáo dục và học tập: học ngoại ngữ, kiến thức, khóa học, phương pháp học tập, " +
+                            "bài tập, kỳ thi, kỹ năng mới, học trực tuyến, mục tiêu học tập. " +
+                            "TRÁNH: liệt kê môn học dài dòng, câu quá formal."),
+
+            Map.entry("TECHNOLOGY",
+                    "Công nghệ trong đời sống: dùng điện thoại, máy tính, mạng xã hội, " +
+                            "ứng dụng, internet, nhắn tin, gọi video, xem phim, chơi game, " +
+                            "thiết bị điện tử. " +
+                            "TRÁNH: thuật ngữ kỹ thuật phức tạp, 'trí tuệ nhân tạo', 'lập trình', câu quá dài."),
+
+            Map.entry("HOBBIES",
+                    "Sở thích cá nhân: nghe nhạc, xem phim, đọc sách, chơi thể thao, " +
+                            "chơi trò chơi, chụp ảnh, nấu ăn, du lịch, làm vườn, " +
+                            "các hoạt động giải trí trong thời gian rảnh. " +
+                            "TRÁNH: liệt kê sở thích dài dòng."),
+
+            Map.entry("DAILY_ROUTINE",
+                    "Thói quen và hoạt động hằng ngày: thức dậy, đánh răng, tắm rửa, ăn sáng, " +
+                            "đi học, đi làm, làm việc nhà, tập thể dục, nghỉ ngơi, đi ngủ. " +
+                            "TRÁNH: 'đang thức dậy', câu quá dài, liệt kê hoạt động."),
+
+            Map.entry("DAILY_CONVERSATION",
+                    "Giao tiếp hàng ngày: hỏi thăm, rủ rê, nhờ vả, phản hồi, kể chuyện, " +
+                            "từ chối, hẹn gặp, chia sẻ cảm xúc, đưa ra ý kiến, hỏi đáp thông thường. " +
+                            "Câu ngắn, khẩu ngữ tự nhiên như bạn bè nói chuyện. " +
+                            "TRÁNH: cảm ơn/xin lỗi sáo rỗng, 'đang cảm ơn', 'người bạn', câu quá dài."),
+
+            Map.entry("RESTAURANT",
+                    "Nhà hàng hoặc quán cà phê: đặt bàn, gọi món, hỏi thực đơn, yêu cầu thêm món, " +
+                            "hỏi thành phần món ăn, phàn nàn về dịch vụ, yêu cầu thanh toán, " +
+                            "giao tiếp với nhân viên phục vụ. " +
+                            "TRÁNH: 'đang gọi món', câu quá formal, liệt kê món ăn."),
+
+            Map.entry("SCHOOL",
+                    "Môi trường học đường: trường học, lớp học, giáo viên, bạn bè, môn học, " +
+                            "thời khóa biểu, nội quy, hoạt động ngoại khóa, giờ ra chơi, bài kiểm tra, " +
+                            "những trải nghiệm ở trường. " +
+                            "TRÁNH: liệt kê môn học dài dòng, câu quá formal."),
+
+            Map.entry("FRIENDS",
+                    "Bạn bè và tình bạn: giới thiệu bạn bè, miêu tả tính cách, gặp gỡ, trò chuyện, " +
+                            "đi chơi, tổ chức sinh nhật, mời bạn tham gia hoạt động, giúp đỡ bạn bè, " +
+                            "chia sẻ những kỷ niệm. " +
+                            "TRÁNH: 'người bạn' formal, câu quá dài, liệt kê hoạt động.")
     );
 
     // ========================================
@@ -161,520 +113,136 @@ public class PromptConstants {
     // ========================================
     public static final Map<String, String> SENTENCE_TYPE_DESC = Map.of(
             "QUESTION", """
-                ═══════════════════════════════════════
-                LOẠI CÂU BẮT BUỘC: NGHI VẤN (CÂU HỎI)
-                ═══════════════════════════════════════
-
-                ✅ BẮT BUỘC:
-                   - PHẢI có dấu "?" ở cuối câu
-                   - PHẢI có từ để hỏi: ai, gì, nào, đâu, khi nào, tại sao,
-                     như thế nào, bao nhiêu, mấy, có...không, chưa
-
-                ✅ VÍ DỤ ĐÚNG:
-                   - "Bạn ăn cơm chưa?"
-                   - "Cô ấy tên là gì?"
-                   - "Bạn đi đâu đấy?"
-                   - "Hôm nay trời có mưa không?"
-
-                ❌ VÍ DỤ SAI (bị cấm):
-                   - "Mình ăn cơm rồi."     (trần thuật - không có ?)
-                   - "Hãy ăn cơm đi."        (cầu khiến - không có ?)
-                   - "Ôi cơm ngon quá!"      (cảm thán - không có ?)
+                BẮT BUỘC: câu hỏi. PHẢI có dấu "?" cuối câu. PHẢI có từ để hỏi (ai, gì, nào, đâu, khi nào, tại sao, bao nhiêu, có...không, chưa).
+                KHÔNG được là câu trần thuật/cầu khiến/cảm thán.
                 """,
             "ANSWER", """
-                ═══════════════════════════════════════
-                LOẠI CÂU BẮT BUỘC: TRẦN THUẬT (KHÔNG PHẢI CÂU HỎI)
-                ═══════════════════════════════════════
-
-                ⚠️ ĐÂY LÀ LOẠI CÂU BAO GỒM 3 DẠNG:
-                1. TRẦN THUẬT (kể, thông báo): "Mình đã ăn cơm rồi."
-                2. CẦU KHIẾN (yêu cầu, đề nghị): "Hãy ăn cơm đi."
-                3. CẢM THÁN (bộc lộ cảm xúc): "Ôi, cơm ngon quá!"
-
-                ✅ BẮT BUỘC:
-                   - TUYỆT ĐỐI KHÔNG có dấu "?" ở cuối câu
-                   - TUYỆT ĐỐI KHÔNG có từ để hỏi: ai, gì, nào, đâu, khi nào,
-                     tại sao, như thế nào, bao nhiêu, mấy, có...không, chưa
-                   - KHÔNG được sinh câu hỏi dù bất kỳ lý do gì
-
-                ✅ VÍ DỤ ĐÚNG:
-                   - "Tôi uống cà phê vào buổi sáng."
-                   - "Cô ấy làm việc ở văn phòng."
-                   - "Hôm nay trời đẹp."
-                   - "Mình đã ăn cơm rồi."
-                   - "Hãy ăn cơm đi."
-                   - "Ôi, cơm ngon quá!"
-
-                ❌ VÍ DỤ SAI (bị cấm):
-                   - "Bạn uống cà phê chưa?"      (có "?" + "chưa")
-                   - "Cô ấy tên là gì?"            (có "?" + "gì")
-                   - "Bạn khỏe không?"             (có "?" + "không")
-                   - "Hôm nay trời có mưa không?"  (có "?" + "không")
-
-                ⚠️ NHẮC LẠI: Nếu user chọn "ANSWER", CHỈ sinh câu trần thuật.
-                TUYỆT ĐỐI KHÔNG tự ý thêm câu hỏi xen kẽ.
+                BẮT BUỘC: câu trần thuật/cầu khiến/cảm thán. TUYỆT ĐỐI KHÔNG có "?" cuối câu.
+                KHÔNG có từ để hỏi (ai, gì, nào, đâu, khi nào, tại sao, bao nhiêu, có...không, chưa).
+                KHÔNG được sinh câu hỏi dù bất kỳ lý do gì.
                 """,
-            "RANDOM", """
-                ═══════════════════════════════════════
-                LOẠI CÂU: NGẪU NHIÊN
-                ═══════════════════════════════════════
-                Chọn ngẫu nhiên 1 trong 2 loại:
-                - NGHI VẤN (câu hỏi)
-                - TRẦN THUẬT (trần thuật/cầu khiến/cảm thán)
-                """
+            "RANDOM", "Chọn ngẫu nhiên 1 trong 2 loại: QUESTION hoặc ANSWER."
     );
 
     // ========================================
-    // 4. ERROR TAXONOMY
+    // 4. GENERATE PROMPT TEMPLATE
     // ========================================
-    public static final String ERROR_TAXONOMY = """
-
-        ===== PHÂN LOẠI LỖI =====
-
-        Bước 1 — Chọn errorCategory (BẮT BUỘC, 1 trong 12):
-        - TENSE, ARTICLE, PREPOSITION, CONJUNCTION, STRUCTURE,
-          POS, VERB, NATURALNESS, SPELLING, WORD_CHOICE, MEANING, PUNCTUATION
-
-        Bước 2 — Viết errorType (TỰ DO, BẰNG TIẾNG VIỆT, ≤ 12 từ):
-        Mô tả CHÍNH XÁC lỗi là gì — CÀNG CỤ THỂ CÀNG TỐT.
-
-        ⚠️ QUY TẮC QUAN TRỌNG VỀ errorType:
-
-        (A) Nếu là lỗi TỪ / GIỚI TỪ / COLLOCATION cụ thể → GHI RÕ từ nào:
-            ✅ "Thiếu giới từ 'with' sau 'communicate'"
-            ✅ "Sai giới từ: by vs through"
-            ✅ "Dùng sai từ: have vs encounter"
-            ✅ "Sai collocation: 'make a decision' không phải 'do a decision'"
-            ❌ "Lỗi về giới từ"       (quá chung chung)
-            ❌ "Lỗi dùng từ"         (quá chung chung)
-
-        (B) Nếu là lỗi CHÍNH TẢ → ghi rõ từ sai:
-            ✅ "Viết sai chính tả: 'socal' → 'social'"
-            ✅ "Viết sai chính tả: 'offten' → 'often'"
-            ❌ "Lỗi chính tả"        (quá chung chung)
-
-        (C) Nếu là lỗi NGỮ PHÁP chung → có thể dùng tên loại:
-            ✅ "Hòa hợp chủ ngữ - động từ"
-            ✅ "Thiếu mạo từ trước danh từ"
-            ✅ "Sai thì quá khứ đơn"
-            ✅ "Thiếu viết hoa đầu câu"
-            ✅ "Thiếu dấu hỏi cuối câu"
-
-        ⚠️ MỖI LỖI PHẢI CÓ errorType KHÁC NHAU.
-        Nếu 2 lỗi cùng category nhưng khác bản chất
-        (VD: 2 lỗi giới từ khác nhau) → PHẢI mô tả KHÁC NHAU.
-        TUYỆT ĐỐI KHÔNG dùng cùng 1 errorType cho 2 lỗi khác nhau.
-
-        CÁC TRƯỜNG KHÁC TRONG MỖI ERROR:
-        - userText: đoạn text SAI của học viên (TIẾNG ANH)
-        - correctText: đoạn text ĐÚNG đã sửa (TIẾNG ANH)
-        - explanation: giải thích bằng TIẾNG VIỆT
-        - severity: HIGH | MEDIUM | LOW
-        """;
-
-    // ========================================
-    // 4B. CORE EVALUATION RULES
-    // ========================================
-    public static final String CORE_EVALUATION_RULES = """
-
-        ═══════════════════════════════════════════════════
-        TRIẾT LÝ CHẤM ĐIỂM
-        ═══════════════════════════════════════════════════
-
-        Bạn đang chấm BÀI DỊCH, KHÔNG PHẢI so khớp với đáp án mẫu.
-        "Đáp án mẫu" chỉ là MỘT trong NHIỀU cách dịch đúng.
-
-        ─────────────────────────────────────────
-        LỖI LÀ GÌ?
-        ─────────────────────────────────────────
-        LỖI = vi phạm 1 trong các quy tắc:
-        - Ngữ pháp: vi phạm cấu trúc câu tiếng Anh chuẩn
-        - Từ vựng: dùng từ sai nghĩa/ngữ cảnh
-        - Chính tả: viết sai từ
-        - Nghĩa: không truyền đạt đúng nghĩa câu gốc
-
-        KHÔNG PHẢI LỖI:
-        - Cách diễn đạt khác nhưng đúng nghĩa
-        - Từ đồng nghĩa (often/usually, big/large)
-        - Cấu trúc tương đương (I think = In my opinion)
-        - Determiner thay thế nhau (the/this/that store)
-        - Phong cách khác (formal/informal đều OK)
-
-        ─────────────────────────────────────────
-        NGUYÊN TẮC CHỐNG BẮT LỖI OAN
-        ─────────────────────────────────────────
-        Trước khi thêm 1 error vào mảng, PHẢI trả lời 3 câu hỏi:
-
-        1. Nếu người bản xứ đọc câu này, họ có hiểu đúng không?
-           → CÓ hiểu → KHÔNG phải lỗi
-
-        2. Câu này vi phạm quy tắc ngữ pháp CỨNG nào?
-           → KHÔNG vi phạm → KHÔNG phải lỗi
-
-        3. Nếu thay ngữ cảnh, câu này có đúng không?
-           → CÓ đúng → KHÔNG phải lỗi
-
-        Chỉ khi cả 3 đều "KHÔNG" → mới thêm vào errors.
-
-        ─────────────────────────────────────────
-        QUY TRÌNH SUY RA LABEL
-        ─────────────────────────────────────────
-        Bước 1: So sánh userText vs correctText → khác chỗ nào?
-        Bước 2: Tại sao phải sửa?
-           - Viết sai ký tự → SPELLING
-           - Không viết hoa đầu câu → SPELLING
-           - Thiếu dấu chấm/hỏi cuối → PUNCTUATION
-           - Sai ngữ pháp → TENSE / STRUCTURE / ARTICLE / PREPOSITION / ...
-           - Sai từ vựng → WORD_CHOICE
-           - Sai nghĩa → MEANING
-        Bước 3: Chọn errorCategory phù hợp
-        Bước 4: Viết errorType TIẾNG VIỆT mô tả CỤ THỂ lỗi
-        Bước 5: Kiểm tra explanation có khớp label không?
-           - Nếu không khớp → SỬA LẠI
-
-        ─────────────────────────────────────────
-        BẮT LỖI ĐẦY ĐỦ
-        ─────────────────────────────────────────
-        Khi phân tích 1 câu, kiểm tra LẦN LƯỢT:
-        a) Chính tả từng từ
-        b) Viết hoa đầu câu
-        c) Dấu câu cuối câu
-        d) Chia động từ theo chủ ngữ (SVA)
-        e) Thì của động từ
-        f) Mạo từ trước danh từ
-        g) Giới từ
-        h) Trật tự từ
-        i) Nghĩa có khớp câu gốc không
-
-        Một câu CÓ THỂ có NHIỀU lỗi. KHÔNG bỏ sót.
-        """;
-
-    // ========================================
-    // 4C. FEW-SHOT EXAMPLES
-    // ========================================
-    public static final String FEW_SHOT_EXAMPLES = """
-
-        ═══════════════════════════════════════════════════
-        VÍ DỤ CHẤM ĐÚNG
-        ═══════════════════════════════════════════════════
-
-        ── Ví dụ 1: Đúng nhưng KHÁC đáp án mẫu ──
-        Câu gốc: "Tôi thường ăn sáng lúc 7 giờ"
-        Đáp án mẫu: "I usually have breakfast at 7 AM"
-        Học viên: "I often have breakfast at 7 o'clock"
-        → isCorrect = true, errors = []
-
-        ── Ví dụ 2: Determiner khác nhưng vẫn đúng ──
-        Câu gốc: "Học sinh thường mua sách ở cửa hàng đó."
-        Học viên: "Students often buy books at that store."
-        → isCorrect = true, errors = []
-        ('that store' và 'the store' đều đúng)
-
-        ── Ví dụ 3: SAI chính tả ──
-        Học viên: "She offten cooks"
-        → errors = [{
-            errorType: "Viết sai chính tả: 'offten' → 'often'",
-            errorCategory: "SPELLING",
-            userText: "offten",
-            correctText: "often",
-            explanation: "Từ 'offten' viết sai chính tả, đúng là 'often'.",
-            severity: "MEDIUM"
-          }]
-
-        ── Ví dụ 4: SAI hòa hợp chủ - động ──
-        Học viên: "She cook every morning"
-        → errors = [{
-            errorType: "Hòa hợp chủ ngữ - động từ",
-            errorCategory: "STRUCTURE",
-            userText: "She cook",
-            correctText: "She cooks",
-            explanation: "Chủ ngữ số ít ngôi thứ ba 'She' → động từ thêm 's'.",
-            severity: "HIGH"
-          }]
-
-        ── Ví dụ 5: "I have a lot of traffic" ──
-        Câu gốc: "Tôi gặp rất nhiều giao thông trên đường đi làm."
-        Học viên: "I have a lot of traffic on my way to work."
-        → errors = [{
-            errorType: "Dùng sai từ: have vs encounter",
-            errorCategory: "WORD_CHOICE",
-            userText: "have a lot of traffic",
-            correctText: "encounter a lot of traffic",
-            explanation: "Trong tiếng Anh, 'have traffic' không tự nhiên. Người bản xứ dùng 'encounter' hoặc 'get stuck in'.",
-            severity: "MEDIUM"
-          }]
-
-        ── Ví dụ 6: 2 LỖI GIỚI TỪ KHÁC NHAU → 2 errorType KHÁC NHAU ──
-        Học viên: "We communicate each other by social media."
-        → errors = [
-            {
-              errorType: "Thiếu giới từ 'with' sau 'communicate'",
-              errorCategory: "PREPOSITION",
-              userText: "communicate each other",
-              correctText: "communicate with each other",
-              explanation: "Động từ 'communicate' khi đi với tân ngữ chỉ người cần có giới từ 'with'.",
-              severity: "HIGH"
-            },
-            {
-              errorType: "Sai giới từ: by vs through",
-              errorCategory: "PREPOSITION",
-              userText: "by",
-              correctText: "through",
-              explanation: "Khi nói về phương tiện truyền thông qua mạng xã hội, người bản xứ thường dùng giới từ 'through'.",
-              severity: "MEDIUM"
-            }
-          ]
-
-        ── Ví dụ 7: BẮT NHIỀU LỖI CÙNG LÚC ──
-        Học viên: "passeger buy tickets"
-        → errors = [
-            {
-              errorType: "Viết sai chính tả: 'passeger' → 'passenger'",
-              errorCategory: "SPELLING",
-              userText: "passeger",
-              correctText: "passenger",
-              explanation: "Viết sai chính tả 'passeger' → 'passenger'.",
-              severity: "MEDIUM"
-            },
-            {
-              errorType: "Thiếu viết hoa đầu câu",
-              errorCategory: "SPELLING",
-              userText: "passeger",
-              correctText: "Passeger",
-              explanation: "Đầu câu phải viết hoa.",
-              severity: "LOW"
-            },
-            {
-              errorType: "Hòa hợp chủ ngữ - động từ",
-              errorCategory: "STRUCTURE",
-              userText: "Passeger buy",
-              correctText: "Passengers buy",
-              explanation: "Chủ ngữ số nhiều 'Passengers' → động từ nguyên mẫu 'buy'.",
-              severity: "HIGH"
-            }
-          ]
-        """;
-
-    // ========================================
-    // 5. PROMPT TEMPLATES
-    // ========================================
-
     public static final String GENERATE_PROMPT_TEMPLATE = """
-        Bạn là giáo viên tiếng Anh 10 năm kinh nghiệm.
-        Nhiệm vụ: Tạo câu tiếng Việt để học viên dịch sang tiếng Anh.
+        Bạn là giáo viên tiếng Anh. Tạo 1 câu tiếng Việt để học viên dịch sang tiếng Anh.
 
-        ═══════════════════════════════════════════════════
-        ⚠️ RÀNG BUỘC BẮT BUỘC
-        ═══════════════════════════════════════════════════
+        === RÀNG BUỘC CỨNG ===
+        - %s
+        - %s
+        - %s
 
-        📌 TRÌNH ĐỘ: %s
-        - Câu PHẢI phù hợp với trình độ (xem hướng dẫn bên dưới)
-        - KHÔNG được dùng thì/cấu trúc chưa học ở level này
-        - Độ dài câu PHẢI đúng theo level
-
-        📌 CHỦ ĐỀ: %s
-        - Câu PHẢI liên quan TRỰC TIẾP đến chủ đề này
-        - KHÔNG được lạc sang chủ đề khác
-
-        📌 LOẠI CÂU: %s
-        - PHẢI tuân thủ CHÍNH XÁC loại câu (xem giải thích bên dưới)
-        - Nếu là ANSWER → CHỈ câu trần thuật, KHÔNG có "?"
-        - Nếu là QUESTION → CHỈ câu hỏi, PHẢI có "?"
-        - KHÔNG tự ý thêm loại câu khác xen kẽ
-
-        ═══════════════════════════════════════════════════
-        HƯỚNG DẪN THEO TRÌNH ĐỘ
-        ═══════════════════════════════════════════════════
+        === TỪ VỰNG BẮT BUỘC ===
         %s
 
-        ═══════════════════════════════════════════════════
-        HƯỚNG DẪN THEO CHỦ ĐỀ
-        ═══════════════════════════════════════════════════
+        === CÂU ĐÃ HỎI ===
         %s
 
-        ═══════════════════════════════════════════════════
-        LOẠI CÂU BẮT BUỘC: %s
-        ═══════════════════════════════════════════════════
-        %s
+        === QUY TẮC TẠO CÂU ===
+        1. Câu tiếng Việt 100%% tiếng Việt — KHÔNG trộn từ tiếng Anh.
+        2. Từ vựng bắt buộc PHẢI được dịch sang tiếng Việt trong câu.
+        3. Đọc tự nhiên như người thật đang nói chuyện — KHÔNG gượng ép ghép từ.
+        4. KHÔNG lặp ý tưởng / cấu trúc / trạng ngữ thời gian với câu đã hỏi.
+        5. Trước khi viết, nghĩ ra 1 bối cảnh cụ thể (bữa ăn sáng hôm qua, lúc dọn nhà, khi đi làm về...)
+           — bối cảnh phải KHÁC các câu trước.
 
-        ═══════════════════════════════════════════════════
-        ⚠️ TỪ VỰNG BẮT BUỘC TRONG CÂU NÀY
-        ═══════════════════════════════════════════════════
-        %s
-
-        ═══════════════════════════════════════════════════
-        CÁC CÂU ĐÃ HỎI TRƯỚC ĐÓ (KHÔNG ĐƯỢC LẶP)
-        ═══════════════════════════════════════════════════
-        %s
-
-        ═══════════════════════════════════════════════════
-        QUY TẮC CHỐNG TRÙNG LẶP
-        ═══════════════════════════════════════════════════
-        1. Câu tiếp theo KHÔNG được giống câu trên
-        2. KHÔNG dùng lại CÙNG chủ ngữ + CÙNG động từ + CÙNG trạng ngữ
-        3. PHẢI thay đổi ÍT NHẤT 2 yếu tố:
-           - Chủ ngữ: I → She / They / My brother...
-           - Động từ: eat → cook / buy / enjoy...
-           - Trạng ngữ: lúc 7 giờ → ở nhà / hôm qua...
-           - Cấu trúc: khẳng định → phủ định
-
-        ═══════════════════════════════════════════════════
-        ⚠️ QUY TẮC NGÔN NGỮ (CỰC KỲ QUAN TRỌNG)
-        ═══════════════════════════════════════════════════
-        1. Câu tiếng Việt PHẢI HOÀN TOÀN TIẾNG VIỆT.
-           TUYỆT ĐỐI KHÔNG trộn từ tiếng Anh vào câu tiếng Việt.
-        2. Nếu có từ vựng bắt buộc (tiếng Anh) → PHẢI DỊCH sang tiếng Việt.
-           - "coffee"      → "cà phê"
-           - "communicate" → "giao tiếp"
-           - "message"     → "tin nhắn"
-           - "social media"→ "mạng xã hội"
-           - "reservation" → "đặt chỗ"
-        3. Từ tiếng Anh CHỈ xuất hiện trong expectedAnswer (đáp án).
-
-        ═══════════════════════════════════════════════════
-        CHECKLIST TRƯỚC KHI TRẢ JSON
-        ═══════════════════════════════════════════════════
-        □ Câu tiếng Việt ĐÚNG loại câu yêu cầu
-        □ Nếu là ANSWER: KHÔNG có "?", KHÔNG có từ để hỏi
-        □ Nếu là QUESTION: PHẢI có "?", PHẢI có từ để hỏi
-        □ Câu liên quan TRỰC TIẾP đến chủ đề
-        □ Câu phù hợp với trình độ (độ dài + thì)
-        □ Câu KHÔNG trùng với câu đã hỏi
-        □ Câu tiếng Việt HOÀN TOÀN TIẾNG VIỆT (KHÔNG trộn tiếng Anh)
-        □ Nếu có từ vựng force: từ đó PHẢI được DỊCH sang tiếng Việt
-          (VD: "coffee" → "cà phê", KHÔNG viết "coffee")
-
-        Nếu BẤT KỲ ô nào KHÔNG đạt → SỬA LẠI.
+        === QUY TẮC TỰ NHIÊN (QUAN TRỌNG NHẤT) ===
+        1. Câu phải là câu NGƯỜI VIỆT THẬT SỰ NÓI hàng ngày — như bạn bè nói chuyện.
+        2. KHÔNG dùng "đang + cảm xúc" (đang cảm ơn, đang xin lỗi).
+        3. KHÔNG lặp chủ ngữ "tôi... tôi..." trong câu ngắn.
+        4. KHÔNG nhồi forcedWords nếu gượng — thà câu ngắn tự nhiên.
+        5. ĐA DẠNG: mỗi câu dùng cấu trúc/ngữ cảnh KHÁC câu trước.
+        6. Ưu tiên câu HỎI, RỦ RÊ, CHIA SẺ hơn câu sáo rỗng.
 
         === JSON OUTPUT ===
         {
           "vietnameseSentence": "câu tiếng Việt",
           "expectedAnswer": "câu tiếng Anh đúng",
           "sentenceType": "QUESTION|ANSWER|RANDOM",
-          "usedVocabulary": ["từ tiếng Anh đã dùng trong câu"]
+          "usedVocabulary": ["từ tiếng Anh đã dùng"]
         }
         """;
 
+    // ========================================
+    // 5. EVALUATE PROMPT TEMPLATE
+    // ========================================
     public static final String EVALUATE_PROMPT_TEMPLATE = """
-        Bạn là giáo viên tiếng Anh chuyên đánh giá bài dịch.
+        Bạn là giáo viên tiếng Anh chấm bài dịch.
 
-        === NGỮ CẢNH ===
-        - Câu tiếng Việt: %s
+        === BÀI LÀM ===
+        - Câu gốc: %s
+        - Đáp án mẫu: %s
         - Bài dịch: %s
-        - Đáp án đúng: %s
         - Trình độ: %s
 
-        %s
+        === TRIẾT LÝ CHẤM ===
+        - Đây là BÀI DỊCH, không phải so khớp đáp án. Đáp án mẫu chỉ là MỘT trong nhiều cách đúng.
+        - KHÔNG phải lỗi: từ đồng nghĩa (often/usually), cấu trúc tương đương (I think = In my opinion),
+          determiner thay thế (the/this store), phong cách khác.
+        - LÀ lỗi: vi phạm ngữ pháp cứng, sai nghĩa, sai chính tả, dùng từ sai ngữ cảnh.
 
-        === HƯỚNG DẪN CHẤM ===
-        %s
+        === CHẤP NHẬN BIẾN THỂ Ở LEVEL THẤP (A1/A2) ===
+        Với level A1/A2, KHÔNG bắt lỗi các trường hợp sau (vì người bản xứ vẫn hiểu):
+        - Thiếu giới từ nếu nghĩa vẫn rõ: "welcome the colleague the company" thay vì "to the company"
+        - Thiếu giới từ sau động từ nếu ngữ cảnh rõ: "apologize you" → vẫn có thể chấp nhận ở A1, chỉ MEDIUM ở A2
+        - Sai thì nhẹ nhưng có trạng ngữ thời gian rõ: "I welcome him yesterday" — chỉ LOW/MEDIUM, không HIGH
+        - Dùng từ đồng nghĩa: "say bye" vs "say goodbye", "big" vs "large", "night" vs "evening"
+        CHỈ bắt lỗi HIGH khi: sai nghĩa hoàn toàn, sai cấu trúc khiến người bản xứ KHÔNG hiểu được.
+        Ở level A1/A2, ưu tiên ĐỘNG VIÊN — chỉ bắt lỗi thực sự nghiêm trọng.
 
-        %s
+        === 3 CÂU HỎI CHỐNG BẮT LỖI OAN (trả lời trước khi thêm error) ===
+        1. Người bản xứ đọc câu này có hiểu đúng không? → CÓ → KHÔNG phải lỗi.
+        2. Câu này vi phạm quy tắc ngữ pháp CỨNG nào? → KHÔNG → KHÔNG phải lỗi.
+        3. Nếu thay ngữ cảnh, câu này có đúng không? → CÓ → KHÔNG phải lỗi.
+        Chỉ khi cả 3 đều "KHÔNG" → mới thêm vào errors.
+
+        === LUẬT CHỐNG ẢO GIÁC ===
+        - Nếu userText VÀ correctText GIỐNG HỆT NHAU (hoặc chỉ khác dấu chấm/viết hoa)
+          → KHÔNG tạo lỗi.
+        - Nếu học viên viết đúng chính tả + ngữ pháp → TUYỆT ĐỐI KHÔNG báo lỗi.
+
+        === LUẬT MẠO TỪ ===
+        - Danh từ không đếm được (coffee, tea): nói chung không cần "the",
+          nhưng ngữ cảnh xác định ("the coffee I spilled") dùng "the" là ĐÚNG.
+        - KHÔNG bắt lỗi thừa/thiếu mạo từ nếu cả 2 cách đều chấp nhận.
+
+        === VÍ DỤ ===
+        1. Gốc: "Tôi thường ăn sáng lúc 7 giờ" | Đáp án: "I usually have breakfast at 7 AM"
+           | Bài làm: "I often have breakfast at 7 o'clock" → ĐÚNG, không lỗi.
+        2. Bài làm: "She offten cooks" → LỖI: SPELLING "offten" → "often", severity MEDIUM.
+        3. Bài làm: "She cook every morning" → LỖI: STRUCTURE "She cook" → "She cooks", severity HIGH.
+        4. Bài làm: "We communicate each other by social media" → 2 LỖI:
+           - PREPOSITION: thiếu "with" sau "communicate" (HIGH)
+           - PREPOSITION: "by" → "through" (MEDIUM)
+           → 2 lỗi cùng category nhưng errorType KHÁC NHAU.
+        5. Bài làm A2: "I welcome new colleague the company" → KHÔNG bắt lỗi "thiếu to"
+           (vẫn hiểu được, chỉ góp ý trong feedback, không thêm error).
+        6. Bài làm A2: "I have to apologize you" → thiếu "to" sau "apologize" → LỖI PREPOSITION,
+           severity MEDIUM (không HIGH vì nghĩa vẫn rõ).
+
+        === ERROR TAXONOMY ===
+        Bước 1 — errorCategory (1 trong 12): TENSE, ARTICLE, PREPOSITION, CONJUNCTION, STRUCTURE,
+          POS, VERB, NATURALNESS, SPELLING, WORD_CHOICE, MEANING, PUNCTUATION.
+        Bước 2 — errorType (BẮT BUỘC DỊCH SANG TIẾNG VIỆT, ≤ 12 từ, CỤ THỂ):
+          ⚠️ TUYỆT ĐỐI KHÔNG DÙNG TIẾNG ANH CHO errorType. Phải dịch sang tiếng Việt.
+          - Lỗi MEANING → ghi: "Sai nghĩa hoàn toàn", "Dịch sai ý câu gốc"
+          - Lỗi TENSE → ghi: "Sai thì: 'find' → 'found'"
+          - Lỗi PREPOSITION → ghi: "Thiếu giới từ 'with' sau 'communicate'"
+          - Lỗi SPELLING → ghi: "Viết sai chính tả: 'offten' → 'often'"
+          - Lỗi STRUCTURE → ghi: "Hòa hợp chủ ngữ - động từ"
+          - Lỗi WORD_CHOICE → ghi: "Dùng sai từ vựng: 'plate' → 'fork'"
+          - Mỗi lỗi PHẢI có errorType KHÁC NHAU.
+        Bước 3 — severity: HIGH | MEDIUM | LOW.
 
         === JSON OUTPUT ===
         {
           "isCorrect": boolean,
           "score": number (0-100),
           "naturalnessScore": number (0-100),
-          "feedback": "string (TIẾNG VIỆT)",
-          "betterAnswers": ["string"],
-          "errors": [...]
-        }
-        """;
-
-    public static final String EVALUATE_AND_GENERATE_PROMPT_TEMPLATE = """
-        Bạn là giáo viên tiếng Anh chuyên đánh giá bài dịch và tạo câu tiếp theo.
-
-        ⚠️ QUY TẮC BẮT BUỘC:
-        1. TẤT CẢ feedback, explanation, errorType PHẢI bằng TIẾNG VIỆT
-        2. CHỈ expectedAnswer, correctText, userText, betterAnswers là TIẾNG ANH
-        3. PHẢI phân tích TỪNG LỖI riêng biệt
-        4. Mỗi lỗi PHẢI có đủ các thành phần: errorType, errorCategory,
-           userText, correctText, explanation, severity
-        5. Mỗi lỗi PHẢI có errorType KHÁC NHAU (cụ thể, không chung chung)
-        6. Chỉ trả về JSON
-
-        ═══════════════════════════════════════════════════
-        PHẦN 1: ĐÁNH GIÁ BÀI DỊCH
-        ═══════════════════════════════════════════════════
-
-        === NGỮ CẢNH ĐÁNH GIÁ ===
-        - Câu tiếng Việt: %s
-        - Bài dịch của học viên: %s
-        - Đáp án đúng: %s
-        - Trình độ: %s
-        - Chủ đề: %s
-
-        === TRIẾT LÝ CHẤM ===
-        %s
-
-        === VÍ DỤ ===
-        %s
-
-        ═══════════════════════════════════════════════════
-        PHẦN 2: TẠO CÂU TIẾP THEO
-        ═══════════════════════════════════════════════════
-
-        📌 TRÌNH ĐỘ: %s
-        - Câu tiếp theo PHẢI phù hợp với level này
-        - KHÔNG dùng thì/cấu trúc chưa học ở level
-
-        📌 CHỦ ĐỀ: %s
-        - Câu tiếp theo PHẢI liên quan TRỰC TIẾP đến chủ đề
-
-        📌 LOẠI CÂU BẮT BUỘC: %s
-        %s
-
-        ⚠️ NHẮC LẠI: KHÔNG được sinh loại câu khác.
-
-        📌 HƯỚNG DẪN TRÌNH ĐỘ:
-        %s
-
-        📌 HƯỚNG DẪN CHỦ ĐỀ:
-        %s
-
-        ═══════════════════════════════════════════════════
-        ⚠️ TỪ VỰNG BẮT BUỘC TRONG CÂU TIẾP THEO
-        ═══════════════════════════════════════════════════
-        %s
-
-        ═══════════════════════════════════════════════════
-        CÁC CÂU ĐÃ HỎI TRƯỚC ĐÓ (KHÔNG LẶP)
-        ═══════════════════════════════════════════════════
-        %s
-
-        ═══════════════════════════════════════════════════
-        QUY TẮC CHỐNG TRÙNG LẶP
-        ═══════════════════════════════════════════════════
-        1. Câu tiếp theo KHÔNG được giống câu trên
-        2. PHẢI thay đổi ÍT NHẤT 2 yếu tố
-
-        ═══════════════════════════════════════════════════
-        ⚠️ QUY TẮC NGÔN NGỮ (CỰC KỲ QUAN TRỌNG)
-        ═══════════════════════════════════════════════════
-        1. Câu tiếng Việt tiếp theo PHẢI HOÀN TOÀN TIẾNG VIỆT.
-           TUYỆT ĐỐI KHÔNG trộn từ tiếng Anh vào câu tiếng Việt.
-        2. Nếu có từ vựng bắt buộc (tiếng Anh) → PHẢI DỊCH sang tiếng Việt.
-           - "coffee"      → "cà phê"
-           - "communicate" → "giao tiếp"
-           - "message"     → "tin nhắn"
-           - "social media"→ "mạng xã hội"
-           - "reservation" → "đặt chỗ"
-        3. Từ tiếng Anh CHỈ xuất hiện trong expectedAnswer (đáp án).
-
-        ═══════════════════════════════════════════════════
-        ERROR TAXONOMY
-        ═══════════════════════════════════════════════════
-        %s
-
-        ═══════════════════════════════════════════════════
-        ĐỊNH DẠNG JSON
-        ═══════════════════════════════════════════════════
-        {
-          "isCorrect": boolean,
-          "score": number (0-100),
-          "naturalnessScore": number (0-100),
-          "feedback": "string (TIẾNG VIỆT)",
+          "feedback": "TIẾNG VIỆT",
           "betterAnswers": ["câu tiếng Anh hay hơn"],
           "errors": [
             {
@@ -682,16 +250,10 @@ public class PromptConstants {
               "errorCategory": "STRUCTURE",
               "userText": "She cook",
               "correctText": "She cooks",
-              "explanation": "Chủ ngữ số ít ngôi 3 'She' → động từ thêm 's'.",
+              "explanation": "TIẾNG VIỆT",
               "severity": "HIGH"
             }
-          ],
-          "nextQuestion": {
-            "vietnameseSentence": "câu tiếp theo",
-            "expectedAnswer": "đáp án",
-            "sentenceType": "QUESTION|ANSWER|RANDOM",
-            "usedVocabulary": ["từ đã dùng"]
-          }
+          ]
         }
         """;
 
@@ -722,61 +284,26 @@ public class PromptConstants {
             return "(Chưa có câu nào — đây là câu đầu tiên)";
         }
         StringBuilder sb = new StringBuilder();
+        sb.append("Các câu ĐÃ HỎI (TUYỆT ĐỐI KHÔNG lặp lại ý tưởng, cấu trúc, hay trạng ngữ thời gian):\n");
         for (int i = 0; i < previousSentences.size(); i++) {
             sb.append(i + 1).append(". ").append(previousSentences.get(i)).append("\n");
         }
+        sb.append("\n⚠️ Nếu câu trước dùng \"buổi sáng\" → câu này phải dùng ngữ cảnh khác (chiều, tối, lúc đang làm gì...).\n");
+        sb.append("⚠️ Nếu câu trước nói về \"ăn sáng\" → câu này phải nói về chủ đề khác trong cùng topic.\n");
         return sb.toString();
     }
 
-    /**
-     * ✅ Format block forced words.
-     * Rỗng = AI tự do.
-     * Có từ = ÉP AI dịch sang tiếng Việt khi đưa vào câu tiếng Việt.
-     */
     private static String formatForcedWordsBlock(List<String> forcedWords) {
         if (forcedWords == null || forcedWords.isEmpty()) {
-            return "✓ Không có từ vựng bắt buộc. Câu tiếp theo có thể dùng BẤT KỲ từ nào.";
+            return "Không có từ bắt buộc.";
         }
-
         StringBuilder sb = new StringBuilder();
-        sb.append("Câu tiếp theo BẮT BUỘC PHẢI chứa ").append(forcedWords.size())
-                .append(" từ vựng sau:\n\n");
-        for (int i = 0; i < forcedWords.size(); i++) {
-            sb.append(i + 1).append(". \"").append(forcedWords.get(i)).append("\"\n");
+        sb.append("Câu tiếng Việt PHẢI chứa nghĩa tiếng Việt của các từ sau:\n");
+        for (String w : forcedWords) {
+            sb.append("- \"").append(w).append("\" → phải xuất hiện nghĩa tiếng Việt trong câu\n");
         }
-
-        sb.append("\n⚠️ QUY TẮC CỰC KỲ QUAN TRỌNG:\n");
-
-        sb.append("\n1. TỪ TIẾNG ANH PHẢI ĐƯỢC DỊCH SANG TIẾNG VIỆT khi đưa vào câu.\n");
-        sb.append("   - \"coffee\"       → \"cà phê\"\n");
-        sb.append("   - \"morning\"      → \"buổi sáng\"\n");
-        sb.append("   - \"communicate\"  → \"giao tiếp\"\n");
-        sb.append("   - \"message\"      → \"tin nhắn\"\n");
-        sb.append("   - \"often\"        → \"thường\"\n");
-        sb.append("   - \"social media\" → \"mạng xã hội\"\n");
-        sb.append("   - \"reservation\"  → \"đặt chỗ\"\n");
-
-        sb.append("\n2. ❌ TUYỆT ĐỐI KHÔNG được giữ từ tiếng Anh trong câu tiếng Việt.\n");
-        sb.append("   SAI: \"Chúng tôi thường communicate bằng tin nhắn mỗi ngày.\"\n");
-        sb.append("   SAI: \"Tôi dùng smartphone mỗi ngày.\"\n");
-        sb.append("   SAI: \"Cô ấy thích coffee vào buổi sáng.\"\n");
-
-        sb.append("\n3. ✅ ĐÚNG — câu PHẢI HOÀN TOÀN TIẾNG VIỆT:\n");
-        sb.append("   ĐÚNG: \"Chúng tôi thường giao tiếp bằng tin nhắn mỗi ngày.\"\n");
-        sb.append("   ĐÚNG: \"Tôi dùng điện thoại thông minh mỗi ngày.\"\n");
-        sb.append("   ĐÚNG: \"Cô ấy thích cà phê vào buổi sáng.\"\n");
-
-        sb.append("\n4. Từ tiếng Anh CHỈ xuất hiện trong expectedAnswer (đáp án).\n");
-        sb.append("   - Câu tiếng Việt: \"Chúng tôi thường giao tiếp bằng tin nhắn mỗi ngày.\"\n");
-        sb.append("   - Đáp án: \"We often communicate by message every day.\"\n");
-        sb.append("   - usedVocabulary: [\"communicate\", \"message\"]\n");
-
-        sb.append("\n5. Nếu từ vựng bắt buộc KHÔNG CÓ nghĩa tiếng Việt phù hợp\n");
-        sb.append("   (VD: tên riêng, thuật ngữ chuyên ngành) → vẫn phải Việt hóa\n");
-        sb.append("   hoặc mô tả bằng tiếng Việt.\n");
-
-        sb.append("\n⚠️ ĐÂY LÀ YÊU CẦU CỨNG. Vi phạm = câu trả lời SAI.\n");
-
+        sb.append("\nKHÔNG giữ nguyên từ tiếng Anh trong câu tiếng Việt. ")
+                .append("Từ tiếng Anh CHỈ có trong expectedAnswer.");
         return sb.toString();
     }
 
@@ -786,55 +313,24 @@ public class PromptConstants {
 
     public static String formatGeneratePrompt(
             String level, String topic, String sentenceType,
-            String weaknesses, List<String> previousSentences,
-            List<String> forcedWords) {
-
-        String normalizedType = (sentenceType != null && !sentenceType.isEmpty())
-                ? sentenceType.toUpperCase()
-                : "RANDOM";
-
-        return String.format(
-                GENERATE_PROMPT_TEMPLATE,
-                level,                                              // %s 1 - Trình độ
-                topic,                                              // %s 2 - Chủ đề
-                normalizedType,                                     // %s 3 - Loại câu
-                getLevelDescription(level),                         // %s 4 - Hướng dẫn trình độ
-                getTopicDescription(topic),                         // %s 5 - Hướng dẫn chủ đề
-                normalizedType,                                     // %s 6 - Loại câu (lặp)
-                getSentenceTypeDescription(normalizedType),         // %s 7 - Mô tả chi tiết loại câu
-                formatForcedWordsBlock(forcedWords),                // %s 8 - Từ vựng force
-                formatPreviousSentences(previousSentences)          // %s 9 - Câu đã hỏi
-        );
-    }
-
-    public static String formatEvaluateAndGeneratePrompt(
-            String vietnameseSentence, String studentAnswer,
-            String expectedAnswer, String level, String topic,
-            String weaknesses, String sentenceType,
             List<String> previousSentences, List<String> forcedWords) {
 
         String normalizedType = (sentenceType != null && !sentenceType.isEmpty())
                 ? sentenceType.toUpperCase()
                 : "RANDOM";
 
+        String levelBlock = getLevelDescription(level);
+        String topicBlock = getTopicDescription(topic);
+        String sentenceTypeBlock = "Loại câu: " + normalizedType + "\n"
+                + getSentenceTypeDescription(normalizedType);
+
         return String.format(
-                EVALUATE_AND_GENERATE_PROMPT_TEMPLATE,
-                vietnameseSentence,                                 // %s 1
-                studentAnswer,                                      // %s 2
-                expectedAnswer,                                     // %s 3
-                level,                                              // %s 4
-                topic,                                              // %s 5
-                CORE_EVALUATION_RULES,                              // %s 6
-                FEW_SHOT_EXAMPLES,                                  // %s 7
-                level,                                              // %s 8 - Trình độ câu tiếp
-                topic,                                              // %s 9 - Chủ đề câu tiếp
-                normalizedType,                                     // %s 10 - Loại câu
-                getSentenceTypeDescription(normalizedType),         // %s 11 - Mô tả loại câu
-                getLevelDescription(level),                         // %s 12
-                getTopicDescription(topic),                         // %s 13
-                formatForcedWordsBlock(forcedWords),                // %s 14 - Từ vựng force
-                formatPreviousSentences(previousSentences),         // %s 15 - Câu đã hỏi
-                ERROR_TAXONOMY                                      // %s 16
+                GENERATE_PROMPT_TEMPLATE,
+                levelBlock,
+                topicBlock,
+                sentenceTypeBlock,
+                formatForcedWordsBlock(forcedWords),
+                formatPreviousSentences(previousSentences)
         );
     }
 
@@ -845,12 +341,9 @@ public class PromptConstants {
         return String.format(
                 EVALUATE_PROMPT_TEMPLATE,
                 vietnameseSentence,
-                studentAnswer,
                 expectedAnswer,
-                level,
-                CORE_EVALUATION_RULES,
-                getLevelDescription(level),
-                ERROR_TAXONOMY
+                studentAnswer,
+                level
         );
     }
 }

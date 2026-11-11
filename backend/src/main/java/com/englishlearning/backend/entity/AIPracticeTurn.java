@@ -40,6 +40,10 @@ public class AIPracticeTurn {
     @Column(name = "used_vocabulary", length = 500)
     private String usedVocabulary;
 
+    // ✅ THÊM FIELD MỚI: từ vựng MÌNH ÉP (khác usedVocabulary của AI báo)
+    @Column(name = "forced_words", length = 500)
+    private String forcedWords;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
