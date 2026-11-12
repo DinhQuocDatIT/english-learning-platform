@@ -79,44 +79,42 @@ function Leaderboard() {
 
   return (
     <div className={styles.container}>
-      {/* HERO */}
+      {/* HERO SECTION */}
       <div className={styles.hero}>
-        <span className={styles.heroBadge}>
+        <div className={styles.heroBadge}>
           <FontAwesomeIcon icon={faTrophy} />
-          Bảng xếp hạng
-        </span>
-
+          Bảng xếp hạng học tập
+        </div>
         <h1 className={styles.heroTitle}>
-          Bảng xếp hạng{" "}
+          Vinh danh{" "}
           <span className={styles.heroHighlight}>học viên xuất sắc</span>
         </h1>
-
         <p className={styles.heroDesc}>
-          Vinh danh những học viên có thành tích học tập tốt nhất và duy trì
-          chuỗi học tập chăm chỉ.
+          Ghi nhận những nỗ lực học tập chăm chỉ và duy trì chuỗi thành tích ấn
+          tượng mỗi ngày.
         </p>
 
-        {totalParticipants > 0 && (
-          <p className={styles.heroMeta}>
+        {/* {totalParticipants > 0 && (
+          <div className={styles.heroMeta}>
             Đang có{" "}
             <strong className={styles.heroMetaNum}>
               {totalParticipants.toLocaleString("vi-VN")}
             </strong>{" "}
             học viên tham gia thi đua
-          </p>
-        )}
+          </div>
+        )} */}
       </div>
 
       {/* PODIUM — TOP 3 */}
       <div className={styles.podium}>
         {/* TOP 2 */}
         {top2 && (
-          <div
-            className={`${styles.podiumCard} ${styles.rank2}`}
-            style={{ "--card-color": "#f59e0b" }}
-          >
-            <div className={styles.podiumRank}>
-              <FontAwesomeIcon icon={faMedal} />
+          <div className={`${styles.podiumCard} ${styles.rank2}`}>
+            <div className={styles.podiumRankBadge}>
+              <FontAwesomeIcon
+                icon={faMedal}
+                className={styles.medalIconRank2}
+              />
               <span>2</span>
             </div>
             <div className={styles.podiumAvatarWrap}>
@@ -131,15 +129,17 @@ function Leaderboard() {
             <h3 className={styles.podiumName} title={top2.name}>
               {top2.name}
             </h3>
-            {top2.title && (
-              <span className={styles.userSubTitle}>{top2.title}</span>
-            )}
+            <span className={styles.userSubTitle}>
+              {top2.title || "Học viên tích cực"}
+            </span>
             <div className={styles.podiumStats}>
-              <span className={styles.podiumStat}>
+              <div className={styles.podiumStatItem}>
                 <FontAwesomeIcon icon={faStar} className={styles.starIcon} />
-                <strong>{top2.exp.toLocaleString("vi-VN")}</strong>
-                <span className={styles.expLabel}>exp</span>
-              </span>
+                <span className={styles.statValue}>
+                  {top2.exp.toLocaleString("vi-VN")}
+                </span>
+                <span className={styles.statUnit}>EXP</span>
+              </div>
               <StreakBadge streak={top2.streak} />
             </div>
           </div>
@@ -147,14 +147,8 @@ function Leaderboard() {
 
         {/* TOP 1 */}
         {top1 && (
-          <div
-            className={`${styles.podiumCard} ${styles.rank1}`}
-            style={{ "--card-color": "#0ea792" }}
-          >
-            <div className={styles.crownWrap}>
-              <FontAwesomeIcon icon={faCrown} className={styles.crownIcon} />
-            </div>
-            <div className={styles.podiumRank}>
+          <div className={`${styles.podiumCard} ${styles.rank1}`}>
+            <div className={styles.podiumRankBadge}>
               <FontAwesomeIcon icon={faTrophy} />
               <span>1</span>
             </div>
@@ -172,18 +166,22 @@ function Leaderboard() {
             <h3 className={styles.podiumName} title={top1.name}>
               {top1.name}
             </h3>
-            {top1.title && (
-              <span className={styles.userSubTitleGold}>{top1.title}</span>
-            )}
+            <span className={styles.userSubTitleGold}>
+              {top1.title || "Quán quân học tập"}
+            </span>
             <div className={styles.podiumStats}>
-              <span className={`${styles.podiumStat} ${styles.statGold}`}>
+              <div
+                className={`${styles.podiumStatItem} ${styles.statGoldItem}`}
+              >
                 <FontAwesomeIcon
                   icon={faStar}
                   className={styles.starIconGold}
                 />
-                <strong>{top1.exp.toLocaleString("vi-VN")}</strong>
-                <span className={styles.expLabel}>exp</span>
-              </span>
+                <span className={styles.statValue}>
+                  {top1.exp.toLocaleString("vi-VN")}
+                </span>
+                <span className={styles.statUnit}>EXP</span>
+              </div>
               <StreakBadge streak={top1.streak} />
             </div>
           </div>
@@ -191,12 +189,12 @@ function Leaderboard() {
 
         {/* TOP 3 */}
         {top3Item && (
-          <div
-            className={`${styles.podiumCard} ${styles.rank3}`}
-            style={{ "--card-color": "#dc2626" }}
-          >
-            <div className={styles.podiumRank}>
-              <FontAwesomeIcon icon={faMedal} />
+          <div className={`${styles.podiumCard} ${styles.rank3}`}>
+            <div className={styles.podiumRankBadge}>
+              <FontAwesomeIcon
+                icon={faMedal}
+                className={styles.medalIconRank3}
+              />
               <span>3</span>
             </div>
             <div className={styles.podiumAvatarWrap}>
@@ -211,15 +209,17 @@ function Leaderboard() {
             <h3 className={styles.podiumName} title={top3Item.name}>
               {top3Item.name}
             </h3>
-            {top3Item.title && (
-              <span className={styles.userSubTitle}>{top3Item.title}</span>
-            )}
+            <span className={styles.userSubTitle}>
+              {top3Item.title || "Học viên năng nổ"}
+            </span>
             <div className={styles.podiumStats}>
-              <span className={styles.podiumStat}>
+              <div className={styles.podiumStatItem}>
                 <FontAwesomeIcon icon={faStar} className={styles.starIcon} />
-                <strong>{top3Item.exp.toLocaleString("vi-VN")}</strong>
-                <span className={styles.expLabel}>exp</span>
-              </span>
+                <span className={styles.statValue}>
+                  {top3Item.exp.toLocaleString("vi-VN")}
+                </span>
+                <span className={styles.statUnit}>EXP</span>
+              </div>
               <StreakBadge streak={top3Item.streak} />
             </div>
           </div>
@@ -229,15 +229,16 @@ function Leaderboard() {
       {/* LEADERBOARD LIST */}
       {allUsers.length > 0 && (
         <div className={styles.listSection}>
-          <h2 className={styles.listTitleFull}>
-            Bảng xếp hạng Top {allUsers.length} học viên
-          </h2>
+          <div className={styles.listHeaderBar}>
+            <h2 className={styles.listTitle}>Bảng xếp hạng</h2>
+            <span className={styles.listCount}>{allUsers.length} học viên</span>
+          </div>
 
-          <div className={styles.listHeader}>
+          <div className={styles.tableHeader}>
             <span className={styles.colRank}>Hạng</span>
             <span className={styles.colUser}>Học viên</span>
             <span className={styles.colExp}>Kinh nghiệm</span>
-            <span className={styles.colStreak}>Chuỗi học</span>
+            <span className={styles.colStreak}>Chuỗi học tập</span>
           </div>
 
           <div className={styles.list}>
@@ -247,9 +248,9 @@ function Leaderboard() {
               const isRank3 = user.rank === 3;
 
               let rowClass = styles.listRow;
-              if (isRank1) rowClass += ` ${styles.rank1ListRow}`;
-              else if (isRank2) rowClass += ` ${styles.rank2ListRow}`;
-              else if (isRank3) rowClass += ` ${styles.rank3ListRow}`;
+              if (isRank1) rowClass += ` ${styles.rank1Row}`;
+              else if (isRank2) rowClass += ` ${styles.rank2Row}`;
+              else if (isRank3) rowClass += ` ${styles.rank3Row}`;
               if (user.isCurrentUser) rowClass += ` ${styles.currentUserRow}`;
 
               return (
@@ -257,24 +258,24 @@ function Leaderboard() {
                   <div className={styles.colRank}>
                     {isRank1 ? (
                       <span
-                        className={`${styles.rankNumber} ${styles.rank1RowPill}`}
+                        className={`${styles.rankBadgeNum} `}
                       >
-                        🥇 #1
+                        🥇 1
                       </span>
                     ) : isRank2 ? (
                       <span
-                        className={`${styles.rankNumber} ${styles.rank2RowPill}`}
+                        className={`${styles.rankBadgeNum} `}
                       >
-                        🥈 #2
+                        🥈 2
                       </span>
                     ) : isRank3 ? (
                       <span
-                        className={`${styles.rankNumber} ${styles.rank3RowPill}`}
+                        className={`${styles.rankBadgeNum} `}
                       >
-                        🥉 #3
+                        🥉 3
                       </span>
                     ) : (
-                      <span className={styles.rankNumber}>#{user.rank}</span>
+                      <span className={styles.rankBadgeNum}>#{user.rank}</span>
                     )}
                   </div>
 
@@ -286,15 +287,16 @@ function Leaderboard() {
                       onError={handleAvatarError}
                     />
                     <div className={styles.rowUserInfo}>
-                      <span className={styles.rowName} title={user.name}>
-                        {user.name}
+                      <div className={styles.rowNameWrapper}>
+                        <span className={styles.rowName} title={user.name}>
+                          {user.name}
+                        </span>
                         {user.isCurrentUser && (
-                          <span className={styles.youTag}> (Bạn)</span>
+                          <span className={styles.youTag}>Bạn</span>
                         )}
-                      </span>
+                      </div>
                       <span className={styles.rowLevel}>
-                        Cấp độ {user.level}{" "}
-                        {user.title ? `· ${user.title}` : ""}
+                        Cấp {user.level} {user.title ? `· ${user.title}` : ""}
                       </span>
                     </div>
                   </div>
@@ -304,7 +306,10 @@ function Leaderboard() {
                       icon={faStar}
                       className={styles.starIconRow}
                     />
-                    <strong>{user.exp.toLocaleString("vi-VN")}</strong> exp
+                    <span className={styles.expNumber}>
+                      {user.exp.toLocaleString("vi-VN")}
+                    </span>
+                    <span className={styles.expText}>EXP</span>
                   </div>
 
                   <div className={styles.colStreak}>

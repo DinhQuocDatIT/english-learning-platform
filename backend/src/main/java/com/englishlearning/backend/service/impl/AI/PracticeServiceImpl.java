@@ -161,7 +161,7 @@ public class PracticeServiceImpl implements PracticeService {
     }
 
     // ========================================
-    // SUBMIT ANSWER — TÁCH 2 CALL: EVALUATE → GENERATE
+    // SUBMIT ANSWER — TÁCH 2 CALL, GỘP 1 ROW AIUSAGE
     // ========================================
     @Override
     public EvaluationResponse submitAnswer(Long userId, SubmitAnswerRequest request) {
@@ -226,7 +226,6 @@ public class PracticeServiceImpl implements PracticeService {
         long evalResponseTime = System.currentTimeMillis() - evalStart;
 
         sanitizeErrors(evalResponse);
-        // ✅ Quyết định isCorrect: score >= 80 && KHÔNG CÓ LỖI NÀO
         deriveIsCorrectFromScore(evalResponse);
 
         GeminiUsageMetadata evalUsage = null;
@@ -303,14 +302,14 @@ public class PracticeServiceImpl implements PracticeService {
         answer.setIsCorrect(isCorrect);
         answerRepository.save(answer);
 
-        saveAIUsageWithTokens(studentId, chat, RequestType.EVALUATE_ANSWER,
-                provider, modelName, evalResponseTime, true, null, evalUsage);
-
         EvaluationResponse response = buildEvaluationResponse(evalResponse, chat, isCompleted, xpEarned, student);
 
         // ========================================
         // CALL 2: GENERATE NEXT QUESTION
         // ========================================
+        GeminiUsageMetadata genUsage = null;
+        long genResponseTime = 0;
+
         if (!isCompleted) {
             List<String> nextForcedWords = pickForcedWordsRoundRobin(chat.getId(), chat.getVocabularyWords());
             List<String> prevSentences = getPreviousSentences(chat.getId());
@@ -329,15 +328,11 @@ public class PracticeServiceImpl implements PracticeService {
             long genStart = System.currentTimeMillis();
             AIGenerateResponse nextQuestion = generateWithFullValidation(
                     genRequest, nextForcedWords, chat.getSentenceType(), prevSentences);
-            long genResponseTime = System.currentTimeMillis() - genStart;
+            genResponseTime = System.currentTimeMillis() - genStart;
 
-            GeminiUsageMetadata genUsage = null;
             if (aiService instanceof GeminiAIService geminiService) {
                 genUsage = geminiService.getCurrentUsage();
             }
-
-            saveAIUsageWithTokens(studentId, chat, RequestType.GENERATE_SENTENCE,
-                    provider, modelName, genResponseTime, true, null, genUsage);
 
             if (nextQuestion != null) {
                 int nextOrder = turnRepository.findMaxQuestionOrder(chat.getId()) + 1;
@@ -369,6 +364,28 @@ public class PracticeServiceImpl implements PracticeService {
                         nextForcedWords, sanitizedVocab);
             }
         }
+
+        // ========================================
+        // CỘNG DỒN TOKEN CỦA CẢ 2 CALL VÀ LƯU 1 ROW DUY NHẤT
+        // ========================================
+        GeminiUsageMetadata finalUsage = evalUsage;
+        if (evalUsage != null && genUsage != null) {
+            int totalInput = (evalUsage.getPromptTokenCount() != null ? evalUsage.getPromptTokenCount() : 0)
+                    + (genUsage.getPromptTokenCount() != null ? genUsage.getPromptTokenCount() : 0);
+            int totalOutput = (evalUsage.getCandidatesTokenCount() != null ? evalUsage.getCandidatesTokenCount() : 0)
+                    + (genUsage.getCandidatesTokenCount() != null ? genUsage.getCandidatesTokenCount() : 0);
+            int totalTokens = (evalUsage.getTotalTokenCount() != null ? evalUsage.getTotalTokenCount() : 0)
+                    + (genUsage.getTotalTokenCount() != null ? genUsage.getTotalTokenCount() : 0);
+
+            finalUsage = GeminiUsageMetadata.builder()
+                    .promptTokenCount(totalInput)
+                    .candidatesTokenCount(totalOutput)
+                    .totalTokenCount(totalTokens)
+                    .build();
+        }
+
+        saveAIUsageWithTokens(studentId, chat, RequestType.EVALUATE_ANSWER,
+                provider, modelName, evalResponseTime + genResponseTime, true, null, finalUsage);
 
         log.info("Answer submitted. Turn: {} (order={}), Correct: {}, Score: {}, XP: {}",
                 turn.getId(), turn.getQuestionOrder(), isCorrect, evalResponse.getScore(), xpEarned);
@@ -799,16 +816,12 @@ public class PracticeServiceImpl implements PracticeService {
 
     // ========================================
     // DERIVE isCorrect TỪ SCORE
-    // isCorrect = (score >= 80) AND (KHÔNG CÓ LỖI NÀO)
     // ========================================
     private void deriveIsCorrectFromScore(AIEvaluateResponse response) {
         if (response == null) return;
         int score = response.getScore() != null ? response.getScore() : 0;
-
-        // Chỉ cần 1 lỗi bất kỳ (HIGH/MEDIUM/LOW) → SAI
         boolean hasAnyError = response.getErrors() != null
                 && !response.getErrors().isEmpty();
-
         response.setIsCorrect(score >= CORRECT_SCORE_THRESHOLD && !hasAnyError);
     }
 
@@ -1030,19 +1043,15 @@ public class PracticeServiceImpl implements PracticeService {
         }
         String trimmed = rawType.trim();
 
-        // 1. Nếu AI trả về tiếng Việt (có dấu) -> Giữ nguyên
         if (trimmed.matches(".*[àáảãạăâđêôơưÀÁẢÃẠĂÂĐÊÔƠƯèéẻẽẹêềếểễệìíỉĩịòóỏõọồốổỗộùúủũụỳýỷỹỵ].*")) {
             return trimmed.length() > 100 ? trimmed.substring(0, 100) : trimmed;
         }
 
-        // 2. Nếu AI lười, trả về đúng tên Category bằng tiếng Anh (VD: MEANING, TENSE)
-        // -> Dịch nó sang tiếng Việt
         String upper = trimmed.toUpperCase();
         if (upper.equals(category.toUpperCase()) || upper.equals("MEANING") || upper.equals("TENSE") || upper.equals("WORD_CHOICE")) {
             return mapCategoryToVietnamese(upper);
         }
 
-        // 3. Fallback cuối cùng
         return mapCategoryToVietnamese(category);
     }
 
@@ -1059,7 +1068,7 @@ public class PracticeServiceImpl implements PracticeService {
             case "NATURALNESS": return "Diễn đạt thiếu tự nhiên";
             case "SPELLING":    return "Lỗi chính tả";
             case "WORD_CHOICE": return "Chọn từ sai";
-            case "MEANING":     return "Sai nghĩa hoàn toàn"; // Dịch chuẩn cho MEANING
+            case "MEANING":     return "Sai nghĩa hoàn toàn";
             case "PUNCTUATION": return "Lỗi dấu câu";
             default:            return "Lỗi không xác định";
         }
