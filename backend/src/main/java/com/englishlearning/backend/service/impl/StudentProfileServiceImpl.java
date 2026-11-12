@@ -7,6 +7,7 @@ import com.englishlearning.backend.dto.response.studentprofile.VocabularyInfoRes
 import com.englishlearning.backend.dto.response.studentprofile.WeaknessInfoResponse;
 import com.englishlearning.backend.dto.response.studentprofile.WeeklyActivityResponse;
 import com.englishlearning.backend.entity.*;
+import com.englishlearning.backend.enums.ChatStatus;
 import com.englishlearning.backend.enums.LearningStatus;
 import com.englishlearning.backend.enums.StudentMembershipStatus;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
@@ -38,12 +39,16 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     private final AIErrorRepository aiErrorRepository;
     private final StudentVocabularyRepository studentVocabularyRepository;
 
+    // ===== MỚI: inject 2 repo conversation =====
+    private final ChatConversationRepository chatConversationRepository;
+    private final ChatMessageRepository chatMessageRepository;
+
     private static final int MAX_WEAKNESSES = 5;
     private static final int MAX_RECENT_WORDS = 5;
     private static final int WEEKLY_DAYS = 7;
 
     // =====================================================
-    // 1. LEVEL
+    // 1. LEVEL (giữ nguyên)
     // =====================================================
     @Override
     public LevelInfoResponse getLevel(Long userId) {
@@ -76,7 +81,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     }
 
     // =====================================================
-    // 2. STATS
+    // 2. STATS — SỬA: thêm conversation stats
     // =====================================================
     @Override
     public StatsInfoResponse getStats(Long userId) {
@@ -115,6 +120,17 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         long totalCorrectAll = totalAiCorrect + totalListeningCorrect;
         double accuracy = totalAll > 0 ? (totalCorrectAll * 100.0) / totalAll : 0.0;
 
+        // ===== MỚI: CONVERSATION STATS =====
+        long totalConversations = chatConversationRepository.countByStudentId(studentId);
+        long activeConversations = chatConversationRepository
+                .countByStudentIdAndStatus(studentId, ChatStatus.ACTIVE);
+        long totalMessages = chatMessageRepository.countUserMessagesByStudentId(studentId);
+        long errorMessages = chatMessageRepository.countErrorMessagesByStudentId(studentId);
+        long correctMessages = Math.max(0, totalMessages - errorMessages);
+        double conversationAccuracy = totalMessages > 0
+                ? (correctMessages * 100.0) / totalMessages
+                : 0.0;
+
         return StatsInfoResponse.builder()
                 .totalXp(totalXp)
                 .totalCompletedTopics(totalCompletedTopics)
@@ -131,11 +147,18 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                 .totalSessions(totalSessions)
                 .completedSessions(completedSessions)
                 .inProgressSessions(inProgressSessions)
+                // conversation
+                .totalConversations(totalConversations)
+                .activeConversations(activeConversations)
+                .totalMessages(totalMessages)
+                .correctMessages(correctMessages)
+                .errorMessages(errorMessages)
+                .conversationAccuracy(round1(conversationAccuracy))
                 .build();
     }
 
     // =====================================================
-    // 3. MEMBERSHIP
+    // 3. MEMBERSHIP (giữ nguyên)
     // =====================================================
     @Override
     public MembershipInfoResponse getMembership(Long userId) {
@@ -192,7 +215,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     }
 
     // =====================================================
-    // 4. WEAKNESSES
+    // 4. WEAKNESSES (giữ nguyên — frontend bỏ gọi)
     // =====================================================
     @Override
     public List<WeaknessInfoResponse> getWeaknesses(Long userId) {
@@ -246,7 +269,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     }
 
     // =====================================================
-    // 5. VOCABULARY
+    // 5. VOCABULARY (giữ nguyên)
     // =====================================================
     @Override
     public VocabularyInfoResponse getVocabulary(Long userId) {
@@ -287,7 +310,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     }
 
     // =====================================================
-    // 6. WEEKLY ACTIVITY (chỉ AI Practice)
+    // 6. WEEKLY ACTIVITY — SỬA: 2 series (practice + conversation)
     // =====================================================
     @Override
     public List<WeeklyActivityResponse> getWeeklyActivity(Long userId) {
@@ -298,29 +321,38 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                 .minusDays(WEEKLY_DAYS - 1)
                 .atStartOfDay();
 
-        List<Object[]> rows = statsRepository.countQuestionsByDate(studentId, from);
+        List<Object[]> rows = statsRepository.countActivityByDate(studentId, from);
 
-        Map<LocalDate, Long> map = new HashMap<>();
+        // Map date -> [practiceCount, conversationCount]
+        Map<LocalDate, long[]> map = new HashMap<>();
         for (Object[] row : rows) {
             LocalDate date = toLocalDate(row[0]);
-            long count = ((Number) row[1]).longValue();
-            if (date != null) map.put(date, count);
+            if (date == null) continue;
+            long practice = row[1] != null ? ((Number) row[1]).longValue() : 0L;
+            long conversation = row[2] != null ? ((Number) row[2]).longValue() : 0L;
+            map.put(date, new long[]{practice, conversation});
         }
 
         List<WeeklyActivityResponse> result = new ArrayList<>();
         LocalDate today = LocalDate.now();
         for (int i = WEEKLY_DAYS - 1; i >= 0; i--) {
             LocalDate d = today.minusDays(i);
+            long[] counts = map.getOrDefault(d, new long[]{0L, 0L});
+            long practice = counts[0];
+            long conversation = counts[1];
+
             result.add(WeeklyActivityResponse.builder()
                     .date(d)
-                    .questionCount(map.getOrDefault(d, 0L))
+                    .practiceCount(practice)
+                    .conversationCount(conversation)
+                    .questionCount(practice + conversation)   // backward-compat
                     .build());
         }
         return result;
     }
 
     // =====================================================
-    // HELPERS
+    // HELPERS (giữ nguyên)
     // =====================================================
     private Student getStudentByUserId(Long userId) {
         return studentRepository.findByUserId(userId)

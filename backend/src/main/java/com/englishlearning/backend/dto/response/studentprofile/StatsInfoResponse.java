@@ -13,24 +13,32 @@ import lombok.Setter;
 @Builder
 public class StatsInfoResponse {
 
-    private Integer totalXp;
-    private Integer totalCompletedTopics;
-    private Integer totalLearningSeconds;
-
-    private Double accuracyRate;
-
+    // ===== XP / RANKING =====
+    private int totalXp;
+    private int totalCompletedTopics;
+    private int totalLearningSeconds;
+    private double accuracyRate;
     private Integer ranking;
     private Double topPercent;
-    private Long totalStudents;
+    private long totalStudents;
 
-    private Long totalListeningAnswers;
-    private Long totalListeningCorrect;
+    // ===== LISTENING =====
+    private long totalListeningAnswers;
+    private long totalListeningCorrect;
 
-    private Long totalAiAnswers;
-    private Long totalAiCorrect;
-    private Double avgAiScore;
+    // ===== AI PRACTICE =====
+    private long totalAiAnswers;
+    private long totalAiCorrect;
+    private double avgAiScore;
+    private long totalSessions;
+    private long completedSessions;
+    private long inProgressSessions;
 
-    private Long totalSessions;
-    private Long completedSessions;
-    private Long inProgressSessions;
+    // ===== CONVERSATION (MỚI) =====
+    private long totalConversations;
+    private long activeConversations;
+    private long totalMessages;
+    private long correctMessages;
+    private long errorMessages;
+    private double conversationAccuracy;
 }

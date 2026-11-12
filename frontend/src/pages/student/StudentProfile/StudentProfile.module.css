@@ -22,20 +22,16 @@
 /* =====================================================
    LOADING
    ===================================================== */
-
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
-
 .loadingWrapper p {
   color: #64748b;
   font-size: 14px;
   font-weight: 500;
 }
-
 .retryBtn {
   margin-top: 12px;
   padding: 8px 16px;
@@ -61,7 +57,6 @@
   justify-content: space-between;
   gap: 32px;
 }
-
 .heroSection::before {
   content: "";
   position: absolute;
@@ -77,7 +72,6 @@
   border-radius: 50%;
   pointer-events: none;
 }
-
 .heroContent {
   display: flex;
   align-items: flex-start;
@@ -87,12 +81,10 @@
   position: relative;
   z-index: 2;
 }
-
 .heroAvatarWrapper {
   position: relative;
   flex-shrink: 0;
 }
-
 .heroAvatar {
   width: 110px;
   height: 110px;
@@ -102,14 +94,12 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   background: rgba(255, 255, 255, 0.1);
 }
-
 .heroAvatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-
 .avatarEditBtn {
   position: absolute;
   bottom: 2px;
@@ -128,17 +118,14 @@
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
-
 .avatarEditBtn:hover {
   background: #0d9488;
   transform: scale(1.1);
 }
-
 .heroInfo {
   flex: 1;
   min-width: 0;
 }
-
 .heroTag {
   display: inline-flex;
   align-items: center;
@@ -148,18 +135,15 @@
   border-radius: 20px;
   margin-bottom: 12px;
 }
-
 .heroTag svg {
   font-size: 11px;
   color: #ffffff;
 }
-
 .heroTag span {
   font-size: 11px;
   font-weight: 600;
   color: #ffffff;
 }
-
 .heroTitle {
   font-size: 24px;
   font-weight: 700;
@@ -168,14 +152,12 @@
   line-height: 1.3;
   letter-spacing: -0.3px;
 }
-
 .heroMeta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 20px;
 }
-
 .heroMetaItem {
   display: inline-flex;
   align-items: center;
@@ -187,19 +169,16 @@
   padding: 4px 12px;
   border-radius: 20px;
 }
-
 .heroMetaItem svg {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.85);
 }
-
 .heroActions {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
-
 .heroBtnPrimary {
   display: inline-flex;
   align-items: center;
@@ -214,22 +193,18 @@
   cursor: pointer;
   transition: background 0.2s ease;
 }
-
 .heroBtnPrimary:hover {
   background: #f1f5f9;
 }
-
 .heroBtnPrimary svg {
   color: #0d9488;
   font-size: 12px;
 }
-
 .heroBtnPrimary span {
   color: #0d9488;
   font-size: 13px;
   font-weight: 600;
 }
-
 .heroBtnGhost {
   display: inline-flex;
   align-items: center;
@@ -244,15 +219,12 @@
   cursor: pointer;
   transition: background 0.2s ease;
 }
-
 .heroBtnGhost:hover {
   background: rgba(255, 255, 255, 0.2);
 }
-
 .heroBtnGhost svg {
   font-size: 12px;
 }
-
 .heroBtnGhost span {
   font-size: 13px;
   font-weight: 600;
@@ -273,13 +245,11 @@
   flex-direction: column;
   gap: 14px;
 }
-
 .levelBoxHeader {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 .levelIconSmall {
   width: 42px;
   height: 42px;
@@ -291,38 +261,32 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
   flex-shrink: 0;
 }
-
 .levelIconSmall span {
   color: #ffffff;
   font-size: 18px;
   font-weight: 800;
 }
-
 .levelBoxHeader > div:last-child {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
 .levelBoxLabel {
   font-size: 10px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.7);
   letter-spacing: 0.5px;
 }
-
 .levelBoxTitle {
   font-size: 13px;
   font-weight: 700;
   color: #ffffff;
 }
-
 .levelBoxProgress {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-
 .levelBoxProgressHeader {
   display: flex;
   align-items: center;
@@ -331,33 +295,28 @@
   font-weight: 600;
   color: rgba(255, 255, 255, 0.85);
 }
-
 .levelBoxProgressHeader span {
   font-size: 11px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.85);
 }
-
 .levelBoxProgressHeader strong {
   font-size: 12px;
   font-weight: 700;
   color: #ffffff;
 }
-
 .levelBoxTrack {
   height: 6px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   overflow: hidden;
 }
-
 .levelBoxFill {
   height: 100%;
   border-radius: 10px;
   background: #ffffff;
   transition: width 0.6s ease;
 }
-
 .levelBoxFooter {
   display: flex;
   align-items: center;
@@ -368,18 +327,15 @@
   border-radius: 6px;
   font-size: 11px;
 }
-
 .levelBoxFooter span {
   font-size: 11px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.85);
 }
-
 .levelBoxFooter svg {
   font-size: 10px;
   color: #a7f3d0;
 }
-
 .levelBoxFooter strong {
   font-weight: 700;
   color: #ffffff;
@@ -393,7 +349,6 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
-
 .statCard {
   position: relative;
   display: flex;
@@ -408,12 +363,10 @@
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
-
 .statCard:hover {
   border-color: #0ea792;
   box-shadow: 0 4px 12px rgba(14, 167, 146, 0.08);
 }
-
 .statIconBox {
   width: 46px;
   height: 46px;
@@ -425,7 +378,6 @@
   font-size: 18px;
   flex-shrink: 0;
 }
-
 .statContent {
   display: flex;
   flex-direction: column;
@@ -433,27 +385,23 @@
   position: relative;
   z-index: 1;
 }
-
 .statLabel {
   font-size: 12px;
   font-weight: 600;
   color: #64748b;
   margin-bottom: 2px;
 }
-
 .statValueRow {
   display: flex;
   align-items: baseline;
   gap: 4px;
 }
-
 .statValue {
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.3px;
 }
-
 .statSuffix {
   font-size: 12px;
   font-weight: 600;
@@ -461,7 +409,7 @@
 }
 
 /* =====================================================
-   DASHBOARD GRID
+   DASHBOARD GRID & CARDS
    ===================================================== */
 .dashboardGrid {
   display: grid;
@@ -469,20 +417,15 @@
   gap: 16px;
   align-items: start;
 }
-
-/* =====================================================
-   COMMON CARD
-   ===================================================== */
 .card {
   background: #ffffff;
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   border: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
-
 .cardHeader {
   display: flex;
   align-items: center;
@@ -490,21 +433,18 @@
   gap: 12px;
   flex-wrap: wrap;
 }
-
 .cardHeaderLeft {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
 }
-
 .cardTitle {
   font-size: 15px;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
 }
-
 .cardSubtitle {
   font-size: 11.5px;
   color: #64748b;
@@ -512,12 +452,11 @@
   font-weight: 400;
 }
 
-/* ===== Icon boxes ===== */
+/* Icons */
 .iconBoxGold,
-.iconBoxRed,
-.iconBoxPurple,
 .iconBoxBlue,
-.iconBoxCyan {
+.iconBoxCyan,
+.iconBoxTeal {
   width: 40px;
   height: 40px;
   border-radius: 10px;
@@ -527,41 +466,29 @@
   font-size: 16px;
   flex-shrink: 0;
 }
-
 .iconBoxGold {
   background: #fef3c7;
   color: #d97706;
 }
-
-.iconBoxRed {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.iconBoxPurple {
-  background: #ede9fe;
-  color: #7c3aed;
-}
-
 .iconBoxBlue {
   background: #dbeafe;
   color: #2563eb;
 }
-
 .iconBoxCyan {
   background: #cffafe;
   color: #0891b2;
 }
+.iconBoxTeal {
+  background: #ccfbf1;
+  color: #0d9488;
+}
 
-/* =====================================================
-   MEMBERSHIP
-   ===================================================== */
+/* Membership */
 .membershipContent {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .membershipTop {
   display: flex;
   align-items: center;
@@ -569,14 +496,12 @@
   gap: 10px;
   flex-wrap: wrap;
 }
-
 .packageName {
   font-size: 15px;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
 }
-
 .statusBadge {
   display: inline-flex;
   align-items: center;
@@ -585,23 +510,19 @@
   font-size: 11px;
   font-weight: 600;
 }
-
 .statusActive {
   background: #dcfce7;
   color: #16a34a;
 }
-
 .statusWarning {
   background: #fef3c7;
   color: #d97706;
 }
-
 .membershipInfoGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
-
 .membershipInfoItem {
   display: flex;
   flex-direction: column;
@@ -611,25 +532,21 @@
   border-radius: 8px;
   border: 1px solid #f1f5f9;
 }
-
 .membershipInfoLabel {
   font-size: 11px;
   font-weight: 500;
   color: #64748b;
 }
-
 .membershipInfoValue {
   font-size: 13px;
   font-weight: 700;
   color: #1e293b;
 }
-
 .membershipInfoValueHighlight {
   font-size: 13px;
   font-weight: 700;
   color: #0ea792;
 }
-
 .aiBox {
   display: flex;
   flex-direction: column;
@@ -639,13 +556,11 @@
   border-radius: 8px;
   border: 1px solid #f1f5f9;
 }
-
 .aiBoxHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-
 .aiBoxLabel {
   display: inline-flex;
   align-items: center;
@@ -654,26 +569,21 @@
   font-weight: 600;
   color: #1e293b;
 }
-
 .aiBoxLabel svg {
   color: #0ea792;
   font-size: 11px;
 }
-
 .aiBoxCount {
   font-size: 13px;
   font-weight: 700;
   color: #0ea792;
 }
-
 .aiBoxWarning {
   color: #d97706;
 }
-
 .aiBoxDanger {
   color: #dc2626;
 }
-
 .unlimitedTag {
   font-size: 11px;
   font-weight: 700;
@@ -682,29 +592,24 @@
   padding: 2px 10px;
   border-radius: 20px;
 }
-
 .aiBoxTrack {
   height: 6px;
   background: #e2e8f0;
   border-radius: 10px;
   overflow: hidden;
 }
-
 .aiBoxFill {
   height: 100%;
   background: #0ea792;
   border-radius: 10px;
   transition: width 0.6s ease;
 }
-
 .aiBoxFillWarning {
   background: #f59e0b;
 }
-
 .aiBoxFillDanger {
   background: #ef4444;
 }
-
 .membershipEmpty {
   display: flex;
   flex-direction: column;
@@ -714,459 +619,217 @@
   gap: 10px;
   color: #94a3b8;
 }
-
 .membershipEmptyIcon {
   font-size: 28px;
 }
-
 .membershipEmpty p {
   font-size: 13px;
   margin: 0;
 }
 
 /* =====================================================
-   WEEKLY CHART SVG
+   WEEKLY CHART
    ===================================================== */
 .weeklyChartSvgWrapper {
   width: 100%;
   padding: 4px 0;
+  overflow: visible;
 }
-
 .weeklyChartSvg {
   width: 100%;
   height: auto;
   overflow: visible;
+  display: block;
 }
-
+.chartGridLine {
+  stroke: #f1f5f9;
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.chartLine {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: chartDraw 1s ease-out forwards;
+}
+@keyframes chartDraw {
+  from {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 0;
+  }
+}
+.chartPoint {
+  cursor: pointer;
+  transition:
+    r 0.15s ease,
+    stroke-width 0.15s ease;
+}
+.chartPoint:hover {
+  r: 6.5;
+  stroke-width: 3;
+}
 .svgText {
-  font-size: 9px;
+  font-size: 9.5px;
   fill: #94a3b8;
+  font-weight: 500;
 }
-
 .svgTextBold {
   font-size: 11px;
   fill: #334155;
-  font-weight: 600;
+  font-weight: 700;
 }
-
 .svgTextSmall {
   font-size: 9px;
   fill: #94a3b8;
 }
-
-.chartPoint {
-  cursor: pointer;
-  transition: r 0.15s ease;
+.chartTooltip {
+  pointer-events: none;
+  filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.25));
+  animation: tooltipFade 0.15s ease;
 }
-
-.chartPoint:hover {
-  r: 7;
-}
-
-/* =====================================================
-   AI STATS
-   ===================================================== */
-.aiStatsGridNew {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.aiStatNew {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease;
-}
-
-.aiStatNew:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-}
-
-.aiStatNewIcon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  flex-shrink: 0;
-  color: #ffffff;
-}
-
-.aiStatNewTeal .aiStatNewIcon {
-  background: #0ea792;
-}
-
-.aiStatNewBlue .aiStatNewIcon {
-  background: #3b82f6;
-}
-
-.aiStatNewOrange .aiStatNewIcon {
-  background: #f59e0b;
-}
-
-.aiStatNewGreen .aiStatNewIcon {
-  background: #16a34a;
-}
-
-.aiStatNewInfo {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.aiStatNewValue {
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.1;
-  color: #1e293b;
-}
-
-.aiStatNewLabel {
-  font-size: 11px;
-  font-weight: 500;
-  color: #64748b;
-  margin-top: 2px;
-}
-
-.aiStatsDivider {
-  height: 1px;
-  background: #f1f5f9;
-  margin: 4px 0;
-}
-
-/* =====================================================
-   LISTENING COMPACT
-   ===================================================== */
-.listeningCompact {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px 14px;
-  background: #ffffff;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-}
-
-.listeningCompactHeader {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.listeningCompactHeader svg {
-  font-size: 12px;
-  color: #0891b2;
-}
-
-.listeningCompactRow {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.listeningCompactItem {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 10px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #f1f5f9;
-  text-align: center;
-}
-
-.listeningCompactLabel {
-  font-size: 10px;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.2px;
-}
-
-.listeningCompactValue {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.listeningCompactValueGreen {
-  font-size: 16px;
-  font-weight: 700;
-  color: #16a34a;
-}
-
-.listeningCompactValueHighlight {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0891b2;
-}
-
-/* =====================================================
-   ERROR IMPROVE LIST
-   ===================================================== */
-.errorImproveList {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 520px;
-  overflow-y: auto;
-  padding-right: 6px;
-}
-
-.errorImproveList::-webkit-scrollbar {
-  width: 6px;
-}
-
-.errorImproveList::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 10px;
-}
-
-.errorImproveList::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-
-.errorImproveList::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-.errorImproveCard {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-left: 3px solid #0ea792;
-  border-radius: 10px;
-  padding: 12px 14px;
-  transition: all 0.2s ease;
-}
-
-.errorImproveCard:hover {
-  box-shadow: 0 4px 12px rgba(14, 167, 146, 0.08);
-  border-color: #cbd5e1;
-}
-
-.errorImproveHeader {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.errorImproveMain {
-  flex: 1;
-  min-width: 0;
-}
-
-.errorImproveTopRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-
-.errorImproveName {
-  flex: 1;
-  font-size: 13px;
-  font-weight: 700;
-  color: #1e293b;
-  line-height: 1.4;
-}
-
-.errorImproveSeverity {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border: 1px solid;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.errorImproveMeta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.errorImproveMeta span {
-  font-size: 11px;
-  color: #64748b;
-  font-weight: 500;
-}
-
-.errorImproveCount {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 3px;
-}
-
-.errorImproveCount strong {
-  color: #1e293b;
-  font-weight: 700;
-  font-size: 11px;
-}
-
-.errorImproveDot {
-  color: #cbd5e1;
-  font-size: 11px;
-}
-
-.errorImproveTrend {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-weight: 600;
-  font-size: 11px;
-}
-
-.errorImproveTrend svg {
-  font-size: 9px;
-}
-
-.errorImproveExpandBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  background: #f1f5f9;
-  color: #64748b;
-  border: none;
-  border-radius: 6px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.errorImproveExpandBtn:hover {
-  background: #e9f8f5;
-  color: #0ea792;
-}
-
-.errorImproveExpandBtn svg {
-  transition: transform 0.2s ease;
-  font-size: 11px;
-}
-
-.errorImproveExpandBtn svg.rotated {
-  transform: rotate(180deg);
-}
-
-.errorImproveExpanded {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  animation: errorImproveFadeIn 0.25s ease;
-}
-
-@keyframes errorImproveFadeIn {
+@keyframes tooltipFade {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
-.errorImproveSection {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.errorImproveSectionLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+.tooltipTitle {
   font-size: 10px;
   font-weight: 700;
-  color: #0ea792;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  fill: var(--color-secondary);
 }
-
-.errorImproveSectionText {
-  margin: 0;
-  padding: 8px 12px;
-  background: white;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #475569;
-  font-weight: 400;
+.tooltipText {
+  font-size: 10.5px;
+  font-weight: 600;
 }
-
-.errorImproveExample {
-  padding: 8px 12px;
-  background: #f0fdf9;
-  border-left: 3px solid #0ea792;
-  font-family: "Courier New", monospace;
-  font-size: 12px;
-  color: #0d9488;
-  font-weight: 500;
-  word-break: break-word;
-  line-height: 1.5;
-}
-
-.errorImproveFooterMeta {
+.chartLegend {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 4px 0 8px;
   flex-wrap: wrap;
-  padding: 8px 0;
-  border-top: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
 }
-
-.errorImproveFooterMeta span {
+.legendItem {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  color: #94a3b8;
-  font-weight: 500;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
 }
-
-.errorImproveFooterMeta svg {
-  font-size: 10px;
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 /* =====================================================
-   COUNT BADGE
+   TỔNG HỢP 3 CỘT (MODERN LIST)
    ===================================================== */
-.countBadge {
-  display: inline-flex;
+.statsTriGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.statColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.statColHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f8fafc;
+}
+
+.statColIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 8px;
-  background: #fee2e2;
-  color: #dc2626;
-  border-radius: 12px;
-  font-size: 11px;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.bgTeal {
+  background: #0ea792;
+}
+.bgBlue {
+  background: #3b82f6;
+}
+.bgCyan {
+  background: #0891b2;
+}
+
+.statColTitle {
+  font-size: 14px;
   font-weight: 700;
+  color: #1e293b;
+}
+
+/* Danh sách số liệu hiện đại */
+.modernStatList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modernStatItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.modernStatDivider {
+  height: 1px;
+  background: #f1f5f9;
+  width: 100%;
+}
+
+.modernStatLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.modernStatValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.modernStatValueGreen {
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a;
+}
+.modernStatValueRed {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ef4444;
 }
 
 /* =====================================================
@@ -1180,7 +843,6 @@
   padding: 24px 16px;
   gap: 10px;
 }
-
 .emptyIconGreen {
   width: 52px;
   height: 52px;
@@ -1192,14 +854,12 @@
   background: #dcfce7;
   color: #059669;
 }
-
 .emptyTitle {
   font-size: 14px;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
 }
-
 .emptyText {
   font-size: 12px;
   color: #64748b;
@@ -1209,7 +869,7 @@
 }
 
 /* =====================================================
-   MODALS
+   MODALS (Giữ nguyên)
    ===================================================== */
 .backdrop {
   position: fixed;
@@ -1222,7 +882,6 @@
   padding: 20px;
   animation: fadeIn 0.2s ease;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -1231,7 +890,6 @@
     opacity: 1;
   }
 }
-
 .modal {
   background: #ffffff;
   border-radius: 16px;
@@ -1244,7 +902,6 @@
   animation: slideUp 0.25s ease;
   overflow: hidden;
 }
-
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -1255,7 +912,6 @@
     transform: translateY(0);
   }
 }
-
 .modalHeader {
   display: flex;
   align-items: center;
@@ -1263,14 +919,11 @@
   padding: 20px 24px;
   border-bottom: 1px solid #e2e8f0;
 }
-
 .modalHeaderLeft {
   display: flex;
   align-items: center;
   gap: 14px;
 }
-
-/* ✅ ĐỔI SANG TEAL — đồng bộ */
 .modalIconBox {
   width: 44px;
   height: 44px;
@@ -1283,8 +936,6 @@
   font-size: 18px;
   flex-shrink: 0;
 }
-
-/* Giữ class này để tương thích code cũ, nhưng style teal luôn */
 .modalIconBoxPurple {
   width: 44px;
   height: 44px;
@@ -1297,7 +948,6 @@
   font-size: 18px;
   flex-shrink: 0;
 }
-
 .modalTitle {
   font-size: 17px;
   font-weight: 700;
@@ -1305,14 +955,12 @@
   margin: 0;
   letter-spacing: -0.2px;
 }
-
 .modalSubtitle {
   font-size: 12.5px;
   color: #64748b;
   margin: 2px 0 0 0;
   font-weight: 400;
 }
-
 .modalCloseBtn {
   width: 34px;
   height: 34px;
@@ -1328,17 +976,10 @@
   transition: background 0.2s ease;
   flex-shrink: 0;
 }
-
 .modalCloseBtn:hover:not(:disabled) {
   background: #e2e8f0;
   color: #1e293b;
 }
-
-.modalCloseBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .modalBody {
   padding: 22px 24px;
   display: flex;
@@ -1347,14 +988,11 @@
   overflow-y: auto;
   flex: 1;
 }
-
 .formGroup {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
-/* ✅ ĐỔI ICON SANG TEAL */
 .formLabel {
   display: inline-flex;
   align-items: center;
@@ -1363,16 +1001,13 @@
   font-weight: 600;
   color: #1e293b;
 }
-
 .formLabel svg {
   font-size: 12px;
   color: #0ea792;
 }
-
 .required {
   color: #dc2626;
 }
-
 .formInput {
   width: 100%;
   height: 44px;
@@ -1387,49 +1022,37 @@
   font-family: inherit;
   box-sizing: border-box;
 }
-
 .formInput:focus {
   border-color: #0ea792;
   box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.1);
 }
-
-.formInput::placeholder {
-  color: #94a3b8;
-}
-
 .inputDisabled {
   background: #f8fafc;
   color: #94a3b8;
   cursor: not-allowed;
 }
-
 .inputError {
   border-color: #ef4444;
 }
-
 .inputError:focus {
   border-color: #ef4444;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
-
 .errorText {
   font-size: 12px;
   color: #dc2626;
   font-weight: 500;
 }
-
 .formHint {
   font-size: 11.5px;
   color: #94a3b8;
   font-style: italic;
 }
-
 .radioGroup {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
-
 .radioLabel {
   display: flex;
   align-items: center;
@@ -1445,18 +1068,15 @@
   justify-content: center;
   position: relative;
 }
-
 .radioLabel:hover {
   background: #f0fdf9;
   border-color: #0ea792;
 }
-
 .radio {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
-
 .radioCustom {
   width: 18px;
   height: 18px;
@@ -1469,11 +1089,9 @@
   flex-shrink: 0;
   position: relative;
 }
-
 .radio:checked + .radioCustom {
   border-color: #0ea792;
 }
-
 .radio:checked + .radioCustom::after {
   content: "";
   width: 9px;
@@ -1481,27 +1099,22 @@
   border-radius: 50%;
   background: #0ea792;
 }
-
 .radio:checked ~ .radioText {
   color: #0ea792;
   font-weight: 700;
 }
-
 .radioText {
   font-size: 13.5px;
   font-weight: 600;
   color: #475569;
   transition: all 0.2s ease;
 }
-
 .inputWrapper {
   position: relative;
 }
-
 .inputWrapper .formInput {
   padding-right: 46px;
 }
-
 .eyeBtn {
   position: absolute;
   right: 12px;
@@ -1518,23 +1131,18 @@
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease;
+  transition: all 0.2s ease;
 }
-
 .eyeBtn:hover {
   background: #f1f5f9;
   color: #475569;
 }
-
 .strengthWrapper {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-top: 4px;
 }
-
 .strengthTrack {
   flex: 1;
   height: 6px;
@@ -1542,20 +1150,17 @@
   border-radius: 10px;
   overflow: hidden;
 }
-
 .strengthFill {
   height: 100%;
   border-radius: 10px;
   transition: all 0.3s ease;
 }
-
 .strengthLabel {
   font-size: 11.5px;
   font-weight: 700;
   min-width: 70px;
   text-align: right;
 }
-
 .checklist {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1566,7 +1171,6 @@
   border-radius: 10px;
   border: 1px solid #e2e8f0;
 }
-
 .checkItem {
   display: flex;
   align-items: center;
@@ -1576,21 +1180,17 @@
   font-weight: 500;
   transition: color 0.2s ease;
 }
-
 .checkItem svg {
   font-size: 10px;
   opacity: 0.4;
 }
-
 .checkPassed {
   color: #16a34a;
 }
-
 .checkPassed svg {
   opacity: 1;
   color: #16a34a;
 }
-
 .modalFooter {
   display: flex;
   align-items: center;
@@ -1599,7 +1199,6 @@
   padding: 16px 24px;
   border-top: 1px solid #e2e8f0;
 }
-
 .cancelBtn {
   padding: 10px 20px;
   background: #ffffff;
@@ -1609,23 +1208,13 @@
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease;
+  transition: all 0.2s ease;
 }
-
 .cancelBtn:hover:not(:disabled) {
   background: #f1f5f9;
   border-color: #cbd5e1;
   color: #1e293b;
 }
-
-.cancelBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ✅ NÚT SUBMIT — đổi teal đồng bộ */
 .submitBtn {
   display: inline-flex;
   align-items: center;
@@ -1640,23 +1229,9 @@
   cursor: pointer;
   transition: background 0.2s ease;
 }
-
-.submitBtn span {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .submitBtn:hover:not(:disabled) {
   background: #0d9488;
 }
-
-.submitBtn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* ✅ Class cũ — giữ nhưng style teal */
 .submitBtnPurple {
   display: inline-flex;
   align-items: center;
@@ -1671,30 +1246,9 @@
   cursor: pointer;
   transition: background 0.2s ease;
 }
-
-.submitBtnPurple span {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .submitBtnPurple:hover:not(:disabled) {
   background: #0d9488;
 }
-
-.submitBtnPurple:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.submitBtn svg,
-.submitBtnPurple svg {
-  font-size: 13px;
-}
-
-/* =====================================================
-   AVATAR UPLOAD MODAL
-   ===================================================== */
 .avatarUploadPreview {
   display: flex;
   flex-direction: column;
@@ -1702,7 +1256,6 @@
   gap: 12px;
   padding: 12px 0 20px;
 }
-
 .avatarPreviewCircle {
   position: relative;
   width: 140px;
@@ -1713,14 +1266,12 @@
   box-shadow: 0 8px 24px rgba(14, 167, 146, 0.25);
   background: #f8fafc;
 }
-
 .avatarPreviewCircle img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-
 .newAvatarBadge {
   position: absolute;
   bottom: 0;
@@ -1732,9 +1283,7 @@
   font-size: 11px;
   font-weight: 700;
   text-align: center;
-  letter-spacing: 0.3px;
 }
-
 .avatarHint {
   font-size: 13px;
   color: #64748b;
@@ -1745,13 +1294,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .avatarActions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
-
 .avatarSelectBtn,
 .avatarRemoveBtn {
   display: inline-flex;
@@ -1766,33 +1313,23 @@
   transition: all 0.2s ease;
   border: 1.5px solid transparent;
 }
-
 .avatarSelectBtn {
   background: #0ea792;
   color: #ffffff;
   border-color: #0ea792;
 }
-
 .avatarSelectBtn:hover:not(:disabled) {
   background: #0d9488;
   border-color: #0d9488;
 }
-
 .avatarRemoveBtn {
   background: transparent;
   color: #ef4444;
   border-color: #fecaca;
 }
-
 .avatarRemoveBtn:hover:not(:disabled) {
   background: #fef2f2;
   border-color: #ef4444;
-}
-
-.avatarSelectBtn:disabled,
-.avatarRemoveBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 /* =====================================================
@@ -1805,8 +1342,9 @@
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .aiStatsGridNew {
-    grid-template-columns: repeat(2, 1fr);
+  .statsTriGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 
@@ -1815,7 +1353,6 @@
     padding: 16px 14px 36px;
     gap: 16px;
   }
-
   .heroSection {
     padding: 24px 20px;
     border-radius: 14px;
@@ -1823,102 +1360,64 @@
     align-items: stretch;
     gap: 20px;
   }
-
   .heroContent {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-
   .heroAvatar {
     width: 90px;
     height: 90px;
   }
-
   .heroInfo {
     width: 100%;
   }
-
   .heroMeta {
     justify-content: center;
   }
-
   .heroActions {
     flex-direction: column;
     align-items: stretch;
     justify-content: center;
   }
-
   .heroBtnPrimary,
   .heroBtnGhost {
     width: 100%;
     justify-content: center;
   }
-
   .heroTitle {
     font-size: 20px;
   }
-
   .heroLevelBox {
     width: 100%;
   }
-
   .statsGrid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-
   .statCard {
     padding: 16px;
   }
-
   .statIconBox {
     width: 42px;
     height: 42px;
     font-size: 16px;
   }
-
   .statValue {
     font-size: 18px;
   }
-
   .card {
     padding: 18px;
     border-radius: 12px;
-    gap: 14px;
+    gap: 16px;
   }
-
   .cardTitle {
     font-size: 14px;
   }
-
-  .aiStatsGridNew {
-    grid-template-columns: 1fr;
-  }
-
-  .listeningCompactRow {
-    grid-template-columns: 1fr;
-  }
-
-  .errorImproveList {
-    max-height: none;
-    overflow-y: visible;
-  }
-
-  .errorImproveCard {
-    padding: 10px 12px;
-  }
-
-  .errorImproveExpandBtn {
-    width: 24px;
-    height: 24px;
-  }
-
   .modalFooter {
     padding: 14px 20px;
     flex-direction: column-reverse;
   }
-
   .cancelBtn,
   .submitBtn,
   .submitBtnPurple {
@@ -1926,7 +1425,6 @@
     justify-content: center;
     padding: 12px 20px;
   }
-
   .checklist {
     grid-template-columns: 1fr;
   }
@@ -1937,44 +1435,35 @@
     padding: 12px;
     gap: 12px;
   }
-
   .heroSection {
     padding: 20px 16px;
   }
-
   .heroTitle {
     font-size: 18px;
   }
-
   .heroMetaItem {
     font-size: 11px;
     padding: 4px 10px;
   }
-
   .levelIconSmall {
     width: 38px;
     height: 38px;
     font-size: 16px;
   }
-
   .card {
     padding: 16px;
   }
-
   .statusBadge {
     font-size: 10px;
     padding: 3px 8px;
   }
-
   .avatarUploadPreview {
     padding: 8px 0 16px;
   }
-
   .avatarPreviewCircle {
     width: 110px;
     height: 110px;
   }
-
   .avatarActions {
     grid-template-columns: 1fr;
   }

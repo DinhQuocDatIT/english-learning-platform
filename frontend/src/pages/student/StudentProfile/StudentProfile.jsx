@@ -7,13 +7,8 @@ import {
   faCrown,
   faCalendarAlt,
   faArrowUp,
-  faArrowDown,
-  faMinus,
   faLock,
   faChartLine,
-  faRobot,
-  faBookmark,
-  faChevronDown,
   faCheckCircle,
   faPen,
   faEnvelope,
@@ -28,11 +23,12 @@ import {
   faKey,
   faUser,
   faGraduationCap,
-  faHeadphones,
-  faTriangleExclamation,
   faClock,
   faCamera,
   faTrashCan,
+  faComments,
+  faPenNib,
+  faHeadphones,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -44,14 +40,25 @@ import Loading from "../../../components/common/Loading/Loading";
 import styles from "./StudentProfile.module.css";
 
 const DEFAULT_AVATAR = "/uploads/avatars/default-avatar.png";
+const MAX_LEVEL = 30; // Cấu hình Max Level
+
+const COLORS = {
+  practice: "#0ea792",
+  conversation: "#f63b3b",
+};
+
+const CHART_LEFT = 40;
+const CHART_RIGHT = 480;
+const CHART_TOP = 20;
+const CHART_BOTTOM = 170;
+const TOOLTIP_WIDTH = 160;
+const TOOLTIP_HEIGHT = 56;
 
 function StudentProfile() {
   const [user, setUser] = useState(null);
   const [level, setLevel] = useState(null);
   const [stats, setStats] = useState(null);
   const [membership, setMembership] = useState(null);
-  const [weaknesses, setWeaknesses] = useState([]);
-  const [vocabulary, setVocabulary] = useState(null);
   const [weeklyActivity, setWeeklyActivity] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -66,23 +73,14 @@ function StudentProfile() {
     try {
       setLoading(true);
 
-      const [
-        userRes,
-        levelRes,
-        statsRes,
-        membershipRes,
-        weaknessesRes,
-        vocabRes,
-        weeklyRes,
-      ] = await Promise.allSettled([
-        UserService.getProfile(),
-        studentProfileService.getLevel(),
-        studentProfileService.getStats(),
-        studentProfileService.getMembership(),
-        studentProfileService.getWeaknesses(),
-        studentProfileService.getVocabulary(),
-        studentProfileService.getWeeklyActivity(),
-      ]);
+      const [userRes, levelRes, statsRes, membershipRes, weeklyRes] =
+        await Promise.allSettled([
+          UserService.getProfile(),
+          studentProfileService.getLevel(),
+          studentProfileService.getStats(),
+          studentProfileService.getMembership(),
+          studentProfileService.getWeeklyActivity(),
+        ]);
 
       if (userRes.status === "fulfilled") {
         setUser(userRes.value?.data?.data || null);
@@ -97,10 +95,6 @@ function StudentProfile() {
         setStats(statsRes.value?.data?.data || null);
       if (membershipRes.status === "fulfilled")
         setMembership(membershipRes.value?.data?.data || null);
-      if (weaknessesRes.status === "fulfilled")
-        setWeaknesses(weaknessesRes.value?.data?.data || []);
-      if (vocabRes.status === "fulfilled")
-        setVocabulary(vocabRes.value?.data?.data || null);
       if (weeklyRes.status === "fulfilled")
         setWeeklyActivity(weeklyRes.value?.data?.data || []);
     } finally {
@@ -132,56 +126,76 @@ function StudentProfile() {
     return `${d.getDate()}/${d.getMonth() + 1}`;
   };
 
+  // ===== Chart Helpers =====
   const buildWeeklyChartPoints = (weeklyData) => {
     if (!weeklyData || weeklyData.length === 0) return [];
-    const CHART_LEFT = 40,
-      CHART_RIGHT = 480,
-      CHART_TOP = 20,
-      CHART_BOTTOM = 170;
     const chartWidth = CHART_RIGHT - CHART_LEFT;
     const chartHeight = CHART_BOTTOM - CHART_TOP;
-    const counts = weeklyData.map((d) => d.questionCount || 0);
-    const maxCount = Math.max(...counts, 1);
-    const yMax = maxCount * 1.2;
     const N = weeklyData.length;
 
+    const practices = weeklyData.map((d) => d.practiceCount || 0);
+    const conversations = weeklyData.map((d) => d.conversationCount || 0);
+    const maxVal = Math.max(...practices, ...conversations, 1);
+    const yMax = maxVal * 1.2;
+
     return weeklyData.map((day, index) => {
-      let x =
+      const x =
         N === 1
           ? (CHART_LEFT + CHART_RIGHT) / 2
           : CHART_LEFT + (index * chartWidth) / (N - 1);
-      const value = counts[index];
-      const y = CHART_BOTTOM - (value / yMax) * chartHeight;
+      const practice = practices[index];
+      const conversation = conversations[index];
+      const yPractice = CHART_BOTTOM - (practice / yMax) * chartHeight;
+      const yConversation = CHART_BOTTOM - (conversation / yMax) * chartHeight;
       return {
         x,
-        y,
-        count: value,
+        yPractice,
+        yConversation,
+        practice,
+        conversation,
         dayLabel: getDayLabel(day.date),
         dateLabel: getDayShort(day.date),
       };
     });
   };
 
-  const buildWeeklyChartPaths = (chartPoints) => {
-    if (chartPoints.length === 0) return { linePath: "", areaPath: "" };
-    if (chartPoints.length === 1) {
-      const p = chartPoints[0];
-      return {
-        linePath: `M ${p.x - 5} ${p.y} L ${p.x + 5} ${p.y}`,
-        areaPath: `M ${p.x - 5} 170 L ${p.x - 5} ${p.y} L ${p.x + 5} ${p.y} L ${p.x + 5} 170 Z`,
-      };
+  const buildSmoothPath = (points, yKey) => {
+    if (!points || points.length === 0) return "";
+    if (points.length === 1) {
+      const p = points[0];
+      return `M ${p.x} ${p[yKey]}`;
     }
-    const linePath = "M " + chartPoints.map((p) => `${p.x} ${p.y}`).join(" L ");
-    const first = chartPoints[0];
-    const last = chartPoints[chartPoints.length - 1];
-    const areaPath =
-      `M ${first.x} 170 L ${first.x} ${first.y} ` +
-      chartPoints.map((p) => `L ${p.x} ${p.y}`).join(" ") +
-      ` L ${last.x} 170 Z`;
-    return { linePath, areaPath };
+    if (points.length === 2) {
+      return `M ${points[0].x} ${points[0][yKey]} L ${points[1].x} ${points[1][yKey]}`;
+    }
+
+    const getY = (p) => p[yKey];
+    let d = `M ${points[0].x} ${getY(points[0])}`;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = getY(p1) + (getY(p2) - getY(p0)) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = getY(p2) - (getY(p3) - getY(p1)) / 6;
+
+      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${getY(p2)}`;
+    }
+    return d;
   };
 
-  // ===== LOADING =====
+  const buildSmoothAreaPath = (points, yKey, bottomY = CHART_BOTTOM) => {
+    if (!points || points.length === 0) return "";
+    const line = buildSmoothPath(points, yKey);
+    const first = points[0];
+    const last = points[points.length - 1];
+    return `${line} L ${last.x} ${bottomY} L ${first.x} ${bottomY} Z`;
+  };
+
   if (loading) {
     return <Loading size="large" text="Đang tải thông tin cá nhân..." />;
   }
@@ -200,36 +214,7 @@ function StudentProfile() {
   const levelData = level || {};
   const statsData = stats || {};
   const membershipData = membership || { hasMembership: false };
-  const vocabData = vocabulary || {};
   const avatarUrl = user.avatarUrl || DEFAULT_AVATAR;
-
-  const statItems = [
-    {
-      id: "xp",
-      icon: faBolt,
-      label: "Tổng XP",
-      value: (statsData.totalXp || 0).toLocaleString("vi-VN"),
-      color: "#0ea792",
-      gradient: "linear-gradient(135deg, #0ea792, #0d9488)",
-    },
-    {
-      id: "accuracy",
-      icon: faBullseye,
-      label: "Độ chính xác",
-      value: `${statsData.accuracyRate || 0}%`,
-      color: "#f59e0b",
-      gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
-    },
-    {
-      id: "ranking",
-      icon: faTrophy,
-      label: "Xếp hạng",
-      value: statsData.ranking ? `#${statsData.ranking}` : "N/A",
-      sub: statsData.totalStudents ? `/ ${statsData.totalStudents}` : "",
-      color: "#a855f7",
-      gradient: "linear-gradient(135deg, #a855f7, #9333ea)",
-    },
-  ];
 
   const aiUsage = membershipData.aiUsage || {};
   const aiLimit = aiUsage.limit || 0;
@@ -240,23 +225,52 @@ function StudentProfile() {
   const isAiDanger = !isUnlimited && aiRemaining === 0;
 
   const weeklyChartPoints = buildWeeklyChartPoints(weeklyActivity);
-  const { linePath: weeklyLinePath, areaPath: weeklyAreaPath } =
-    buildWeeklyChartPaths(weeklyChartPoints);
 
   const weeklyMaxCount =
     weeklyChartPoints.length > 0
-      ? Math.max(...weeklyChartPoints.map((p) => p.count)) * 1.2
+      ? Math.max(
+          ...weeklyChartPoints.map((p) => Math.max(p.practice, p.conversation)),
+        ) * 1.2
       : 10;
 
   const weeklyYAxisLabels = [
     { value: weeklyMaxCount, y: 34 },
-    { value: weeklyMaxCount * 0.6, y: 84 },
-    { value: weeklyMaxCount * 0.3, y: 134 },
+    { value: weeklyMaxCount * 0.66, y: 80 },
+    { value: weeklyMaxCount * 0.33, y: 126 },
     { value: 0, y: 174 },
   ];
 
+  const clampX = (x) => {
+    const half = TOOLTIP_WIDTH / 2;
+    if (x - half < 4) return half + 4;
+    if (x + half > 496) return 496 - half;
+    return x;
+  };
+
+  const practiceLine = buildSmoothPath(weeklyChartPoints, "yPractice");
+  const conversationLine = buildSmoothPath(weeklyChartPoints, "yConversation");
+  const practiceArea = buildSmoothAreaPath(weeklyChartPoints, "yPractice");
+  const conversationArea = buildSmoothAreaPath(
+    weeklyChartPoints,
+    "yConversation",
+  );
+
+  const totalAi = statsData.totalAiAnswers || 0;
+  const correctAi = statsData.totalAiCorrect || 0;
+
+  const convMessages = statsData.totalMessages || 0;
+  const convCorrect = statsData.correctMessages || 0;
+
+  const listeningTotal = statsData.totalListeningAnswers || 0;
+  const listeningCorrect = statsData.totalListeningCorrect || 0;
+
+  // Check Max Level
+  const currentLevel = levelData.level || 1;
+  const isMaxLevel = currentLevel >= MAX_LEVEL;
+
   return (
     <div className={styles.wrapper}>
+      {/* HERO SECTION */}
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
           <div className={styles.heroAvatarWrapper}>
@@ -331,12 +345,10 @@ function StudentProfile() {
         <div className={styles.heroLevelBox}>
           <div className={styles.levelBoxHeader}>
             <div className={styles.levelIconSmall}>
-              <span>{levelData.level || 1}</span>
+              <span>{currentLevel}</span>
             </div>
             <div>
-              <span className={styles.levelBoxLabel}>
-                LEVEL {levelData.level || 1}
-              </span>
+              <span className={styles.levelBoxLabel}>LEVEL {currentLevel}</span>
               <span className={styles.levelBoxTitle}>
                 {levelData.titleEmoji} {levelData.title}
               </span>
@@ -345,57 +357,45 @@ function StudentProfile() {
 
           <div className={styles.levelBoxProgress}>
             <div className={styles.levelBoxProgressHeader}>
-              <span>Tiến độ lên Level {(levelData.level || 1) + 1}</span>
-              <strong>{levelData.progressPercent || 0}%</strong>
+              {isMaxLevel ? (
+                <span>Đạt cấp độ tối đa</span>
+              ) : (
+                <span>Tiến độ lên Level {currentLevel + 1}</span>
+              )}
+              <strong>
+                {isMaxLevel ? 100 : levelData.progressPercent || 0}%
+              </strong>
             </div>
             <div className={styles.levelBoxTrack}>
               <div
                 className={styles.levelBoxFill}
-                style={{ width: `${levelData.progressPercent || 0}%` }}
+                style={{
+                  width: `${isMaxLevel ? 100 : levelData.progressPercent || 0}%`,
+                }}
               />
             </div>
             <div className={styles.levelBoxFooter}>
-              <FontAwesomeIcon icon={faArrowUp} />
+              <FontAwesomeIcon icon={isMaxLevel ? faTrophy : faArrowUp} />
               <span>
-                Còn{" "}
-                <strong>
-                  {(levelData.xpRemaining || 0).toLocaleString("vi-VN")} XP
-                </strong>
+                {isMaxLevel ? (
+                  <strong>Bạn đã đạt cảnh giới cao nhất!</strong>
+                ) : (
+                  <>
+                    Còn{" "}
+                    <strong>
+                      {(levelData.xpRemaining || 0).toLocaleString("vi-VN")} XP
+                    </strong>
+                  </>
+                )}
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      <section className={styles.statsGrid}>
-        {statItems.map((item) => (
-          <div key={item.id} className={styles.statCard}>
-            <div
-              className={styles.statIconBox}
-              style={{ background: item.gradient }}
-            >
-              <FontAwesomeIcon icon={item.icon} />
-            </div>
-            <div className={styles.statContent}>
-              <span className={styles.statLabel}>{item.label}</span>
-              <div className={styles.statValueRow}>
-                <span
-                  className={styles.statValue}
-                  style={{ color: item.color }}
-                >
-                  {item.value}
-                </span>
-                {item.sub && (
-                  <span className={styles.statSuffix}>{item.sub}</span>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </section>
-
+      {/* DASHBOARD GRID */}
       <section className={styles.dashboardGrid}>
-        {/* Membership */}
+        {/* MEMBERSHIP CARD */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -494,7 +494,7 @@ function StudentProfile() {
           )}
         </div>
 
-        {/* Weekly Activity */}
+        {/* WEEKLY ACTIVITY CHART */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
@@ -504,7 +504,7 @@ function StudentProfile() {
               <div>
                 <h3 className={styles.cardTitle}>Hoạt động 7 ngày</h3>
                 <p className={styles.cardSubtitle}>
-                  Số câu hỏi đã làm mỗi ngày
+                  Luyện dịch và hội thoại mỗi ngày
                 </p>
               </div>
             </div>
@@ -521,280 +521,380 @@ function StudentProfile() {
               </p>
             </div>
           ) : (
-            <div className={styles.weeklyChartSvgWrapper}>
-              <svg viewBox="0 0 500 210" className={styles.weeklyChartSvg}>
-                <defs>
-                  <linearGradient
-                    id="weeklyChartGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="0%" stopColor="#0ea792" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#0ea792" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-
-                <line
-                  x1="40"
-                  y1="30"
-                  x2="480"
-                  y2="30"
-                  stroke="#f1f5f9"
-                  strokeWidth="1"
-                />
-                <line
-                  x1="40"
-                  y1="80"
-                  x2="480"
-                  y2="80"
-                  stroke="#f1f5f9"
-                  strokeWidth="1"
-                />
-                <line
-                  x1="40"
-                  y1="130"
-                  x2="480"
-                  y2="130"
-                  stroke="#f1f5f9"
-                  strokeWidth="1"
-                />
-                <line
-                  x1="40"
-                  y1="170"
-                  x2="480"
-                  y2="170"
-                  stroke="#cbd5e1"
-                  strokeWidth="1"
-                />
-
-                {weeklyYAxisLabels.map((lbl, i) => (
-                  <text key={i} x="15" y={lbl.y} className={styles.svgText}>
-                    {Math.round(lbl.value)}
-                  </text>
-                ))}
-
-                {weeklyAreaPath && (
-                  <path d={weeklyAreaPath} fill="url(#weeklyChartGradient)" />
-                )}
-
-                {weeklyLinePath && (
-                  <path
-                    d={weeklyLinePath}
-                    fill="none"
-                    stroke="#0ea792"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+            <>
+              <div className={styles.chartLegend}>
+                <span className={styles.legendItem}>
+                  <span
+                    className={styles.legendDot}
+                    style={{
+                      background: COLORS.practice,
+                      boxShadow: `0 0 0 3px ${COLORS.practice}20`,
+                    }}
                   />
-                )}
+                  Luyện dịch
+                </span>
+                <span className={styles.legendItem}>
+                  <span
+                    className={styles.legendDot}
+                    style={{
+                      background: COLORS.conversation,
+                      boxShadow: `0 0 0 3px ${COLORS.conversation}20`,
+                    }}
+                  />
+                  Hội thoại
+                </span>
+              </div>
 
-                {weeklyChartPoints.map((item, index) => (
-                  <g key={index}>
-                    <circle
-                      cx={item.x}
-                      cy={item.y}
-                      r="5"
-                      fill="#ffffff"
-                      stroke="#0ea792"
-                      strokeWidth="3"
-                      className={styles.chartPoint}
-                      onMouseEnter={() =>
-                        setActiveChartTooltip({
-                          x: item.x,
-                          y: item.y - 15,
-                          text: `${item.dayLabel} (${item.dateLabel}): ${item.count} câu`,
-                        })
-                      }
-                      onMouseLeave={() => setActiveChartTooltip(null)}
-                    />
-                    <text
-                      x={item.x}
-                      y="188"
-                      textAnchor="middle"
-                      className={styles.svgTextBold}
+              <div className={styles.weeklyChartSvgWrapper}>
+                <svg viewBox="0 0 500 210" className={styles.weeklyChartSvg}>
+                  <defs>
+                    <linearGradient
+                      id="practiceGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
                     >
-                      {item.dayLabel}
-                    </text>
-                    <text
-                      x={item.x}
-                      y="202"
-                      textAnchor="middle"
-                      className={styles.svgTextSmall}
+                      <stop
+                        offset="0%"
+                        stopColor={COLORS.practice}
+                        stopOpacity="0.28"
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor={COLORS.practice}
+                        stopOpacity="0"
+                      />
+                    </linearGradient>
+                    <linearGradient
+                      id="conversationGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
                     >
-                      {item.dateLabel}
-                    </text>
-                  </g>
-                ))}
+                      <stop
+                        offset="0%"
+                        stopColor={COLORS.conversation}
+                        stopOpacity="0.22"
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor={COLORS.conversation}
+                        stopOpacity="0"
+                      />
+                    </linearGradient>
+                  </defs>
 
-                {activeChartTooltip && (
-                  <g>
-                    <rect
-                      x={activeChartTooltip.x - 80}
-                      y={activeChartTooltip.y - 25}
-                      width="160"
-                      height="24"
-                      rx="6"
-                      fill="#1e293b"
+                  <line
+                    x1={CHART_LEFT}
+                    y1={30}
+                    x2={CHART_RIGHT}
+                    y2={30}
+                    stroke="#f1f5f9"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1={CHART_LEFT}
+                    y1={80}
+                    x2={CHART_RIGHT}
+                    y2={80}
+                    stroke="#f1f5f9"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1={CHART_LEFT}
+                    y1={130}
+                    x2={CHART_RIGHT}
+                    y2={130}
+                    stroke="#f1f5f9"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1={CHART_LEFT}
+                    y1={170}
+                    x2={CHART_RIGHT}
+                    y2={170}
+                    stroke="#cbd5e1"
+                    strokeWidth="1"
+                  />
+
+                  {weeklyChartPoints.map((p, i) => (
+                    <line
+                      key={`v-${i}`}
+                      x1={p.x}
+                      y1={30}
+                      x2={p.x}
+                      y2={170}
+                      className={styles.chartGridLine}
                     />
+                  ))}
+
+                  {weeklyYAxisLabels.map((lbl, i) => (
                     <text
-                      x={activeChartTooltip.x}
-                      y={activeChartTooltip.y - 9}
-                      fill="#ffffff"
-                      fontSize="10"
-                      fontWeight="bold"
-                      textAnchor="middle"
+                      key={i}
+                      x="15"
+                      y={lbl.y + 3}
+                      className={styles.svgText}
                     >
-                      {activeChartTooltip.text}
+                      {Math.round(lbl.value)}
                     </text>
-                  </g>
-                )}
-              </svg>
-            </div>
+                  ))}
+
+                  {practiceArea && (
+                    <path d={practiceArea} fill="url(#practiceGradient)" />
+                  )}
+                  {conversationArea && (
+                    <path
+                      d={conversationArea}
+                      fill="url(#conversationGradient)"
+                    />
+                  )}
+
+                  {practiceLine && (
+                    <path
+                      d={practiceLine}
+                      stroke={COLORS.practice}
+                      className={styles.chartLine}
+                    />
+                  )}
+                  {conversationLine && (
+                    <path
+                      d={conversationLine}
+                      stroke={COLORS.conversation}
+                      className={styles.chartLine}
+                    />
+                  )}
+
+                  {weeklyChartPoints.map((item, index) => (
+                    <g key={index}>
+                      <circle
+                        cx={item.x}
+                        cy={item.yPractice}
+                        r="4"
+                        fill="#ffffff"
+                        stroke={COLORS.practice}
+                        strokeWidth="2.5"
+                        className={styles.chartPoint}
+                        onMouseEnter={() =>
+                          setActiveChartTooltip({
+                            x: clampX(item.x),
+                            y: Math.min(item.yPractice, item.yConversation),
+                            text: `${item.dayLabel} (${item.dateLabel})`,
+                            practice: item.practice,
+                            conversation: item.conversation,
+                          })
+                        }
+                        onMouseLeave={() => setActiveChartTooltip(null)}
+                      />
+                      <circle
+                        cx={item.x}
+                        cy={item.yConversation}
+                        r="4"
+                        fill="#ffffff"
+                        stroke={COLORS.conversation}
+                        strokeWidth="2.5"
+                        className={styles.chartPoint}
+                        onMouseEnter={() =>
+                          setActiveChartTooltip({
+                            x: clampX(item.x),
+                            y: Math.min(item.yPractice, item.yConversation),
+                            text: `${item.dayLabel} (${item.dateLabel})`,
+                            practice: item.practice,
+                            conversation: item.conversation,
+                          })
+                        }
+                        onMouseLeave={() => setActiveChartTooltip(null)}
+                      />
+                      <text
+                        x={item.x}
+                        y="188"
+                        textAnchor="middle"
+                        className={styles.svgTextBold}
+                      >
+                        {item.dayLabel}
+                      </text>
+                      <text
+                        x={item.x}
+                        y="202"
+                        textAnchor="middle"
+                        className={styles.svgTextSmall}
+                      >
+                        {item.dateLabel}
+                      </text>
+                    </g>
+                  ))}
+
+                  {activeChartTooltip &&
+                    (() => {
+                      const tx = activeChartTooltip.x;
+                      const ty = Math.max(
+                        activeChartTooltip.y - TOOLTIP_HEIGHT - 8,
+                        4,
+                      );
+                      return (
+                        <g className={styles.chartTooltip}>
+                          <rect
+                            x={tx - TOOLTIP_WIDTH / 2}
+                            y={ty}
+                            width={TOOLTIP_WIDTH}
+                            height={TOOLTIP_HEIGHT}
+                            rx="8"
+                            fill="#ffffff"
+                          />
+                          <text
+                            x={tx}
+                            y={ty + 18}
+                            textAnchor="middle"
+                            className={styles.tooltipTitle}
+                          >
+                            {activeChartTooltip.text}
+                          </text>
+                          <text
+                            x={tx - TOOLTIP_WIDTH / 2 + 14}
+                            y={ty + 36}
+                            className={styles.tooltipText}
+                            fill={COLORS.practice}
+                          >
+                            ● Luyện dịch: {activeChartTooltip.practice}
+                          </text>
+                          <text
+                            x={tx - TOOLTIP_WIDTH / 2 + 14}
+                            y={ty + 50}
+                            className={styles.tooltipText}
+                            fill={COLORS.conversation}
+                          >
+                            ● Hội thoại: {activeChartTooltip.conversation}
+                          </text>
+                        </g>
+                      );
+                    })()}
+                </svg>
+              </div>
+            </>
           )}
         </div>
 
-        {/* AI Stats */}
-        <div className={styles.card}>
+        {/* CARD TỔNG HỢP 3 CỘT */}
+        <div className={styles.card} style={{ gridColumn: "1 / -1" }}>
           <div className={styles.cardHeader}>
             <div className={styles.cardHeaderLeft}>
-              <div className={styles.iconBoxPurple}>
-                <FontAwesomeIcon icon={faRobot} />
-              </div>
-              <div>
-                <h3 className={styles.cardTitle}>Thống kê luyện tập AI</h3>
-                <p className={styles.cardSubtitle}>Tổng hợp hoạt động</p>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.aiStatsGridNew}>
-            <div className={`${styles.aiStatNew} ${styles.aiStatNewTeal}`}>
-              <div className={styles.aiStatNewIcon}>
+              <div className={styles.iconBoxTeal}>
                 <FontAwesomeIcon icon={faChartLine} />
               </div>
-              <div className={styles.aiStatNewInfo}>
-                <span className={styles.aiStatNewValue}>
-                  {statsData.completedSessions || 0}
-                </span>
-                <span className={styles.aiStatNewLabel}>Buổi hoàn thành</span>
-              </div>
-            </div>
-
-            <div className={`${styles.aiStatNew} ${styles.aiStatNewBlue}`}>
-              <div className={styles.aiStatNewIcon}>
-                <FontAwesomeIcon icon={faBookmark} />
-              </div>
-              <div className={styles.aiStatNewInfo}>
-                <span className={styles.aiStatNewValue}>
-                  {statsData.totalAiAnswers || 0}
-                </span>
-                <span className={styles.aiStatNewLabel}>Câu hỏi đã làm</span>
-              </div>
-            </div>
-
-            <div className={`${styles.aiStatNew} ${styles.aiStatNewOrange}`}>
-              <div className={styles.aiStatNewIcon}>
-                <FontAwesomeIcon icon={faBullseye} />
-              </div>
-              <div className={styles.aiStatNewInfo}>
-                <span className={styles.aiStatNewValue}>
-                  {statsData.avgAiScore || 0}
-                </span>
-                <span className={styles.aiStatNewLabel}>Điểm trung bình</span>
-              </div>
-            </div>
-
-            <div className={`${styles.aiStatNew} ${styles.aiStatNewGreen}`}>
-              <div className={styles.aiStatNewIcon}>
-                <FontAwesomeIcon icon={faBolt} />
-              </div>
-              <div className={styles.aiStatNewInfo}>
-                <span className={styles.aiStatNewValue}>
-                  {aiUsage.used || 0}
-                </span>
-                <span className={styles.aiStatNewLabel}>
-                  Lượt gọi AI hôm nay
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.aiStatsDivider} />
-
-          <div className={styles.listeningCompact}>
-            <div className={styles.listeningCompactHeader}>
-              <FontAwesomeIcon icon={faHeadphones} />
-              <span>Luyện nghe</span>
-            </div>
-            <div className={styles.listeningCompactRow}>
-              <div className={styles.listeningCompactItem}>
-                <span className={styles.listeningCompactLabel}>Tổng câu</span>
-                <span className={styles.listeningCompactValue}>
-                  {statsData.totalListeningAnswers || 0}
-                </span>
-              </div>
-              <div className={styles.listeningCompactItem}>
-                <span className={styles.listeningCompactLabel}>Đúng</span>
-                <span className={styles.listeningCompactValueGreen}>
-                  {statsData.totalListeningCorrect || 0}
-                </span>
-              </div>
-              <div className={styles.listeningCompactItem}>
-                <span className={styles.listeningCompactLabel}>Chính xác</span>
-                <span className={styles.listeningCompactValueHighlight}>
-                  {statsData.totalListeningAnswers > 0
-                    ? Math.round(
-                        (statsData.totalListeningCorrect * 100) /
-                          statsData.totalListeningAnswers,
-                      )
-                    : 0}
-                  %
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Error Improve */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <div className={styles.cardHeaderLeft}>
-              <div className={styles.iconBoxRed}>
-                <FontAwesomeIcon icon={faTriangleExclamation} />
-              </div>
               <div>
-                <h3 className={styles.cardTitle}>Cần Cải Thiện</h3>
+                <h3 className={styles.cardTitle}>Thống kê hoạt động</h3>
                 <p className={styles.cardSubtitle}>
-                  {weaknesses.length > 0
-                    ? `${weaknesses.length} lỗi cần tập trung`
-                    : "Lỗi ngữ pháp cần chú ý"}
+                  Chi tiết quá trình học tập
                 </p>
               </div>
             </div>
-            {weaknesses.length > 0 && (
-              <span className={styles.countBadge}>{weaknesses.length}</span>
-            )}
           </div>
 
-          {weaknesses.length === 0 ? (
-            <div className={styles.emptyState}>
-              <div className={styles.emptyIconGreen}>
-                <FontAwesomeIcon icon={faCheckCircle} />
+          <div className={styles.statsTriGrid}>
+            {/* Cột 1: Luyện dịch */}
+            <div className={styles.statColumn}>
+              <div className={styles.statColHeader}>
+                <div className={`${styles.statColIcon} ${styles.bgTeal}`}>
+                  <FontAwesomeIcon icon={faPenNib} />
+                </div>
+                <span className={styles.statColTitle}>Luyện dịch</span>
               </div>
-              <h4 className={styles.emptyTitle}>Tuyệt vời! 🎉</h4>
-              <p className={styles.emptyText}>
-                Bạn chưa có lỗi nào cần cải thiện. Tiếp tục luyện tập nhé!
-              </p>
+
+              <div className={styles.modernStatList}>
+                <div className={styles.modernStatItem}>
+                  <span className={styles.modernStatLabel}>
+                    Tổng câu đã làm
+                  </span>
+                  <span className={styles.modernStatValue}>{totalAi}</span>
+                </div>
+                <div className={styles.modernStatDivider} />
+                <div className={styles.modernStatItem}>
+                  <span className={styles.modernStatLabel}>Số câu đúng</span>
+                  <span className={styles.modernStatValueGreen}>
+                    {correctAi}
+                  </span>
+                </div>
+                <div className={styles.modernStatDivider} />
+                <div className={styles.modernStatItem}>
+                  <span className={styles.modernStatLabel}>Số câu sai</span>
+                  <span className={styles.modernStatValueRed}>
+                    {Math.max(0, totalAi - correctAi)}
+                  </span>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className={styles.errorImproveList}>
-              {weaknesses.map((error, index) => (
-                <ErrorImproveCard key={index} error={error} index={index + 1} />
-              ))}
+
+            {/* Cột 2: Hội thoại */}
+            <div className={styles.statColumn}>
+              <div className={styles.statColHeader}>
+                <div className={`${styles.statColIcon} ${styles.bgBlue}`}>
+                  <FontAwesomeIcon icon={faComments} />
+                </div>
+                <span className={styles.statColTitle}>Hội thoại</span>
+              </div>
+
+              <div className={styles.modernStatList}>
+                <div className={styles.modernStatItem}>
+                  <span className={styles.modernStatLabel}>Tổng tin nhắn</span>
+                  <span className={styles.modernStatValue}>{convMessages}</span>
+                </div>
+                <div className={styles.modernStatDivider} />
+                <div className={styles.modernStatItem}>
+                  <span className={styles.modernStatLabel}>Tin nhắn đúng</span>
+                  <span className={styles.modernStatValueGreen}>
+                    {convCorrect}
+                  </span>
+                </div>
+                <div className={styles.modernStatDivider} />
+                <div className={styles.modernStatItem}>
+                  <span className={styles.modernStatLabel}>Tin nhắn lỗi</span>
+                  <span className={styles.modernStatValueRed}>
+                    {Math.max(0, convMessages - convCorrect)}
+                  </span>
+                </div>
+              </div>
             </div>
-          )}
+
+            {/* Cột 3: Luyện nghe */}
+            <div className={styles.statColumn}>
+              <div className={styles.statColHeader}>
+                <div className={`${styles.statColIcon} ${styles.bgCyan}`}>
+                  <FontAwesomeIcon icon={faHeadphones} />
+                </div>
+                <span className={styles.statColTitle}>Luyện nghe</span>
+              </div>
+
+              <div className={styles.modernStatList}>
+                <div className={styles.modernStatItem}>
+                  <span className={styles.modernStatLabel}>
+                    Tổng câu đã nghe
+                  </span>
+                  <span className={styles.modernStatValue}>
+                    {listeningTotal}
+                  </span>
+                </div>
+                <div className={styles.modernStatDivider} />
+                <div className={styles.modernStatItem}>
+                  <span className={styles.modernStatLabel}>
+                    Số câu nghe đúng
+                  </span>
+                  <span className={styles.modernStatValueGreen}>
+                    {listeningCorrect}
+                  </span>
+                </div>
+                <div className={styles.modernStatDivider} />
+                <div className={styles.modernStatItem}>
+                  <span className={styles.modernStatLabel}>
+                    Số câu nghe sai
+                  </span>
+                  <span className={styles.modernStatValueRed}>
+                    {Math.max(0, listeningTotal - listeningCorrect)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -807,13 +907,11 @@ function StudentProfile() {
           fetchAll();
         }}
       />
-
       <ChangePasswordModal
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
         onSuccess={() => setShowPasswordModal(false)}
       />
-
       <AvatarUploadModal
         isOpen={showAvatarModal}
         onClose={() => setShowAvatarModal(false)}
@@ -829,165 +927,6 @@ function StudentProfile() {
           }
         }}
       />
-    </div>
-  );
-}
-
-// =====================================================
-// ERROR IMPROVE CARD
-// =====================================================
-function ErrorImproveCard({ error, index }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const getSeverityConfig = (severity) => {
-    const map = {
-      HIGH: {
-        bg: "#fef2f2",
-        border: "#fecaca",
-        text: "#dc2626",
-        label: "Cần sửa gấp",
-      },
-      MEDIUM: {
-        bg: "#fffbeb",
-        border: "#fde68a",
-        text: "#d97706",
-        label: "Nên cải thiện",
-      },
-      LOW: {
-        bg: "#f0fdf4",
-        border: "#bbf7d0",
-        text: "#16a34a",
-        label: "Đang tiến bộ",
-      },
-    };
-    return map[severity] || map.MEDIUM;
-  };
-
-  const getTrendConfig = (trend) => {
-    const map = {
-      UP: { icon: faArrowUp, color: "#dc2626", label: "Đang tăng" },
-      DOWN: { icon: faArrowDown, color: "#16a34a", label: "Đang giảm" },
-      STABLE: { icon: faMinus, color: "#64748b", label: "Ổn định" },
-    };
-    return map[trend] || map.STABLE;
-  };
-
-  const severityConfig = getSeverityConfig(error.severity);
-  const trendConfig = getTrendConfig(error.trend);
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "N/A";
-    return new Date(dateStr).toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
-
-  const formatTimeAgo = (dateStr) => {
-    if (!dateStr) return "";
-    const now = new Date();
-    const date = new Date(dateStr);
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-    if (diffMins < 1) return "vừa xong";
-    if (diffMins < 60) return `${diffMins} phút trước`;
-    if (diffHours < 24) return `${diffHours} giờ trước`;
-    if (diffDays < 7) return `${diffDays} ngày trước`;
-    return new Date(dateStr).toLocaleDateString("vi-VN");
-  };
-
-  return (
-    <div
-      className={styles.errorImproveCard}
-      style={{ "--severity-color": severityConfig.text }}
-    >
-      <div
-        className={styles.errorImproveHeader}
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className={styles.errorImproveMain}>
-          <div className={styles.errorImproveTopRow}>
-            <span className={styles.errorImproveName}>{error.displayName}</span>
-            <span
-              className={styles.errorImproveSeverity}
-              style={{
-                background: severityConfig.bg,
-                borderColor: severityConfig.border,
-                color: severityConfig.text,
-              }}
-            >
-              {severityConfig.label}
-            </span>
-          </div>
-
-          <div className={styles.errorImproveMeta}>
-            <span className={styles.errorImproveCount}>
-              <strong>{error.occurrenceCount}</strong> lần mắc lỗi
-            </span>
-            <span className={styles.errorImproveDot}>•</span>
-            <span
-              className={styles.errorImproveTrend}
-              style={{ color: trendConfig.color }}
-            >
-              <FontAwesomeIcon icon={trendConfig.icon} />
-              {trendConfig.label}
-            </span>
-          </div>
-        </div>
-
-        <button
-          className={styles.errorImproveExpandBtn}
-          aria-label="Xem chi tiết"
-          type="button"
-        >
-          <FontAwesomeIcon
-            icon={faChevronDown}
-            className={isExpanded ? "rotated" : ""}
-          />
-        </button>
-      </div>
-
-      {isExpanded && (
-        <div className={styles.errorImproveExpanded}>
-          {error.explanation && (
-            <div className={styles.errorImproveSection}>
-              <span className={styles.errorImproveSectionLabel}>
-                Giải thích
-              </span>
-              <p className={styles.errorImproveSectionText}>
-                {error.explanation}
-              </p>
-            </div>
-          )}
-
-          {error.exampleWrong && error.exampleCorrect && (
-            <div className={styles.errorImproveSection}>
-              <span className={styles.errorImproveSectionLabel}>Ví dụ</span>
-              <div className={styles.errorImproveExample}>
-                ❌ {error.exampleWrong} → ✅ {error.exampleCorrect}
-              </div>
-            </div>
-          )}
-
-          <div className={styles.errorImproveFooterMeta}>
-            {error.firstOccurredAt && (
-              <span>
-                <FontAwesomeIcon icon={faCalendarAlt} />
-                Lần đầu: {formatDate(error.firstOccurredAt)}
-              </span>
-            )}
-            {error.lastOccurredAt && (
-              <span>
-                <FontAwesomeIcon icon={faClock} />
-                Lần cuối: {formatTimeAgo(error.lastOccurredAt)}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -1022,18 +961,15 @@ function AvatarUploadModal({ isOpen, onClose, currentAvatar, onSuccess }) {
   const handleSelectFile = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (file.size > 2 * 1024 * 1024) {
       toast.error("Ảnh không được vượt quá 2MB");
       return;
     }
-
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
       toast.error("Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP");
       return;
     }
-
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
@@ -1596,7 +1532,6 @@ function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
                 </div>
               </>
             )}
-
             {errors.newPassword && (
               <span className={styles.errorText}>{errors.newPassword}</span>
             )}

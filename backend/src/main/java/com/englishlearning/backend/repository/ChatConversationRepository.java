@@ -17,4 +17,5 @@ public interface ChatConversationRepository extends JpaRepository<ChatConversati
     Optional<ChatConversation> findByStudentIdAndStatus(Long studentId, ChatStatus status);
 
     long countByStudentId(Long studentId);
+    long countByStudentIdAndStatus(Long studentId, ChatStatus status);
 }

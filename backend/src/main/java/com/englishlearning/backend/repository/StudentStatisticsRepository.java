@@ -134,25 +134,53 @@ public interface StudentStatisticsRepository extends JpaRepository<Student, Long
     List<Object[]> countErrorsByType(@Param("studentId") Long studentId);
 
     // =====================================================
-    // 6. ACTIVITY — ĐẾM SỐ CÂU HỎI THEO NGÀY
+    // 6. ACTIVITY — ĐẾM HOẠT ĐỘNG THEO NGÀY (PRACTICE + CONVERSATION)
     // =====================================================
 
     /**
-     * Đếm số CÂU HỎI đã trả lời theo ngày (7 ngày gần nhất)
-     * Dùng ai_answer.answered_at — chính xác hơn
-     * Trả về: [date, count]
+     * Đếm số câu Practice + số tin nhắn USER của Conversation theo ngày.
+     * Trả về: [date, practiceCount, conversationCount]
      */
     @Query(value = """
-        SELECT DATE(a.answered_at) as d, COUNT(*) as cnt
-        FROM ai_answer a
-        JOIN ai_practice_turn t ON a.turn_id = t.id
-        JOIN ai_practice_chat c ON t.practice_chat_id = c.id
-        WHERE c.student_id = :studentId
-          AND a.answered_at >= :from
-        GROUP BY DATE(a.answered_at)
-        ORDER BY d
+        SELECT d.d AS usage_date,
+               COALESCE(p.practice_count, 0) AS practice_count,
+               COALESCE(c.conversation_count, 0) AS conversation_count
+        FROM (
+            SELECT DATE(a.answered_at) AS d
+            FROM ai_answer a
+            JOIN ai_practice_turn t ON a.turn_id = t.id
+            JOIN ai_practice_chat pc ON t.practice_chat_id = pc.id
+            WHERE pc.student_id = :studentId
+              AND a.answered_at >= :from
+            UNION
+            SELECT DATE(cm.created_at) AS d
+            FROM chat_message cm
+            JOIN chat_conversation cc ON cm.conversation_id = cc.id
+            WHERE cc.student_id = :studentId
+              AND cm.role = 'USER'
+              AND cm.created_at >= :from
+        ) d
+        LEFT JOIN (
+            SELECT DATE(a.answered_at) AS d, COUNT(*) AS practice_count
+            FROM ai_answer a
+            JOIN ai_practice_turn t ON a.turn_id = t.id
+            JOIN ai_practice_chat pc ON t.practice_chat_id = pc.id
+            WHERE pc.student_id = :studentId
+              AND a.answered_at >= :from
+            GROUP BY DATE(a.answered_at)
+        ) p ON p.d = d.d
+        LEFT JOIN (
+            SELECT DATE(cm.created_at) AS d, COUNT(*) AS conversation_count
+            FROM chat_message cm
+            JOIN chat_conversation cc ON cm.conversation_id = cc.id
+            WHERE cc.student_id = :studentId
+              AND cm.role = 'USER'
+              AND cm.created_at >= :from
+            GROUP BY DATE(cm.created_at)
+        ) c ON c.d = d.d
+        ORDER BY d.d
     """, nativeQuery = true)
-    List<Object[]> countQuestionsByDate(
+    List<Object[]> countActivityByDate(
             @Param("studentId") Long studentId,
             @Param("from") LocalDateTime from
     );

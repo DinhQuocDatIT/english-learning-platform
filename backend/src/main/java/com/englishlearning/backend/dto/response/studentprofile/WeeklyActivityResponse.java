@@ -16,5 +16,20 @@ import java.time.LocalDate;
 public class WeeklyActivityResponse {
 
     private LocalDate date;
+
+    /**
+     * Tổng hoạt động = practiceCount + conversationCount
+     * (giữ lại để backward-compatible)
+     */
     private Long questionCount;
+
+    /**
+     * Số câu luyện dịch (AI Practice) đã trả lời trong ngày
+     */
+    private Long practiceCount;
+
+    /**
+     * Số tin nhắn USER gửi trong Conversation trong ngày
+     */
+    private Long conversationCount;
 }
