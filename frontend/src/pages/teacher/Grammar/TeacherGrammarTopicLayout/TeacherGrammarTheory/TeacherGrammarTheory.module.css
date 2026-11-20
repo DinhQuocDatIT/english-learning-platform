@@ -44,7 +44,6 @@
 
 /* ================= LOADING ================= */
 
-
 /* ================= READONLY BANNER ================= */
 .readOnlyBanner {
   display: flex;
@@ -621,6 +620,48 @@
   border-color: var(--color-primary);
   background: var(--color-surface);
   box-shadow: 0 0 0 2px rgba(14, 167, 146, 0.12);
+}
+
+/* ================= NÚT THÊM/XÓA CỘT ================= */
+.columnHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.columnHeaderRow input {
+  flex: 1;
+  min-width: 0;
+}
+
+.columnDeleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 5px;
+  font-size: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.columnDeleteBtn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.tableActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 /* ================= LIST EDITOR ================= */

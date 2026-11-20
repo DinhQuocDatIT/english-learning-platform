@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ListeningSentenceRepository extends JpaRepository<ListeningSentence, Long> {
     List<ListeningSentence> findByListeningLessonIdOrderBySentenceOrderAsc(Long listeningLessonId);
@@ -18,4 +19,6 @@ public interface ListeningSentenceRepository extends JpaRepository<ListeningSent
     long countByListeningLessonId(Long listeningLessonId);
     boolean existsByListeningLessonId(Long lessonId);
     void deleteByListeningLessonId(Long lessonId);
+    Optional<ListeningSentence> findByListeningLessonIdAndSentenceOrder(Long listeningLessonId, Integer sentenceOrder);
+
 }

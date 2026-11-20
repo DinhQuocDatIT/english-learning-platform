@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,12 +48,20 @@ public class ListeningSentenceServiceImpl implements ListeningSentenceService {
     public ListeningSentenceResponse update(Long sentenceId, ListeningSentenceRequest request) {
         ListeningSentence sentence = getSentence(sentenceId);
 
-        // Kiểm tra trùng thứ tự (không tính chính nó)
-        if (listeningSentenceRepository.existsByListeningLessonIdAndSentenceOrder(
-                request.getListeningLessonId(), request.getSentenceOrder())) {
+        // Tìm xem có câu nào ĐANG CHIẾM thứ tự này trong bài nghe không
+        Optional<ListeningSentence> existingSentence =
+                listeningSentenceRepository.findByListeningLessonIdAndSentenceOrder(
+                        request.getListeningLessonId(),
+                        request.getSentenceOrder()
+                );
+
+        // Nếu tìm thấy câu khác (ID khác với ID đang sửa) -> Báo lỗi trùng thứ tự
+        if (existingSentence.isPresent() && !existingSentence.get().getId().equals(sentenceId)) {
             throw new RuntimeException("Thứ tự câu đã tồn tại trong bài nghe này");
         }
 
+        // Cập nhật lại thông tin (bao gồm cả việc đổi bài nghe nếu có)
+        sentence.setListeningLesson(getLesson(request.getListeningLessonId()));
         sentence.setEnglishText(request.getEnglishText());
         sentence.setSentenceOrder(request.getSentenceOrder());
         sentence.setVietnameseMeaning(request.getVietnameseMeaning());
@@ -97,7 +106,9 @@ public class ListeningSentenceServiceImpl implements ListeningSentenceService {
                 .toList();
     }
 
-
+    // =====================================================
+    // HELPERS
+    // =====================================================
 
     private ListeningLesson getLesson(Long lessonId) {
         return listeningLessonRepository.findById(lessonId)

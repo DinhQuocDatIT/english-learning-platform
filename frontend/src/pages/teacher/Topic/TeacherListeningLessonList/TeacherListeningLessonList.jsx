@@ -245,7 +245,7 @@ function TeacherListeningLessonList() {
             (sum, lesson) => sum + (lesson.studentCount || 0),
             0,
           )}{" "}
-          học viên
+          học sinh
         </span>
       </div>
 

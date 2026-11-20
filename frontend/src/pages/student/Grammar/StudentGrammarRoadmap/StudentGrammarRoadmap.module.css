@@ -101,7 +101,7 @@
   margin: 0 0 8px 0;
   font-size: 42px;
   font-weight: 900 !important;
-  color: var(--color-secondary, #0f172a);
+  color: #0ea792;
   letter-spacing: -1px;
   line-height: 1.1;
 }

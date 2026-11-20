@@ -423,13 +423,7 @@ function CreateStudySession() {
                 </span>
               </div>
 
-              <div className={styles.summaryRow}>
-                <span className={styles.summaryLabel}>Thời gian dự kiến</span>
-                <span className={styles.summaryValueTime}>
-                  <FontAwesomeIcon icon={faClockRotateLeft} />~{" "}
-                  {Math.max(1, Math.round(selectedWords.length * 0.25))} phút
-                </span>
-              </div>
+              
             </div>
 
             <button

@@ -122,24 +122,54 @@ function InlineSection({
     onChange(payload);
   }, [form, tableHeaders, tableRows, listItems, noteColor, isDirty]);
 
+  // ===== TABLE ACTIONS =====
   const addRow = () => {
-    setTableRows([...tableRows, ["", "", ""]]);
+    const emptyRow = new Array(tableHeaders.length).fill("");
+    setTableRows([...tableRows, emptyRow]);
     setIsDirty(true);
   };
+
   const removeRow = (i) => {
+    if (tableRows.length <= 1) {
+      toast.warning("Phải có ít nhất 1 dòng.");
+      return;
+    }
     setTableRows(tableRows.filter((_, idx) => idx !== i));
     setIsDirty(true);
   };
+
   const updateCell = (r, c, v) => {
     const copy = [...tableRows];
     copy[r][c] = v;
     setTableRows(copy);
     setIsDirty(true);
   };
+
   const updateHeader = (c, v) => {
     const copy = [...tableHeaders];
     copy[c] = v;
     setTableHeaders(copy);
+    setIsDirty(true);
+  };
+
+  // ===== TÍNH NĂNG THÊM/XÓA CỘT =====
+  const addColumn = () => {
+    setTableHeaders([...tableHeaders, `Cột ${tableHeaders.length + 1}`]);
+    setTableRows(tableRows.map((row) => [...row, ""]));
+    setIsDirty(true);
+  };
+
+  const removeColumn = (indexToRemove) => {
+    if (tableHeaders.length <= 2) {
+      toast.warning("Bảng phải có ít nhất 2 cột.");
+      return;
+    }
+    if (!window.confirm(`Xóa cột "${tableHeaders[indexToRemove]}"?`)) return;
+
+    setTableHeaders(tableHeaders.filter((_, idx) => idx !== indexToRemove));
+    setTableRows(
+      tableRows.map((row) => row.filter((_, idx) => idx !== indexToRemove)),
+    );
     setIsDirty(true);
   };
 
@@ -304,13 +334,26 @@ function InlineSection({
                 <tr>
                   {tableHeaders.map((h, i) => (
                     <th key={i}>
-                      <input
-                        value={h}
-                        onChange={(e) => updateHeader(i, e.target.value)}
-                        placeholder={`Cột ${i + 1}`}
-                      />
+                      <div className={styles.columnHeaderRow}>
+                        <input
+                          value={h}
+                          onChange={(e) => updateHeader(i, e.target.value)}
+                          placeholder={`Cột ${i + 1}`}
+                        />
+                        {tableHeaders.length > 2 && (
+                          <button
+                            type="button"
+                            className={styles.columnDeleteBtn}
+                            onClick={() => removeColumn(i)}
+                            title="Xóa cột này"
+                          >
+                            <FontAwesomeIcon icon={faXmark} />
+                          </button>
+                        )}
+                      </div>
                     </th>
                   ))}
+                  {/* Cột ảo để căn chỉnh nút xóa dòng */}
                   <th style={{ width: 40 }}></th>
                 </tr>
               </thead>
@@ -325,11 +368,12 @@ function InlineSection({
                         />
                       </td>
                     ))}
-                    <td>
+                    <td style={{ width: 40, textAlign: "center" }}>
                       <button
                         type="button"
                         className={styles.rowDeleteBtn}
                         onClick={() => removeRow(ri)}
+                        title="Xóa dòng"
                       >
                         <FontAwesomeIcon icon={faXmark} />
                       </button>
@@ -338,10 +382,25 @@ function InlineSection({
                 ))}
               </tbody>
             </table>
-            <button type="button" className={styles.addRowBtn} onClick={addRow}>
-              <FontAwesomeIcon icon={faPlus} />
-              <span>Thêm dòng</span>
-            </button>
+
+            <div className={styles.tableActions}>
+              <button
+                type="button"
+                className={styles.addRowBtn}
+                onClick={addRow}
+              >
+                <FontAwesomeIcon icon={faPlus} />
+                <span>Thêm dòng</span>
+              </button>
+              <button
+                type="button"
+                className={styles.addRowBtn}
+                onClick={addColumn}
+              >
+                <FontAwesomeIcon icon={faPlus} />
+                <span>Thêm cột</span>
+              </button>
+            </div>
           </div>
         )}
 

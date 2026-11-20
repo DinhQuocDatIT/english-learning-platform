@@ -314,7 +314,7 @@ function StudentLessonList() {
                     <div className={styles.cardMeta}>
                       <span className={styles.metaItem}>
                         <FontAwesomeIcon icon={faUsers} />
-                        {lesson.studentCount || 0} học viên
+                        {lesson.studentCount || 0} học sinh
                       </span>
                     </div>
                     <button className={styles.startBtn}>

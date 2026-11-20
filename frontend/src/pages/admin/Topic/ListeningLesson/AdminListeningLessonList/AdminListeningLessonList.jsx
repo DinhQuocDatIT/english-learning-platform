@@ -388,7 +388,7 @@ function AdminListeningLessonList() {
             (sum, lesson) => sum + (lesson.studentCount || 0),
             0,
           )}{" "}
-          học viên
+          học sinh
         </span>
       </div>
 
@@ -606,7 +606,7 @@ function AdminListeningLessonList() {
                     <div className={styles.cardMeta}>
                       <span className={styles.metaItem}>
                         <FontAwesomeIcon icon={faUsers} />
-                        {lesson.studentCount || 0} học viên
+                        {lesson.studentCount || 0} học sinh
                       </span>
                       <span className={styles.metaItem}>
                         <FontAwesomeIcon icon={faClock} />
