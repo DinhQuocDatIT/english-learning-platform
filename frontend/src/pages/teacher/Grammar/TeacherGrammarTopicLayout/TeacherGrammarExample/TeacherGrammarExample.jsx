@@ -7,7 +7,6 @@ import {
   faSave,
   faTrash,
   faXmark,
-  faLock,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
@@ -72,7 +71,6 @@ function InlineExample({
     onChange(payload);
   }, [form, isDirty]);
 
-  // ===== VIEW MODE =====
   if (!isEditing) {
     return (
       <div
@@ -106,7 +104,6 @@ function InlineExample({
     );
   }
 
-  // ===== EDIT MODE =====
   return (
     <div className={`${styles.item} ${styles.itemEditing}`}>
       <span className={styles.order}>{form.displayOrder}</span>
@@ -164,7 +161,7 @@ function InlineExample({
 }
 
 function TeacherGrammarExample() {
-  const { topicId, topic } = useOutletContext();
+  const { topicId, topic, isOwner: isOwnerFromCtx } = useOutletContext();
 
   const [examples, setExamples] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -173,8 +170,9 @@ function TeacherGrammarExample() {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [pendingChanges, setPendingChanges] = useState({});
 
+  const isOwner = isOwnerFromCtx === true || topic?.isOwner === true;
   const canEdit =
-    !topic || topic.status === "DRAFT" || topic.status === "REJECTED";
+    isOwner && (topic?.status === "DRAFT" || topic?.status === "REJECTED");
 
   useEffect(() => {
     if (topicId) fetchData();
@@ -271,7 +269,9 @@ function TeacherGrammarExample() {
   const handleAddNew = () => {
     if (!canEdit) {
       toast.warning(
-        "Chỉ có thể thêm ví dụ khi chủ điểm ở trạng thái NHÁP hoặc TỪ CHỐI.",
+        !isOwner
+          ? "Bạn không có quyền chỉnh sửa chủ điểm này."
+          : "Chỉ có thể thêm ví dụ khi chủ điểm ở trạng thái NHÁP hoặc TỪ CHỐI.",
       );
       return;
     }
@@ -282,24 +282,20 @@ function TeacherGrammarExample() {
   const hasPending = Object.keys(pendingChanges).length > 0;
   const nextOrder = examples.length + 1;
 
-  // ===== LOADING =====
   if (loading) {
     return <Loading fullScreen={false} text="Đang tải ví dụ..." />;
   }
 
   return (
     <>
-      <div className={styles.actionRow}>
-        <button
-          className={styles.addBtn}
-          onClick={handleAddNew}
-          disabled={!canEdit}
-          title={!canEdit ? "Chủ điểm không ở trạng thái cho phép sửa" : ""}
-        >
-          <FontAwesomeIcon icon={faPlus} />
-          <span>Thêm ví dụ</span>
-        </button>
-      </div>
+      {canEdit && (
+        <div className={styles.actionRow}>
+          <button className={styles.addBtn} onClick={handleAddNew}>
+            <FontAwesomeIcon icon={faPlus} />
+            <span>Thêm ví dụ</span>
+          </button>
+        </div>
+      )}
 
       <div className={styles.list}>
         {examples.map((ex) => (

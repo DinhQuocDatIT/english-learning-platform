@@ -1,9 +1,8 @@
 package com.englishlearning.backend.service.grammar.impl;
 
+import com.englishlearning.backend.dto.grammar.request.GrammarReassignRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarRoadmapRequest;
-import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
-import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
-import com.englishlearning.backend.dto.grammar.response.GrammarTopicReviewResponse;
+import com.englishlearning.backend.dto.grammar.response.*;
 import com.englishlearning.backend.entity.GrammarRoadmap;
 import com.englishlearning.backend.entity.GrammarTheory;
 import com.englishlearning.backend.entity.GrammarTopic;
@@ -12,13 +11,7 @@ import com.englishlearning.backend.enums.GrammarReviewAction;
 import com.englishlearning.backend.enums.GrammarStatus;
 import com.englishlearning.backend.exception.BusinessException;
 import com.englishlearning.backend.exception.ResourceNotFoundException;
-import com.englishlearning.backend.repository.GrammarExampleRepository;
-import com.englishlearning.backend.repository.GrammarQuizRepository;
-import com.englishlearning.backend.repository.GrammarRoadmapRepository;
-import com.englishlearning.backend.repository.GrammarTheoryRepository;
-import com.englishlearning.backend.repository.GrammarTipRepository;
-import com.englishlearning.backend.repository.GrammarTopicRepository;
-import com.englishlearning.backend.repository.UserRepository;
+import com.englishlearning.backend.repository.*;
 import com.englishlearning.backend.service.grammar.GrammarAdminService;
 import com.englishlearning.backend.service.grammar.GrammarTopicReviewService;
 import lombok.RequiredArgsConstructor;
@@ -154,7 +147,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         topic.setStatus(GrammarStatus.PUBLISHED);
         GrammarTopic saved = topicRepository.save(topic);
 
-        // Theory
         List<GrammarTheory> theories = theoryRepository
                 .findByTopicIdOrderByDisplayOrderAsc(topicId);
         for (GrammarTheory theory : theories) {
@@ -166,7 +158,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         }
         theoryRepository.saveAll(theories);
 
-        // Example
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PENDING, GrammarStatus.PUBLISHED);
         exampleRepository.updateStatusByTopicAndFromStatus(
@@ -174,7 +165,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         exampleRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.REJECTED, GrammarStatus.PUBLISHED);
 
-        // Tip
         tipRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PENDING, GrammarStatus.PUBLISHED);
         tipRepository.updateStatusByTopicAndFromStatus(
@@ -182,7 +172,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
         tipRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.REJECTED, GrammarStatus.PUBLISHED);
 
-        // Quiz
         quizRepository.updateStatusByTopicAndFromStatus(
                 topicId, GrammarStatus.PENDING, GrammarStatus.PUBLISHED);
         quizRepository.updateStatusByTopicAndFromStatus(
@@ -194,7 +183,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
         reviewService.log(topic, GrammarReviewAction.APPROVE, null, admin);
 
-        log.info("✅ Admin {} đã publish topic id={}", adminId, topicId);
         return toTopicResponse(saved);
     }
 
@@ -217,7 +205,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
         reviewService.log(topic, GrammarReviewAction.UNPUBLISH, null, admin);
 
-        log.info("✅ Admin {} đã ẩn topic id={}", adminId, topicId);
         return toTopicResponse(saved);
     }
 
@@ -257,7 +244,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
         reviewService.log(topic, GrammarReviewAction.REJECT, reason.trim(), admin);
 
-        log.info("❌ Admin {} đã từ chối topic id={}, lý do: {}", adminId, topicId, reason);
         return toTopicResponse(saved);
     }
 
@@ -294,7 +280,6 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
         reviewService.log(topic, GrammarReviewAction.APPROVE, "Bỏ ẩn chủ điểm", admin);
 
-        log.info("✅ Admin {} đã bỏ ẩn topic id={}", adminId, topicId);
         return toTopicResponse(saved);
     }
 
@@ -305,6 +290,68 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
             throw new ResourceNotFoundException("Không tìm thấy chủ điểm");
         }
         return reviewService.getHistory(topicId);
+    }
+
+    // =====================================================
+    // REASSIGN
+    // =====================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TeacherSummaryResponse> getTeachersWithTopics() {
+        return userRepository.findTeachersWithTopicCount()
+                .stream()
+                .map(row -> {
+                    User u = (User) row[0];
+                    Long count = (Long) row[1];
+                    return TeacherSummaryResponse.builder()
+                            .id(u.getId())
+                            .fullName(u.getFullName())
+                            .email(u.getEmail())
+                            .topicCount(count)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GrammarTopicResponse> getTopicsByTeacher(Long teacherId) {
+        return topicRepository.findByCreatedByIdOrderByDisplayOrderAsc(teacherId)
+                .stream()
+                .map(this::toTopicResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void reassignTopics(Long adminId, GrammarReassignRequest request) {
+        if (request.getTopicIds() == null || request.getTopicIds().isEmpty()) {
+            throw new BusinessException("Vui lòng chọn ít nhất 1 chủ điểm để chuyển giao");
+        }
+
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy admin"));
+        User newOwner = userRepository.findById(request.getNewOwnerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy teacher mới"));
+
+        List<GrammarTopic> topics = topicRepository.findAllById(request.getTopicIds());
+
+        if (topics.isEmpty()) {
+            throw new BusinessException("Không tìm thấy chủ điểm nào hợp lệ");
+        }
+
+        for (GrammarTopic topic : topics) {
+            User oldOwner = topic.getCreatedBy();
+            if (oldOwner.getId().equals(newOwner.getId())) {
+                continue;
+            }
+
+            topic.setCreatedBy(newOwner);
+            topicRepository.save(topic);
+
+            reviewService.log(topic, GrammarReviewAction.REASSIGN,
+                    "Chuyển giao từ " + oldOwner.getFullName() + " sang " + newOwner.getFullName(), admin);
+        }
     }
 
     // =====================================================
@@ -337,6 +384,12 @@ public class GrammarAdminServiceImpl implements GrammarAdminService {
                 .description(t.getDescription())
                 .displayOrder(t.getDisplayOrder())
                 .status(t.getStatus().name())
+                .roadmapId(t.getRoadmap() != null ? t.getRoadmap().getId() : null)
+                .roadmapName(t.getRoadmap() != null ? t.getRoadmap().getName() : null)
+                .createdById(t.getCreatedBy() != null ? t.getCreatedBy().getId() : null)
+                .createdByName(t.getCreatedBy() != null ? t.getCreatedBy().getFullName() : null)
+                .isOwner(false)
+                .canRequestEdit(null)
                 .build();
     }
 }

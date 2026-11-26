@@ -11,6 +11,7 @@ import com.englishlearning.backend.entity.GrammarRoadmap;
 import com.englishlearning.backend.entity.GrammarTheory;
 import com.englishlearning.backend.entity.GrammarTopic;
 import com.englishlearning.backend.entity.User;
+import com.englishlearning.backend.enums.GrammarEditRequestStatus;
 import com.englishlearning.backend.enums.GrammarReviewAction;
 import com.englishlearning.backend.enums.GrammarStatus;
 import com.englishlearning.backend.exception.BusinessException;
@@ -20,6 +21,7 @@ import com.englishlearning.backend.repository.GrammarQuizRepository;
 import com.englishlearning.backend.repository.GrammarRoadmapRepository;
 import com.englishlearning.backend.repository.GrammarTheoryRepository;
 import com.englishlearning.backend.repository.GrammarTipRepository;
+import com.englishlearning.backend.repository.GrammarTopicEditRequestRepository;
 import com.englishlearning.backend.repository.GrammarTopicRepository;
 import com.englishlearning.backend.repository.UserRepository;
 import com.englishlearning.backend.service.grammar.GrammarTeacherService;
@@ -48,6 +50,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     private final GrammarTipRepository tipRepository;
     private final GrammarQuizRepository quizRepository;
     private final UserRepository userRepository;
+    private final GrammarTopicEditRequestRepository editRequestRepository;
     private final GrammarTopicReviewService reviewService;
     private final ObjectMapper objectMapper;
 
@@ -88,7 +91,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         }
         return topicRepository.findForTeacher(roadmapId, teacherId)
                 .stream()
-                .map(this::toTopicResponse)
+                .map(t -> toTopicResponse(t, teacherId))
                 .collect(Collectors.toList());
     }
 
@@ -97,6 +100,14 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     public GrammarTopicDetailResponse getTopicForEdit(Long teacherId, Long topicId) {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
+
+        boolean isOwner = topic.getCreatedBy() != null
+                && topic.getCreatedBy().getId().equals(teacherId);
+
+        // Không phải owner + không PUBLISHED → không được xem
+        if (!isOwner && topic.getStatus() != GrammarStatus.PUBLISHED) {
+            throw new BusinessException("Bạn không có quyền xem chủ điểm này");
+        }
 
         List<GrammarTheoryResponse> theories = theoryRepository
                 .findByTopicIdOrderByDisplayOrderAsc(topicId)
@@ -111,6 +122,9 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
                 .description(topic.getDescription())
                 .displayOrder(topic.getDisplayOrder())
                 .status(topic.getStatus().name())
+                .createdById(topic.getCreatedBy() != null ? topic.getCreatedBy().getId() : null)
+                .createdByName(topic.getCreatedBy() != null ? topic.getCreatedBy().getFullName() : null)
+                .isOwner(isOwner)
                 .theories(theories)
                 .build();
     }
@@ -134,7 +148,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         topic.setStatus(GrammarStatus.DRAFT);
 
         GrammarTopic saved = topicRepository.save(topic);
-        return toTopicResponse(saved);
+        return toTopicResponse(saved, teacherId);
     }
 
     @Override
@@ -162,7 +176,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         if (request.getDisplayOrder() != null) topic.setDisplayOrder(request.getDisplayOrder());
 
         GrammarTopic saved = topicRepository.save(topic);
-        return toTopicResponse(saved);
+        return toTopicResponse(saved, teacherId);
     }
 
     @Override
@@ -232,7 +246,7 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         reviewService.log(topic, GrammarReviewAction.SUBMIT, null, teacher);
 
         log.info("📤 Teacher {} đã gửi duyệt topic id={}", teacherId, topicId);
-        return toTopicResponse(topic);
+        return toTopicResponse(topic, teacherId);
     }
 
     // =====================================================
@@ -259,6 +273,17 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
     @Override
     @Transactional(readOnly = true)
     public List<GrammarTheoryResponse> getTheoriesForEdit(Long teacherId, Long topicId) {
+        GrammarTopic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
+
+        boolean isOwner = topic.getCreatedBy() != null
+                && topic.getCreatedBy().getId().equals(teacherId);
+
+        // Không phải owner + không PUBLISHED → không được xem
+        if (!isOwner && topic.getStatus() != GrammarStatus.PUBLISHED) {
+            throw new BusinessException("Bạn không có quyền xem lý thuyết của chủ điểm này");
+        }
+
         return theoryRepository.findByTopicIdOrderByDisplayOrderAsc(topicId)
                 .stream()
                 .map(this::toTheoryResponse)
@@ -383,7 +408,19 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
         }
     }
 
-    private GrammarTopicResponse toTopicResponse(GrammarTopic t) {
+    private GrammarTopicResponse toTopicResponse(GrammarTopic t, Long currentUserId) {
+        boolean isOwner = currentUserId != null
+                && t.getCreatedBy() != null
+                && t.getCreatedBy().getId().equals(currentUserId);
+
+        Boolean canRequestEdit = null;
+        if (currentUserId != null) {
+            canRequestEdit = isOwner
+                    && t.getStatus() == GrammarStatus.PUBLISHED
+                    && !editRequestRepository.existsByTopicIdAndStatus(
+                    t.getId(), GrammarEditRequestStatus.PENDING);
+        }
+
         return GrammarTopicResponse.builder()
                 .id(t.getId())
                 .name(t.getName())
@@ -391,6 +428,10 @@ public class GrammarTeacherServiceImpl implements GrammarTeacherService {
                 .description(t.getDescription())
                 .displayOrder(t.getDisplayOrder())
                 .status(t.getStatus().name())
+                .createdById(t.getCreatedBy() != null ? t.getCreatedBy().getId() : null)
+                .createdByName(t.getCreatedBy() != null ? t.getCreatedBy().getFullName() : null)
+                .isOwner(isOwner)
+                .canRequestEdit(canRequestEdit)
                 .build();
     }
 

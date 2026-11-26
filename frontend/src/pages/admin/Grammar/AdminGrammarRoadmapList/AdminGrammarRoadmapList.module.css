@@ -473,3 +473,25 @@
 .pendingStat span {
   color: #d97706 !important;
 }
+/* Thêm vào đầu file CSS */
+.reassignBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  background: #3b82f6; /* Màu xanh dương */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 5px 14px rgba(59, 130, 246, 0.28);
+}
+
+.reassignBtn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.38);
+}

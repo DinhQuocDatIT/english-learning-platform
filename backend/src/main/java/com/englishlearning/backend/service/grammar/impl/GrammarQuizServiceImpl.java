@@ -66,7 +66,6 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
             throw new BusinessException("Đề này chưa được publish");
         }
 
-        // ✅ Lấy attempt IN_PROGRESS mới nhất (chống trùng)
         List<GrammarQuizAttempt> inProgressList = attemptRepository
                 .findByStudentIdAndQuizIdAndStatusOrderByIdDesc(
                         student.getId(), quizId, GrammarQuizAttemptStatus.IN_PROGRESS);
@@ -75,7 +74,6 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
         if (!inProgressList.isEmpty()) {
             attempt = inProgressList.get(0);
 
-            // Dọn các attempt IN_PROGRESS cũ nếu có nhiều hơn 1
             if (inProgressList.size() > 1) {
                 for (int i = 1; i < inProgressList.size(); i++) {
                     attemptRepository.delete(inProgressList.get(i));
@@ -170,7 +168,6 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
     public GrammarQuizAttemptResponse getAttemptForQuiz(Long userId, Long quizId) {
         Student student = findStudent(userId);
 
-        // ✅ List + get(0)
         List<GrammarQuizAttempt> inProgressList = attemptRepository
                 .findByStudentIdAndQuizIdAndStatusOrderByIdDesc(
                         student.getId(), quizId, GrammarQuizAttemptStatus.IN_PROGRESS);
@@ -225,9 +222,18 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
     @Override
     @Transactional(readOnly = true)
     public List<GrammarQuizSummaryResponse> getQuizzesForEdit(Long teacherId, Long topicId) {
-        GrammarTopic topic = findTopicAndCheckOwner(teacherId, topicId);
-        return quizRepository.findByTopicIdOrderByDisplayOrderAsc(topic.getId())
-                .stream()
+        GrammarTopic topic = findTopicAndCheckAccess(teacherId, topicId);
+        boolean isOwner = topic.getCreatedBy().getId().equals(teacherId);
+
+        List<GrammarQuiz> quizzes;
+        if (isOwner) {
+            quizzes = quizRepository.findByTopicIdOrderByDisplayOrderAsc(topic.getId());
+        } else {
+            quizzes = quizRepository.findByTopicIdAndStatusOrderByDisplayOrderAsc(
+                    topic.getId(), GrammarStatus.PUBLISHED);
+        }
+
+        return quizzes.stream()
                 .map(q -> toSummary(q, null))
                 .collect(Collectors.toList());
     }
@@ -335,6 +341,16 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
     // =====================================================
     // HELPERS
     // =====================================================
+
+    private GrammarTopic findTopicAndCheckAccess(Long teacherId, Long topicId) {
+        GrammarTopic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
+        boolean isOwner = topic.getCreatedBy().getId().equals(teacherId);
+        if (!isOwner && topic.getStatus() != GrammarStatus.PUBLISHED) {
+            throw new BusinessException("Bạn không có quyền xem chủ điểm này");
+        }
+        return topic;
+    }
 
     private GrammarTopic findTopicAndCheckOwner(Long teacherId, Long topicId) {
         GrammarTopic topic = topicRepository.findById(topicId)
@@ -459,7 +475,6 @@ public class GrammarQuizServiceImpl implements GrammarQuizService {
                         .totalQuestions(totalQuestions);
 
         if (student != null) {
-            // ✅ List + isEmpty
             List<GrammarQuizAttempt> inProgressList = attemptRepository
                     .findByStudentIdAndQuizIdAndStatusOrderByIdDesc(
                             student.getId(), q.getId(), GrammarQuizAttemptStatus.IN_PROGRESS);

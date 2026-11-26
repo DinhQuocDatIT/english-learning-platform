@@ -7,23 +7,22 @@ import {
   faTrash,
   faFileAlt,
   faClipboardList,
-  faLock,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
-import { getStatusLabel } from "../../../../../constants/grammarConstants";
 import Loading from "../../../../../components/common/Loading/Loading";
 import styles from "./TeacherGrammarQuiz.module.css";
 
 function TeacherGrammarQuiz() {
   const navigate = useNavigate();
-  const { topicId, topic } = useOutletContext();
+  const { topicId, topic, isOwner: isOwnerFromCtx } = useOutletContext();
 
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const isOwner = isOwnerFromCtx === true || topic?.isOwner === true;
   const canEdit =
-    !topic || topic.status === "DRAFT" || topic.status === "REJECTED";
+    isOwner && (topic?.status === "DRAFT" || topic?.status === "REJECTED");
 
   useEffect(() => {
     if (topicId) fetchData();
@@ -53,28 +52,27 @@ function TeacherGrammarQuiz() {
     }
   };
 
-  // ===== LOADING =====
   if (loading) {
     return <Loading fullScreen={false} text="Đang tải danh sách đề..." />;
   }
 
   return (
     <>
-      <div className={styles.actionRow}>
-        <button
-          className={styles.addBtn}
-          onClick={() =>
-            navigate(
-              `/dashboard/teacher/grammar/topics/${topicId}/quizzes/create`,
-            )
-          }
-          disabled={!canEdit}
-          title={!canEdit ? "Chủ điểm không ở trạng thái cho phép sửa" : ""}
-        >
-          <FontAwesomeIcon icon={faPlus} />
-          <span>Thêm đề</span>
-        </button>
-      </div>
+      {canEdit && (
+        <div className={styles.actionRow}>
+          <button
+            className={styles.addBtn}
+            onClick={() =>
+              navigate(
+                `/dashboard/teacher/grammar/topics/${topicId}/quizzes/create`,
+              )
+            }
+          >
+            <FontAwesomeIcon icon={faPlus} />
+            <span>Thêm đề</span>
+          </button>
+        </div>
+      )}
 
       {quizzes.length === 0 ? (
         <div className={styles.emptyBox}>

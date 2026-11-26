@@ -1,6 +1,7 @@
 package com.englishlearning.backend.controller.grammar;
 
 import com.englishlearning.backend.dto.grammar.request.GrammarEditRequestReviewRequest;
+import com.englishlearning.backend.dto.grammar.request.GrammarReassignRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarRoadmapRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarTopicRejectRequest;
 import com.englishlearning.backend.dto.grammar.response.*;
@@ -28,6 +29,7 @@ public class GrammarAdminController {
     private final GrammarExampleService exampleService;
     private final GrammarTipService tipService;
     private final GrammarQuizService quizService;
+
     // =====================================================
     // ROADMAP
     // =====================================================
@@ -214,8 +216,8 @@ public class GrammarAdminController {
                 200, "Lấy danh sách mẹo thành công", response));
     }
     // =====================================================
-// QUIZ (Admin xem để duyệt)
-// =====================================================
+    // QUIZ (Admin xem để duyệt)
+    // =====================================================
 
     @GetMapping("/topics/{topicId}/quizzes")
     public ResponseEntity<ApiResponse<List<GrammarQuizSummaryResponse>>> getQuizzesForAdmin(
@@ -232,5 +234,34 @@ public class GrammarAdminController {
         GrammarQuizResponse response = quizService.getQuizForAdmin(quizId);
         return ResponseEntity.ok(new ApiResponse<>(
                 200, "Lấy chi tiết đề thành công", response));
+    }
+
+    // =====================================================
+    // REASSIGN
+    // =====================================================
+
+    @GetMapping("/teachers-with-topics")
+    public ResponseEntity<ApiResponse<List<TeacherSummaryResponse>>> getTeachersWithTopics() {
+        List<TeacherSummaryResponse> response = grammarAdminService.getTeachersWithTopics();
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy danh sách giáo viên thành công", response));
+    }
+
+    @GetMapping("/teachers/{teacherId}/topics")
+    public ResponseEntity<ApiResponse<List<GrammarTopicResponse>>> getTopicsByTeacher(
+            @PathVariable Long teacherId) {
+        List<GrammarTopicResponse> response = grammarAdminService.getTopicsByTeacher(teacherId);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Lấy danh sách chủ điểm thành công", response));
+    }
+
+    @PostMapping("/topics/reassign")
+    public ResponseEntity<ApiResponse<Void>> reassignTopics(
+            @RequestBody GrammarReassignRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long adminId = userDetails.getUser().getId();
+        grammarAdminService.reassignTopics(adminId, request);
+        return ResponseEntity.ok(new ApiResponse<>(
+                200, "Chuyển giao chủ điểm thành công", null));
     }
 }

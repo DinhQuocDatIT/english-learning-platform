@@ -69,4 +69,5 @@ public interface GrammarTopicRepository extends JpaRepository<GrammarTopic, Long
     // =====================================================
     boolean existsBySlug(String slug);
     boolean existsBySlugAndIdNot(String slug, Long id);
+    List<GrammarTopic> findByCreatedByIdOrderByDisplayOrderAsc(Long teacherId);
 }

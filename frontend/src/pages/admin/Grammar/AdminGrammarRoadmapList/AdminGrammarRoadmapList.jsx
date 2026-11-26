@@ -10,9 +10,11 @@ import {
   faLayerGroup,
   faEye,
   faClock,
+  faExchangeAlt, // ✅ Thêm icon chuyển giao
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
+import ReassignModal from "../../../../components/ReassignModal/ReassignModal";
 import styles from "./AdminGrammarRoadmapList.module.css";
 
 function AdminGrammarRoadmapList() {
@@ -20,6 +22,7 @@ function AdminGrammarRoadmapList() {
 
   const [roadmaps, setRoadmaps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isReassignModalOpen, setIsReassignModalOpen] = useState(false); // ✅ State mở modal
 
   useEffect(() => {
     fetchRoadmaps();
@@ -70,6 +73,15 @@ function AdminGrammarRoadmapList() {
     <div className={styles.container}>
       {/* TOP BAR */}
       <div className={styles.header}>
+        {/* ✅ Thêm nút Chuyển giao */}
+        <button
+          className={styles.reassignBtn}
+          onClick={() => setIsReassignModalOpen(true)}
+        >
+          <FontAwesomeIcon icon={faExchangeAlt} />
+          <span>Chuyển giao chủ điểm</span>
+        </button>
+
         <button
           className={styles.createBtn}
           onClick={() => navigate("/dashboard/admin/grammar/roadmaps/create")}
@@ -129,7 +141,6 @@ function AdminGrammarRoadmapList() {
                   </span>
                 </div>
 
-                {/* ✅ Badge chờ duyệt — chỉ hiện khi có */}
                 {r.pendingTopics > 0 && (
                   <div className={`${styles.statItem} ${styles.pendingStat}`}>
                     <FontAwesomeIcon icon={faClock} />
@@ -177,6 +188,16 @@ function AdminGrammarRoadmapList() {
           ))}
         </div>
       )}
+
+      {/* ✅ Modal Chuyển giao */}
+      <ReassignModal
+        isOpen={isReassignModalOpen}
+        onClose={() => setIsReassignModalOpen(false)}
+        onSuccess={() => {
+          toast.success("Đã cập nhật lại dữ liệu.");
+          fetchRoadmaps();
+        }}
+      />
     </div>
   );
 }

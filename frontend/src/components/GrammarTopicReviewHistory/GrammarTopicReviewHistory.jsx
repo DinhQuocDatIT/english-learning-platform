@@ -14,6 +14,7 @@ import {
   faPenToSquare,
   faCircleCheck,
   faCircleXmark,
+  faUserGear,
 } from "@fortawesome/free-solid-svg-icons";
 import grammarService from "../../services/grammarService";
 import Loading from "../../components/common/Loading/Loading";
@@ -68,6 +69,13 @@ const ACTION_CONFIG = {
     color: "#b91c1c",
     bg: "#fef2f2",
     border: "#fecaca",
+  },
+  REASSIGN: {
+    label: "Phân công lại",
+    icon: faUserGear,
+    color: "#7c3aed",
+    bg: "#f5f3ff",
+    border: "#ddd6fe",
   },
 };
 

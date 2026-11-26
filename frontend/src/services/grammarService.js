@@ -48,39 +48,7 @@ const GrammarService = {
   getQuizAttemptById(attemptId) {
     return axiosClient.get(`/v1/student/grammar/attempts/${attemptId}`);
   },
-  // =====================================================
-  // QUIZ — PUBLIC + STUDENT
-  // =====================================================
-  getPublishedQuizzes(topicId) {
-    return axiosClient.get(`/v1/grammar/topics/${topicId}/quizzes`);
-  },
 
-  getQuizForPlay(quizId) {
-    return axiosClient.get(`/v1/student/grammar/quizzes/${quizId}`);
-  },
-
-  startOrResumeQuizAttempt(quizId) {
-    return axiosClient.post(`/v1/student/grammar/quizzes/${quizId}/start`);
-  },
-
-  getQuizAttempt(quizId) {
-    return axiosClient.get(`/v1/student/grammar/quizzes/${quizId}/attempt`);
-  },
-
-  saveQuizAnswer(attemptId, questionId, answer) {
-    return axiosClient.put(`/v1/student/grammar/attempts/${attemptId}/answer`, {
-      questionId,
-      answer,
-    });
-  },
-
-  submitQuizAttempt(attemptId) {
-    return axiosClient.post(`/v1/student/grammar/attempts/${attemptId}/submit`);
-  },
-
-  getQuizAttemptById(attemptId) {
-    return axiosClient.get(`/v1/student/grammar/attempts/${attemptId}`);
-  },
   // =====================================================
   // TEACHER — ROADMAP
   // =====================================================
@@ -116,7 +84,6 @@ const GrammarService = {
     return axiosClient.post(`/v1/teacher/grammar/topics/${topicId}/submit`);
   },
 
-  // Teacher xem lịch sử duyệt topic của mình
   teacherGetTopicHistory(topicId) {
     return axiosClient.get(`/v1/teacher/grammar/topics/${topicId}/history`);
   },
@@ -148,7 +115,7 @@ const GrammarService = {
   },
 
   // =====================================================
-  // TEACHER — EDIT REQUEST (MỚI)
+  // TEACHER — EDIT REQUEST
   // =====================================================
   requestEditTopic(topicId, reason) {
     return axiosClient.post(
@@ -162,6 +129,7 @@ const GrammarService = {
       `/v1/teacher/grammar/topics/${topicId}/edit-requests`,
     );
   },
+
   // =====================================================
   // TEACHER — EXAMPLE
   // =====================================================
@@ -177,6 +145,7 @@ const GrammarService = {
   deleteExample(exampleId) {
     return axiosClient.delete(`/v1/teacher/grammar/examples/${exampleId}`);
   },
+
   // =====================================================
   // TEACHER — TIP
   // =====================================================
@@ -192,6 +161,7 @@ const GrammarService = {
   deleteTip(tipId) {
     return axiosClient.delete(`/v1/teacher/grammar/tips/${tipId}`);
   },
+
   // =====================================================
   // TEACHER — QUIZ
   // =====================================================
@@ -278,8 +248,9 @@ const GrammarService = {
   adminGetQuizDetail(quizId) {
     return axiosClient.get(`/v1/admin/grammar/quizzes/${quizId}`);
   },
+
   // =====================================================
-  // ADMIN — EDIT REQUEST (MỚI)
+  // ADMIN — EDIT REQUEST
   // =====================================================
   adminGetEditRequests(status) {
     const params = status ? { status } : {};
@@ -302,8 +273,25 @@ const GrammarService = {
       { note },
     );
   },
+
   adminRestoreTopic(topicId) {
     return axiosClient.post(`/v1/admin/grammar/topics/${topicId}/restore`);
+  },
+
+  // =====================================================
+  // ADMIN — REASSIGN (CHUYỂN GIAO)
+  // =====================================================
+  adminGetTeachersWithTopics() {
+    return axiosClient.get("/v1/admin/grammar/teachers-with-topics");
+  },
+
+  adminGetTopicsByTeacher(teacherId) {
+    return axiosClient.get(`/v1/admin/grammar/teachers/${teacherId}/topics`);
+  },
+
+  adminReassignTopics(data) {
+    // data = { topicIds: [1, 2, 3], newOwnerId: 5 }
+    return axiosClient.post("/v1/admin/grammar/topics/reassign", data);
   },
 };
 

@@ -8,6 +8,7 @@ import {
   faStar,
   faQuestionCircle,
   faHistory,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
@@ -23,7 +24,13 @@ const TABS = [
   { key: "example", path: "examples", label: "Ví dụ", icon: faStar },
   { key: "tip", path: "tips", label: "Mẹo", icon: faLightbulb },
   { key: "quiz", path: "quiz", label: "Trắc nghiệm", icon: faQuestionCircle },
-  { key: "history", path: "history", label: "Lịch sử duyệt", icon: faHistory },
+  {
+    key: "history",
+    path: "history",
+    label: "Lịch sử duyệt",
+    icon: faHistory,
+    ownerOnly: true,
+  },
 ];
 
 function TeacherGrammarTopicLayout() {
@@ -45,16 +52,20 @@ function TeacherGrammarTopicLayout() {
       setTopic(res?.data?.data || null);
     } catch (e) {
       console.error(e);
-      toast.error("Không thể tải chủ điểm.");
+      toast.error(e.response?.data?.message || "Không thể tải chủ điểm.");
       navigate(-1);
     } finally {
       setLoading(false);
     }
   };
 
+  const isOwner = topic?.isOwner === true;
+
+  const visibleTabs = TABS.filter((t) => !t.ownerOnly || isOwner);
+
   const currentPath = location.pathname.split("/").pop();
-  const activeTab = TABS.find((t) => t.path === currentPath)?.key || "theory";
-  const activeTabObj = TABS.find((t) => t.key === activeTab) || TABS[0];
+  const activeTab =
+    visibleTabs.find((t) => t.path === currentPath)?.key || "theory";
 
   const handleTabChange = (tab) => {
     navigate(`/dashboard/teacher/grammar/topics/${topicId}/${tab.path}`, {
@@ -66,7 +77,6 @@ function TeacherGrammarTopicLayout() {
     navigate(-1);
   };
 
-  // ===== LOADING =====
   if (loading) {
     return <Loading size="large" text="Đang tải chủ điểm..." />;
   }
@@ -80,13 +90,18 @@ function TeacherGrammarTopicLayout() {
         <span>Quay lại</span>
       </button>
 
+      {/* Chỉ hiện banner nhẹ khi là topic người khác */}
+      {/* {!isOwner && (
+        <div className={styles.viewOnlyBanner}>
+          <FontAwesomeIcon icon={faEye} />
+          <span>Bạn đang xem chủ điểm công khai ở chế độ chỉ đọc.</span>
+        </div>
+      )} */}
+
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1>{topic?.name}</h1>
           <div className={styles.metaRow}>
-            {/* {topic?.slug && (
-              <code className={styles.topicSlug}>/{topic.slug}</code>
-            )} */}
             {topic?.status && (
               <span
                 className={styles.statusBadge}
@@ -104,7 +119,7 @@ function TeacherGrammarTopicLayout() {
       </div>
 
       <div className={styles.tabBar}>
-        {TABS.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab.key}
             className={`${styles.tabBtn} ${
@@ -120,7 +135,14 @@ function TeacherGrammarTopicLayout() {
 
       <div className={styles.page}>
         <div className={styles.pageContent}>
-          <Outlet context={{ topic, topicId, onRefresh: fetchTopic }} />
+          <Outlet
+            context={{
+              topic,
+              topicId,
+              isOwner,
+              onRefresh: fetchTopic,
+            }}
+          />
         </div>
       </div>
     </div>

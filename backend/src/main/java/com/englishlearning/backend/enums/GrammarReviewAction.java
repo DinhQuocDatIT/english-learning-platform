@@ -9,5 +9,6 @@ public enum GrammarReviewAction {
     RESTORE,         // Admin bỏ ẩn topic
     REQUEST_EDIT,    // Teacher gửi yêu cầu chỉnh sửa
     APPROVE_EDIT,    // Admin đồng ý cho sửa
-    REJECT_EDIT      // Admin từ chối yêu cầu sửa
+    REJECT_EDIT,      // Admin từ chối yêu cầu sửa
+    REASSIGN
 }

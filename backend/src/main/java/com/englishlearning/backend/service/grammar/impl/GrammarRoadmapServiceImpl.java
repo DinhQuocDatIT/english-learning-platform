@@ -58,6 +58,10 @@ public class GrammarRoadmapServiceImpl implements GrammarRoadmapService {
                         .description(t.getDescription())
                         .displayOrder(t.getDisplayOrder())
                         .status(t.getStatus().name())
+                        .createdById(t.getCreatedBy() != null ? t.getCreatedBy().getId() : null)
+                        .createdByName(t.getCreatedBy() != null ? t.getCreatedBy().getFullName() : null)
+                        .isOwner(false)
+                        .canRequestEdit(null)
                         .build())
                 .collect(Collectors.toList());
 

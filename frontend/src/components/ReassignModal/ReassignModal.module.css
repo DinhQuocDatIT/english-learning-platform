@@ -1,0 +1,414 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6); /* Tối hơn xíu cho nổi bật form */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px); /* Thêm hiệu ứng mờ nền */
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 1200px; /* ✅ Tăng từ 800px lên 1050px */
+  max-width: 95vw;
+  height: 85vh; /* ✅ Cố định chiều cao để form to ra */
+  max-height: 850px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 16px 16px 0 0;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 20px; /* ✅ Tăng font */
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.closeBtn {
+  background: #e2e8f0;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
+}
+.closeBtn:hover {
+  background: #cbd5e1;
+  color: #dc2626;
+}
+
+.body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1; /* ✅ Để body chiếm hết phần còn lại */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= BƯỚC 1: CHỌN TEACHER + TOPIC ================= */
+.selectStep {
+  display: flex;
+  gap: 24px;
+  flex: 1; /* ✅ Tự động lấp đầy chiều cao */
+  min-height: 0; /* Quan trọng để scroll hoạt động bên trong */
+}
+
+/* Cột trái: Danh sách Teacher */
+.teacherList {
+  flex: 0 0 340px; /* ✅ Rộng hơn xíu */
+  border-right: 1px solid #e2e8f0;
+  padding-right: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.teacherList h3 {
+  font-size: 16px; /* ✅ Tăng font */
+  margin: 0 0 12px 0;
+  color: #475569;
+  font-weight: 600;
+}
+
+.teacherItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px; /* ✅ To hơn */
+  border-radius: 10px;
+  cursor: pointer;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+  font-size: 15px; /* ✅ Tăng font */
+  color: #334155;
+}
+
+.teacherItem:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.activeTeacher {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.activeTeacher span:first-child {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.count {
+  font-size: 13px;
+  background: #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Cột phải: Danh sách Topic */
+.topicList {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topicHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.topicHeader h3 {
+  font-size: 16px; /* ✅ Tăng font */
+  margin: 0;
+  color: #1e293b;
+}
+
+.selectAllBtn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #0284c7;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.selectAllBtn:hover {
+  background: #e0f2fe;
+  border-color: #7dd3fc;
+}
+
+/* Khung cuộn chứa các nhóm Roadmap */
+.topicScroll {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+/* ================= ROADMAP GROUP ================= */
+.roadmapGroup {
+  margin-bottom: 20px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.roadmapGroupTitle {
+  background: #f1f5f9;
+  padding: 12px 16px;
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 15px; /* ✅ Tăng font */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.roadmapGroupTitle svg {
+  color: #0ea792;
+  font-size: 16px;
+}
+
+.topicItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px; /* ✅ To hơn */
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  font-size: 15px; /* ✅ Tăng font */
+  color: #334155;
+  transition: background 0.2s;
+}
+
+.topicItem:last-child {
+  border-bottom: none;
+}
+
+.topicItem:hover {
+  background: #f8fafc;
+}
+
+.iconChecked {
+  color: #0ea792;
+  font-size: 20px; /* ✅ Icon to hơn */
+}
+
+.iconUncheck {
+  color: #cbd5e1;
+  font-size: 20px;
+}
+
+.topicId {
+  color: #64748b;
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: 600;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.status {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: #64748b;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #94a3b8;
+  font-size: 16px;
+  font-style: italic;
+}
+
+/* ================= FOOTER ACTIONS ================= */
+.footerActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cancelBtn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 12px 24px; /* ✅ Nút to hơn */
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cancelBtn:hover {
+  background: #e2e8f0;
+}
+
+.submitBtn {
+  background: #0ea792;
+  color: #fff;
+  border: none;
+  padding: 12px 28px; /* ✅ Nút to hơn */
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(14, 167, 146, 0.3);
+}
+.submitBtn:hover:not(:disabled) {
+  background: #0c8a78;
+  transform: translateY(-1px);
+}
+.submitBtn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ================= BƯỚC 2: XÁC NHẬN CHUYỂN GIAO ================= */
+.assignStep {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.summaryBox {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.summaryBox h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #1e293b;
+}
+
+.selectedList {
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0 0 16px 0;
+  padding-left: 20px;
+  font-size: 15px;
+  color: #334155;
+}
+.selectedList li {
+  margin-bottom: 8px;
+}
+
+.roadmapTag {
+  font-size: 13px;
+  color: #64748b;
+  margin-left: 8px;
+  font-style: italic;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ownerInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1e293b;
+  background: #e2e8f0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.targetBox {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.targetBox h3 {
+  font-size: 16px;
+  margin: 0;
+  color: #1e293b;
+}
+
+.select {
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fff;
+}
+.select:focus {
+  border-color: #0ea792;
+  box-shadow: 0 0 0 3px rgba(14, 167, 146, 0.1);
+}
+
+.targetInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #0ea792;
+  background: #ecfdf5;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  border: 1px solid #a7f3d0;
+}

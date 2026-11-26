@@ -17,5 +17,11 @@ public class GrammarTopicDetailResponse {
     private String description;
     private Integer displayOrder;
     private String status;
+
+    // ===== THÔNG TIN OWNER =====
+    private Long createdById;
+    private String createdByName;
+    private Boolean isOwner;
+
     private List<GrammarTheoryResponse> theories = new ArrayList<>();
 }

@@ -42,8 +42,19 @@ public class GrammarExampleServiceImpl implements GrammarExampleService {
     @Override
     @Transactional(readOnly = true)
     public List<GrammarExampleResponse> getExamplesForEdit(Long teacherId, Long topicId) {
-        GrammarTopic topic = findTopicAndCheckOwner(teacherId, topicId);
-        return exampleRepository.findByTopicIdOrderByDisplayOrderAsc(topic.getId())
+        GrammarTopic topic = findTopicAndCheckAccess(teacherId, topicId);
+
+        boolean isOwner = topic.getCreatedBy().getId().equals(teacherId);
+
+        if (isOwner) {
+            return exampleRepository.findByTopicIdOrderByDisplayOrderAsc(topic.getId())
+                    .stream()
+                    .map(this::toResponse)
+                    .collect(Collectors.toList());
+        }
+
+        return exampleRepository.findByTopicIdAndStatusOrderByDisplayOrderAsc(
+                        topic.getId(), GrammarStatus.PUBLISHED)
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -122,6 +133,17 @@ public class GrammarExampleServiceImpl implements GrammarExampleService {
     }
 
     // ===== HELPERS =====
+
+    private GrammarTopic findTopicAndCheckAccess(Long teacherId, Long topicId) {
+        GrammarTopic topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));
+        boolean isOwner = topic.getCreatedBy().getId().equals(teacherId);
+        if (!isOwner && topic.getStatus() != GrammarStatus.PUBLISHED) {
+            throw new BusinessException("Bạn không có quyền xem chủ điểm này");
+        }
+        return topic;
+    }
+
     private GrammarTopic findTopicAndCheckOwner(Long teacherId, Long topicId) {
         GrammarTopic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ điểm"));

@@ -8,9 +8,9 @@ import {
   faTrash,
   faPaperPlane,
   faBookOpen,
-  faLayerGroup,
   faPen,
   faClock,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../services/grammarService";
@@ -34,8 +34,6 @@ function TeacherGrammarTopicList() {
   const [submittingRequest, setSubmittingRequest] = useState(false);
   const [selectedTopicForEdit, setSelectedTopicForEdit] = useState(null);
 
-  const [pendingRequestTopics, setPendingRequestTopics] = useState({});
-
   useEffect(() => {
     fetchData();
   }, [roadmapId]);
@@ -48,39 +46,14 @@ function TeacherGrammarTopicList() {
         grammarService.getMyTopics(roadmapId),
       ]);
 
-      const roadmapData = roadmapRes?.data?.data || null;
-      const topicsData = topicsRes?.data?.data || [];
-
-      setRoadmap(roadmapData);
-      setTopics(topicsData);
-
-      await checkPendingRequests(topicsData);
+      setRoadmap(roadmapRes?.data?.data || null);
+      setTopics(topicsRes?.data?.data || []);
     } catch (e) {
       console.error(e);
       toast.error("Không thể tải danh sách chủ điểm.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const checkPendingRequests = async (topicsList) => {
-    const publishedTopics = topicsList.filter((t) => t.status === "PUBLISHED");
-    if (publishedTopics.length === 0) return;
-
-    const results = {};
-    await Promise.all(
-      publishedTopics.map(async (t) => {
-        try {
-          const res = await grammarService.getMyEditRequests(t.id);
-          const requests = res?.data?.data || [];
-          const hasPending = requests.some((r) => r.status === "PENDING");
-          if (hasPending) results[t.id] = true;
-        } catch (e) {
-          // bỏ qua lỗi từng topic
-        }
-      }),
-    );
-    setPendingRequestTopics(results);
   };
 
   const handleDelete = async (topic) => {
@@ -119,10 +92,6 @@ function TeacherGrammarTopicList() {
       window.dispatchEvent(new Event("refresh-edit-requests"));
 
       setEditModalOpen(false);
-      setPendingRequestTopics((prev) => ({
-        ...prev,
-        [selectedTopicForEdit.id]: true,
-      }));
       setSelectedTopicForEdit(null);
       fetchData();
     } catch (e) {
@@ -134,9 +103,15 @@ function TeacherGrammarTopicList() {
 
   const renderTopic = (topic, index) => {
     const statusColor = getStatusColor(topic.status);
-    const canEdit = topic.status === "DRAFT" || topic.status === "REJECTED";
+
+    const isOwner = topic.isOwner === true;
+    const canEdit =
+      isOwner && (topic.status === "DRAFT" || topic.status === "REJECTED");
     const isPublished = topic.status === "PUBLISHED";
-    const hasPendingRequest = pendingRequestTopics[topic.id];
+    const canRequestEdit =
+      isOwner && isPublished && topic.canRequestEdit === true;
+    const hasPendingRequest =
+      isOwner && isPublished && topic.canRequestEdit === false;
 
     const orderNumber =
       topic.displayOrder != null ? topic.displayOrder : index + 1;
@@ -144,7 +119,7 @@ function TeacherGrammarTopicList() {
     return (
       <div
         key={topic.id}
-        className={styles.row}
+        className={`${styles.row} ${isOwner ? styles.rowOwned : ""}`}
         style={{ "--topic-color": roadmap?.color || "#0ea792" }}
       >
         <span className={styles.orderBadge}>{orderNumber}</span>
@@ -167,7 +142,15 @@ function TeacherGrammarTopicList() {
               {getStatusLabel(topic.status)}
             </span>
 
-            {isPublished && hasPendingRequest && (
+            {/* ✅ Chỉ hiện badge khi là topic của mình */}
+            {isOwner && (
+              <span className={styles.myTopicBadge}>
+                <FontAwesomeIcon icon={faUser} />
+                Của tôi
+              </span>
+            )}
+
+            {hasPendingRequest && (
               <span className={styles.pendingRequestBadge}>
                 <FontAwesomeIcon icon={faClock} />
                 Chờ duyệt yêu cầu
@@ -220,7 +203,7 @@ function TeacherGrammarTopicList() {
             </>
           )}
 
-          {isPublished && !hasPendingRequest && (
+          {canRequestEdit && (
             <button
               className={`${styles.actionBtn} ${styles.requestEditBtn}`}
               onClick={() => handleOpenEditRequest(topic)}
@@ -235,7 +218,6 @@ function TeacherGrammarTopicList() {
     );
   };
 
-  // ===== LOADING =====
   if (loading) {
     return <Loading size="large" text="Đang tải danh sách chủ điểm..." />;
   }
@@ -254,15 +236,7 @@ function TeacherGrammarTopicList() {
         className={styles.header}
         style={{ "--topic-color": roadmap?.color || "#0ea792" }}
       >
-        <div className={styles.headerLeft}>
-          {/* <span className={styles.levelLabel}>
-            <FontAwesomeIcon icon={faLayerGroup} />
-            {roadmap?.levelLabel || "Lộ trình"}
-          </span>
-          <h1 style={{ color: roadmap?.color || "#0ea792" }}>
-            {roadmap?.name}
-          </h1> */}
-        </div>
+        <div className={styles.headerLeft} />
         <button
           className={styles.createBtn}
           onClick={() =>

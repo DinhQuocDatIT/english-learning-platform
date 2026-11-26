@@ -1,9 +1,11 @@
 package com.englishlearning.backend.service.grammar;
 
+import com.englishlearning.backend.dto.grammar.request.GrammarReassignRequest;
 import com.englishlearning.backend.dto.grammar.request.GrammarRoadmapRequest;
 import com.englishlearning.backend.dto.grammar.response.GrammarRoadmapResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicResponse;
 import com.englishlearning.backend.dto.grammar.response.GrammarTopicReviewResponse;
+import com.englishlearning.backend.dto.grammar.response.TeacherSummaryResponse;
 
 import java.util.List;
 
@@ -25,4 +27,7 @@ public interface GrammarAdminService {
     GrammarTopicResponse restoreTopic(Long adminId, Long topicId);
     // Review history
     List<GrammarTopicReviewResponse> getTopicHistory(Long topicId);
+    List<TeacherSummaryResponse> getTeachersWithTopics();
+    List<GrammarTopicResponse> getTopicsByTeacher(Long teacherId);
+    void reassignTopics(Long adminId, GrammarReassignRequest request);
 }

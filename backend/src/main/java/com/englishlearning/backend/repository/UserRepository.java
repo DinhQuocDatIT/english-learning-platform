@@ -56,4 +56,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
       AND u.deletedAt IS NULL
 """)
         long countByRoleName(@Param("roleName") String roleName);
+
+        @Query("SELECT u, COUNT(t) FROM User u JOIN GrammarTopic t ON t.createdBy.id = u.id GROUP BY u ORDER BY COUNT(t) DESC")
+        List<Object[]> findTeachersWithTopicCount();
 }

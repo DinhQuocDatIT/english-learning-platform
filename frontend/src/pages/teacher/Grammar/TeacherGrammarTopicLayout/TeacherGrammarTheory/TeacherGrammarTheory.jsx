@@ -7,7 +7,6 @@ import {
   faSave,
   faTrash,
   faXmark,
-  faLock,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import grammarService from "../../../../../services/grammarService";
@@ -17,6 +16,7 @@ import styles from "./TeacherGrammarTheory.module.css";
 
 function TextView({ content }) {
   if (!content) return null;
+
   const lines = content
     .split("\n")
     .map((l) => l.trim())
@@ -47,21 +47,25 @@ function InlineSection({
   onCancelNew,
   topicId,
   readOnly,
+  initialOrder = 1,
 }) {
   const [form, setForm] = useState({
     title: theory?.title || "",
     sectionType: theory?.sectionType || "TEXT",
     content: theory?.content || "",
-    displayOrder: theory?.displayOrder || 0,
+    displayOrder: theory?.displayOrder ?? initialOrder,
   });
 
   const [tableHeaders, setTableHeaders] = useState(
     theory?.metadata?.headers || ["Dạng", "Cấu trúc", "Ví dụ"],
   );
+
   const [tableRows, setTableRows] = useState(
     theory?.metadata?.rows || [["", "", ""]],
   );
+
   const [listItems, setListItems] = useState(theory?.metadata?.items || [""]);
+
   const [noteColor, setNoteColor] = useState(
     theory?.metadata?.color || "yellow",
   );
@@ -76,9 +80,11 @@ function InlineSection({
   const isFormEmpty = () => {
     const hasTitle = form.title.trim().length > 0;
     const hasContent = form.content.trim().length > 0;
+
     const hasTableData = tableRows.some((r) =>
       r.some((c) => c.trim().length > 0),
     );
+
     const hasListData = listItems.some((i) => i.trim().length > 0);
 
     return !hasTitle && !hasContent && !hasTableData && !hasListData;
@@ -88,22 +94,29 @@ function InlineSection({
     if (!isEditing) return;
 
     if (isFormEmpty()) {
-      if (onRemovePending) onRemovePending(theory?.id || "new");
+      if (onRemovePending) {
+        onRemovePending(theory?.id || "new");
+      }
       return;
     }
 
     if (!isDirty) return;
 
     let metadata = null;
+
     if (form.sectionType === "TABLE") {
       metadata = {
         headers: tableHeaders,
         rows: tableRows.filter((r) => r.some((c) => c.trim())),
       };
     } else if (form.sectionType === "LIST") {
-      metadata = { items: listItems.filter((i) => i.trim()) };
+      metadata = {
+        items: listItems.filter((i) => i.trim()),
+      };
     } else if (form.sectionType === "NOTE") {
-      metadata = { color: noteColor };
+      metadata = {
+        color: noteColor,
+      };
     }
 
     const payload = {
@@ -116,13 +129,13 @@ function InlineSection({
           ? form.content
           : null,
       metadata,
-      displayOrder: form.displayOrder || 0,
+      displayOrder: form.displayOrder ?? 1,
       isNew: !!isNew,
     };
+
     onChange(payload);
   }, [form, tableHeaders, tableRows, listItems, noteColor, isDirty]);
 
-  // ===== TABLE ACTIONS =====
   const addRow = () => {
     const emptyRow = new Array(tableHeaders.length).fill("");
     setTableRows([...tableRows, emptyRow]);
@@ -134,12 +147,13 @@ function InlineSection({
       toast.warning("Phải có ít nhất 1 dòng.");
       return;
     }
+
     setTableRows(tableRows.filter((_, idx) => idx !== i));
     setIsDirty(true);
   };
 
   const updateCell = (r, c, v) => {
-    const copy = [...tableRows];
+    const copy = tableRows.map((row) => [...row]);
     copy[r][c] = v;
     setTableRows(copy);
     setIsDirty(true);
@@ -152,7 +166,6 @@ function InlineSection({
     setIsDirty(true);
   };
 
-  // ===== TÍNH NĂNG THÊM/XÓA CỘT =====
   const addColumn = () => {
     setTableHeaders([...tableHeaders, `Cột ${tableHeaders.length + 1}`]);
     setTableRows(tableRows.map((row) => [...row, ""]));
@@ -164,12 +177,17 @@ function InlineSection({
       toast.warning("Bảng phải có ít nhất 2 cột.");
       return;
     }
-    if (!window.confirm(`Xóa cột "${tableHeaders[indexToRemove]}"?`)) return;
+
+    if (!window.confirm(`Xóa cột "${tableHeaders[indexToRemove]}"?`)) {
+      return;
+    }
 
     setTableHeaders(tableHeaders.filter((_, idx) => idx !== indexToRemove));
+
     setTableRows(
       tableRows.map((row) => row.filter((_, idx) => idx !== indexToRemove)),
     );
+
     setIsDirty(true);
   };
 
@@ -177,10 +195,12 @@ function InlineSection({
     setListItems([...listItems, ""]);
     setIsDirty(true);
   };
+
   const removeListItem = (i) => {
     setListItems(listItems.filter((_, idx) => idx !== i));
     setIsDirty(true);
   };
+
   const updateListItem = (i, v) => {
     const copy = [...listItems];
     copy[i] = v;
@@ -193,7 +213,6 @@ function InlineSection({
     setIsDirty(true);
   };
 
-  // ===== VIEW MODE =====
   if (!isEditing) {
     return (
       <div
@@ -205,6 +224,7 @@ function InlineSection({
       >
         <div className={styles.sectionTitleRow}>
           <h3 className={styles.sectionTitle}>{theory.title}</h3>
+
           {!readOnly && (
             <div className={styles.sectionActions}>
               <button
@@ -225,6 +245,7 @@ function InlineSection({
           {theory.sectionType === "TEXT" && (
             <TextView content={theory.content} />
           )}
+
           {theory.sectionType === "TABLE" && theory.metadata?.rows && (
             <table className={styles.viewTable}>
               <thead>
@@ -234,6 +255,7 @@ function InlineSection({
                   ))}
                 </tr>
               </thead>
+
               <tbody>
                 {theory.metadata.rows.map((row, ri) => (
                   <tr key={ri}>
@@ -245,6 +267,7 @@ function InlineSection({
               </tbody>
             </table>
           )}
+
           {theory.sectionType === "LIST" && theory.metadata?.items && (
             <ul className={styles.viewList}>
               {theory.metadata.items.map((item, i) => (
@@ -252,6 +275,7 @@ function InlineSection({
               ))}
             </ul>
           )}
+
           {theory.sectionType === "NOTE" && (
             <div
               className={`${styles.viewNote} ${
@@ -266,7 +290,6 @@ function InlineSection({
     );
   }
 
-  // ===== EDIT MODE =====
   return (
     <div className={`${styles.sectionBlock} ${styles.sectionEditing}`}>
       <div className={styles.sectionTitleRow}>
@@ -274,14 +297,25 @@ function InlineSection({
           className={styles.titleInput}
           type="text"
           value={form.title}
-          onChange={(e) => updateForm({ ...form, title: e.target.value })}
+          onChange={(e) =>
+            updateForm({
+              ...form,
+              title: e.target.value,
+            })
+          }
           placeholder="Tiêu đề section..."
           autoFocus
         />
+
         <select
           className={styles.typeSelect}
           value={form.sectionType}
-          onChange={(e) => updateForm({ ...form, sectionType: e.target.value })}
+          onChange={(e) =>
+            updateForm({
+              ...form,
+              sectionType: e.target.value,
+            })
+          }
         >
           {SECTION_TYPE_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -289,16 +323,21 @@ function InlineSection({
             </option>
           ))}
         </select>
+
         <input
           className={styles.orderInput}
           type="number"
           value={form.displayOrder}
           onChange={(e) =>
-            updateForm({ ...form, displayOrder: Number(e.target.value) })
+            updateForm({
+              ...form,
+              displayOrder: Number(e.target.value),
+            })
           }
           min={0}
           title="Thứ tự"
         />
+
         <div className={styles.sectionActions}>
           <button
             className={styles.iconBtn}
@@ -317,9 +356,15 @@ function InlineSection({
               className={styles.contentTextarea}
               rows={6}
               value={form.content}
-              onChange={(e) => updateForm({ ...form, content: e.target.value })}
+              onChange={(e) =>
+                updateForm({
+                  ...form,
+                  content: e.target.value,
+                })
+              }
               placeholder="Nhập nội dung..."
             />
+
             <p className={styles.hintText}>
               Nếu bạn muốn có dấu chấm đầu dòng •, hãy nhập mỗi ý trên{" "}
               <strong>1 dòng riêng biệt</strong> (Enter để xuống dòng).
@@ -340,6 +385,7 @@ function InlineSection({
                           onChange={(e) => updateHeader(i, e.target.value)}
                           placeholder={`Cột ${i + 1}`}
                         />
+
                         {tableHeaders.length > 2 && (
                           <button
                             type="button"
@@ -353,10 +399,11 @@ function InlineSection({
                       </div>
                     </th>
                   ))}
-                  {/* Cột ảo để căn chỉnh nút xóa dòng */}
+
                   <th style={{ width: 40 }}></th>
                 </tr>
               </thead>
+
               <tbody>
                 {tableRows.map((row, ri) => (
                   <tr key={ri}>
@@ -368,7 +415,13 @@ function InlineSection({
                         />
                       </td>
                     ))}
-                    <td style={{ width: 40, textAlign: "center" }}>
+
+                    <td
+                      style={{
+                        width: 40,
+                        textAlign: "center",
+                      }}
+                    >
                       <button
                         type="button"
                         className={styles.rowDeleteBtn}
@@ -392,6 +445,7 @@ function InlineSection({
                 <FontAwesomeIcon icon={faPlus} />
                 <span>Thêm dòng</span>
               </button>
+
               <button
                 type="button"
                 className={styles.addRowBtn}
@@ -409,11 +463,13 @@ function InlineSection({
             {listItems.map((item, i) => (
               <div key={i} className={styles.listRow}>
                 <span className={styles.listBullet}>•</span>
+
                 <input
                   value={item}
                   onChange={(e) => updateListItem(i, e.target.value)}
                   placeholder="Nhập nội dung..."
                 />
+
                 <button
                   type="button"
                   className={styles.rowDeleteBtn}
@@ -423,6 +479,7 @@ function InlineSection({
                 </button>
               </div>
             ))}
+
             <button
               type="button"
               className={styles.addRowBtn}
@@ -450,11 +507,17 @@ function InlineSection({
                 </button>
               ))}
             </div>
+
             <textarea
               className={styles.contentTextarea}
               rows={3}
               value={form.content}
-              onChange={(e) => updateForm({ ...form, content: e.target.value })}
+              onChange={(e) =>
+                updateForm({
+                  ...form,
+                  content: e.target.value,
+                })
+              }
               placeholder="Nhập ghi chú..."
             />
           </>
@@ -465,7 +528,7 @@ function InlineSection({
 }
 
 function TeacherGrammarTheory() {
-  const { topicId, topic } = useOutletContext();
+  const { topicId, topic, isOwner: isOwnerFromCtx } = useOutletContext();
 
   const [theories, setTheories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -474,8 +537,11 @@ function TeacherGrammarTheory() {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [pendingChanges, setPendingChanges] = useState({});
 
+  const [nextOrder, setNextOrder] = useState(1);
+
+  const isOwner = isOwnerFromCtx === true || topic?.isOwner === true;
   const canEdit =
-    !topic || topic.status === "DRAFT" || topic.status === "REJECTED";
+    isOwner && (topic?.status === "DRAFT" || topic?.status === "REJECTED");
 
   useEffect(() => {
     if (topicId) fetchData();
@@ -484,9 +550,20 @@ function TeacherGrammarTheory() {
   const fetchData = async () => {
     try {
       setLoading(true);
+
       const res = await grammarService.getTheories(topicId);
-      setTheories(res?.data?.data || []);
+
+      const data = res?.data?.data || [];
+
+      setTheories(data);
       setPendingChanges({});
+
+      const maxOrder =
+        data.length > 0
+          ? Math.max(...data.map((th) => Number(th.displayOrder) || 0))
+          : 0;
+
+      setNextOrder(maxOrder + 1);
     } catch (e) {
       console.error(e);
       toast.error("Không thể tải dữ liệu.");
@@ -497,28 +574,40 @@ function TeacherGrammarTheory() {
 
   const handleChange = (payload) => {
     const key = payload.id || "new";
-    setPendingChanges((prev) => ({ ...prev, [key]: payload }));
+
+    setPendingChanges((prev) => ({
+      ...prev,
+      [key]: payload,
+    }));
   };
 
   const handleRemovePending = (key) => {
     setPendingChanges((prev) => {
       if (!prev[key]) return prev;
+
       const copy = { ...prev };
       delete copy[key];
+
       return copy;
     });
   };
 
   const handleDelete = async (theory) => {
-    if (!window.confirm(`Xóa section "${theory.title}"?`)) return;
+    if (!window.confirm(`Xóa section "${theory.title}"?`)) {
+      return;
+    }
+
     try {
       await grammarService.deleteTheory(theory.id);
+
       toast.success("Xóa thành công!");
+
       setPendingChanges((prev) => {
         const copy = { ...prev };
         delete copy[theory.id];
         return copy;
       });
+
       fetchData();
     } catch (e) {
       toast.error(e.response?.data?.message || "Không thể xóa.");
@@ -527,6 +616,7 @@ function TeacherGrammarTheory() {
 
   const handleSaveAll = async () => {
     const changes = Object.values(pendingChanges);
+
     if (changes.length === 0) {
       toast.info("Không có thay đổi nào để lưu.");
       return;
@@ -534,6 +624,7 @@ function TeacherGrammarTheory() {
 
     try {
       setSaving(true);
+
       let successCount = 0;
 
       for (const payload of changes) {
@@ -556,12 +647,15 @@ function TeacherGrammarTheory() {
             displayOrder: payload.displayOrder,
           });
         }
+
         successCount++;
       }
 
       toast.success(`Đã lưu ${successCount} thay đổi!`);
+
       setEditingId(null);
       setIsCreatingNew(false);
+
       fetchData();
     } catch (e) {
       toast.error(e.response?.data?.message || "Không thể lưu.");
@@ -573,17 +667,32 @@ function TeacherGrammarTheory() {
   const handleAddNew = () => {
     if (!canEdit) {
       toast.warning(
-        "Chỉ có thể thêm section khi chủ điểm ở trạng thái NHÁP hoặc TỪ CHỐI.",
+        !isOwner
+          ? "Bạn không có quyền chỉnh sửa chủ điểm này."
+          : "Chỉ có thể thêm section khi chủ điểm ở trạng thái NHÁP hoặc TỪ CHỐI.",
       );
       return;
     }
+
+    const existingOrders = [
+      ...theories.map((th) => Number(th.displayOrder) || 0),
+      ...Object.values(pendingChanges).map(
+        (item) => Number(item.displayOrder) || 0,
+      ),
+    ];
+
+    const maxOrder =
+      existingOrders.length > 0 ? Math.max(...existingOrders) : 0;
+
+    const order = Math.max(nextOrder, maxOrder + 1);
+
+    setNextOrder(order + 1);
     setEditingId(null);
     setIsCreatingNew(true);
   };
 
   const hasPending = Object.keys(pendingChanges).length > 0;
 
-  // ===== LOADING =====
   if (loading) {
     return <Loading fullScreen={false} text="Đang tải lý thuyết..." />;
   }
@@ -594,7 +703,7 @@ function TeacherGrammarTheory() {
         <button
           className={styles.addBtn}
           onClick={handleAddNew}
-          disabled={!canEdit}
+          disabled={!canEdit || isCreatingNew}
           title={!canEdit ? "Chủ điểm không ở trạng thái cho phép sửa" : ""}
         >
           <FontAwesomeIcon icon={faPlus} />
@@ -609,6 +718,7 @@ function TeacherGrammarTheory() {
           isEditing={editingId === th.id}
           onStartEdit={(t) => {
             if (!canEdit) return;
+
             setIsCreatingNew(false);
             setEditingId(t.id);
           }}
@@ -626,7 +736,11 @@ function TeacherGrammarTheory() {
           theory={null}
           isEditing={true}
           isNew={true}
-          onCancelNew={() => setIsCreatingNew(false)}
+          initialOrder={nextOrder - 1}
+          onCancelNew={() => {
+            setIsCreatingNew(false);
+            handleRemovePending("new");
+          }}
           onChange={handleChange}
           onRemovePending={handleRemovePending}
           topicId={topicId}
@@ -648,6 +762,7 @@ function TeacherGrammarTheory() {
           <span className={styles.saveBarText}>
             Bạn có {Object.keys(pendingChanges).length} thay đổi chưa lưu
           </span>
+
           <button
             className={styles.saveAllBtn}
             onClick={handleSaveAll}
@@ -658,6 +773,7 @@ function TeacherGrammarTheory() {
             ) : (
               <FontAwesomeIcon icon={faSave} />
             )}
+
             <span>Lưu tất cả</span>
           </button>
         </div>
