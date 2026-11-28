@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -35,6 +35,7 @@ function StudentLessonList() {
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [checkingId, setCheckingId] = useState(null);
+  const [selectedLevel, setSelectedLevel] = useState("ALL");
 
   useEffect(() => {
     fetchData();
@@ -68,9 +69,24 @@ function StudentLessonList() {
     }
   };
 
+  // Danh sách level có trong topic (unique theo levelName)
+  const levelOptions = useMemo(() => {
+    const map = new Map();
+    lessons.forEach((l) => {
+      if (l.levelName && !map.has(l.levelName)) {
+        map.set(l.levelName, l.levelColor || "#0ea792");
+      }
+    });
+    return Array.from(map, ([name, color]) => ({ name, color }));
+  }, [lessons]);
+
   const filteredLessons = lessons.filter((lesson) => {
     const keyword = searchKeyword.trim().toLowerCase();
-    return !keyword || lesson.title?.toLowerCase().includes(keyword);
+    const matchKeyword =
+      !keyword || lesson.title?.toLowerCase().includes(keyword);
+    const matchLevel =
+      selectedLevel === "ALL" || lesson.levelName === selectedLevel;
+    return matchKeyword && matchLevel;
   });
 
   const handleGoBack = () => {
@@ -112,11 +128,6 @@ function StudentLessonList() {
       setCheckingId(null);
       hideLoading();
     }
-  };
-
-  const getLearnerCount = () => {
-    const counts = [127, 89, 234, 56, 312, 45, 178, 93, 256, 67];
-    return counts[Math.floor(Math.random() * counts.length)];
   };
 
   // ===== LOADING =====
@@ -179,7 +190,7 @@ function StudentLessonList() {
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search + Level filter */}
       <div className={styles.filterCard}>
         <div className={styles.searchGroup}>
           <label className={styles.filterLabel}>Tìm kiếm bài học</label>
@@ -194,6 +205,44 @@ function StudentLessonList() {
             />
           </div>
         </div>
+
+        {levelOptions.length > 0 && (
+          <div className={styles.levelFilterGroup}>
+            <label className={styles.filterLabel}>Cấp độ</label>
+            <div className={styles.levelChips}>
+              <button
+                type="button"
+                className={`${styles.levelChip} ${selectedLevel === "ALL" ? styles.levelChipActive : ""}`}
+                onClick={() => setSelectedLevel("ALL")}
+              >
+                Tất cả
+              </button>
+              {levelOptions.map((lv) => (
+                <button
+                  key={lv.name}
+                  type="button"
+                  className={`${styles.levelChip} ${selectedLevel === lv.name ? styles.levelChipActive : ""}`}
+                  onClick={() => setSelectedLevel(lv.name)}
+                  style={
+                    selectedLevel === lv.name
+                      ? {
+                          borderColor: lv.color,
+                          color: lv.color,
+                          background: `${lv.color}18`,
+                        }
+                      : undefined
+                  }
+                >
+                  <span
+                    className={styles.levelDot}
+                    style={{ backgroundColor: lv.color }}
+                  />
+                  {lv.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats */}
@@ -222,7 +271,6 @@ function StudentLessonList() {
       ) : (
         <div className={styles.grid}>
           {filteredLessons.map((lesson) => {
-            const learnerCount = getLearnerCount();
             const isChecking = checkingId === lesson.id;
             const isPremium = lesson.isPremium;
 
@@ -275,14 +323,6 @@ function StudentLessonList() {
                       }}
                     >
                       {lesson.levelName}
-                    </span>
-                  )}
-
-                  {/* Premium Badge */}
-                  {isPremium && (
-                    <span className={styles.premiumBadge}>
-                      <FontAwesomeIcon icon={faCrown} />
-                      Premium
                     </span>
                   )}
 

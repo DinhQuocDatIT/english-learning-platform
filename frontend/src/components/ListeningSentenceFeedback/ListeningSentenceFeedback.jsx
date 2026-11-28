@@ -26,10 +26,9 @@ import { useLoading } from "../../contexts/LoadingContext";
 import styles from "./ListeningSentenceFeedback.module.css";
 
 // ============================================================
-// SUB-COMPONENTS (Memoized để tối ưu re-render)
+// SUB-COMPONENTS
 // ============================================================
 
-// Feedback Item Component
 const FeedbackItem = memo(
   ({ feedback, isMine, studentName, onDelete, formatTime }) => (
     <div className={styles.feedbackItem}>
@@ -76,14 +75,12 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAllFeedbacks, setShowAllFeedbacks] = useState(false);
   const [allFeedbacks, setAllFeedbacks] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Refs
   const textareaRef = useRef(null);
   const emojiPickerRef = useRef(null);
-  const containerRef = useRef(null);
 
   // ============================================================
   // MEMOIZED VALUES
@@ -94,20 +91,27 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
     [myFeedbacks],
   );
 
-  const totalCount = useMemo(
-    () => allFeedbacks.length + myFeedbacks.length,
-    [allFeedbacks.length, myFeedbacks.length],
-  );
+  // Hiển thị tất cả feedback; nếu myFeedbacks có item chưa có trong allFeedbacks
+  // (vd vừa gửi) thì merge để không bị mất.
+  const displayFeedbacks = useMemo(() => {
+    const map = new Map();
+    allFeedbacks.forEach((f) => map.set(f.id, f));
+    myFeedbacks.forEach((f) => {
+      if (!map.has(f.id)) map.set(f.id, f);
+    });
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    );
+  }, [allFeedbacks, myFeedbacks]);
 
   // ============================================================
-  // CALLBACKS (Stable references)
+  // CALLBACKS
   // ============================================================
 
   const fetchMyFeedbacks = useCallback(async () => {
     if (!sentenceId) return;
 
     try {
-      setIsLoading(true);
       const response =
         await listeningSentenceFeedbackService.getMyFeedbackBySentence(
           sentenceId,
@@ -133,12 +137,10 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
       }
     } catch (error) {
       if (error.response?.status !== 404) {
-        console.error("Lỗi lấy feedback:", error);
+        console.error("Lỗi lấy feedback của tôi:", error);
       }
       setMyFeedbacks([]);
       setMyStudentName("");
-    } finally {
-      setIsLoading(false);
     }
   }, [sentenceId]);
 
@@ -153,6 +155,15 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
       console.error("Lỗi lấy danh sách feedback:", error);
     }
   }, [lessonId]);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await Promise.all([fetchAllFeedbacks(), fetchMyFeedbacks()]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchAllFeedbacks, fetchMyFeedbacks]);
 
   const handleCreate = useCallback(async () => {
     const trimmedContent = content.trim();
@@ -171,7 +182,9 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
 
       const data = response?.data?.data;
 
+      // Cập nhật cả myFeedbacks lẫn allFeedbacks để UI hiện ngay
       setMyFeedbacks((prev) => [data, ...prev]);
+      setAllFeedbacks((prev) => [data, ...prev]);
 
       const name =
         data?.studentName ||
@@ -184,24 +197,13 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
       setContent("");
       setShowEmojiPicker(false);
       toast.success("Gửi phản hồi thành công!");
-
-      if (showAllFeedbacks) {
-        await fetchAllFeedbacks();
-      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Không thể gửi phản hồi.");
     } finally {
       hideLoading();
       setIsSubmitting(false);
     }
-  }, [
-    content,
-    sentenceId,
-    showAllFeedbacks,
-    fetchAllFeedbacks,
-    showLoading,
-    hideLoading,
-  ]);
+  }, [content, sentenceId, showLoading, hideLoading]);
 
   const handleDelete = useCallback(
     async (feedbackId) => {
@@ -212,27 +214,16 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
         await listeningSentenceFeedbackService.delete(feedbackId);
 
         setMyFeedbacks((prev) => prev.filter((f) => f.id !== feedbackId));
+        setAllFeedbacks((prev) => prev.filter((f) => f.id !== feedbackId));
         toast.success("Xóa phản hồi thành công!");
-
-        if (showAllFeedbacks) {
-          await fetchAllFeedbacks();
-        }
       } catch (error) {
         toast.error(error.response?.data?.message || "Không thể xóa phản hồi.");
       } finally {
         hideLoading();
       }
     },
-    [showAllFeedbacks, fetchAllFeedbacks, showLoading, hideLoading],
+    [showLoading, hideLoading],
   );
-
-  const handleToggleAllFeedbacks = useCallback(async () => {
-    const newState = !showAllFeedbacks;
-    if (newState) {
-      await fetchAllFeedbacks();
-    }
-    setShowAllFeedbacks(newState);
-  }, [showAllFeedbacks, fetchAllFeedbacks]);
 
   const handleEmojiClick = useCallback((emojiData) => {
     setContent((prev) => prev + emojiData.emoji);
@@ -266,8 +257,8 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
   // ============================================================
 
   useEffect(() => {
-    fetchMyFeedbacks();
-  }, [fetchMyFeedbacks]);
+    fetchData();
+  }, [fetchData]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -298,21 +289,14 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
   }
 
   return (
-    <div className={styles.container} ref={containerRef}>
+    <div className={styles.container}>
       {/* HEADER */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <FontAwesomeIcon icon={faComment} className={styles.headerIcon} />
           <h3 className={styles.headerTitle}>Phản hồi</h3>
-          <span className={styles.countBadge}>{totalCount}</span>
+          <span className={styles.countBadge}>{displayFeedbacks.length}</span>
         </div>
-        <button
-          className={styles.toggleBtn}
-          onClick={handleToggleAllFeedbacks}
-          aria-expanded={showAllFeedbacks}
-        >
-          {showAllFeedbacks ? "Ẩn" : "Xem tất cả"}
-        </button>
       </div>
 
       {/* CREATE AREA */}
@@ -372,53 +356,31 @@ function ListeningSentenceFeedback({ sentenceId, lessonId }) {
         </div>
       </div>
 
-      {/* MY FEEDBACKS */}
-      {myFeedbacks.length > 0 && (
-        <div className={styles.myFeedbacks}>
-          <div className={styles.divider} />
-          <h4 className={styles.sectionTitle}>
-            Phản hồi của tôi ({myFeedbacks.length})
-          </h4>
+      {/* ALL FEEDBACKS */}
+      <div className={styles.allFeedbacks}>
+        <div className={styles.divider} />
+        <h4 className={styles.sectionTitle}>
+          Tất cả phản hồi ({displayFeedbacks.length})
+        </h4>
+        {displayFeedbacks.length === 0 ? (
+          <p className={styles.emptyText}>
+            Chưa có phản hồi nào. Hãy là người đầu tiên!
+          </p>
+        ) : (
           <div className={styles.feedbackList}>
-            {myFeedbacks.map((item) => (
+            {displayFeedbacks.map((item) => (
               <FeedbackItem
                 key={item.id}
                 feedback={item}
-                isMine={true}
+                isMine={myFeedbackIds.has(item.id)}
                 studentName={myStudentName}
                 onDelete={handleDelete}
                 formatTime={formatTime}
               />
             ))}
           </div>
-        </div>
-      )}
-
-      {/* ALL FEEDBACKS */}
-      {showAllFeedbacks && (
-        <div className={styles.allFeedbacks}>
-          <div className={styles.divider} />
-          <h4 className={styles.sectionTitle}>
-            Tất cả phản hồi ({allFeedbacks.length})
-          </h4>
-          {allFeedbacks.length === 0 ? (
-            <p className={styles.emptyText}>Chưa có phản hồi nào.</p>
-          ) : (
-            <div className={styles.feedbackList}>
-              {allFeedbacks.map((item) => (
-                <FeedbackItem
-                  key={item.id}
-                  feedback={item}
-                  isMine={myFeedbackIds.has(item.id)}
-                  studentName={myStudentName}
-                  onDelete={handleDelete}
-                  formatTime={formatTime}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@
   width: 100%;
   background: var(--color-background, #ffffff);
   border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 16px 18px;
   transition:
     border-color 0.2s ease,
@@ -11,7 +11,7 @@
 
 .vocabularyResult:hover {
   border-color: var(--color-primary, #0ea792);
-  box-shadow: 0 2px 8px rgba(14, 167, 146, 0.08);
+  box-shadow: 0 4px 14px rgba(14, 167, 146, 0.1);
 }
 
 /* =========================
@@ -24,8 +24,6 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--color-border, #e2e8f0);
 }
 
 .headerLeft {
@@ -38,7 +36,7 @@
 
 .word {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
   color: var(--color-secondary, #1e293b);
@@ -46,21 +44,21 @@
 }
 
 .speakBtn {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   padding: 0;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  
+  background: var(--color-tertiary, #d4f3ef);
   color: var(--color-primary, #0ea792);
 
   border: none;
-  border-radius: 6px;
+  border-radius: 50%;
 
-  font-size: 13px;
+  font-size: 12px;
   cursor: pointer;
 
   transition: all 0.2s ease;
@@ -70,7 +68,7 @@
 .speakBtn:hover {
   background: var(--color-primary, #0ea792);
   color: white;
-  transform: scale(1.08);
+  transform: scale(1.1);
 }
 
 .pronunciation {
@@ -90,13 +88,13 @@
   justify-content: center;
   gap: 6px;
 
-  padding: 7px 14px;
+  padding: 8px 16px;
 
   background-color: var(--color-primary, #0ea792);
   color: white;
 
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
 
   font-size: 13px;
   font-weight: 600;
@@ -106,6 +104,7 @@
   flex-shrink: 0;
 
   transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(14, 167, 146, 0.25);
 }
 
 .saveBtn span {
@@ -116,15 +115,17 @@
 .saveBtn:hover:not(:disabled) {
   background-color: var(--color-primary-hover, #52afa3);
   transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(14, 167, 146, 0.3);
 }
 
 .saveBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* =========================
-   MEANINGS
+   MEANINGS — khối nhóm
 ========================= */
 
 .meanings {
@@ -133,10 +134,23 @@
   gap: 10px;
 }
 
-.meaningItem {
+.meaningGroup {
+  background: #f8fafc;
+  border: 1px solid #eef2f6;
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: background 0.2s ease;
+}
+
+.meaningGroup:hover {
+  background: #f4f9f8;
+}
+
+.groupHeader {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .posBadge {
@@ -144,44 +158,61 @@
   align-items: center;
   justify-content: center;
 
-  background-color: var(--color-tertiary, #d4f3ef);
-  color: var(--color-accent, #168a7c);
+  background-color: var(--color-primary, #0ea792);
+  color: white;
 
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
 
   flex-shrink: 0;
   white-space: nowrap;
-  margin-top: 2px;
 }
 
-.meaningContent {
-  flex: 1;
-  min-width: 0;
+.groupCount {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.meaningList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meaningItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-left: 10px;
+  border-left: 2px solid var(--color-tertiary, #d4f3ef);
 }
 
 .meaningText {
   margin: 0;
-
   font-size: 14px;
   font-weight: 500;
   line-height: 1.5;
-
   color: var(--color-text, #1e293b);
 }
 
 .exampleText {
-  margin: 4px 0 0 0;
-
-  font-size: 12px;
+  margin: 0;
+  font-size: 12.5px;
   line-height: 1.5;
-
   color: var(--color-text-muted, #64748b);
   font-style: italic;
+}
+
+.exampleQuote {
+  color: var(--color-primary, #0ea792);
+  font-weight: 700;
+  font-style: normal;
 }
 
 /* =========================
@@ -196,13 +227,13 @@
 
   width: 100%;
   margin-top: 12px;
-  padding: 8px;
+  padding: 9px;
 
   background: transparent;
   color: var(--color-primary, #0ea792);
 
   border: 1px dashed var(--color-border, #e2e8f0);
-  border-radius: 7px;
+  border-radius: 8px;
 
   font-size: 12px;
   font-weight: 600;
@@ -210,11 +241,13 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
+
 .showMoreBtn span {
   font-size: 12px;
   font-weight: 600;
   color: var(--color-primary, #0ea792) !important;
 }
+
 .showMoreBtn:hover {
   background: var(--color-tertiary, #d4f3ef);
   border-color: var(--color-primary, #0ea792);
@@ -240,5 +273,9 @@
 
   .meaningText {
     font-size: 13px;
+  }
+
+  .meaningGroup {
+    padding: 10px 12px;
   }
 }

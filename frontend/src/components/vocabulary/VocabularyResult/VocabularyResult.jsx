@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import styles from "./VocabularyResult.module.css";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -89,9 +89,25 @@ function VocabularyResult({ vocabulary, onSave, saving = false }) {
     return POS_LABELS[key] || pos;
   };
 
-  const meanings = vocabulary?.meanings || [];
-  const visibleMeanings = showAll ? meanings : meanings.slice(0, MAX_DISPLAY);
-  const hasMore = meanings.length > MAX_DISPLAY;
+  const meanings = useMemo(
+    () => vocabulary?.meanings || [],
+    [vocabulary?.meanings],
+  );
+
+  const groupedMeanings = useMemo(() => {
+    const groups = {};
+    meanings.forEach((m) => {
+      const pos = translatePos(m.partOfSpeech) || "Khác";
+      if (!groups[pos]) groups[pos] = [];
+      groups[pos].push(m);
+    });
+    return Object.entries(groups).map(([pos, items]) => ({ pos, items }));
+  }, [meanings]);
+
+  const visibleGroups = showAll
+    ? groupedMeanings
+    : groupedMeanings.slice(0, MAX_DISPLAY);
+  const hasMore = groupedMeanings.length > MAX_DISPLAY;
 
   const hasPronunciation =
     vocabulary.pronunciation && vocabulary.pronunciation.trim() !== "";
@@ -130,25 +146,33 @@ function VocabularyResult({ vocabulary, onSave, saving = false }) {
         </button>
       </div>
 
-      {/* MEANINGS */}
+      {/* MEANINGS — dạng khối nhóm */}
       <div className={styles.meanings}>
-        {visibleMeanings.map((item, index) => {
-          const posLabel = translatePos(item.partOfSpeech);
+        {visibleGroups.map((group, gIndex) => (
+          <section key={gIndex} className={styles.meaningGroup}>
+            <header className={styles.groupHeader}>
+              <span className={styles.posBadge}>{group.pos}</span>
+              <span className={styles.groupCount}>
+                {group.items.length} nghĩa
+              </span>
+            </header>
 
-          return (
-            <div key={index} className={styles.meaningItem}>
-              {posLabel && <span className={styles.posBadge}>{posLabel}</span>}
-
-              <div className={styles.meaningContent}>
-                <p className={styles.meaningText}>{item.meaning}</p>
-
-                {item.example && (
-                  <p className={styles.exampleText}>"{item.example}"</p>
-                )}
-              </div>
+            <div className={styles.meaningList}>
+              {group.items.map((item, index) => (
+                <div key={index} className={styles.meaningItem}>
+                  <p className={styles.meaningText}>{item.meaning}</p>
+                  {item.example && (
+                    <p className={styles.exampleText}>
+                      <span className={styles.exampleQuote}>“</span>
+                      {item.example}
+                      <span className={styles.exampleQuote}>”</span>
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
-          );
-        })}
+          </section>
+        ))}
       </div>
 
       {/* SHOW MORE */}
@@ -162,7 +186,7 @@ function VocabularyResult({ vocabulary, onSave, saving = false }) {
           <span>
             {showAll
               ? "Thu gọn"
-              : `Xem thêm ${meanings.length - MAX_DISPLAY} nghĩa`}
+              : `Xem thêm ${groupedMeanings.length - MAX_DISPLAY} nhóm nghĩa`}
           </span>
         </button>
       )}
