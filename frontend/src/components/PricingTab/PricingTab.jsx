@@ -5,9 +5,7 @@ import {
   faDollarSign,
   faPlus,
   faLock,
-  faUnlock,
   faCheckCircle,
-  faBan,
   faTriangleExclamation,
   faXmark,
   faArrowRight,
@@ -21,33 +19,14 @@ import pricingService from "../../services/pricingService";
 import Loading from "../common/Loading/Loading";
 import styles from "./PricingTab.module.css";
 
-const MODEL_LIST = {
-  GEMINI: [
-    { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-    { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-    { value: "gemini-3.5-flash-lite", label: "Gemini 3.5 Flash Lite" },
-    { value: "gemini-3.5-flash", label: "Gemini 3.5 Flash" },
-    { value: "gemini-3.5-pro", label: "Gemini 3.5 Pro" },
-  ],
-  OPENAI: [
-    { value: "gpt-4", label: "GPT-4" },
-    { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
-    { value: "gpt-4o", label: "GPT-4o" },
-    { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
-  ],
-  CLAUDE: [
-    { value: "claude-3-opus", label: "Claude 3 Opus" },
-    { value: "claude-3-sonnet", label: "Claude 3 Sonnet" },
-    { value: "claude-3-haiku", label: "Claude 3 Haiku" },
-    { value: "claude-3.5-sonnet", label: "Claude 3.5 Sonnet" },
-  ],
-};
+// ✅ Cố định cho demo: chỉ dùng 1 provider + 1 model
+const FIXED_PROVIDER = "GEMINI";
+const FIXED_MODEL = "gemini-3.5-flash-lite";
+const FIXED_MODEL_LABEL = "Gemini 3.5 Flash Lite";
 
 function PricingTab({ pricings, loading, onRefresh }) {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
-    provider: "GEMINI",
-    model: "",
     inputPricePerMillion: "",
     outputPricePerMillion: "",
   });
@@ -63,8 +42,6 @@ function PricingTab({ pricings, loading, onRefresh }) {
 
   const handleAddPricing = () => {
     setFormData({
-      provider: "GEMINI",
-      model: "",
       inputPricePerMillion: "",
       outputPricePerMillion: "",
     });
@@ -99,7 +76,8 @@ function PricingTab({ pricings, loading, onRefresh }) {
     e.preventDefault();
     try {
       const payload = {
-        ...formData,
+        provider: FIXED_PROVIDER,
+        model: FIXED_MODEL,
         inputPricePerMillion: parseFloat(formData.inputPricePerMillion),
         outputPricePerMillion: parseFloat(formData.outputPricePerMillion),
         effectiveFrom: new Date().toISOString(),
@@ -116,13 +94,10 @@ function PricingTab({ pricings, loading, onRefresh }) {
     }
   };
 
-  const getModelsByProvider = (provider) => {
-    return MODEL_LIST[provider] || [];
-  };
-
-  const isModelActive = (provider, model) => {
+  const isFixedModelActive = () => {
     return pricings.some(
-      (p) => p.provider === provider && p.model === model && p.isActive,
+      (p) =>
+        p.provider === FIXED_PROVIDER && p.model === FIXED_MODEL && p.isActive,
     );
   };
 
@@ -148,7 +123,7 @@ function PricingTab({ pricings, loading, onRefresh }) {
             <h2 className={styles.title}>Quản lý AI Model</h2>
             <p className={styles.subtitle}>
               <FontAwesomeIcon icon={faRobot} className={styles.subIcon} />
-              Quản lý bảng giá cho các mô hình AI theo từng nhà cung cấp
+              Quản lý bảng giá cho mô hình AI
             </p>
           </div>
         </div>
@@ -335,113 +310,90 @@ function PricingTab({ pricings, loading, onRefresh }) {
               </button>
             </div>
 
-            {formData.model &&
-              isModelActive(formData.provider, formData.model) && (
-                <div className={styles.modalWarning}>
-                  <FontAwesomeIcon icon={faTriangleExclamation} />
-                  <div>
-                    <strong>❌ Model này đang active!</strong>
-                    <p>Vui lòng vô hiệu hóa pricing cũ trước khi thêm mới.</p>
-                    <button
-                      className={styles.goToDeleteBtn}
-                      onClick={() => {
-                        setShowModal(false);
-                        setTimeout(() => {
-                          document
-                            .querySelector(`.${styles.table}`)
-                            ?.scrollIntoView({ behavior: "smooth" });
-                        }, 300);
-                      }}
-                    >
-                      Đi đến danh sách để vô hiệu hóa
-                    </button>
+            {isFixedModelActive() && (
+              <div className={styles.modalWarning}>
+                <FontAwesomeIcon icon={faTriangleExclamation} />
+                <div>
+                  <strong>Model này đang active!</strong>
+                  <p>Vui lòng vô hiệu hóa pricing cũ trước khi thêm mới.</p>
+                  <button
+                    className={styles.goToDeleteBtn}
+                    onClick={() => {
+                      setShowModal(false);
+                      setTimeout(() => {
+                        document
+                          .querySelector(`.${styles.table}`)
+                          ?.scrollIntoView({ behavior: "smooth" });
+                      }, 300);
+                    }}
+                  >
+                    Đi đến danh sách để vô hiệu hóa
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitPricing} className={styles.form}>
+              {/* Model info card */}
+              <div className={styles.modelCard}>
+                <div className={styles.modelCardIcon}>
+                  <FontAwesomeIcon icon={faRobot} />
+                </div>
+                <div className={styles.modelCardInfo}>
+                  <span className={styles.modelCardProvider}>
+                    {FIXED_PROVIDER}
+                  </span>
+                  <span className={styles.modelCardName}>
+                    {FIXED_MODEL_LABEL}
+                  </span>
+                  <code className={styles.modelCardCode}>{FIXED_MODEL}</code>
+                </div>
+              </div>
+
+              {/* Price inputs */}
+              <div className={styles.priceInputs}>
+                <div className={styles.priceField}>
+                  <label>Giá Input</label>
+                  <div className={styles.priceInputWrapper}>
+                    <span className={styles.pricePrefix}>$</span>
+                    <input
+                      type="number"
+                      step="0.001"
+                      placeholder="0.00"
+                      value={formData.inputPricePerMillion}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          inputPricePerMillion: e.target.value,
+                        })
+                      }
+                      required
+                      disabled={isFixedModelActive()}
+                    />
+                    <span className={styles.priceSuffix}>/ 1M</span>
                   </div>
                 </div>
-              )}
 
-            <form onSubmit={handleSubmitPricing}>
-              <div className={styles.formGroup}>
-                <label>Nhà cung cấp</label>
-                <select
-                  value={formData.provider}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      provider: e.target.value,
-                      model: "",
-                    })
-                  }
-                >
-                  <option value="GEMINI">GEMINI</option>
-                  <option value="OPENAI">OPENAI</option>
-                  <option value="CLAUDE">CLAUDE</option>
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Mô hình</label>
-                <select
-                  value={formData.model}
-                  onChange={(e) =>
-                    setFormData({ ...formData, model: e.target.value })
-                  }
-                  required
-                >
-                  <option value="">— Chọn model —</option>
-                  {getModelsByProvider(formData.provider).map((model) => {
-                    const active = isModelActive(
-                      formData.provider,
-                      model.value,
-                    );
-                    return (
-                      <option key={model.value} value={model.value}>
-                        {model.label} {active ? "(⚠️ Đang active)" : ""}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>Giá Input (USD/1M)</label>
-                  <input
-                    type="number"
-                    step="0.001"
-                    placeholder="0.00"
-                    value={formData.inputPricePerMillion}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        inputPricePerMillion: e.target.value,
-                      })
-                    }
-                    required
-                    disabled={
-                      formData.model &&
-                      isModelActive(formData.provider, formData.model)
-                    }
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Giá Output (USD/1M)</label>
-                  <input
-                    type="number"
-                    step="0.001"
-                    placeholder="0.00"
-                    value={formData.outputPricePerMillion}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        outputPricePerMillion: e.target.value,
-                      })
-                    }
-                    required
-                    disabled={
-                      formData.model &&
-                      isModelActive(formData.provider, formData.model)
-                    }
-                  />
+                <div className={styles.priceField}>
+                  <label>Giá Output</label>
+                  <div className={styles.priceInputWrapper}>
+                    <span className={styles.pricePrefix}>$</span>
+                    <input
+                      type="number"
+                      step="0.001"
+                      placeholder="0.00"
+                      value={formData.outputPricePerMillion}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          outputPricePerMillion: e.target.value,
+                        })
+                      }
+                      required
+                      disabled={isFixedModelActive()}
+                    />
+                    <span className={styles.priceSuffix}>/ 1M</span>
+                  </div>
                 </div>
               </div>
 
@@ -456,11 +408,9 @@ function PricingTab({ pricings, loading, onRefresh }) {
                 <button
                   type="submit"
                   className={styles.submitBtn}
-                  disabled={
-                    formData.model &&
-                    isModelActive(formData.provider, formData.model)
-                  }
+                  disabled={isFixedModelActive()}
                 >
+                  <FontAwesomeIcon icon={faPlus} />
                   Thêm mới
                 </button>
               </div>

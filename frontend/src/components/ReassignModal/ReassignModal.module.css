@@ -4,39 +4,40 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6); /* Tối hơn xíu cho nổi bật form */
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(2px); /* Thêm hiệu ứng mờ nền */
+  backdrop-filter: blur(2px);
+  padding: 16px;
 }
 
 .modal {
   background: #fff;
-  border-radius: 16px;
-  width: 1200px; /* ✅ Tăng từ 800px lên 1050px */
+  border-radius: 12px;
+  width: 820px;
   max-width: 95vw;
-  height: 85vh; /* ✅ Cố định chiều cao để form to ra */
-  max-height: 850px;
+  height: 80vh;
+  max-height: 720px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
+  padding: 14px 20px;
   border-bottom: 1px solid #e2e8f0;
   background: #f8fafc;
-  border-radius: 16px 16px 0 0;
 }
 
 .header h2 {
   margin: 0;
-  font-size: 20px; /* ✅ Tăng font */
+  font-size: 17px;
   color: #1e293b;
   font-weight: 700;
 }
@@ -44,13 +45,13 @@
 .closeBtn {
   background: #e2e8f0;
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 14px;
   cursor: pointer;
   color: #64748b;
   transition: all 0.2s;
@@ -61,63 +62,63 @@
 }
 
 .body {
-  padding: 24px;
+  padding: 18px 20px;
   overflow-y: auto;
-  flex: 1; /* ✅ Để body chiếm hết phần còn lại */
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* ================= BƯỚC 1: CHỌN TEACHER + TOPIC ================= */
+/* ================= BƯỚC 1 ================= */
 .selectStep {
   display: flex;
-  gap: 24px;
-  flex: 1; /* ✅ Tự động lấp đầy chiều cao */
-  min-height: 0; /* Quan trọng để scroll hoạt động bên trong */
+  gap: 18px;
+  flex: 1;
+  min-height: 0;
 }
 
-/* Cột trái: Danh sách Teacher */
 .teacherList {
-  flex: 0 0 340px; /* ✅ Rộng hơn xíu */
+  flex: 0 0 260px;
   border-right: 1px solid #e2e8f0;
-  padding-right: 24px;
+  padding-right: 18px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .teacherList h3 {
-  font-size: 16px; /* ✅ Tăng font */
-  margin: 0 0 12px 0;
+  font-size: 13px;
+  margin: 0 0 10px 0;
   color: #475569;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .teacherItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 16px; /* ✅ To hơn */
-  border-radius: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
   cursor: pointer;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   transition: all 0.2s;
-  font-size: 15px; /* ✅ Tăng font */
+  font-size: 13px;
   color: #334155;
 }
 
 .teacherItem:hover {
   background: #f1f5f9;
   border-color: #cbd5e1;
-  transform: translateY(-1px);
 }
 
 .activeTeacher {
   background: #eff6ff;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
 .activeTeacher span:first-child {
@@ -126,15 +127,16 @@
 }
 
 .count {
-  font-size: 13px;
+  font-size: 11px;
   background: #e2e8f0;
-  padding: 4px 10px;
+  padding: 2px 8px;
   border-radius: 99px;
   font-weight: 600;
   color: #475569;
+  white-space: nowrap;
 }
 
-/* Cột phải: Danh sách Topic */
+/* Cột phải */
 .topicList {
   flex: 1;
   display: flex;
@@ -146,11 +148,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .topicHeader h3 {
-  font-size: 16px; /* ✅ Tăng font */
+  font-size: 14px;
   margin: 0;
   color: #1e293b;
 }
@@ -158,15 +160,15 @@
 .selectAllBtn {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 6px;
   color: #0284c7;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
   transition: all 0.2s;
 }
 .selectAllBtn:hover {
@@ -174,53 +176,58 @@
   border-color: #7dd3fc;
 }
 
-/* Khung cuộn chứa các nhóm Roadmap */
 .topicScroll {
   flex: 1;
   overflow-y: auto;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 12px;
   background: #f8fafc;
 }
 
 /* ================= ROADMAP GROUP ================= */
 .roadmapGroup {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   border: 1px solid #cbd5e1;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.roadmapGroup:last-child {
+  margin-bottom: 0;
 }
 
 .roadmapGroupTitle {
   background: #f1f5f9;
-  padding: 12px 16px;
+  padding: 8px 12px;
   font-weight: 700;
   color: #1e293b;
-  font-size: 15px; /* ✅ Tăng font */
+  font-size: 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   border-bottom: 1px solid #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .roadmapGroupTitle svg {
   color: #0ea792;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .topicItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px; /* ✅ To hơn */
+  gap: 10px;
+  padding: 8px 12px;
   border-bottom: 1px solid #f1f5f9;
   cursor: pointer;
-  font-size: 15px; /* ✅ Tăng font */
+  font-size: 13px;
   color: #334155;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
 .topicItem:last-child {
@@ -233,32 +240,34 @@
 
 .iconChecked {
   color: #0ea792;
-  font-size: 20px; /* ✅ Icon to hơn */
+  font-size: 16px;
 }
 
 .iconUncheck {
   color: #cbd5e1;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .topicId {
   color: #64748b;
   font-family: monospace;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
   background: #f1f5f9;
-  padding: 2px 6px;
+  padding: 1px 5px;
   border-radius: 4px;
 }
 
 .status {
   margin-left: auto;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
   background: #f1f5f9;
-  padding: 4px 10px;
+  padding: 2px 8px;
   border-radius: 6px;
   color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .placeholder {
@@ -267,26 +276,26 @@
   justify-content: center;
   height: 100%;
   color: #94a3b8;
-  font-size: 16px;
+  font-size: 14px;
   font-style: italic;
 }
 
-/* ================= FOOTER ACTIONS ================= */
+/* ================= FOOTER ================= */
 .footerActions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
-  padding-top: 16px;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
   border-top: 1px solid #e2e8f0;
 }
 
 .cancelBtn {
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
-  padding: 12px 24px; /* ✅ Nút to hơn */
-  border-radius: 8px;
-  font-size: 15px;
+  padding: 9px 18px;
+  border-radius: 7px;
+  font-size: 13px;
   font-weight: 600;
   color: #475569;
   cursor: pointer;
@@ -300,13 +309,13 @@
   background: #0ea792;
   color: #fff;
   border: none;
-  padding: 12px 28px; /* ✅ Nút to hơn */
-  border-radius: 8px;
-  font-size: 15px;
+  padding: 9px 20px;
+  border-radius: 7px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 6px -1px rgba(14, 167, 146, 0.3);
+  box-shadow: 0 2px 6px rgba(14, 167, 146, 0.25);
 }
 .submitBtn:hover:not(:disabled) {
   background: #0c8a78;
@@ -318,12 +327,12 @@
   box-shadow: none;
 }
 
-/* ================= BƯỚC 2: XÁC NHẬN CHUYỂN GIAO ================= */
+/* ================= BƯỚC 2 ================= */
 .assignStep {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  max-width: 800px;
+  gap: 16px;
+  max-width: 640px;
   margin: 0 auto;
   width: 100%;
 }
@@ -331,66 +340,70 @@
 .summaryBox {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 10px;
+  padding: 14px 16px;
 }
 
 .summaryBox h3 {
-  margin: 0 0 16px 0;
-  font-size: 16px;
+  margin: 0 0 10px 0;
+  font-size: 13px;
   color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .selectedList {
-  max-height: 200px;
+  max-height: 160px;
   overflow-y: auto;
-  margin: 0 0 16px 0;
-  padding-left: 20px;
-  font-size: 15px;
+  margin: 0 0 12px 0;
+  padding-left: 18px;
+  font-size: 13px;
   color: #334155;
 }
 .selectedList li {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .roadmapTag {
-  font-size: 13px;
+  font-size: 11px;
   color: #64748b;
-  margin-left: 8px;
+  margin-left: 6px;
   font-style: italic;
   background: #f1f5f9;
-  padding: 2px 8px;
+  padding: 1px 6px;
   border-radius: 4px;
 }
 
 .ownerInfo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: #1e293b;
   background: #e2e8f0;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 15px;
+  padding: 9px 12px;
+  border-radius: 7px;
+  font-size: 13px;
 }
 
 .targetBox {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .targetBox h3 {
-  font-size: 16px;
+  font-size: 13px;
   margin: 0;
   color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .select {
-  padding: 14px 16px;
+  padding: 10px 12px;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 7px;
+  font-size: 13px;
   outline: none;
   transition: border-color 0.2s;
   background: #fff;
@@ -403,12 +416,12 @@
 .targetInfo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: #0ea792;
   background: #ecfdf5;
-  padding: 14px 16px;
-  border-radius: 8px;
+  padding: 10px 12px;
+  border-radius: 7px;
   font-weight: 500;
-  font-size: 15px;
+  font-size: 13px;
   border: 1px solid #a7f3d0;
 }
